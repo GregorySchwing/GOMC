@@ -27,6 +27,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "CalculateEnergyCUDAKernel.cuh"
 #include "CalculateForceCUDAKernel.cuh"
 #include "ConstantDefinitionsCUDAKernel.cuh"
+#include <thrust>
 #endif
 
 #define NUMBER_OF_NEIGHBOR_CELL 27
