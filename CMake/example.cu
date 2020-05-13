@@ -44,11 +44,11 @@ int main (){
     //copying the data to device
     d_vec = h_vec;
     d_keys = h_keys;
-    cout << "Before : keys[0] - " << d_keys[0] << ", keys[1] - " << d_keys[1] << "keys[2] - " << d_keys[2] << endl;
+    cout << "Before : keys[0] - " << d_vec[0] << ", keys[1] - " << d_vec[1] << "keys[2] - " << d_vec[2] << endl;
     int start_s=clock();
-    thrust::stable_sort(d_keys.begin(), d_keys.end());
+    thrust::stable_sort(d_vec.begin(), d_vec.end());
     int stop_s=clock();
-    cout << "Before : keys[0] - " << d_keys[0] << ", keys[1] - " << d_keys[1] << "keys[2] - " << d_keys[2] << endl; 
+    cout << "Before : keys[0] - " << d_vec[0] << ", keys[1] - " << d_vec[1] << "keys[2] - " << d_vec[2] << endl; 
     //copying back
     h_vec = d_vec;
     cout  << ((stop_s-start_s)+timeKeys)/double(CLOCKS_PER_SEC)*1000 << endl;
