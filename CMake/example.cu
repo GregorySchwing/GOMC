@@ -50,6 +50,6 @@ int main (){
     //copying back
     h_vec = d_vec;
     cout  << ((stop_s-start_s)+timeKeys)/double(CLOCKS_PER_SEC)*1000 << endl;
-    unsigned* my_device_pointer = thrust::raw_pointer_cast(&d_keys[0]);
+    int* my_device_pointer = thrust::raw_pointer_cast(&d_keys[0]);
     return 0;
 }
