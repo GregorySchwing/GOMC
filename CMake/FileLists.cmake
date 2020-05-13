@@ -114,7 +114,12 @@ set(libHeaders
    lib/libpme6/spline.h
    lib/libpme6/pme.h
    lib/libpme6/cube.h
-   lib/libpme6/linear-algebra.h)
+   lib/libpme6/linear-algebra.h
+   lib/thrust/host_vector.h
+   lib/thrust/device_vector.h
+   lib/thrust/generate.h
+   lib/thrust/reduce.h
+   lib/thrust/functional.h)
 
 set(libSources
     lib/FloydWarshallCycle.cpp
