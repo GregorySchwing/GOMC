@@ -100,6 +100,11 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(FFTW REQUIRED fftw3)
 include_directories(${FFTW_INCLUDE_DIRS})
 
+#Thrust
+find_package(Thrust REQUIRED CONFIG)
+thrust_create_target(Thrust)
+target_link_libraries(MyProgram Thrust)
+
 include(CMakePrintHelpers)
 cmake_print_variables(FFTW_LDFLAGS)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/usr/lib64 -lfftw3 -lfftw3_omp")

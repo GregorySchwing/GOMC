@@ -38,6 +38,8 @@ if(ENSEMBLE_GPU_NVT)
     if(MPI_FOUND)
 	target_link_libraries(GPU_NVT ${MPI_LIBRARIES})
     endif()
+    target_link_libraries(GPU_NVT Thrust)
+
 endif()
 
 if(ENSEMBLE_GPU_GEMC)
