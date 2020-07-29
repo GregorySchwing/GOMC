@@ -10,7 +10,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "NoEwald.h"                //for ewald calculation
 #include "EnergyTypes.h"            //Energy structs
 #include "EnsemblePreprocessor.h"   //Flags
-#include "BasicTypes.h"             //uint
+#include <BasicTypes.h>             //uint
 #include "System.h"                 //For init
 #include "StaticVals.h"             //For init
 #include "Forcefield.h"             //
@@ -23,6 +23,8 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "GeomLib.h"
 #include "NumLib.h"
 #include <cassert>
+#include <limits>
+
 #ifdef GOMC_CUDA
 #include "CalculateEnergyCUDAKernel.cuh"
 #include "CalculateForceCUDAKernel.cuh"
@@ -186,6 +188,31 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
   int atomNumber = currentCoords.Count();
   int currParticleIdx, currParticle, currCell, nCellIndex, neighborCell, endIndex, nParticleIndex, nParticle;
   int countpairs = 0;
+  
+  int energyVectorLen = numberOfCells * 27 * 256;
+
+  int * hostEnergyVectorLJKeys; 
+  int * hostEnergyVectorREnKeys;
+/*
+  for (int i = 0; i < energyVectorLen; i++){
+    hostEnergyVectorLJKeys[i] = i;
+    hostEnergyVectorREnKeys[i] = i;
+  }
+
+  for (int i = 0; i < energyVectorLen; i++){
+    std::cout << "LJ Keys b4 sort (index, key) : (" << i << ", " << hostEnergyVectorLJKeys[i] << ")" << std::endl;
+  }
+
+  for (int i = 0; i < energyVectorLen; i++){
+    std::cout << "Real Keys b4 sort (index, key) : (" << i << ", " << hostEnergyVectorREnKeys[i] << ")" << std::endl;
+  }
+*/
+  double * hostEnergyVectorLJValues; 
+  double * hostEnergyVectorREnValues; 
+  uint numberOfInters;
+  std::vector<double> serialSummandsLJValues;
+  std::vector<double> serialSummandsREnValues;
+
 
 #ifdef GOMC_CUDA
   double REn = 0.0, LJEn = 0.0;
@@ -202,18 +229,72 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
                            newAxes.cellBasis_Inv[box].z);
   }
 
+  GetNumberOfInters(forcefield.particles->getCUDAVars(), cellVector, cellStartIndex,
+                  neighborList, coords, boxAxes, electrostatic, particleCharge,
+                  particleKind, particleMol, REn, LJEn, forcefield.sc_coul,
+                  forcefield.sc_sigma_6, forcefield.sc_alpha,
+                  forcefield.sc_power, box, 
+                  numberOfInters);
+
+  hostEnergyVectorLJValues = (double*) malloc (sizeof(double) * numberOfInters);
+  hostEnergyVectorREnValues = (double*) malloc (sizeof(double) * numberOfInters);
+
   CallBoxInterGPU(forcefield.particles->getCUDAVars(), cellVector, cellStartIndex,
                   neighborList, coords, boxAxes, electrostatic, particleCharge,
                   particleKind, particleMol, REn, LJEn, forcefield.sc_coul,
                   forcefield.sc_sigma_6, forcefield.sc_alpha,
-                  forcefield.sc_power, box);
+                  forcefield.sc_power, box, 
+                  hostEnergyVectorLJKeys, 
+                  hostEnergyVectorREnKeys, 
+                  hostEnergyVectorLJValues, 
+                  hostEnergyVectorREnValues,
+                  numberOfInters);
   tempREn = REn;
   tempLJEn = LJEn;
+
+  serialSummandsLJValues.resize(numberOfInters);
+  serialSummandsREnValues.resize(numberOfInters);
+  for (uint i = 0; i < numberOfInters; i++){
+    serialSummandsLJValues[i] = hostEnergyVectorLJValues[i];
+    serialSummandsREnValues[i] = hostEnergyVectorREnValues[i];
+  }
+
+/*
+int key = 0;
+std::vector<int> keyVector;
+std::vector<double> REnValues;
+std::vector<double> LJEnValues;
+
+for (int i = 0; i < energyVectorLen; i++){
+  if(hostEnergyVectorREnValues[i] != 0.0){
+    keyVector.push_back(key);
+    REnValues.push_back(hostEnergyVectorREnValues[i]);
+    LJEnValues.push_back(hostEnergyVectorLJValues[i]);
+    key++;
+  }
+}
+
+std::sort(REnValues.begin(), REnValues.end());
+
+  typedef std::numeric_limits< double > dbl;
+  std::cout.precision(dbl::max_digits10);
+  for (int i = 0; i < REnValues.size(); i++){
+    std::cout << "Real GPU : (" << i << ", " << REnValues[i] << ")" << std::endl;  
+  }
+
+  for (int i = 0; i < energyVectorLen; i++){
+    std::cout << "Real Keys after sort (index, key) : (" << i << ", " << hostEnergyVectorREnKeys[i] << ")" << std::endl;
+  }
+*/
+
+
 #else
+
 #ifdef _OPENMP
   #pragma omp parallel for default(shared) \
   private(currParticleIdx, currParticle, currCell, nCellIndex, neighborCell, endIndex, \
-          nParticleIndex, nParticle, distSq, qi_qj_fact, virComponents)\
+          nParticleIndex, nParticle, distSq, qi_qj_fact, virComponents) \
+  shared(serialSummandsREnValues, serialSummandsLJValues)\
   reduction(+:tempREn, tempLJEn)
 #endif
   // loop over all particles
@@ -232,29 +313,95 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
       for(nParticleIndex = cellStartIndex[neighborCell];
           nParticleIndex < endIndex; nParticleIndex++) {
         nParticle = cellVector[nParticleIndex];
-
         // avoid same particles and duplicate work
         if(currParticle < nParticle && particleMol[currParticle] != particleMol[nParticle]) {
-          countpairs++;
+//          countpairs++;
           if(boxAxes.InRcut(distSq, virComponents, coords, currParticle, nParticle, box)) {
+          #pragma omp critical
+        {
             lambdaVDW = GetLambdaVDW(particleMol[currParticle], particleMol[nParticle], box);
             if (electrostatic) {
               lambdaCoulomb = GetLambdaCoulomb(particleMol[currParticle],
                                                particleMol[nParticle], box);
               qi_qj_fact = particleCharge[currParticle] *
                            particleCharge[nParticle] * num::qqFact;
+         
+                           
               tempREn += forcefield.particles->CalcCoulomb(distSq,
                          particleKind[currParticle], particleKind[nParticle],
                          qi_qj_fact, lambdaCoulomb, box);
+              serialSummandsREnValues.push_back(forcefield.particles->CalcCoulomb(distSq,
+                         particleKind[currParticle], particleKind[nParticle],
+                         qi_qj_fact, lambdaCoulomb, box));
+        
             }
             tempLJEn += forcefield.particles->CalcEn(distSq,
                         particleKind[currParticle], particleKind[nParticle], lambdaVDW);
-          }
+            serialSummandsLJValues.push_back(forcefield.particles->CalcEn(distSq,
+                        particleKind[currParticle], particleKind[nParticle], lambdaVDW));                      
+        }
+          }   
         }
       }
     }
   }
+/*
+  // double cutoff = fmax(gpu_rCut[0], gpu_rCutCoulomb[box]);
+  std::cout <<   "cpu's cutoff : " << boxAxes.rCutSq[0] << std::endl;
+  std::cout <<   "cpu's rCut[0] : " << forcefield.rCut << std::endl;
+  std::cout <<   "cpu's rCutCoulomb[box] : " << forcefield.rCutCoulomb[0] << std::endl;
+ 
+std::vector<int> condensedKeys;  
+std::vector<double> condensedREns;  
+int newkey = 0;
+*/
+numberOfInters = serialSummandsREnValues.size();
+
+/*
+  std::sort(condensedREns.begin(), condensedREns.end());
+  typedef std::numeric_limits< double > dbl;
+  std::cout.precision(dbl::max_digits10);
+  for (int i = 0; i < condensedREns.size(); i++){
+    std::cout << "Real CPU : (" << i << ", " << condensedREns[i] << ")" << std::endl;
+  }
+ */ 
 #endif
+  typedef std::numeric_limits< double > dbl;
+  std::cout.precision(dbl::max_digits10);
+
+  std::vector<uint> keys(serialSummandsREnValues.size());
+  std::iota(std::begin(keys), std::end(keys), 0);
+
+  std::vector< std::pair<double,double> > LJValuesAndREnValues;
+  LJValuesAndREnValues.reserve(serialSummandsLJValues.size());
+  std::transform(serialSummandsLJValues.begin(), serialSummandsLJValues.end(), serialSummandsREnValues.begin(), std::back_inserter(LJValuesAndREnValues),
+               [](double a, double b) { return std::make_pair(a, b); });
+
+  std::sort(LJValuesAndREnValues.begin(), LJValuesAndREnValues.end());
+
+  double sumREn = 0.0;
+  double sumLJEn = 0.0;
+  for (int i = 0; i < serialSummandsREnValues.size(); i++){
+    sumLJEn+=LJValuesAndREnValues[i].first;
+    sumREn+=LJValuesAndREnValues[i].second;
+  }
+
+  for (int i = 0; i < serialSummandsREnValues.size(); i++){
+    std::cout << "LJV " << LJValuesAndREnValues[i].first << std::endl;
+  }
+
+  for (int i = 0; i < serialSummandsREnValues.size(); i++){
+    std::cout << "RealV " << LJValuesAndREnValues[i].second << std::endl;
+  }
+
+  std::cout << "number of REn interactions : " << serialSummandsREnValues.size() << std::endl;
+  std::cout << "number of LJEn interactions : " << serialSummandsLJValues.size() << std::endl;
+
+  std::cout << "boring LJEn reductions : " << sumLJEn << std::endl;
+  std::cout << "boring REn reductions : " << sumREn << std::endl;
+
+  std::cout << "REn : " << tempREn << std::endl;
+  std::cout << "LJEn : " << tempLJEn << std::endl;
   // setting energy and virial of LJ interaction
   potential.boxEnergy[box].inter = tempLJEn;
   // setting energy and virial of coulomb interaction
@@ -389,7 +536,19 @@ reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
     }
   }
 #endif
-
+/*
+  typedef std::numeric_limits< double > dbl;
+  std::cout.precision(dbl::max_digits10);
+for(currParticleIdx = 0; currParticleIdx < cellVector.size(); currParticleIdx++) {
+  currParticle = cellVector[currParticleIdx];
+  std::cout << "aForcex[" << currParticle << "] : " << aForcex[currParticle] << std::endl;
+  std::cout << "aForcey[" << currParticle << "] : " << aForcey[currParticle] << std::endl;
+  std::cout << "aForcez[" << currParticle << "] : " << aForcez[currParticle] << std::endl;
+  std::cout << "mForcex[particleMol[" << currParticle << "] : " << mForcex[particleMol[currParticle]] << std::endl;
+  std::cout << "mForcey[particleMol[" << currParticle << "] : " << mForcey[particleMol[currParticle]] << std::endl;
+  std::cout << "mForcez[particleMol[" << currParticle << "] : " << mForcez[particleMol[currParticle]] << std::endl;
+}
+*/
   // setting energy and virial of LJ interaction
   potential.boxEnergy[box].inter = tempLJEn;
   // setting energy and virial of coulomb interaction

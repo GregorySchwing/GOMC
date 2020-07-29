@@ -13,6 +13,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "Ewald.h"
 #include "NoEwald.h"
 #include "CellList.h"
+#include <numeric>
 
 #include <vector>
 

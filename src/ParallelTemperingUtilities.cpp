@@ -149,7 +149,7 @@ void ParallelTemperingUtilities::evaluateExchangeCriteria(ulong step){
     double printRecord;
     if (bMultiEx){
 
-        int i0, i1, a, b, ap, bp;
+        int i0, i1, a, b, ap, bp, tmp;
 
         /* multiple random switch exchange */
         int nself = 0;
@@ -175,13 +175,15 @@ void ParallelTemperingUtilities::evaluateExchangeCriteria(ulong step){
             #endif
             /* we actually only use the first space in the prob and bEx array,
                since there are actually many switches between pairs. */
-            exchangeProbabilities[0] = min(uBoltz, 1.0);
+            exchangeProbabilities[0] = std::min(uBoltz, 1.0);
             exchangeResults[0] = (printRecord = prng()) < uBoltz;
             //std::cout << "Swapping repl " << i-1 << " and repl " << i << " uBoltz :" << uBoltz << "prng : " << printRecord << std::endl;
             prob_sum[0] += exchangeProbabilities[0];
             if (exchangeResults[0]){
                 /* swap these two */
-                swap(pind[i0], pind[i1]);
+                tmp = pind[i0];
+                pind[i0] = pind[i1];
+                pind[i1] = tmp;
             }
         }
         nattempt[0]++; /* keep track of total permutation trials here */
@@ -190,6 +192,7 @@ void ParallelTemperingUtilities::evaluateExchangeCriteria(ulong step){
     } else {
 
         int parity = step / parallelTempFreq % 2;
+        int tmp;
 
         for (int i = 1; i < ms->worldSize; i++){
             bPrint = ms->worldRank == i || ms->worldRank == i -1;
@@ -197,13 +200,15 @@ void ParallelTemperingUtilities::evaluateExchangeCriteria(ulong step){
                 #if ENSEMBLE == NVT
                 uBoltz = exp((global_betas[i] - global_betas[i-1]) * (global_energies[i] - global_energies[i-1]));
                 #endif
-                exchangeProbabilities[i] = min(uBoltz, 1.0);
+                exchangeProbabilities[i] = std::min(uBoltz, 1.0);
                 exchangeResults[i] = (printRecord = prng()) < uBoltz;
                 //std::cout << "Swapping repl " << i-1 << " and repl " << i << " uBoltz :" << uBoltz << "prng : " << printRecord << std::endl;
                 prob_sum[i] += exchangeProbabilities[i];
                 if (exchangeResults[i]){
                     /* swap these two */
-                    swap(pind[i-1], pind[i]);
+                    tmp = pind[i-1];
+                    pind[i-1] = pind[i];
+                    pind[i] = tmp;
                     nexchange[i]++;
                 }
             } else {
@@ -275,7 +280,7 @@ void ParallelTemperingUtilities::prepareToDoExchange(const int replica_id, int* 
 
 }
 
-void ParallelTemperingUtilities::cyclicDecomposition(const vector<int> destinations, vector< vector<int> > & cyclic, vector<bool> & incycle, const int nrepl, int * nswap){
+void ParallelTemperingUtilities::cyclicDecomposition(const std::vector<int> destinations, std::vector< std::vector<int> > & cyclic, std::vector<bool> & incycle, const int nrepl, int * nswap){
     
     int i, j, c, p;
     int maxlen = 1;
@@ -334,7 +339,7 @@ void ParallelTemperingUtilities::cyclicDecomposition(const vector<int> destinati
     #endif
 }
 
-void ParallelTemperingUtilities::computeExchangeOrder(vector< vector<int> > & cyclic, vector< vector<int> > & order, const int nrepl, const int maxswap){
+void ParallelTemperingUtilities::computeExchangeOrder(std::vector< std::vector<int> > & cyclic, std::vector< std::vector<int> > & order, const int nrepl, const int maxswap){
 
     int i, j;
     for (j = 0; j < maxswap; j++)
@@ -1171,7 +1176,7 @@ void ParallelTemperingUtilities::exchangeVirials(SystemPotential & mySystemPoten
     }
 }
 
-void ParallelTemperingUtilities::print_ind(FILE* fplog, const char* leg, int n, vector<int> ind, const vector<bool> bEx)
+void ParallelTemperingUtilities::print_ind(FILE* fplog, const char* leg, int n, std::vector<int> ind, const std::vector<bool> bEx)
 {
     int i;
 
@@ -1183,7 +1188,7 @@ void ParallelTemperingUtilities::print_ind(FILE* fplog, const char* leg, int n, 
     fprintf(fplog, "\n");
 }
 
-void ParallelTemperingUtilities::print_prob(FILE* fplog, const char* leg, int n, vector<double> prob)
+void ParallelTemperingUtilities::print_prob(FILE* fplog, const char* leg, int n, std::vector<double> prob)
 {
     int  i;
     char buf[8];
@@ -1204,7 +1209,7 @@ void ParallelTemperingUtilities::print_prob(FILE* fplog, const char* leg, int n,
     fprintf(fplog, "\n");
 }
 
-void ParallelTemperingUtilities::print_count(FILE* fplog, const char* leg, int n, vector<int> count)
+void ParallelTemperingUtilities::print_count(FILE* fplog, const char* leg, int n, std::vector<int> count)
 {
     int i;
 
@@ -1216,7 +1221,7 @@ void ParallelTemperingUtilities::print_count(FILE* fplog, const char* leg, int n
     fprintf(fplog, "\n");
 }
 
-void ParallelTemperingUtilities::print_transition_matrix(FILE* fplog, int n, vector< vector<int> > nmoves, const vector<int> nattempt)
+void ParallelTemperingUtilities::print_transition_matrix(FILE* fplog, int n, std::vector< std::vector<int> > nmoves, const std::vector<int> nattempt)
 {
     int   i, j, ntot;
     float Tprint;
@@ -1256,7 +1261,7 @@ void ParallelTemperingUtilities::print_transition_matrix(FILE* fplog, int n, vec
 void ParallelTemperingUtilities::print_replica_exchange_statistics(FILE* fplog)
 {
     int i;
-    vector<bool> nullVec;
+    std::vector<bool> nullVec;
 
     fprintf(fplog, "\nReplica exchange statistics\n");
     if (!bMultiEx){
@@ -1305,7 +1310,7 @@ void ParallelTemperingUtilities::print_replica_exchange_statistics(FILE* fplog)
     print_transition_matrix(fplog, ms->worldSize, nmoves, nattempt);
 }
 
-void ParallelTemperingUtilities::print_allswitchind(FILE* fplog, int n, vector<int> pind, vector<int> allswaps, vector<int> tmpswap)
+void ParallelTemperingUtilities::print_allswitchind(FILE* fplog, int n, std::vector<int> pind, std::vector<int> allswaps, std::vector<int> tmpswap)
 {
     int i;
 

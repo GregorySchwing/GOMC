@@ -55,5 +55,5 @@ ICPC_PATH="$(which icpc)"
 export CC=${ICC_PATH}
 export CXX=${ICPC_PATH}
 cmake .. -DCMAKE_BUILD_TYPE=Debug
-make -j4 NVT 
+make -j8 NVT GPU_NVT 
 
