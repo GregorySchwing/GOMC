@@ -209,10 +209,13 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
 */
   double * hostEnergyVectorLJValues; 
   double * hostEnergyVectorREnValues; 
-  uint numberOfInters;
+  
   std::vector<double> serialSummandsLJValues;
   std::vector<double> serialSummandsREnValues;
 
+  uint tnoi = 0;
+
+  numberOfInters = &tnoi; 
 
 #ifdef GOMC_CUDA
   double REn = 0.0, LJEn = 0.0;
@@ -236,8 +239,8 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
                   forcefield.sc_power, box, 
                   numberOfInters);
 
-  hostEnergyVectorLJValues = (double*) malloc (sizeof(double) * numberOfInters);
-  hostEnergyVectorREnValues = (double*) malloc (sizeof(double) * numberOfInters);
+  hostEnergyVectorLJValues = (double*) malloc (sizeof(double) * (*numberOfInters));
+  hostEnergyVectorREnValues = (double*) malloc (sizeof(double) * (*numberOfInters));
 
   CallBoxInterGPU(forcefield.particles->getCUDAVars(), cellVector, cellStartIndex,
                   neighborList, coords, boxAxes, electrostatic, particleCharge,
@@ -252,9 +255,9 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
   tempREn = REn;
   tempLJEn = LJEn;
 
-  serialSummandsLJValues.resize(numberOfInters);
-  serialSummandsREnValues.resize(numberOfInters);
-  for (uint i = 0; i < numberOfInters; i++){
+  serialSummandsLJValues.resize((*numberOfInters));
+  serialSummandsREnValues.resize((*numberOfInters));
+  for (uint i = 0; i < (*numberOfInters); i++){
     serialSummandsLJValues[i] = hostEnergyVectorLJValues[i];
     serialSummandsREnValues[i] = hostEnergyVectorREnValues[i];
   }
@@ -355,7 +358,7 @@ std::vector<int> condensedKeys;
 std::vector<double> condensedREns;  
 int newkey = 0;
 */
-numberOfInters = serialSummandsREnValues.size();
+(*numberOfInters) = serialSummandsREnValues.size();
 
 /*
   std::sort(condensedREns.begin(), condensedREns.end());
@@ -454,7 +457,34 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   int atomNumber = coords.Count();
   int currParticleIdx, currParticle, currCell, nCellIndex, neighborCell, endIndex, nParticleIndex, nParticle;
 
+  double *host_aForcex_neighborCell_flattened;
+  double *host_aForcey_neighborCell_flattened;
+  double *host_aForcez_neighborCell_flattened;
+  double *host_mForcex_neighborCell_flattened;
+  double *host_mForcey_neighborCell_flattened;
+  double *host_mForcez_neighborCell_flattened;
+  double *host_aForcex_currentCell_flattened;
+  double *host_aForcey_currentCell_flattened;
+  double *host_aForcez_currentCell_flattened;
+  double *host_mForcex_currentCell_flattened;
+  double *host_mForcey_currentCell_flattened;
+  double *host_mForcez_currentCell_flattened;
+
 #ifdef GOMC_CUDA
+
+  host_aForcex_neighborCell_flattened = new double[*numberOfInters];
+  host_aForcey_neighborCell_flattened = new double[*numberOfInters];
+  host_aForcez_neighborCell_flattened = new double[*numberOfInters];
+  host_mForcex_neighborCell_flattened = new double[*numberOfInters];
+  host_mForcey_neighborCell_flattened = new double[*numberOfInters];
+  host_mForcez_neighborCell_flattened = new double[*numberOfInters];
+  host_aForcex_currentCell_flattened = new double[*numberOfInters];
+  host_aForcey_currentCell_flattened = new double[*numberOfInters];
+  host_aForcez_currentCell_flattened = new double[*numberOfInters];
+  host_mForcex_currentCell_flattened = new double[*numberOfInters];
+  host_mForcey_currentCell_flattened = new double[*numberOfInters];
+  host_mForcez_currentCell_flattened = new double[*numberOfInters];
+
   //update unitcell in GPU
   UpdateCellBasisCUDA(forcefield.particles->getCUDAVars(), box,
                       boxAxes.cellBasis[box].x, boxAxes.cellBasis[box].y,
@@ -468,13 +498,26 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
                            newAxes.cellBasis_Inv[box].z);
   }
 
+
+
   CallBoxForceGPU(forcefield.particles->getCUDAVars(), cellVector,
                   cellStartIndex, neighborList, mapParticleToCell,
                   coords, boxAxes, electrostatic, particleCharge,
                   particleKind, particleMol, tempREn, tempLJEn,
                   aForcex, aForcey, aForcez, mForcex, mForcey, mForcez,
                   atomCount, molCount, forcefield.sc_coul, forcefield.sc_sigma_6, forcefield.sc_alpha,
-                  forcefield.sc_power, box);
+                  forcefield.sc_power, box,   host_aForcex_neighborCell_flattened,
+                                              host_aForcey_neighborCell_flattened,
+                                              host_aForcez_neighborCell_flattened,
+                                              host_mForcex_neighborCell_flattened,
+                                              host_mForcey_neighborCell_flattened,
+                                              host_mForcez_neighborCell_flattened,
+                                              host_aForcex_currentCell_flattened,
+                                              host_aForcey_currentCell_flattened,
+                                              host_aForcez_currentCell_flattened,
+                                              host_mForcex_currentCell_flattened,
+                                              host_mForcey_currentCell_flattened,
+                                              host_mForcez_currentCell_flattened, numberOfInters);
 
 #else
 #if defined _OPENMP && _OPENMP >= 201511 // check if OpenMP version is 4.5
@@ -537,18 +580,37 @@ reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
   }
 #endif
 /*
+
+  host_aForcex_neighborCell_flattened = new double[*numberOfInters];
+  host_aForcey_neighborCell_flattened = new double[*numberOfInters];
+  host_aForcez_neighborCell_flattened = new double[*numberOfInters];
+  host_mForcex_neighborCell_flattened = new double[*numberOfInters];
+  host_mForcey_neighborCell_flattened = new double[*numberOfInters];
+  host_mForcez_neighborCell_flattened = new double[*numberOfInters];
+  host_aForcex_currentCell_flattened = new double[*numberOfInters];
+  host_aForcey_currentCell_flattened = new double[*numberOfInters];
+  host_aForcez_currentCell_flattened = new double[*numberOfInters];
+  host_mForcex_currentCell_flattened = new double[*numberOfInters];
+  host_mForcey_currentCell_flattened = new double[*numberOfInters];
+  host_mForcez_currentCell_flattened = new double[*numberOfInters];
+*/
   typedef std::numeric_limits< double > dbl;
   std::cout.precision(dbl::max_digits10);
-for(currParticleIdx = 0; currParticleIdx < cellVector.size(); currParticleIdx++) {
-  currParticle = cellVector[currParticleIdx];
-  std::cout << "aForcex[" << currParticle << "] : " << aForcex[currParticle] << std::endl;
-  std::cout << "aForcey[" << currParticle << "] : " << aForcey[currParticle] << std::endl;
-  std::cout << "aForcez[" << currParticle << "] : " << aForcez[currParticle] << std::endl;
-  std::cout << "mForcex[particleMol[" << currParticle << "] : " << mForcex[particleMol[currParticle]] << std::endl;
-  std::cout << "mForcey[particleMol[" << currParticle << "] : " << mForcey[particleMol[currParticle]] << std::endl;
-  std::cout << "mForcez[particleMol[" << currParticle << "] : " << mForcez[particleMol[currParticle]] << std::endl;
+for(uint i = 0; i < *numberOfInters; i++) {
+  std::cout << "host_aForcex_neighborCell_flattened[" << i << "] : " << host_aForcex_neighborCell_flattened[i] << std::endl;
+  std::cout << "host_aForcey_neighborCell_flattened[" << i << "] : " << host_aForcey_neighborCell_flattened[i] << std::endl;
+  std::cout << "host_aForcez_neighborCell_flattened[" << i << "] : " << host_aForcez_neighborCell_flattened[i] << std::endl;
+  std::cout << "host_mForcex_neighborCell_flattened[" << i << "] : " << host_mForcex_neighborCell_flattened[i] << std::endl;
+  std::cout << "host_mForcey_neighborCell_flattened[" << i << "] : " << host_mForcey_neighborCell_flattened[i] << std::endl;
+  std::cout << "host_mForcez_neighborCell_flattened[" << i << "] : " << host_mForcez_neighborCell_flattened[i] << std::endl;
+  std::cout << "host_aForcex_currentCell_flattened[" << i << "] : " << host_aForcex_currentCell_flattened[i] << std::endl;
+  std::cout << "host_aForcey_currentCell_flattened[" << i << "] : " << host_aForcey_currentCell_flattened[i] << std::endl;
+  std::cout << "host_aForcez_currentCell_flattened[" << i << "] : " << host_aForcez_currentCell_flattened[i] << std::endl;
+  std::cout << "host_mForcex_currentCell_flattened[" << i << "] : " << host_mForcex_currentCell_flattened[i] << std::endl;
+  std::cout << "host_mForcey_currentCell_flattened[" << i << "] : " << host_mForcey_currentCell_flattened[i] << std::endl;
+  std::cout << "host_mForcez_currentCell_flattened[" << i << "] : " << host_mForcez_currentCell_flattened[i] << std::endl;
 }
-*/
+
   // setting energy and virial of LJ interaction
   potential.boxEnergy[box].inter = tempLJEn;
   // setting energy and virial of coulomb interaction
@@ -585,7 +647,46 @@ Virial CalculateEnergy::VirialCalc(const uint box)
   int atomNumber = currentCoords.Count();
   int currParticleIdx, currParticle, currCell, nCellIndex, neighborCell, endIndex, nParticleIndex, nParticle;
 
+  double * host_rT11_flat;
+  double * host_rT22_flat;
+  double * host_rT33_flat;
+
+          //extra tensor calculations
+  double * host_rT12_flat;
+  double * host_rT13_flat;
+  double * host_rT23_flat;
+
+  double * host_vT11_flat;
+  double * host_vT22_flat;
+  double * host_vT33_flat;
+
+          //extra tensor calculations
+  double * host_vT12_flat;
+  double * host_vT13_flat;
+  double * host_vT23_flat;
+
 #ifdef GOMC_CUDA
+
+
+  host_rT11_flat = new double[*numberOfInters];
+  host_rT22_flat = new double[*numberOfInters];
+  host_rT33_flat = new double[*numberOfInters];
+
+          //extra tensor calculations
+  host_rT12_flat = new double[*numberOfInters];
+  host_rT13_flat = new double[*numberOfInters];
+  host_rT23_flat = new double[*numberOfInters];
+
+  host_vT11_flat = new double[*numberOfInters];
+  host_vT22_flat = new double[*numberOfInters];
+  host_vT33_flat = new double[*numberOfInters];
+
+          //extra tensor calculations
+  host_vT12_flat = new double[*numberOfInters];
+  host_vT13_flat = new double[*numberOfInters];
+  host_vT23_flat = new double[*numberOfInters];
+
+
   //update unitcell in GPU
   UpdateCellBasisCUDA(forcefield.particles->getCUDAVars(), box,
                       currentAxes.cellBasis[box].x,
@@ -607,7 +708,24 @@ Virial CalculateEnergy::VirialCalc(const uint box)
                        vT11, vT12, vT13, vT22, vT23, vT33,
                        forcefield.sc_coul,
                        forcefield.sc_sigma_6, forcefield.sc_alpha,
-                       forcefield.sc_power, box);
+                       forcefield.sc_power, box,  host_rT11_flat,
+                                                  host_rT22_flat,
+                                                  host_rT33_flat,
+
+                                                          //extra tensor calculations
+                                                  host_rT12_flat,
+                                                  host_rT13_flat,
+                                                  host_rT23_flat,
+
+                                                  host_vT11_flat,
+                                                  host_vT22_flat,
+                                                  host_vT33_flat,
+
+                                                          //extra tensor calculations
+                                                  host_vT12_flat,
+                                                  host_vT13_flat,
+                                                  host_vT23_flat,
+                                                  numberOfInters);
 #else
 #ifdef _OPENMP
   #pragma omp parallel for default(shared) private(currParticleIdx, currParticle, \

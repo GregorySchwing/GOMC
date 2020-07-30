@@ -300,6 +300,7 @@ private:
   double GetLambdaVDW(uint molA, uint molB, uint box) const;
   double GetLambdaCoulomb(uint molA, uint molB, uint box) const;
 
+  uint * numberOfInters;
 
   const Forcefield& forcefield;
   const Molecules& mols;

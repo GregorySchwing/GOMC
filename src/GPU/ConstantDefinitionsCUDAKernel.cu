@@ -125,6 +125,7 @@ void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
   CUMALLOC((void**) &vars->gpu_mForcez, maxMolNumber * sizeof(double));
   CUMALLOC((void**) &vars->gpu_cellVector, atomNumber * sizeof(int));
   CUMALLOC((void**) &vars->gpu_mapParticleToCell, atomNumber * sizeof(int));
+
   checkLastErrorCUDA(__FILE__, __LINE__);
 }
 

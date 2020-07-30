@@ -18,6 +18,8 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 
 using namespace cub;
 
+struct Lock;
+
 void CallBoxInterGPU(VariablesCUDA *vars,
                      std::vector<int> cellVector,
                      std::vector<int> cellStartIndex,
@@ -39,7 +41,7 @@ void CallBoxInterGPU(VariablesCUDA *vars,
                      int * hostEnergyVectorREnKeys,
                      double * hostEnergyVectorLJValues,
                      double * hostEnergyVectorREnValues,
-                     uint & numberOfInters
+                     uint * numberOfInters
                     )
 {
   int atomNumber = coords.Count();
@@ -168,6 +170,10 @@ void CallBoxInterGPU(VariablesCUDA *vars,
   for (int i = 0; i < blocksPerGrid; i++){
     totalNumInters+=numIntersPerCell[i];
   }  
+  CUMALLOC((void**) &vars->numberOfInters, sizeof(uint));
+  // Set this for the flattened force calc
+  CubDebugExit(cudaMemcpy(vars->numberOfInters, &totalNumInters, sizeof(uint), cudaMemcpyHostToDevice));
+
 /*
   for (int i = 0; i < blocksPerGrid; i++){
     std::cout << "numIntersPerCell[" << i << "] : " << numIntersPerCell[i] << std::endl;
@@ -202,8 +208,8 @@ void CallBoxInterGPU(VariablesCUDA *vars,
   CUMALLOC((void**) &gpu_flatIndexREn, sizeof(int));
   CUMALLOC((void**) &gpu_flatIndexLJEn, sizeof(int));
 
-  cudaMemcpy(gpu_flatIndexREn, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
-  cudaMemcpy(gpu_flatIndexLJEn, &flatIndexLJEn, sizeof(int), cudaMemcpyHostToDevice);
+  CubDebugExit(cudaMemcpy(gpu_flatIndexREn, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice));
+  CubDebugExit(cudaMemcpy(gpu_flatIndexLJEn, &flatIndexLJEn, sizeof(int), cudaMemcpyHostToDevice));
 
   BoxInterGPUFlattened <<< blocksPerGrid, threadsPerBlock>>>(gpu_cellStartIndex,
     vars->gpu_cellVector,
@@ -357,7 +363,7 @@ CubDebugExit(cudaMemcpy(hostEnergyVectorREnValues, flatgpu_REn, totalNumInters *
 CubDebugExit(cudaMemcpy(hostEnergyVectorLJValues, flatgpu_LJEn, totalNumInters * sizeof(double),
     cudaMemcpyDeviceToHost));
 
-  numberOfInters = totalNumInters;
+  *numberOfInters = totalNumInters;
 
   // ReduceSum
   void * d_temp_storage = NULL;
@@ -427,7 +433,7 @@ void GetNumberOfInters(VariablesCUDA *vars,
   double sc_alpha,
   uint sc_power,
   uint const box,
-  uint & numberOfInters
+  uint * numberOfInters
  )
 {
 int atomNumber = coords.Count();
@@ -557,7 +563,7 @@ for (int i = 0; i < blocksPerGrid; i++){
 totalNumInters+=numIntersPerCell[i];
 }  
 
-numberOfInters = totalNumInters;
+*numberOfInters = totalNumInters;
 
 CUFREE(gpu_particleCharge);
 CUFREE(gpu_particleKind);
@@ -922,7 +928,7 @@ __global__ void BoxInterGPUFlattened(int *gpu_cellStartIndex,
   gpu_cellStartIndex[currentCell + 1] : cellVectorCount;
   particlesInsideCurrentCell = endIndex - gpu_cellStartIndex[currentCell];
 
-  // total number of pairs
+  // total number of pairs aka entries in our NxM matrix or r_ij
   int numberOfPairs = particlesInsideCurrentCell * particlesInsideNeighboringCells;
 
   for(int pairIndex = threadIdx.x; pairIndex < numberOfPairs; pairIndex += blockDim.x) {
@@ -1550,5 +1556,28 @@ __device__ double CalcEnSwitchGPUNoLambda(double distSq, int index,
 
   return (gpu_epsilon_Cn[index] * (repulse - attract)) * factE;
 }
+
+struct Lock {
+  int * mutex;
+  Lock (void) {
+    int state = 0;
+    CUMALLOC((void**)&mutex, sizeof(int));
+    cudaMemcpy(mutex, &state, sizeof(int), cudaMemcpyHostToDevice);
+  }
+
+  ~Lock (void){
+    cudaFree(mutex);
+  }
+
+
+__device__ void lock( void ) {
+  while( atomicCAS( mutex, 0, 1 ) != 0 );
+  __threadfence();}
+  
+  __device__ void unlock( void ) {
+    __threadfence();
+    atomicExch( mutex, 0 );
+  }
+};
 
 #endif

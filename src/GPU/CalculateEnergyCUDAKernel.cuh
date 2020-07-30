@@ -34,7 +34,7 @@ void CallBoxInterGPU(VariablesCUDA *vars,
                      int * hostEnergyVectorREnKeys,
                      double * hostEnergyVectorLJValues,
                      double * hostEnergyVectorREnValues,
-                     uint & numberOfInters);
+                     uint * numberOfInters);
 
 void GetNumberOfInters(VariablesCUDA *vars,
                         std::vector<int> cellVector,
@@ -53,7 +53,7 @@ void GetNumberOfInters(VariablesCUDA *vars,
                         double sc_alpha,
                         uint sc_power,
                         uint const box,
-                        uint & numberOfInters);
+                        uint * numberOfInters);
 
 __global__ void CalcNumberOfInteractions(   int *gpu_cellStartIndex,
                                             int *gpu_cellVector,

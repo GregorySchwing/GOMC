@@ -79,6 +79,9 @@ public:
     gpu_lambdaVDW = NULL;
     gpu_lambdaCoulomb = NULL;
     gpu_isFraction = NULL;
+
+    // GJS
+    numberOfInters = NULL;
   }
   double *gpu_sigmaSq;
   double *gpu_epsilon_Cn;
@@ -120,5 +123,8 @@ public:
 
   // new pair interaction calculation done on GPU
   int *gpu_cellVector, *gpu_mapParticleToCell;
+
+  // GJS For flattened array of forces
+  uint * numberOfInters;
 };
 #endif
