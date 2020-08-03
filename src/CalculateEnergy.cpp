@@ -472,6 +472,8 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
 
 #ifdef GOMC_CUDA
 
+
+
   host_aForcex_neighborCell_flattened = new double[*numberOfInters];
   host_aForcey_neighborCell_flattened = new double[*numberOfInters];
   host_aForcez_neighborCell_flattened = new double[*numberOfInters];
@@ -666,6 +668,22 @@ Virial CalculateEnergy::VirialCalc(const uint box)
   double * host_vT23_flat;
 
 #ifdef GOMC_CUDA
+
+std::cout << "num inters from energy : " << *numberOfInters << std::endl;
+
+*numberOfInters = 0;
+
+GetNumberOfIntersInterForceGPU(forcefield.particles->getCUDAVars(),
+                       cellVector, cellStartIndex, neighborList, mapParticleToCell,
+                       currentCoords, currentCOM, currentAxes,
+                       electrostatic, particleCharge, particleKind,
+                       particleMol, rT11, rT12, rT13, rT22, rT23, rT33,
+                       vT11, vT12, vT13, vT22, vT23, vT33,
+                       forcefield.sc_coul,
+                       forcefield.sc_sigma_6, forcefield.sc_alpha,
+                       forcefield.sc_power, box, numberOfInters);
+
+  std::cout << "num inters from force call : " << *numberOfInters << std::endl;
 
 
   host_rT11_flat = new double[*numberOfInters];

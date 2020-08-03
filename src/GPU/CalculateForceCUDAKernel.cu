@@ -155,18 +155,18 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
   double * gpu_vT23_flat;
   double * gpu_vT33_flat;
 
-  CUMALLOC((void**) &gpu_rT11_flat, *numberOfInters * sizeof(double));
-  CUMALLOC((void**) &gpu_rT12_flat, *numberOfInters * sizeof(double));
-  CUMALLOC((void**) &gpu_rT13_flat, *numberOfInters * sizeof(double));
-  CUMALLOC((void**) &gpu_rT22_flat, *numberOfInters * sizeof(double));
-  CUMALLOC((void**) &gpu_rT23_flat, *numberOfInters * sizeof(double));
-  CUMALLOC((void**) &gpu_rT33_flat, *numberOfInters * sizeof(double));
-  CUMALLOC((void**) &gpu_vT11_flat, *numberOfInters * sizeof(double));
-  CUMALLOC((void**) &gpu_vT12_flat, *numberOfInters * sizeof(double));
-  CUMALLOC((void**) &gpu_vT13_flat, *numberOfInters * sizeof(double));
-  CUMALLOC((void**) &gpu_vT22_flat, *numberOfInters * sizeof(double));
-  CUMALLOC((void**) &gpu_vT23_flat, *numberOfInters * sizeof(double));
-  CUMALLOC((void**) &gpu_vT33_flat, *numberOfInters * sizeof(double));    
+  CUMALLOC((void**) &gpu_rT11_flat, (*numberOfInters) * sizeof(double));
+  CUMALLOC((void**) &gpu_rT12_flat, (*numberOfInters) * sizeof(double));
+  CUMALLOC((void**) &gpu_rT13_flat, (*numberOfInters) * sizeof(double));
+  CUMALLOC((void**) &gpu_rT22_flat, (*numberOfInters) * sizeof(double));
+  CUMALLOC((void**) &gpu_rT23_flat, (*numberOfInters) * sizeof(double));
+  CUMALLOC((void**) &gpu_rT33_flat, (*numberOfInters) * sizeof(double));
+  CUMALLOC((void**) &gpu_vT11_flat, (*numberOfInters) * sizeof(double));
+  CUMALLOC((void**) &gpu_vT12_flat, (*numberOfInters) * sizeof(double));
+  CUMALLOC((void**) &gpu_vT13_flat, (*numberOfInters) * sizeof(double));
+  CUMALLOC((void**) &gpu_vT22_flat, (*numberOfInters) * sizeof(double));
+  CUMALLOC((void**) &gpu_vT23_flat, (*numberOfInters) * sizeof(double));
+  CUMALLOC((void**) &gpu_vT33_flat, (*numberOfInters) * sizeof(double));    
   
   int * gpu_rT11_flat_index;
   int * gpu_rT22_flat_index;
@@ -186,7 +186,21 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
   int * gpu_vT13_flat_index;
   int * gpu_vT23_flat_index;
 
-  int flatIndexREn = -1;
+  int flatIndexREn1 = -1;
+  int flatIndexREn2 = -1;
+  int flatIndexREn3 = -1;
+
+  int flatIndexREn4 = -1;
+  int flatIndexREn5 = -1;
+  int flatIndexREn6 = -1;
+
+  int flatIndexREn7 = -1;
+  int flatIndexREn8 = -1;
+  int flatIndexREn9 = -1;
+
+  int flatIndexREn10 = -1;
+  int flatIndexREn11 = -1;
+  int flatIndexREn12 = -1;
 
   // Might be overkill but whatever
   CUMALLOC((void**) &gpu_rT11_flat_index, sizeof(int));
@@ -206,21 +220,21 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
   CUMALLOC((void**) &gpu_vT23_flat_index, sizeof(int));
 
     // Might be overkill but whatever
-    cudaMemcpy(gpu_rT11_flat_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(gpu_rT22_flat_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(gpu_rT33_flat_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(gpu_rT11_flat_index, &flatIndexREn1, sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(gpu_rT22_flat_index, &flatIndexREn2, sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(gpu_rT33_flat_index, &flatIndexREn3, sizeof(int), cudaMemcpyHostToDevice);
   
-    cudaMemcpy(gpu_rT12_flat_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(gpu_rT13_flat_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(gpu_rT23_flat_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(gpu_rT12_flat_index, &flatIndexREn4, sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(gpu_rT13_flat_index, &flatIndexREn5, sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(gpu_rT23_flat_index, &flatIndexREn6, sizeof(int), cudaMemcpyHostToDevice);
   
-    cudaMemcpy(gpu_vT11_flat_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(gpu_vT22_flat_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(gpu_vT33_flat_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(gpu_vT11_flat_index, &flatIndexREn7, sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(gpu_vT22_flat_index, &flatIndexREn8, sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(gpu_vT33_flat_index, &flatIndexREn9, sizeof(int), cudaMemcpyHostToDevice);
   
-    cudaMemcpy(gpu_vT12_flat_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(gpu_vT13_flat_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(gpu_vT23_flat_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(gpu_vT12_flat_index, &flatIndexREn10, sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(gpu_vT13_flat_index, &flatIndexREn11, sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(gpu_vT23_flat_index, &flatIndexREn12, sizeof(int), cudaMemcpyHostToDevice);
 
 /*
   BoxInterForceGPU <<< blocksPerGrid, threadsPerBlock>>>(gpu_cellStartIndex,
@@ -387,77 +401,139 @@ checkLastErrorCUDA(__FILE__, __LINE__);
 
   checkLastErrorCUDA(__FILE__, __LINE__);
   cudaDeviceSynchronize();
+  checkLastErrorCUDA(__FILE__, __LINE__);
+
   // ReduceSum // Virial of LJ
   void *d_temp_storage = NULL;
+  checkLastErrorCUDA(__FILE__, __LINE__);
+
   size_t temp_storage_bytes = 0;
+  checkLastErrorCUDA(__FILE__, __LINE__);
+
   DeviceReduce::Sum(d_temp_storage, temp_storage_bytes, vars->gpu_vT11,
                     gpu_final_value, energyVectorLen);
+  
+  checkLastErrorCUDA(__FILE__, __LINE__);
+
   CUMALLOC(&d_temp_storage, temp_storage_bytes);
+  checkLastErrorCUDA(__FILE__, __LINE__);
+
   DeviceReduce::Sum(d_temp_storage, temp_storage_bytes, vars->gpu_vT11,
                     gpu_final_value, energyVectorLen);
-  cudaMemcpy(&vT11, gpu_final_value, sizeof(double),
+                    checkLastErrorCUDA(__FILE__, __LINE__);
+
+                    cudaMemcpy(&vT11, gpu_final_value, sizeof(double),
              cudaMemcpyDeviceToHost);
+             checkLastErrorCUDA(__FILE__, __LINE__);
+
   DeviceReduce::Sum(d_temp_storage, temp_storage_bytes, vars->gpu_vT12,
                     gpu_final_value, energyVectorLen);
+                    checkLastErrorCUDA(__FILE__, __LINE__);
+
   cudaMemcpy(&vT12, gpu_final_value, sizeof(double),
              cudaMemcpyDeviceToHost);
-  DeviceReduce::Sum(d_temp_storage, temp_storage_bytes, vars->gpu_vT13,
+             checkLastErrorCUDA(__FILE__, __LINE__);
+
+             DeviceReduce::Sum(d_temp_storage, temp_storage_bytes, vars->gpu_vT13,
                     gpu_final_value, energyVectorLen);
-  cudaMemcpy(&vT13, gpu_final_value, sizeof(double),
+                    checkLastErrorCUDA(__FILE__, __LINE__);
+
+                    cudaMemcpy(&vT13, gpu_final_value, sizeof(double),
              cudaMemcpyDeviceToHost);
-  DeviceReduce::Sum(d_temp_storage, temp_storage_bytes, vars->gpu_vT22,
+             checkLastErrorCUDA(__FILE__, __LINE__);
+
+             DeviceReduce::Sum(d_temp_storage, temp_storage_bytes, vars->gpu_vT22,
                     gpu_final_value, energyVectorLen);
-  cudaMemcpy(&vT22, gpu_final_value, sizeof(double),
+                    checkLastErrorCUDA(__FILE__, __LINE__);
+
+                    cudaMemcpy(&vT22, gpu_final_value, sizeof(double),
              cudaMemcpyDeviceToHost);
-  DeviceReduce::Sum(d_temp_storage, temp_storage_bytes, vars->gpu_vT23,
+             checkLastErrorCUDA(__FILE__, __LINE__);
+
+             DeviceReduce::Sum(d_temp_storage, temp_storage_bytes, vars->gpu_vT23,
                     gpu_final_value, energyVectorLen);
-  cudaMemcpy(&vT23, gpu_final_value, sizeof(double),
+                    checkLastErrorCUDA(__FILE__, __LINE__);
+
+                    cudaMemcpy(&vT23, gpu_final_value, sizeof(double),
              cudaMemcpyDeviceToHost);
-  DeviceReduce::Sum(d_temp_storage, temp_storage_bytes, vars->gpu_vT33,
+             checkLastErrorCUDA(__FILE__, __LINE__);
+
+             DeviceReduce::Sum(d_temp_storage, temp_storage_bytes, vars->gpu_vT33,
                     gpu_final_value, energyVectorLen);
-  cudaMemcpy(&vT33, gpu_final_value, sizeof(double),
+                    checkLastErrorCUDA(__FILE__, __LINE__);
+
+                    cudaMemcpy(&vT33, gpu_final_value, sizeof(double),
              cudaMemcpyDeviceToHost);
+             checkLastErrorCUDA(__FILE__, __LINE__);
 
   if(electrostatic) {
     // ReduceSum // Virial of Coulomb
+    checkLastErrorCUDA(__FILE__, __LINE__);
+
     DeviceReduce::Sum(d_temp_storage, temp_storage_bytes, vars->gpu_rT11,
                       gpu_final_value, energyVectorLen);
-    cudaMemcpy(&rT11, gpu_final_value, sizeof(double),
-               cudaMemcpyDeviceToHost);
-    DeviceReduce::Sum(d_temp_storage, temp_storage_bytes, vars->gpu_rT12,
-                      gpu_final_value, energyVectorLen);
-    cudaMemcpy(&rT12, gpu_final_value, sizeof(double),
-               cudaMemcpyDeviceToHost);
-    DeviceReduce::Sum(d_temp_storage, temp_storage_bytes, vars->gpu_rT13,
-                      gpu_final_value, energyVectorLen);
-    cudaMemcpy(&rT13, gpu_final_value, sizeof(double),
-               cudaMemcpyDeviceToHost);
-    DeviceReduce::Sum(d_temp_storage, temp_storage_bytes, vars->gpu_rT22,
-                      gpu_final_value, energyVectorLen);
-    cudaMemcpy(&rT22, gpu_final_value, sizeof(double),
-               cudaMemcpyDeviceToHost);
-    DeviceReduce::Sum(d_temp_storage, temp_storage_bytes, vars->gpu_rT23,
-                      gpu_final_value, energyVectorLen);
-    cudaMemcpy(&rT23, gpu_final_value, sizeof(double),
-               cudaMemcpyDeviceToHost);
-    DeviceReduce::Sum(d_temp_storage, temp_storage_bytes, vars->gpu_rT33,
-                      gpu_final_value, energyVectorLen);
-    cudaMemcpy(&rT33, gpu_final_value, sizeof(double),
-               cudaMemcpyDeviceToHost);
-  }
+                      checkLastErrorCUDA(__FILE__, __LINE__);
 
-  cudaMemcpy(host_rT11_flat, gpu_rT11_flat, *numberOfInters * sizeof(double), cudaMemcpyDeviceToHost);
-  cudaMemcpy(host_rT12_flat, gpu_rT22_flat, *numberOfInters * sizeof(double), cudaMemcpyDeviceToHost);
-  cudaMemcpy(host_rT13_flat, gpu_rT33_flat, *numberOfInters * sizeof(double), cudaMemcpyDeviceToHost);
-  cudaMemcpy(host_rT22_flat, gpu_rT12_flat, *numberOfInters * sizeof(double), cudaMemcpyDeviceToHost);
-  cudaMemcpy(host_rT23_flat, gpu_rT13_flat, *numberOfInters * sizeof(double), cudaMemcpyDeviceToHost);
-  cudaMemcpy(host_rT33_flat, gpu_rT23_flat, *numberOfInters * sizeof(double), cudaMemcpyDeviceToHost);
-  cudaMemcpy(host_vT11_flat, gpu_vT11_flat, *numberOfInters * sizeof(double), cudaMemcpyDeviceToHost);
-  cudaMemcpy(host_vT12_flat, gpu_vT22_flat, *numberOfInters * sizeof(double), cudaMemcpyDeviceToHost);
-  cudaMemcpy(host_vT13_flat, gpu_vT33_flat, *numberOfInters * sizeof(double), cudaMemcpyDeviceToHost);
-  cudaMemcpy(host_vT22_flat, gpu_vT12_flat, *numberOfInters * sizeof(double), cudaMemcpyDeviceToHost);
-  cudaMemcpy(host_vT23_flat, gpu_vT13_flat, *numberOfInters * sizeof(double), cudaMemcpyDeviceToHost);
-  cudaMemcpy(host_vT33_flat, gpu_vT23_flat, *numberOfInters * sizeof(double), cudaMemcpyDeviceToHost);
+                      cudaMemcpy(&rT11, gpu_final_value, sizeof(double),
+               cudaMemcpyDeviceToHost);
+               checkLastErrorCUDA(__FILE__, __LINE__);
+
+               DeviceReduce::Sum(d_temp_storage, temp_storage_bytes, vars->gpu_rT12,
+                      gpu_final_value, energyVectorLen);
+                      checkLastErrorCUDA(__FILE__, __LINE__);
+
+                      cudaMemcpy(&rT12, gpu_final_value, sizeof(double),
+               cudaMemcpyDeviceToHost);
+               checkLastErrorCUDA(__FILE__, __LINE__);
+
+               DeviceReduce::Sum(d_temp_storage, temp_storage_bytes, vars->gpu_rT13,
+                      gpu_final_value, energyVectorLen);
+                      checkLastErrorCUDA(__FILE__, __LINE__);
+
+                      cudaMemcpy(&rT13, gpu_final_value, sizeof(double),
+               cudaMemcpyDeviceToHost);
+               checkLastErrorCUDA(__FILE__, __LINE__);
+
+               DeviceReduce::Sum(d_temp_storage, temp_storage_bytes, vars->gpu_rT22,
+                      gpu_final_value, energyVectorLen);
+                      checkLastErrorCUDA(__FILE__, __LINE__);
+
+                      cudaMemcpy(&rT22, gpu_final_value, sizeof(double),
+               cudaMemcpyDeviceToHost);
+               checkLastErrorCUDA(__FILE__, __LINE__);
+
+               DeviceReduce::Sum(d_temp_storage, temp_storage_bytes, vars->gpu_rT23,
+                      gpu_final_value, energyVectorLen);
+                      checkLastErrorCUDA(__FILE__, __LINE__);
+
+                      cudaMemcpy(&rT23, gpu_final_value, sizeof(double),
+               cudaMemcpyDeviceToHost);
+               checkLastErrorCUDA(__FILE__, __LINE__);
+
+               DeviceReduce::Sum(d_temp_storage, temp_storage_bytes, vars->gpu_rT33,
+                      gpu_final_value, energyVectorLen);
+                      checkLastErrorCUDA(__FILE__, __LINE__);
+
+                      cudaMemcpy(&rT33, gpu_final_value, sizeof(double),
+               cudaMemcpyDeviceToHost);
+               checkLastErrorCUDA(__FILE__, __LINE__);
+
+              }
+  checkLastErrorCUDA(__FILE__, __LINE__);
+
+  cudaMemcpy(host_rT11_flat, gpu_rT11_flat, (*numberOfInters) * sizeof(double), cudaMemcpyDeviceToHost);
+  cudaMemcpy(host_rT12_flat, gpu_rT22_flat, (*numberOfInters) * sizeof(double), cudaMemcpyDeviceToHost);
+  cudaMemcpy(host_rT13_flat, gpu_rT33_flat, (*numberOfInters) * sizeof(double), cudaMemcpyDeviceToHost);
+  cudaMemcpy(host_rT22_flat, gpu_rT12_flat, (*numberOfInters) * sizeof(double), cudaMemcpyDeviceToHost);
+  cudaMemcpy(host_rT23_flat, gpu_rT13_flat, (*numberOfInters) * sizeof(double), cudaMemcpyDeviceToHost);
+  cudaMemcpy(host_rT33_flat, gpu_rT23_flat, (*numberOfInters) * sizeof(double), cudaMemcpyDeviceToHost);
+  cudaMemcpy(host_vT11_flat, gpu_vT11_flat, (*numberOfInters) * sizeof(double), cudaMemcpyDeviceToHost);
+  cudaMemcpy(host_vT12_flat, gpu_vT22_flat, (*numberOfInters) * sizeof(double), cudaMemcpyDeviceToHost);
+  cudaMemcpy(host_vT13_flat, gpu_vT33_flat, (*numberOfInters) * sizeof(double), cudaMemcpyDeviceToHost);
+  cudaMemcpy(host_vT22_flat, gpu_vT12_flat, (*numberOfInters) * sizeof(double), cudaMemcpyDeviceToHost);
+  cudaMemcpy(host_vT23_flat, gpu_vT13_flat, (*numberOfInters) * sizeof(double), cudaMemcpyDeviceToHost);
+  cudaMemcpy(host_vT33_flat, gpu_vT23_flat, (*numberOfInters) * sizeof(double), cudaMemcpyDeviceToHost);
+  checkLastErrorCUDA(__FILE__, __LINE__);
 
   CUFREE(vars->gpu_rT11);
   CUFREE(vars->gpu_rT12);
@@ -478,6 +554,212 @@ checkLastErrorCUDA(__FILE__, __LINE__);
   CUFREE(gpu_final_value);
   CUFREE(gpu_neighborList);
   CUFREE(gpu_cellStartIndex);
+  
+}
+
+void GetNumberOfIntersInterForceGPU(VariablesCUDA *vars,
+  std::vector<int> &cellVector,
+  std::vector<int> &cellStartIndex,
+  std::vector<std::vector<int> > &neighborList,
+  std::vector<int> &mapParticleToCell,
+  XYZArray const &currentCoords,
+  XYZArray const &currentCOM,
+  BoxDimensions const &boxAxes,
+  bool electrostatic,
+  std::vector<double> &particleCharge,
+  std::vector<int> &particleKind,
+  std::vector<int> &particleMol,
+  double &rT11,
+  double &rT12,
+  double &rT13,
+  double &rT22,
+  double &rT23,
+  double &rT33,
+  double &vT11,
+  double &vT12,
+  double &vT13,
+  double &vT22,
+  double &vT23,
+  double &vT33,
+  bool sc_coul,
+  double sc_sigma_6,
+  double sc_alpha,
+  uint sc_power,
+  uint const box,
+  uint * numberOfInters)
+{
+int atomNumber = currentCoords.Count();
+int molNumber = currentCOM.Count();
+int neighborListCount = neighborList.size() * NUMBER_OF_NEIGHBOR_CELL;
+int numberOfCells = neighborList.size();
+int *gpu_particleKind;
+int *gpu_particleMol;
+int *gpu_neighborList, *gpu_cellStartIndex;
+int blocksPerGrid, threadsPerBlock;
+int energyVectorLen = 0;
+double *gpu_particleCharge;
+double *gpu_final_value;
+
+// Run the kernel...
+threadsPerBlock = 128;
+blocksPerGrid = (int)(numberOfCells * NUMBER_OF_NEIGHBOR_CELL);
+energyVectorLen = numberOfCells * NUMBER_OF_NEIGHBOR_CELL * threadsPerBlock;
+
+// Convert neighbor list to 1D array
+std::vector<int> neighborlist1D(neighborListCount);
+for(int i = 0; i < neighborList.size(); i++) {
+for(int j = 0; j < NUMBER_OF_NEIGHBOR_CELL; j++) {
+neighborlist1D[i * NUMBER_OF_NEIGHBOR_CELL + j] = neighborList[i][j];
+}
+}
+
+CUMALLOC((void**) &gpu_neighborList, neighborListCount * sizeof(int));
+CUMALLOC((void**) &gpu_cellStartIndex,
+cellStartIndex.size() * sizeof(int));
+CUMALLOC((void**) &gpu_particleCharge,
+particleCharge.size() * sizeof(double));
+CUMALLOC((void**) &gpu_particleKind, particleKind.size() * sizeof(int));
+CUMALLOC((void**) &gpu_particleMol, particleMol.size() * sizeof(int));
+CUMALLOC((void**) &gpu_final_value, sizeof(double));
+CUMALLOC((void**) &vars->gpu_rT11, energyVectorLen * sizeof(double));
+CUMALLOC((void**) &vars->gpu_rT12, energyVectorLen * sizeof(double));
+CUMALLOC((void**) &vars->gpu_rT13, energyVectorLen * sizeof(double));
+CUMALLOC((void**) &vars->gpu_rT22, energyVectorLen * sizeof(double));
+CUMALLOC((void**) &vars->gpu_rT23, energyVectorLen * sizeof(double));
+CUMALLOC((void**) &vars->gpu_rT33, energyVectorLen * sizeof(double));
+CUMALLOC((void**) &vars->gpu_vT11, energyVectorLen * sizeof(double));
+CUMALLOC((void**) &vars->gpu_vT12, energyVectorLen * sizeof(double));
+CUMALLOC((void**) &vars->gpu_vT13, energyVectorLen * sizeof(double));
+CUMALLOC((void**) &vars->gpu_vT22, energyVectorLen * sizeof(double));
+CUMALLOC((void**) &vars->gpu_vT23, energyVectorLen * sizeof(double));
+CUMALLOC((void**) &vars->gpu_vT33, energyVectorLen * sizeof(double));
+checkLastErrorCUDA(__FILE__, __LINE__);
+
+
+cudaMemcpy(vars->gpu_mapParticleToCell, &mapParticleToCell[0],
+atomNumber * sizeof(int), cudaMemcpyHostToDevice);
+cudaMemcpy(gpu_neighborList, &neighborlist1D[0],
+neighborListCount * sizeof(int),
+cudaMemcpyHostToDevice);
+cudaMemcpy(gpu_cellStartIndex, &cellStartIndex[0],
+cellStartIndex.size() * sizeof(int),
+cudaMemcpyHostToDevice);
+cudaMemcpy(vars->gpu_cellVector, &cellVector[0],
+atomNumber * sizeof(int),
+cudaMemcpyHostToDevice);
+cudaMemcpy(vars->gpu_x, currentCoords.x, atomNumber * sizeof(double),
+cudaMemcpyHostToDevice);
+cudaMemcpy(vars->gpu_y, currentCoords.y, atomNumber * sizeof(double),
+cudaMemcpyHostToDevice);
+cudaMemcpy(vars->gpu_z, currentCoords.z, atomNumber * sizeof(double),
+cudaMemcpyHostToDevice);
+cudaMemcpy(vars->gpu_comx, currentCOM.x, molNumber * sizeof(double),
+cudaMemcpyHostToDevice);
+cudaMemcpy(vars->gpu_comy, currentCOM.y, molNumber * sizeof(double),
+cudaMemcpyHostToDevice);
+cudaMemcpy(vars->gpu_comz, currentCOM.z, molNumber * sizeof(double),
+cudaMemcpyHostToDevice);
+cudaMemcpy(gpu_particleCharge, &particleCharge[0],
+particleCharge.size() * sizeof(double),
+cudaMemcpyHostToDevice);
+cudaMemcpy(gpu_particleKind, &particleKind[0],
+particleKind.size() * sizeof(int),
+cudaMemcpyHostToDevice);
+cudaMemcpy(gpu_particleMol, &particleMol[0],
+particleMol.size() * sizeof(int),
+cudaMemcpyHostToDevice);
+
+uint * numIntersPerCell = new uint[blocksPerGrid];
+uint * gpu_numIntersPerCell;
+CUMALLOC((void**) &gpu_numIntersPerCell, blocksPerGrid * sizeof(uint));
+
+GetNumberOfIterationsInBoxInterForceGPU <<< blocksPerGrid, threadsPerBlock>>>(gpu_cellStartIndex,
+vars->gpu_cellVector,
+gpu_neighborList,
+numberOfCells,
+atomNumber,
+vars->gpu_mapParticleToCell,
+vars->gpu_x,
+vars->gpu_y,
+vars->gpu_z,
+vars->gpu_comx,
+vars->gpu_comy,
+vars->gpu_comz,
+boxAxes.GetAxis(box).x,
+boxAxes.GetAxis(box).y,
+boxAxes.GetAxis(box).z,
+electrostatic,
+gpu_particleCharge,
+gpu_particleKind,
+gpu_particleMol,
+vars->gpu_rT11,
+vars->gpu_rT12,
+vars->gpu_rT13,
+vars->gpu_rT22,
+vars->gpu_rT23,
+vars->gpu_rT33,
+vars->gpu_vT11,
+vars->gpu_vT12,
+vars->gpu_vT13,
+vars->gpu_vT22,
+vars->gpu_vT23,
+vars->gpu_vT33,
+vars->gpu_sigmaSq,
+vars->gpu_epsilon_Cn,
+vars->gpu_n,
+vars->gpu_VDW_Kind,
+vars->gpu_isMartini,
+vars->gpu_count,
+vars->gpu_rCut,
+vars->gpu_rCutCoulomb,
+vars->gpu_rCutLow,
+vars->gpu_rOn,
+vars->gpu_alpha,
+vars->gpu_ewald,
+vars->gpu_diElectric_1,
+vars->gpu_cell_x[box],
+vars->gpu_cell_y[box],
+vars->gpu_cell_z[box],
+vars->gpu_Invcell_x[box],
+vars->gpu_Invcell_y[box],
+vars->gpu_Invcell_z[box],
+vars->gpu_nonOrth,
+sc_coul,
+sc_sigma_6,
+sc_alpha,
+sc_power,
+vars->gpu_rMin,
+vars->gpu_rMaxSq,
+vars->gpu_expConst,
+vars->gpu_molIndex,
+vars->gpu_kindIndex,
+vars->gpu_lambdaVDW,
+vars->gpu_lambdaCoulomb,
+vars->gpu_isFraction,
+box,
+gpu_numIntersPerCell);
+
+checkLastErrorCUDA(__FILE__, __LINE__);
+
+
+checkLastErrorCUDA(__FILE__, __LINE__);
+cudaDeviceSynchronize();
+checkLastErrorCUDA(__FILE__, __LINE__);
+
+
+CubDebugExit(cudaMemcpy(numIntersPerCell, gpu_numIntersPerCell, blocksPerGrid * sizeof(uint),
+cudaMemcpyDeviceToHost));
+
+
+uint totalNumInters = 0;
+for (int i = 0; i < blocksPerGrid; i++){
+totalNumInters+=numIntersPerCell[i];
+}  
+
+*numberOfInters = totalNumInters;
+
+checkLastErrorCUDA(__FILE__, __LINE__);
+
 }
 
 void CallBoxForceGPU(VariablesCUDA *vars,
@@ -573,18 +855,18 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   double *gpu_mForcey_currentCell_flattened;
   double *gpu_mForcez_currentCell_flattened;
 
-  CUMALLOC((void**) &gpu_aForcex_neighborCell_flattened, *numberOfInters * sizeof(double));
-  CUMALLOC((void**) &gpu_aForcey_neighborCell_flattened, *numberOfInters * sizeof(double));
-  CUMALLOC((void**) &gpu_aForcez_neighborCell_flattened, *numberOfInters * sizeof(double));
-  CUMALLOC((void**) &gpu_mForcex_neighborCell_flattened, *numberOfInters * sizeof(double));
-  CUMALLOC((void**) &gpu_mForcey_neighborCell_flattened, *numberOfInters * sizeof(double));
-  CUMALLOC((void**) &gpu_mForcez_neighborCell_flattened, *numberOfInters * sizeof(double));
-  CUMALLOC((void**) &gpu_aForcex_currentCell_flattened, *numberOfInters * sizeof(double));
-  CUMALLOC((void**) &gpu_aForcey_currentCell_flattened, *numberOfInters * sizeof(double));
-  CUMALLOC((void**) &gpu_aForcez_currentCell_flattened, *numberOfInters * sizeof(double));
-  CUMALLOC((void**) &gpu_mForcex_currentCell_flattened, *numberOfInters * sizeof(double));
-  CUMALLOC((void**) &gpu_mForcey_currentCell_flattened, *numberOfInters * sizeof(double));
-  CUMALLOC((void**) &gpu_mForcez_currentCell_flattened, *numberOfInters * sizeof(double));
+  CUMALLOC((void**) &gpu_aForcex_neighborCell_flattened, (*numberOfInters) * sizeof(double));
+  CUMALLOC((void**) &gpu_aForcey_neighborCell_flattened, (*numberOfInters) * sizeof(double));
+  CUMALLOC((void**) &gpu_aForcez_neighborCell_flattened, (*numberOfInters) * sizeof(double));
+  CUMALLOC((void**) &gpu_mForcex_neighborCell_flattened, (*numberOfInters) * sizeof(double));
+  CUMALLOC((void**) &gpu_mForcey_neighborCell_flattened, (*numberOfInters) * sizeof(double));
+  CUMALLOC((void**) &gpu_mForcez_neighborCell_flattened, (*numberOfInters) * sizeof(double));
+  CUMALLOC((void**) &gpu_aForcex_currentCell_flattened, (*numberOfInters) * sizeof(double));
+  CUMALLOC((void**) &gpu_aForcey_currentCell_flattened, (*numberOfInters) * sizeof(double));
+  CUMALLOC((void**) &gpu_aForcez_currentCell_flattened, (*numberOfInters) * sizeof(double));
+  CUMALLOC((void**) &gpu_mForcex_currentCell_flattened, (*numberOfInters) * sizeof(double));
+  CUMALLOC((void**) &gpu_mForcey_currentCell_flattened, (*numberOfInters) * sizeof(double));
+  CUMALLOC((void**) &gpu_mForcez_currentCell_flattened, (*numberOfInters) * sizeof(double));
 
   int *gpu_aForcex_neighborCell_flattened_index;
   int *gpu_aForcey_neighborCell_flattened_index;
@@ -615,18 +897,18 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   CUMALLOC((void**) &gpu_mForcey_currentCell_flattened_index, sizeof(int));
   CUMALLOC((void**) &gpu_mForcez_currentCell_flattened_index, sizeof(int));
 
-  cudaMemcpy(&gpu_aForcex_neighborCell_flattened_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
-  cudaMemcpy(&gpu_aForcey_neighborCell_flattened_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
-  cudaMemcpy(&gpu_aForcez_neighborCell_flattened_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
-  cudaMemcpy(&gpu_mForcex_neighborCell_flattened_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
-  cudaMemcpy(&gpu_mForcey_neighborCell_flattened_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
-  cudaMemcpy(&gpu_mForcez_neighborCell_flattened_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
-  cudaMemcpy(&gpu_aForcex_currentCell_flattened_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
-  cudaMemcpy(&gpu_aForcey_currentCell_flattened_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
-  cudaMemcpy(&gpu_aForcez_currentCell_flattened_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
-  cudaMemcpy(&gpu_mForcex_currentCell_flattened_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
-  cudaMemcpy(&gpu_mForcey_currentCell_flattened_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
-  cudaMemcpy(&gpu_mForcez_currentCell_flattened_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
+  cudaMemcpy(gpu_aForcex_neighborCell_flattened_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
+  cudaMemcpy(gpu_aForcey_neighborCell_flattened_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
+  cudaMemcpy(gpu_aForcez_neighborCell_flattened_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
+  cudaMemcpy(gpu_mForcex_neighborCell_flattened_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
+  cudaMemcpy(gpu_mForcey_neighborCell_flattened_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
+  cudaMemcpy(gpu_mForcez_neighborCell_flattened_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
+  cudaMemcpy(gpu_aForcex_currentCell_flattened_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
+  cudaMemcpy(gpu_aForcey_currentCell_flattened_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
+  cudaMemcpy(gpu_aForcez_currentCell_flattened_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
+  cudaMemcpy(gpu_mForcex_currentCell_flattened_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
+  cudaMemcpy(gpu_mForcey_currentCell_flattened_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
+  cudaMemcpy(gpu_mForcez_currentCell_flattened_index, &flatIndexREn, sizeof(int), cudaMemcpyHostToDevice);
 
   // Copy necessary data to GPU
   cudaMemcpy(vars->gpu_mapParticleToCell, &mapParticleToCell[0], atomNumber * sizeof(int), cudaMemcpyHostToDevice);
@@ -891,6 +1173,8 @@ void CallVirialReciprocalGPU(VariablesCUDA *vars,
   // Run the kernel...
   threadsPerBlock = 256;
   blocksPerGrid = (int)(imageSize / threadsPerBlock) + 1;
+  checkLastErrorCUDA(__FILE__, __LINE__);
+
   VirialReciprocalGPU <<< blocksPerGrid,
                       threadsPerBlock>>>(vars->gpu_x,
                                          vars->gpu_y,
@@ -962,6 +1246,142 @@ void CallVirialReciprocalGPU(VariablesCUDA *vars,
   CUFREE(gpu_particleCharge);
   CUFREE(gpu_final_value);
   CUFREE(d_temp_storage);
+}
+
+__global__ void GetNumberOfIterationsInBoxInterForceGPU(int *gpu_cellStartIndex,
+  int *gpu_cellVector,
+  int *gpu_neighborList,
+  int numberOfCells,
+  int atomNumber,
+  int *gpu_mapParticleToCell,
+  double *gpu_x,
+  double *gpu_y,
+  double *gpu_z,
+  double *gpu_comx,
+  double *gpu_comy,
+  double *gpu_comz,
+  double xAxes,
+  double yAxes,
+  double zAxes,
+  bool electrostatic,
+  double *gpu_particleCharge,
+  int *gpu_particleKind,
+  int *gpu_particleMol,
+  double *gpu_rT11,
+  double *gpu_rT12,
+  double *gpu_rT13,
+  double *gpu_rT22,
+  double *gpu_rT23,
+  double *gpu_rT33,
+  double *gpu_vT11,
+  double *gpu_vT12,
+  double *gpu_vT13,
+  double *gpu_vT22,
+  double *gpu_vT23,
+  double *gpu_vT33,
+  double *gpu_sigmaSq,
+  double *gpu_epsilon_Cn,
+  double *gpu_n,
+  int *gpu_VDW_Kind,
+  int *gpu_isMartini,
+  int *gpu_count,
+  double *gpu_rCut,
+  double *gpu_rCutCoulomb,
+  double *gpu_rCutLow,
+  double *gpu_rOn,
+  double *gpu_alpha,
+  int *gpu_ewald,
+  double *gpu_diElectric_1,
+  double *gpu_cell_x,
+  double *gpu_cell_y,
+  double *gpu_cell_z,
+  double *gpu_Invcell_x,
+  double *gpu_Invcell_y,
+  double *gpu_Invcell_z,
+  int *gpu_nonOrth,
+  bool sc_coul,
+  double sc_sigma_6,
+  double sc_alpha,
+  uint sc_power,
+  double *gpu_rMin,
+  double *gpu_rMaxSq,
+  double *gpu_expConst,
+  int *gpu_molIndex,
+  int *gpu_kindIndex,
+  double *gpu_lambdaVDW,
+  double *gpu_lambdaCoulomb,
+  bool *gpu_isFraction,
+  int box,
+  uint * numIntersPerCell)
+{
+
+const int threadsPerBlock = 256;
+__shared__ uint cache[threadsPerBlock];
+uint myCounter = 0;
+
+double distSq;
+double virX, virY, virZ;
+double pRF = 0.0, qi_qj, pVF = 0.0;
+double lambdaVDW = 0.0, lambdaCoulomb = 0.0;
+int threadID = blockIdx.x * blockDim.x + threadIdx.x;
+//tensors for VDW and real part of electrostatic
+gpu_vT11[threadID] = 0.0, gpu_vT22[threadID] = 0.0, gpu_vT33[threadID] = 0.0;
+gpu_rT11[threadID] = 0.0, gpu_rT22[threadID] = 0.0, gpu_rT33[threadID] = 0.0;
+// extra tensors reserved for later on
+gpu_vT12[threadID] = 0.0, gpu_vT13[threadID] = 0.0, gpu_vT23[threadID] = 0.0;
+gpu_rT12[threadID] = 0.0, gpu_rT13[threadID] = 0.0, gpu_rT23[threadID] = 0.0;
+double diff_comx, diff_comy, diff_comz;
+double cutoff = fmax(gpu_rCut[0], gpu_rCutCoulomb[box]);
+
+int currentCell = blockIdx.x / 27;
+int nCellIndex = blockIdx.x;
+int neighborCell = gpu_neighborList[nCellIndex];
+
+// calculate number of particles inside neighbor Cell
+int particlesInsideCurrentCell, particlesInsideNeighboringCells;
+int endIndex = neighborCell != numberOfCells - 1 ?
+gpu_cellStartIndex[neighborCell + 1] : atomNumber;
+particlesInsideNeighboringCells = endIndex - gpu_cellStartIndex[neighborCell];
+
+// Calculate number of particles inside current Cell
+endIndex = currentCell != numberOfCells - 1 ?
+gpu_cellStartIndex[currentCell + 1] : atomNumber;
+particlesInsideCurrentCell = endIndex - gpu_cellStartIndex[currentCell];
+
+// total number of pairs
+int numberOfPairs = particlesInsideCurrentCell * particlesInsideNeighboringCells;
+
+for(int pairIndex = threadIdx.x; pairIndex < numberOfPairs; pairIndex += blockDim.x) {
+  int neighborParticleIndex = pairIndex / particlesInsideCurrentCell;
+  int currentParticleIndex = pairIndex % particlesInsideCurrentCell;
+
+  int currentParticle = gpu_cellVector[gpu_cellStartIndex[currentCell] + currentParticleIndex];
+  int neighborParticle = gpu_cellVector[gpu_cellStartIndex[neighborCell] + neighborParticleIndex];
+
+  if(currentParticle < neighborParticle && gpu_particleMol[currentParticle] != gpu_particleMol[neighborParticle]) {
+    if(InRcutGPU(distSq, virX, virY, virZ, gpu_x[currentParticle],
+    gpu_y[currentParticle], gpu_z[currentParticle],
+    gpu_x[neighborParticle], gpu_y[neighborParticle],
+    gpu_z[neighborParticle], xAxes, yAxes, zAxes, xAxes / 2.0,
+    yAxes / 2.0, zAxes / 2.0, cutoff, gpu_nonOrth[0],
+    gpu_cell_x, gpu_cell_y, gpu_cell_z, gpu_Invcell_x, gpu_Invcell_y,
+    gpu_Invcell_z)) {
+        myCounter++;
+      }
+    }
+  }
+  int cacheIndex = threadIdx.x;
+  cache[cacheIndex] = myCounter;
+  __syncthreads();
+  int i = blockDim.x/2;
+  while(i != 0){
+    if(cacheIndex < i)
+      cache[cacheIndex] += cache[cacheIndex+i];
+    __syncthreads();
+    i /= 2;
+  }
+  if (cacheIndex == 0)
+    numIntersPerCell[blockIdx.x] = cache[0];
 }
 
 __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
@@ -1337,7 +1757,7 @@ __global__ void BoxInterForceGPUFlattened(int *gpu_cellStartIndex,
             gpu_vT12[threadID] += pVF * (0.5 * (virX * diff_comy + virY * diff_comx));
             gpu_vT13[threadID] += pVF * (0.5 * (virX * diff_comz + virZ * diff_comx));
             gpu_vT23[threadID] += pVF * (0.5 * (virY * diff_comz + virZ * diff_comy));
-
+/*
             gpu_rT11_flattened[atomicAdd(gpu_rT11_flattened_index, 1)] = pRF * (virX * diff_comx);
             gpu_rT22_flattened[atomicAdd(gpu_rT22_flattened_index, 1)] = pRF * (virY * diff_comy);
             gpu_rT33_flattened[atomicAdd(gpu_rT33_flattened_index, 1)] = pRF * (virZ * diff_comz);
@@ -1353,7 +1773,8 @@ __global__ void BoxInterForceGPUFlattened(int *gpu_cellStartIndex,
             gpu_vT12_flattened[atomicAdd(gpu_vT12_flattened_index, 1)] = pVF * (0.5 * (virX * diff_comy + virY * diff_comx));
             gpu_vT13_flattened[atomicAdd(gpu_vT13_flattened_index, 1)] = pVF * (0.5 * (virX * diff_comz + virZ * diff_comx));
             gpu_vT23_flattened[atomicAdd(gpu_vT23_flattened_index, 1)] = pVF * (0.5 * (virY * diff_comz + virZ * diff_comy));
-      }
+*/
+          }
     }
   }
 }
