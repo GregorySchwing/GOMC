@@ -200,8 +200,8 @@ void CallBoxInterGPU(VariablesCUDA *vars,
   hostEnergyVectorLJKeys = (int*) malloc( sizeof(int) * totalNumInters);  
   hostEnergyVectorREnKeys = (int*) malloc( sizeof(int) * totalNumInters);
   
-  int flatIndexREn = -1;
-  int flatIndexLJEn = -1;
+  int flatIndexREn = 0;
+  int flatIndexLJEn = 0;
 
   int * gpu_flatIndexREn;
   int * gpu_flatIndexLJEn;

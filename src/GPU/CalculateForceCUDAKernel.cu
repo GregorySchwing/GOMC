@@ -186,21 +186,21 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
   int * gpu_vT13_flat_index;
   int * gpu_vT23_flat_index;
 
-  int flatIndexREn1 = -1;
-  int flatIndexREn2 = -1;
-  int flatIndexREn3 = -1;
+  int flatIndexREn1 = 0;
+  int flatIndexREn2 = 0;
+  int flatIndexREn3 = 0;
 
-  int flatIndexREn4 = -1;
-  int flatIndexREn5 = -1;
-  int flatIndexREn6 = -1;
+  int flatIndexREn4 = 0;
+  int flatIndexREn5 = 0;
+  int flatIndexREn6 = 0;
 
-  int flatIndexREn7 = -1;
-  int flatIndexREn8 = -1;
-  int flatIndexREn9 = -1;
+  int flatIndexREn7 = 0;
+  int flatIndexREn8 = 0;
+  int flatIndexREn9 = 0;
 
-  int flatIndexREn10 = -1;
-  int flatIndexREn11 = -1;
-  int flatIndexREn12 = -1;
+  int flatIndexREn10 = 0;
+  int flatIndexREn11 = 0;
+  int flatIndexREn12 = 0;
 
   // Might be overkill but whatever
   CUMALLOC((void**) &gpu_rT11_flat_index, sizeof(int));
@@ -520,7 +520,7 @@ checkLastErrorCUDA(__FILE__, __LINE__);
 
               }
   checkLastErrorCUDA(__FILE__, __LINE__);
-
+/*
   cudaMemcpy(host_rT11_flat, gpu_rT11_flat, (*numberOfInters) * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(host_rT12_flat, gpu_rT22_flat, (*numberOfInters) * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(host_rT13_flat, gpu_rT33_flat, (*numberOfInters) * sizeof(double), cudaMemcpyDeviceToHost);
@@ -533,7 +533,16 @@ checkLastErrorCUDA(__FILE__, __LINE__);
   cudaMemcpy(host_vT22_flat, gpu_vT12_flat, (*numberOfInters) * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(host_vT23_flat, gpu_vT13_flat, (*numberOfInters) * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(host_vT33_flat, gpu_vT23_flat, (*numberOfInters) * sizeof(double), cudaMemcpyDeviceToHost);
+*/
   checkLastErrorCUDA(__FILE__, __LINE__);
+
+  int * cpu_rT11_flat_index;
+  int cpuinit = 0;
+  cpu_rT11_flat_index = &cpuinit;
+  cudaMemcpy(cpu_rT11_flat_index, gpu_rT11_flat_index, sizeof(int), cudaMemcpyDeviceToHost);
+
+  
+  std::cout << "Num inters in BoxInterForce : " << *cpu_rT11_flat_index << std::endl;
 
   CUFREE(vars->gpu_rT11);
   CUFREE(vars->gpu_rT12);
@@ -1757,15 +1766,28 @@ __global__ void BoxInterForceGPUFlattened(int *gpu_cellStartIndex,
             gpu_vT12[threadID] += pVF * (0.5 * (virX * diff_comy + virY * diff_comx));
             gpu_vT13[threadID] += pVF * (0.5 * (virX * diff_comz + virZ * diff_comx));
             gpu_vT23[threadID] += pVF * (0.5 * (virY * diff_comz + virZ * diff_comy));
-/*
-            gpu_rT11_flattened[atomicAdd(gpu_rT11_flattened_index, 1)] = pRF * (virX * diff_comx);
-            gpu_rT22_flattened[atomicAdd(gpu_rT22_flattened_index, 1)] = pRF * (virY * diff_comy);
+            atomicAdd(gpu_rT11_flattened_index, 1);
+            atomicAdd(gpu_rT22_flattened_index, 1);
+            atomicAdd(gpu_rT33_flattened_index, 1);
+            atomicAdd(gpu_rT12_flattened_index, 1);
+            atomicAdd(gpu_rT13_flattened_index, 1);
+            atomicAdd(gpu_rT23_flattened_index, 1);
+
+            atomicAdd(gpu_vT11_flattened_index, 1);
+            atomicAdd(gpu_vT22_flattened_index, 1);
+            atomicAdd(gpu_vT33_flattened_index, 1);
+            atomicAdd(gpu_vT12_flattened_index, 1);
+            atomicAdd(gpu_vT13_flattened_index, 1);
+            atomicAdd(gpu_vT23_flattened_index, 1);
+
+   /*         gpu_rT11_flattened[atomicAdd(gpu_rT11_flattened_index, 1)] = pRF * (virX * diff_comx);
+           gpu_rT22_flattened[atomicAdd(gpu_rT22_flattened_index, 1)] = pRF * (virY * diff_comy);
             gpu_rT33_flattened[atomicAdd(gpu_rT33_flattened_index, 1)] = pRF * (virZ * diff_comz);
 
             gpu_rT12_flattened[atomicAdd(gpu_rT12_flattened_index, 1)] = pRF * (0.5 * (virX * diff_comy + virY * diff_comx));
             gpu_rT13_flattened[atomicAdd(gpu_rT13_flattened_index, 1)] = pRF * (0.5 * (virX * diff_comz + virZ * diff_comx));
             gpu_rT23_flattened[atomicAdd(gpu_rT23_flattened_index, 1)] = pRF * (0.5 * (virY * diff_comz + virZ * diff_comy));
-
+ 
             gpu_vT11_flattened[atomicAdd(gpu_vT11_flattened_index, 1)] = pVF * (virX * diff_comx);
             gpu_vT22_flattened[atomicAdd(gpu_vT22_flattened_index, 1)] = pVF * (virY * diff_comy);
             gpu_vT33_flattened[atomicAdd(gpu_vT33_flattened_index, 1)] = pVF * (virZ * diff_comz);
@@ -1773,7 +1795,8 @@ __global__ void BoxInterForceGPUFlattened(int *gpu_cellStartIndex,
             gpu_vT12_flattened[atomicAdd(gpu_vT12_flattened_index, 1)] = pVF * (0.5 * (virX * diff_comy + virY * diff_comx));
             gpu_vT13_flattened[atomicAdd(gpu_vT13_flattened_index, 1)] = pVF * (0.5 * (virX * diff_comz + virZ * diff_comx));
             gpu_vT23_flattened[atomicAdd(gpu_vT23_flattened_index, 1)] = pVF * (0.5 * (virY * diff_comz + virZ * diff_comy));
-*/
+            */
+
           }
     }
   }
