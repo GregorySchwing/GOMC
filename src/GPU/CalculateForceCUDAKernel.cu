@@ -2346,4 +2346,27 @@ __device__ double CalcVirSwitchGPU(double distSq, int index,
   return (Wij * factE - Eij * factW);
 }
 
+struct Lock {
+  int * mutex;
+  Lock (void) {
+    int state = 0;
+    CUMALLOC((void**)&mutex, sizeof(int));
+    cudaMemcpy(mutex, &state, sizeof(int), cudaMemcpyHostToDevice);
+  }
+
+  ~Lock (void){
+    cudaFree(mutex);
+  }
+
+
+__device__ void lock( void ) {
+  while( atomicCAS( mutex, 0, 1 ) != 0 );
+  __threadfence();}
+  
+  __device__ void unlock( void ) {
+    __threadfence();
+    atomicExch( mutex, 0 );
+  }
+};
+
 #endif
