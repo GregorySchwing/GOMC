@@ -68,6 +68,8 @@ ms(multisim), fplog(multisim->fplog), sysPotRef(sys.potential), parallelTempFreq
 
     }
 
+    state = new ReplicaState(sys.potential, sys.coordinates, sys.com, sys.calcEwald, sys.cellList);
+
     #if BOX_TOTAL == 1
         global_energies.resize(ms->worldSize, 0.0);
     #else
@@ -279,6 +281,9 @@ void ParallelTemperingUtilities::prepareToDoExchange(const int replica_id, int* 
 
 }
 
+void ParallelTemperingUtilities::copyState(ReplicaState * state){}
+
+
 void ParallelTemperingUtilities::cyclicDecomposition(const std::vector<int> destinations, std::vector< std::vector<int> > & cyclic, std::vector<bool> & incycle, const int nrepl, int * nswap){
     
     int i, j, c, p;
@@ -406,6 +411,10 @@ void ParallelTemperingUtilities::conductExchanges(Coordinates & coordCurrRef, CO
 
                 newMolsPos = coordCurrRef;
                 newCOMs = comCurrRef;
+
+                ReplicaState * rS;
+
+                copyState(rS);
 
                 exchangePositionsNonBlocking(newMolsPos, ms, exchangePartner);
                 exchangeCOMsNonBlocking(newCOMs, ms, exchangePartner);

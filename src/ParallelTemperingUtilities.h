@@ -62,6 +62,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "ParallelTemperingPreprocessor.h"
 #include "System.h"
 #include "ConfigSetup.h"
+#include "ReplicaState.h"
 
 class ParallelTemperingUtilities
 {
@@ -73,6 +74,8 @@ void evaluateExchangeCriteria(ulong step);
 void prepareToDoExchange(const int replica_id, int* maxswap, bool* bThisReplicaExchanged);
 void cyclicDecomposition(const std::vector<int> destinations, std::vector< std::vector<int> > & cyclic, std::vector<bool> & incycle, const int nrepl, int * nswap);
 void computeExchangeOrder(std::vector< std::vector<int> > & cyclic, std::vector< std::vector<int> > & order, const int nrepl, const int maxswap);
+
+void copyState(ReplicaState * state);
 
 void conductExchanges(Coordinates & coordCurrRef, COM & comCurrRef, MultiSim const*const& ms, const int & maxSwap, const bool & bThisReplicaExchanged);
 void exchangePositionsNonBlocking(Coordinates & myPos, MultiSim const*const& multisim, int exchangePartner);
@@ -94,6 +97,7 @@ void print_allswitchind(FILE* fplog, int n, std::vector<int> pind, std::vector<i
 private:
 
 MultiSim const*const& ms;
+ReplicaState * state;
 bool bMultiEx;
 FILE * fplog;
 PRNG & prng;
