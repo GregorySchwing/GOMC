@@ -90,7 +90,6 @@ ms(multisim), fplog(multisim->fplog), sysPotRef(sys.potential), parallelTempFreq
     cyclic.resize(ms->worldSize, std::vector<int>(ms->worldSize + 1, -1));
     order.resize(ms->worldSize, std::vector<int>(ms->worldSize, -1));
     incycle.resize(ms->worldSize, false);
-
  
     MPI_Allreduce(MPI_IN_PLACE, &global_betas[0], ms->worldSize, MPI_DOUBLE, MPI_SUM,
         MPI_COMM_WORLD);

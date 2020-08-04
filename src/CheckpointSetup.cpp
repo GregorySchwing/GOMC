@@ -282,7 +282,7 @@ void CheckpointSetup::SetPRNGVariables(PRNG & prng)
 #if GOMC_LIB_MPI
 void CheckpointSetup::SetPRNGVariablesPT(PRNG & prng)
 {
-  prng.GetGenerator()->load(saveArray);
+  prng.GetGenerator()->load(saveArrayPT);
   prng.GetGenerator()->pNext = prng.GetGenerator()->state + seedLocationPT;
   prng.GetGenerator()->left = seedLeftPT;
   prng.GetGenerator()->seedValue = seedValuePT;

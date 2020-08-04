@@ -106,14 +106,26 @@ void System::Init(Setup const& set, ulong & startStep)
   if(set.config.in.restart.restartFromCheckpoint) {
     checkpointSet.ReadAll();
     checkpointSet.SetStepNumber(startStep);
+    std::cout << "set step #" << std::endl;
     checkpointSet.SetBoxDimensions(boxDimRef);
+    std::cout << "set box dim" << std::endl;
     checkpointSet.SetPRNGVariables(prng);
+    std::cout << "set prng vars" << std::endl;
+
     #if GOMC_LIB_MPI
     checkpointSet.SetPRNGVariablesPT(prngParallelTemp);
+    std::cout << "set prng ot vars" << std::endl;
+
     #endif
     checkpointSet.SetCoordinates(coordinates);
+        std::cout << "set coords" << std::endl;
+
     checkpointSet.SetMoleculeLookup(molLookupRef);
+        std::cout << "set mollookup" << std::endl;
+
     checkpointSet.SetMoveSettings(moveSettings);
+        std::cout << "set movesettings" << std::endl;
+
   }
 
   com.CalcCOM();

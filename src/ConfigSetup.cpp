@@ -1252,6 +1252,11 @@ void ConfigSetup::fillDefaults(void)
     printf("%-40s %-s \n", "Default: Random seed", "Active");
   }
 
+  if(in.prngParallelTempering.kind == "") {
+    in.prng.kind = in.prng.KIND_RANDOM;
+    printf("%-40s %-s \n", "Default: Random seed", "Active");
+  }
+
 #if ENSEMBLE == GEMC
   if(sys.gemc.kind == UINT_MAX) {
     sys.gemc.kind = mv::GEMC_NVT;
