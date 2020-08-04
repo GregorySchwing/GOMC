@@ -23,7 +23,7 @@ Simulation::Simulation(char const*const configFileName, MultiSim const*const& mu
   //as system depends on staticValues, and cpu sometimes depends on both.
   set.Init(configFileName, multisim);
   totalSteps = set.config.sys.step.total;
-  staticValues = new StaticVals(set);
+  staticValues = new StaticVals(set, multisim);
   system = new System(*staticValues);
   staticValues->Init(set, *system);
   system->Init(set, startStep);

@@ -28,7 +28,7 @@ class System;
 class StaticVals
 {
 public:
-  StaticVals(Setup & set);
+  StaticVals(Setup & set, MultiSim const*const& multisim = NULL);
   ~StaticVals();
   void Init(Setup & set, System& sys);
   void InitOver(Setup & set, System& sys);
@@ -71,6 +71,9 @@ public:
   config_setup::CFCMCVal  cfcmcVal;
 #endif
 
+  MultiSim const*const& ms;
+
+
   bool IsEquil(const uint step)
   {
     return step >= simEventFreq.tillEquil;
@@ -89,6 +92,10 @@ public:
   }
 
   void InitMovePercents(config_setup::MovePercents const& percent);
+
+  #if GOMC_LIB_MPI
+  std::string getPathToReplicaDirectory() const;
+  #endif
 };
 
 #endif /*STATIC_VALS_H*/

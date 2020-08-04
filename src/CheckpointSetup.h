@@ -47,6 +47,10 @@ private:
   Coordinates & coordCurrRef;
   PRNG & prngRef;
 
+  #if GOMC_LIB_MPI
+  PRNG & prngPTRef;
+  #endif
+
   std::string filename;
   FILE* inputFile;
 
@@ -58,6 +62,12 @@ private:
   std::vector<std::vector<double> > cosAngle;
   uint32_t* saveArray;
   uint32_t seedLocation, seedLeft, seedValue;
+
+#if GOMC_LIB_MPI
+  uint32_t* saveArrayPT;
+  uint32_t seedLocationPT, seedLeftPT, seedValuePT;
+#endif
+
   uint32_t coordLength;
   XYZArray coords;
   std::vector<uint32_t> molLookupVec, boxAndKindStartVec, fixedAtomVec;

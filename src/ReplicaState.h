@@ -14,12 +14,7 @@ class Ewald;
 class ReplicaState
 {
     public:
-        ReplicaState(   SystemPotential& potential,
-                        Coordinates& coordinates,
-                        COM& com,
-                        Ewald *calcEwald,
-                        CellList& cellList);   
-                             
+                           
         ReplicaState(   SystemPotential& potential,
                         Coordinates& coordinates,
                         COM& com,

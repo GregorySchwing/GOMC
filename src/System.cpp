@@ -108,6 +108,9 @@ void System::Init(Setup const& set, ulong & startStep)
     checkpointSet.SetStepNumber(startStep);
     checkpointSet.SetBoxDimensions(boxDimRef);
     checkpointSet.SetPRNGVariables(prng);
+    #if GOMC_LIB_MPI
+    checkpointSet.SetPRNGVariablesPT(prngParallelTemp);
+    #endif
     checkpointSet.SetCoordinates(coordinates);
     checkpointSet.SetMoleculeLookup(molLookupRef);
     checkpointSet.SetMoveSettings(moveSettings);

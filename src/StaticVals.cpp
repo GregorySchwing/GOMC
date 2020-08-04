@@ -128,10 +128,11 @@ void StaticVals::IsBoxOrthogonal(const double cellAngle[][3])
 }
 
 
-StaticVals::StaticVals(Setup & set) : memcVal(set.config.sys.memcVal),
+StaticVals::StaticVals(Setup & set, MultiSim const*const& multisim): memcVal(set.config.sys.memcVal),
   intraMemcVal(set.config.sys.intraMemcVal),
   cfcmcVal(set.config.sys.cfcmcVal),
-  freeEnVal(set.config.sys.freeEn)
+  freeEnVal(set.config.sys.freeEn),
+  ms(multisim)
 {
   multiParticleEnabled = set.config.sys.moves.multiParticleEnabled;
   isOrthogonal = true;
@@ -156,4 +157,14 @@ StaticVals::~StaticVals()
   delete boxDimensions;
 #endif
 }
+
+  #if GOMC_LIB_MPI
+  std::string StaticVals::getPathToReplicaDirectory() const{
+    if(ms != NULL) {
+      return ms->pathToReplicaDirectory;
+    } else {
+      return "";
+    }
+  }
+  #endif
 
