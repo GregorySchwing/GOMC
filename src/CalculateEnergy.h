@@ -299,6 +299,7 @@ private:
 
   double GetLambdaVDW(uint molA, uint molB, uint box) const;
   double GetLambdaCoulomb(uint molA, uint molB, uint box) const;
+  uint NumberOfParticlesInsideBox(uint box);
 
   uint * numberOfInters;
 

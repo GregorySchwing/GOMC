@@ -1859,7 +1859,8 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                             double *gpu_lambdaVDW,
                             double *gpu_lambdaCoulomb,
                             bool *gpu_isFraction,
-                            int box)
+                            int box,
+                            int atomsInsideBox)
 {
   int threadID = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -1881,12 +1882,12 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
   // calculate number of particles inside neighbor Cell
   int particlesInsideCurrentCell, particlesInsideNeighboringCells;
   int endIndex = neighborCell != numberOfCells - 1 ?
-                 gpu_cellStartIndex[neighborCell + 1] : atomNumber;
+                 gpu_cellStartIndex[neighborCell + 1] : atomsInsideBox;
   particlesInsideNeighboringCells = endIndex - gpu_cellStartIndex[neighborCell];
 
   // Calculate number of particles inside current Cell
   endIndex = currentCell != numberOfCells - 1 ?
-             gpu_cellStartIndex[currentCell + 1] : atomNumber;
+             gpu_cellStartIndex[currentCell + 1] : atomsInsideBox;
   particlesInsideCurrentCell = endIndex - gpu_cellStartIndex[currentCell];
 
   // total number of pairs
@@ -1932,7 +1933,7 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                                               gpu_diElectric_1[0],
                                               lambdaCoulomb, sc_coul, sc_sigma_6,
                                               sc_alpha, sc_power,
-                                              gpu_sigmaSq[threadID],
+                                              gpu_sigmaSq[box],
                                               gpu_count[0]);
         }
         gpu_LJEn[threadID] += CalcEnGPU(distSq, kA, kB, gpu_sigmaSq, gpu_n,

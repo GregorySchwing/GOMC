@@ -270,7 +270,8 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                             double *gpu_lambdaVDW,
                             double *gpu_lambdaCoulomb,
                             bool *gpu_isFraction,
-                            int box);
+                            int box,
+                            int atomsInsideBox);
 
 __global__ void BoxForceGPUFlattened(int *gpu_cellStartIndex,
                                 int *gpu_cellVector,

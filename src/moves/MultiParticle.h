@@ -11,6 +11,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "System.h"
 #include "StaticVals.h"
 #include <cmath>
+#include <fstream>
 
 #define MIN_FORCE 1E-12
 #define MAX_FORCE 30
@@ -128,6 +129,7 @@ inline uint MultiParticle::Prep(const double subDraw, const double movPerc)
 #else
   prng.PickBox(bPick, subDraw, movPerc);
 #endif
+
 
   // In each step, we perform either:
   // 1- All displacement move.
@@ -273,8 +275,10 @@ inline void MultiParticle::CalcEn()
   //calculate short range energy and force
   sysPotNew = calcEnRef.BoxForce(sysPotNew, newMolsPos, atomForceNew,
                                  molForceNew, boxDimRef, bPick);
+  std::cout << imie(sysPotNew.boxEnergy->inter) imie(sysPotNew.boxEnergy->real) "\n";
   //calculate long range of new electrostatic energy
   sysPotNew.boxEnergy[bPick].recip = calcEwald->BoxReciprocal(bPick);
+  std::cout << imie(sysPotNew.boxEnergy[bPick].recip) "\n";
   //Calculate long range of new electrostatic force
   calcEwald->BoxForceReciprocal(newMolsPos, atomForceRecNew, molForceRecNew,
                                 bPick);
@@ -321,6 +325,7 @@ inline long double MultiParticle::GetCoeff()
   uint m, molNumber;
   double r_max = moveSetRef.GetRMAX(bPick);
   double t_max = moveSetRef.GetTMAX(bPick);
+  std::cout << imie(r_max) imie(t_max) "\n";
 #ifdef _OPENMP
   #pragma omp parallel for default(shared) private(m, molNumber, lbt_old, lbt_new, lbf_old, lbf_new) reduction(*:w_ratio)
 #endif
@@ -354,12 +359,24 @@ inline long double MultiParticle::GetCoeff()
 
 inline void MultiParticle::Accept(const uint rejectState, const uint step)
 {
+  // dump all coordinates to file
+#ifdef GOMC_CUDA
+  std::ofstream dump("gpu.csv", std::ios::app);
+#else
+  std::ofstream dump("cpu.csv", std::ios::app);
+#endif
+  for(int i=0; i<coordCurrRef.Count(); i++) {
+    dump << std::setprecision(20) << step << "," << coordCurrRef[i].x << "," << coordCurrRef[i].y << "," << coordCurrRef[i].z << "\n";
+  }
+  dump.close();
+
   // Here we compare the values of reference and trial and decide whether to
   // accept or reject the move
   long double MPCoeff = GetCoeff();
   double uBoltz = exp(-BETA * (sysPotNew.Total() - sysPotRef.Total()));
   long double accept = MPCoeff * uBoltz;
   bool result = (rejectState == mv::fail_state::NO_FAIL) && prng() < accept;
+  std::cout << imie(step) imie(MPCoeff) imie(uBoltz) imie(accept) "\n";
   if(result) {
     sysPotRef = sysPotNew;
     swap(coordCurrRef, newMolsPos);

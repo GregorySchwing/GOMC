@@ -25,6 +25,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include <cassert>
 #include <limits>
 
+#include "DoubleErrorTest.h"
 #ifdef GOMC_CUDA
 #include "CalculateEnergyCUDAKernel.cuh"
 #include "CalculateForceCUDAKernel.cuh"
@@ -175,6 +176,7 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
     return potential;
 
   double tempREn = 0.0, tempLJEn = 0.0;
+  double gpu_tempREn = 0.0, gpu_tempLJEn = 0.0;
   double distSq, qi_qj_fact, lambdaVDW, lambdaCoulomb;
   int i;
   XYZ virComponents;
@@ -216,6 +218,7 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
   uint tnoi = 0;
 
   numberOfInters = &tnoi; 
+  int atomsInsideBox = NumberOfParticlesInsideBox(box);
 
 #ifdef GOMC_CUDA
   double REn = 0.0, LJEn = 0.0;
@@ -311,7 +314,7 @@ std::sort(REnValues.begin(), REnValues.end());
       neighborCell = neighborList[currCell][nCellIndex];
 
       // find the ending index in neighboring cell
-      endIndex = neighborCell != numberOfCells - 1 ? cellStartIndex[neighborCell + 1] : atomNumber;
+      endIndex = neighborCell != numberOfCells - 1 ? cellStartIndex[neighborCell + 1] : atomsInsideBox;
       // loop over particle inside neighboring cell
       for(nParticleIndex = cellStartIndex[neighborCell];
           nParticleIndex < endIndex; nParticleIndex++) {
@@ -405,6 +408,16 @@ int newkey = 0;
 
   std::cout << "REn : " << tempREn << std::endl;
   std::cout << "LJEn : " << tempLJEn << std::endl;
+// #endif
+
+  // compare cpu and gpu result
+  if(tempREn != gpu_tempREn) {
+    printf("tempREn: %lf, gpu_tempREn: %lf\n", tempREn, gpu_tempREn);
+  }
+  if(tempLJEn != gpu_tempLJEn) {
+    printf("tempLJEn: %lf, gpu_tempLJEn: %lf\n", tempLJEn, gpu_tempLJEn);
+  }
+
   // setting energy and virial of LJ interaction
   potential.boxEnergy[box].inter = tempLJEn;
   // setting energy and virial of coulomb interaction
@@ -445,9 +458,18 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   int atomCount = atomForce.Count();
   int molCount = molForce.Count();
 
+  // temporary array for gpu // delete this later
+   int aLen = atomForce.Count();
+   int mLen = molForce.Count();
+   double *gpu_aForcex = new double[aLen];
+   double *gpu_aForcey = new double[aLen];
+   double *gpu_aForcez = new double[aLen];
+   double *gpu_mForcex = new double[mLen];
+   double *gpu_mForcey = new double[mLen];
+   double *gpu_mForcez = new double[mLen];
+
   // Reset Force Arrays
   ResetForce(atomForce, molForce, box);
-
 
   std::vector<int> cellVector, cellStartIndex, mapParticleToCell;
   std::vector<std::vector<int> > neighborList;
@@ -456,6 +478,7 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   int numberOfCells = neighborList.size();
   int atomNumber = coords.Count();
   int currParticleIdx, currParticle, currCell, nCellIndex, neighborCell, endIndex, nParticleIndex, nParticle;
+  uint atomsInsideBox = NumberOfParticlesInsideBox(box);
 
   double *host_aForcex_neighborCell_flattened;
   double *host_aForcey_neighborCell_flattened;
@@ -506,7 +529,7 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
                   cellStartIndex, neighborList, mapParticleToCell,
                   coords, boxAxes, electrostatic, particleCharge,
                   particleKind, particleMol, tempREn, tempLJEn,
-                  aForcex, aForcey, aForcez, mForcex, mForcey, mForcez,
+                  gpu_aForcex, gpu_aForcey, gpu_aForcez, gpu_mForcex, gpu_mForcey, gpu_mForcez,
                   atomCount, molCount, forcefield.sc_coul, forcefield.sc_sigma_6, forcefield.sc_alpha,
                   forcefield.sc_power, box,   host_aForcex_neighborCell_flattened,
                                               host_aForcey_neighborCell_flattened,
@@ -521,14 +544,14 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
                                               host_mForcey_currentCell_flattened,
                                               host_mForcez_currentCell_flattened, numberOfInters);
 
-#else
+//#else
 #if defined _OPENMP && _OPENMP >= 201511 // check if OpenMP version is 4.5
   #pragma omp parallel for default(shared) private(currParticle, currCell, nCellIndex, \
   neighborCell, endIndex, nParticleIndex, nParticle, distSq, qi_qj_fact, \
   virComponents, forceReal, forceLJ, lambdaVDW, lambdaCoulomb) \
 reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
             aForcez[:atomCount], mForcex[:molCount], mForcey[:molCount], mForcez[:molCount])
-#endif
+//#endif
   for(currParticleIdx = 0; currParticleIdx < cellVector.size(); currParticleIdx++) {
     currParticle = cellVector[currParticleIdx];
     currCell = mapParticleToCell[currParticle];
@@ -536,8 +559,7 @@ reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
     for(nCellIndex = 0; nCellIndex < NUMBER_OF_NEIGHBOR_CELL; nCellIndex++) {
       neighborCell = neighborList[currCell][nCellIndex];
 
-      endIndex = neighborCell != numberOfCells - 1 ?
-                 cellStartIndex[neighborCell + 1] : atomNumber;
+      endIndex = neighborCell != numberOfCells - 1 ? cellStartIndex[neighborCell + 1] : atomsInsideBox;
       for(nParticleIndex = cellStartIndex[neighborCell];
           nParticleIndex < endIndex; nParticleIndex++) {
         nParticle = cellVector[nParticleIndex];
@@ -613,10 +635,33 @@ for(uint i = 0; i < *numberOfInters; i++) {
   std::cout << "host_mForcez_currentCell_flattened[" << i << "] : " << host_mForcez_currentCell_flattened[i] << std::endl;
 }
 
+   for(int i=0; i<aLen; i++) {
+     //if(aForcex[i] != gpu_aForcex[i]) {
+     if(!AlmostEqualUlps(aForcex[i], gpu_aForcex[i], 6)){  
+       printf("atom %d: gpu=>%.20lf, cpu=>%.20lf, diff=>%.20lf\n", i, gpu_aForcex[i], aForcex[i], abs(aForcex[i] - gpu_aForcex[i]));
+       exit(EXIT_FAILURE);
+     }
+   }
+   for(int i=0; i<mLen; i++) {
+     if(!AlmostEqualUlps(mForcex[i], gpu_mForcex[i], 6)){
+     //if(mForcex[i] != gpu_mForcex[i]) {
+       printf("mol %d: gpu=>%.20lf, cpu=>%.20lf, diff=>%.20lf\n", i, gpu_mForcex[i], mForcex[i], abs(mForcex[i] - gpu_mForcex[i]));
+       exit(EXIT_FAILURE);
+     }
+   }
+
   // setting energy and virial of LJ interaction
   potential.boxEnergy[box].inter = tempLJEn;
   // setting energy and virial of coulomb interaction
   potential.boxEnergy[box].real = tempREn;
+
+   //delete temporary arrays
+   delete [] gpu_aForcex;
+   delete [] gpu_aForcey;
+   delete [] gpu_aForcez;
+   delete [] gpu_mForcex;
+   delete [] gpu_mForcey;
+   delete [] gpu_mForcez;
 
   potential.Total();
   return potential;
@@ -648,6 +693,7 @@ Virial CalculateEnergy::VirialCalc(const uint box)
   int numberOfCells = neighborList.size();
   int atomNumber = currentCoords.Count();
   int currParticleIdx, currParticle, currCell, nCellIndex, neighborCell, endIndex, nParticleIndex, nParticle;
+  uint atomsInsideBox = NumberOfParticlesInsideBox(box);
 
   double * host_rT11_flat;
   double * host_rT22_flat;
@@ -758,8 +804,7 @@ virC, comC, lambdaVDW, lambdaCoulomb) reduction(+:vT11, vT12, vT13, vT22, \
     for(nCellIndex = 0; nCellIndex < NUMBER_OF_NEIGHBOR_CELL; nCellIndex++) {
       neighborCell = neighborList[currCell][nCellIndex];
 
-      endIndex = neighborCell != numberOfCells - 1 ?
-                 cellStartIndex[neighborCell + 1] : atomNumber;
+      endIndex = neighborCell != numberOfCells - 1 ? cellStartIndex[neighborCell + 1] : atomsInsideBox;
       for(nParticleIndex = cellStartIndex[neighborCell];
           nParticleIndex < endIndex; nParticleIndex++) {
         nParticle = cellVector[nParticleIndex];
@@ -1748,6 +1793,20 @@ void CalculateEnergy::ResetForce(XYZArray& atomForce, XYZArray& molForce,
       thisMol++;
     }
   }
+}
+
+uint CalculateEnergy::NumberOfParticlesInsideBox(uint box) {
+  uint count = 0;
+  
+  MoleculeLookup::box_iterator thisMol = molLookup.BoxBegin(box);
+  MoleculeLookup::box_iterator end = molLookup.BoxEnd(box);
+
+  while(thisMol != end) {
+    count += mols.GetKind(*thisMol).NumAtoms();
+    thisMol++;
+  }
+
+  return count;
 }
 
 bool CalculateEnergy::FindMolInCavity(std::vector< std::vector<uint> > &mol,
