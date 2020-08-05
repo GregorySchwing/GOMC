@@ -23,6 +23,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "GeomLib.h"
 #include "NumLib.h"
 #include <cassert>
+#include "DoubleErrorTest.h"
 #ifdef GOMC_CUDA
 #include "CalculateEnergyCUDAKernel.cuh"
 #include "CalculateForceCUDAKernel.cuh"
@@ -307,14 +308,14 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   int molCount = molForce.Count();
 
   // temporary array for gpu // delete this later
-  // int aLen = atomForce.Count();
-  // int mLen = molForce.Count();
-  // double *gpu_aForcex = new double[aLen];
-  // double *gpu_aForcey = new double[aLen];
-  // double *gpu_aForcez = new double[aLen];
-  // double *gpu_mForcex = new double[mLen];
-  // double *gpu_mForcey = new double[mLen];
-  // double *gpu_mForcez = new double[mLen];
+   int aLen = atomForce.Count();
+   int mLen = molForce.Count();
+   double *gpu_aForcex = new double[aLen];
+   double *gpu_aForcey = new double[aLen];
+   double *gpu_aForcez = new double[aLen];
+   double *gpu_mForcex = new double[mLen];
+   double *gpu_mForcey = new double[mLen];
+   double *gpu_mForcez = new double[mLen];
 
   // Reset Force Arrays
   ResetForce(atomForce, molForce, box);
@@ -328,7 +329,7 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   int currParticleIdx, currParticle, currCell, nCellIndex, neighborCell, endIndex, nParticleIndex, nParticle;
   uint atomsInsideBox = NumberOfParticlesInsideBox(box);
 
-#ifdef GOMC_CUDA
+//#ifdef GOMC_CUDA
   //update unitcell in GPU
   UpdateCellBasisCUDA(forcefield.particles->getCUDAVars(), box,
                       boxAxes.cellBasis[box].x, boxAxes.cellBasis[box].y,
@@ -346,18 +347,18 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
                   cellStartIndex, neighborList, mapParticleToCell,
                   coords, boxAxes, electrostatic, particleCharge,
                   particleKind, particleMol, tempREn, tempLJEn,
-                  aForcex, aForcey, aForcez, mForcex, mForcey, mForcez,
+                  gpu_aForcex, gpu_aForcey, gpu_aForcez, gpu_mForcex, gpu_mForcey, gpu_mForcez,
                   atomCount, molCount, forcefield.sc_coul, forcefield.sc_sigma_6, forcefield.sc_alpha,
                   forcefield.sc_power, box, atomsInsideBox);
 
-#else
+//#else
 #if defined _OPENMP && _OPENMP >= 201511 // check if OpenMP version is 4.5
   #pragma omp parallel for default(shared) private(currParticle, currCell, nCellIndex, \
   neighborCell, endIndex, nParticleIndex, nParticle, distSq, qi_qj_fact, \
   virComponents, forceReal, forceLJ, lambdaVDW, lambdaCoulomb) \
 reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
             aForcez[:atomCount], mForcex[:molCount], mForcey[:molCount], mForcez[:molCount])
-#endif
+//#endif
   for(currParticleIdx = 0; currParticleIdx < cellVector.size(); currParticleIdx++) {
     currParticle = cellVector[currParticleIdx];
     currCell = mapParticleToCell[currParticle];
@@ -410,31 +411,33 @@ reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
   }
 #endif
 
-  // for(int i=0; i<aLen; i++) {
-  //   if(aForcex[i] != gpu_aForcex[i]) {
-  //     printf("atom %d: gpu=>%.20lf, cpu=>%.20lf, diff=>%.20lf\n", i, gpu_aForcex[i], aForcex[i], abs(aForcex[i] - gpu_aForcex[i]));
-  //     exit(EXIT_FAILURE);
-  //   }
-  // }
-  // for(int i=0; i<mLen; i++) {
-  //   if(mForcex[i] != gpu_mForcex[i]) {
-  //     printf("mol %d: gpu=>%.20lf, cpu=>%.20lf, diff=>%.20lf\n", i, gpu_mForcex[i], mForcex[i], abs(mForcex[i] - gpu_mForcex[i]));
-  //     exit(EXIT_FAILURE);
-  //   }
-  // }
+   for(int i=0; i<aLen; i++) {
+     //if(aForcex[i] != gpu_aForcex[i]) {
+     if(!AlmostEqualUlps(aForcex[i], gpu_aForcex[i], 6)){  
+       printf("atom %d: gpu=>%.20lf, cpu=>%.20lf, diff=>%.20lf\n", i, gpu_aForcex[i], aForcex[i], abs(aForcex[i] - gpu_aForcex[i]));
+       exit(EXIT_FAILURE);
+     }
+   }
+   for(int i=0; i<mLen; i++) {
+     if(!AlmostEqualUlps(mForcex[i], gpu_mForcex[i], 6)){
+     //if(mForcex[i] != gpu_mForcex[i]) {
+       printf("mol %d: gpu=>%.20lf, cpu=>%.20lf, diff=>%.20lf\n", i, gpu_mForcex[i], mForcex[i], abs(mForcex[i] - gpu_mForcex[i]));
+       exit(EXIT_FAILURE);
+     }
+   }
 
   // setting energy and virial of LJ interaction
   potential.boxEnergy[box].inter = tempLJEn;
   // setting energy and virial of coulomb interaction
   potential.boxEnergy[box].real = tempREn;
 
-  // delete temporary arrays
-  // delete [] gpu_aForcex;
-  // delete [] gpu_aForcey;
-  // delete [] gpu_aForcez;
-  // delete [] gpu_mForcex;
-  // delete [] gpu_mForcey;
-  // delete [] gpu_mForcez;
+   //delete temporary arrays
+   delete [] gpu_aForcex;
+   delete [] gpu_aForcey;
+   delete [] gpu_aForcez;
+   delete [] gpu_mForcex;
+   delete [] gpu_mForcey;
+   delete [] gpu_mForcez;
 
   potential.Total();
   return potential;
