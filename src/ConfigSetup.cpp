@@ -64,6 +64,7 @@ ConfigSetup::ConfigSetup(void)
   in.ffKind.numOfKinds = 0;
   sys.exclude.EXCLUDE_KIND = UINT_MAX;
   in.prng.kind = "";
+  in.prngParallelTempering.kind = "";
   in.files.param.name = "";
   for(i = 0; i < BOX_TOTAL; i++) {
     in.files.pdb.name[i] = "";
@@ -1253,7 +1254,7 @@ void ConfigSetup::fillDefaults(void)
   }
 
   if(in.prngParallelTempering.kind == "") {
-    in.prng.kind = in.prng.KIND_RANDOM;
+    in.prngParallelTempering.kind = in.prng.KIND_RANDOM;
     printf("%-40s %-s \n", "Default: Random seed", "Active");
   }
 
