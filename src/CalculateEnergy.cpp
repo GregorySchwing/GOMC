@@ -497,18 +497,18 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
 
 
 
-  host_aForcex_neighborCell_flattened = new double[*numberOfInters];
-  host_aForcey_neighborCell_flattened = new double[*numberOfInters];
-  host_aForcez_neighborCell_flattened = new double[*numberOfInters];
-  host_mForcex_neighborCell_flattened = new double[*numberOfInters];
-  host_mForcey_neighborCell_flattened = new double[*numberOfInters];
-  host_mForcez_neighborCell_flattened = new double[*numberOfInters];
-  host_aForcex_currentCell_flattened = new double[*numberOfInters];
-  host_aForcey_currentCell_flattened = new double[*numberOfInters];
-  host_aForcez_currentCell_flattened = new double[*numberOfInters];
-  host_mForcex_currentCell_flattened = new double[*numberOfInters];
-  host_mForcey_currentCell_flattened = new double[*numberOfInters];
-  host_mForcez_currentCell_flattened = new double[*numberOfInters];
+  host_aForcex_neighborCell_flattened = (double*) malloc(sizeof(double) * (*numberOfInters));
+  host_aForcey_neighborCell_flattened = (double*) malloc(sizeof(double) * (*numberOfInters));
+  host_aForcez_neighborCell_flattened = (double*) malloc(sizeof(double) * (*numberOfInters));
+  host_mForcex_neighborCell_flattened = (double*) malloc(sizeof(double) * (*numberOfInters));
+  host_mForcey_neighborCell_flattened = (double*) malloc(sizeof(double) * (*numberOfInters));
+  host_mForcez_neighborCell_flattened = (double*) malloc(sizeof(double) * (*numberOfInters));
+  host_aForcex_currentCell_flattened = (double*) malloc(sizeof(double) * (*numberOfInters));
+  host_aForcey_currentCell_flattened = (double*) malloc(sizeof(double) * (*numberOfInters));
+  host_aForcez_currentCell_flattened = (double*) malloc(sizeof(double) * (*numberOfInters));
+  host_mForcex_currentCell_flattened = (double*) malloc(sizeof(double) * (*numberOfInters));
+  host_mForcey_currentCell_flattened = (double*) malloc(sizeof(double) * (*numberOfInters));
+  host_mForcez_currentCell_flattened = (double*) malloc(sizeof(double) * (*numberOfInters));
 
   //update unitcell in GPU
   UpdateCellBasisCUDA(forcefield.particles->getCUDAVars(), box,
@@ -732,23 +732,23 @@ GetNumberOfIntersInterForceGPU(forcefield.particles->getCUDAVars(),
   std::cout << "num inters from force call : " << *numberOfInters << std::endl;
 
 
-  host_rT11_flat = new double[*numberOfInters];
-  host_rT22_flat = new double[*numberOfInters];
-  host_rT33_flat = new double[*numberOfInters];
+  host_rT11_flat = (double*) malloc(sizeof(double) * (*numberOfInters));
+  host_rT22_flat = (double*) malloc(sizeof(double) * (*numberOfInters));
+  host_rT33_flat = (double*) malloc(sizeof(double) * (*numberOfInters));
 
           //extra tensor calculations
-  host_rT12_flat = new double[*numberOfInters];
-  host_rT13_flat = new double[*numberOfInters];
-  host_rT23_flat = new double[*numberOfInters];
+  host_rT12_flat = (double*) malloc(sizeof(double) * (*numberOfInters));
+  host_rT13_flat = (double*) malloc(sizeof(double) * (*numberOfInters));
+  host_rT23_flat = (double*) malloc(sizeof(double) * (*numberOfInters));
 
-  host_vT11_flat = new double[*numberOfInters];
-  host_vT22_flat = new double[*numberOfInters];
-  host_vT33_flat = new double[*numberOfInters];
+  host_vT11_flat = (double*) malloc(sizeof(double) * (*numberOfInters));
+  host_vT22_flat = (double*) malloc(sizeof(double) * (*numberOfInters));
+  host_vT33_flat = (double*) malloc(sizeof(double) * (*numberOfInters));
 
           //extra tensor calculations
-  host_vT12_flat = new double[*numberOfInters];
-  host_vT13_flat = new double[*numberOfInters];
-  host_vT23_flat = new double[*numberOfInters];
+  host_vT12_flat = (double*) malloc(sizeof(double) * (*numberOfInters));
+  host_vT13_flat = (double*) malloc(sizeof(double) * (*numberOfInters));
+  host_vT23_flat = (double*) malloc(sizeof(double) * (*numberOfInters));
 
 
   //update unitcell in GPU

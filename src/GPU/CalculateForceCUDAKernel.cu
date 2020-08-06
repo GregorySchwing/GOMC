@@ -220,21 +220,21 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
   CUMALLOC((void**) &gpu_vT23_flat_index, sizeof(int));
 
     // Might be overkill but whatever
-    cudaMemcpy(gpu_rT11_flat_index, &flatIndexREn1, sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(gpu_rT22_flat_index, &flatIndexREn2, sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(gpu_rT33_flat_index, &flatIndexREn3, sizeof(int), cudaMemcpyHostToDevice);
+    CubDebugExit(cudaMemcpy(gpu_rT11_flat_index, &flatIndexREn1, sizeof(int), cudaMemcpyHostToDevice));
+    CubDebugExit(cudaMemcpy(gpu_rT22_flat_index, &flatIndexREn2, sizeof(int), cudaMemcpyHostToDevice));
+    CubDebugExit(cudaMemcpy(gpu_rT33_flat_index, &flatIndexREn3, sizeof(int), cudaMemcpyHostToDevice));
   
-    cudaMemcpy(gpu_rT12_flat_index, &flatIndexREn4, sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(gpu_rT13_flat_index, &flatIndexREn5, sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(gpu_rT23_flat_index, &flatIndexREn6, sizeof(int), cudaMemcpyHostToDevice);
+    CubDebugExit(cudaMemcpy(gpu_rT12_flat_index, &flatIndexREn4, sizeof(int), cudaMemcpyHostToDevice));
+    CubDebugExit(cudaMemcpy(gpu_rT13_flat_index, &flatIndexREn5, sizeof(int), cudaMemcpyHostToDevice));
+    CubDebugExit(cudaMemcpy(gpu_rT23_flat_index, &flatIndexREn6, sizeof(int), cudaMemcpyHostToDevice));
   
-    cudaMemcpy(gpu_vT11_flat_index, &flatIndexREn7, sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(gpu_vT22_flat_index, &flatIndexREn8, sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(gpu_vT33_flat_index, &flatIndexREn9, sizeof(int), cudaMemcpyHostToDevice);
+    CubDebugExit(cudaMemcpy(gpu_vT11_flat_index, &flatIndexREn7, sizeof(int), cudaMemcpyHostToDevice));
+    CubDebugExit(cudaMemcpy(gpu_vT22_flat_index, &flatIndexREn8, sizeof(int), cudaMemcpyHostToDevice));
+    CubDebugExit(cudaMemcpy(gpu_vT33_flat_index, &flatIndexREn9, sizeof(int), cudaMemcpyHostToDevice));
   
-    cudaMemcpy(gpu_vT12_flat_index, &flatIndexREn10, sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(gpu_vT13_flat_index, &flatIndexREn11, sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(gpu_vT23_flat_index, &flatIndexREn12, sizeof(int), cudaMemcpyHostToDevice);
+    CubDebugExit(cudaMemcpy(gpu_vT12_flat_index, &flatIndexREn10, sizeof(int), cudaMemcpyHostToDevice));
+    CubDebugExit(cudaMemcpy(gpu_vT13_flat_index, &flatIndexREn11, sizeof(int), cudaMemcpyHostToDevice));
+    CubDebugExit(cudaMemcpy(gpu_vT23_flat_index, &flatIndexREn12, sizeof(int), cudaMemcpyHostToDevice));
 
 /*
   BoxInterForceGPU <<< blocksPerGrid, threadsPerBlock>>>(gpu_cellStartIndex,
