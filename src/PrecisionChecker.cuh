@@ -38,6 +38,7 @@ class PrecisionChecker
 public:
     explicit PrecisionChecker(int i);
     void sortCUDATuples(int * curr, int * neigh, double * val, int numberOfElements);
+    void sortOMPTuples(int * curr, int * neigh, double * val, int numberOfElements);
 
     union Float_t
     {

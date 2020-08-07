@@ -324,14 +324,11 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
 
   //#endif
   std::cout << "You used " << indexForTupleOpenMP << "spaces in openmp" << std::endl;
-
+  std::cout << "sorting and printing tuples" << std::endl;
+  pc.sortOMPTuples(currentParticleArrayOpenMP, neighborParticleArrayOpenMP, ljArrayOpenMP, indexForTupleOpenMP);
   std::cout << "building vecs" << std::endl;
-  pc.col_vec_omp.resize(indexForTupleOpenMP);
-  pc.row_vec_omp.resize(indexForTupleOpenMP);
-  pc.val_vec_omp.resize(indexForTupleOpenMP);
-
   for (uint i = 0; i < indexForTupleOpenMP; i++){
-    std::cout << "(" << currentParticleArrayOpenMP[i] << ", " << neighborParticleArrayOpenMP[i] << ") : " << ljArrayOpenMP[i] << std::endl;
+    std::cout << "(" << pc.row_vec_omp[i] << ", " << pc.col_vec_omp[i] << ") : " << pc.val_vec_omp[i] << std::endl;
   }
 
 #ifdef GOMC_CUDA
