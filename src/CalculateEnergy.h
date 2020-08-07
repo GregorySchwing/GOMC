@@ -50,6 +50,7 @@ class TrialMol;
 class CalculateEnergy
 {
 public:
+
   CalculateEnergy(StaticVals & stat, System & sys);
 
   void Init(System & sys);

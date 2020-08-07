@@ -25,6 +25,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include <cassert>
 // GJS
 #include <limits>
+#include "PrecisionChecker.h"
 // GJS
 #ifdef GOMC_CUDA
 #include "CalculateEnergyCUDAKernel.cuh"
@@ -203,6 +204,8 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
   neighborParticleArray = (int*) calloc (atomsInsideBox * atomsInsideBox, sizeof(int));
   ljArray = (double*) calloc (atomsInsideBox * atomsInsideBox, sizeof(double));
 
+  PrecisionChecker pc(1);
+
 #ifdef GOMC_CUDA
   //update unitcell in GPU
   UpdateCellBasisCUDA(forcefield.particles->getCUDAVars(), box,
@@ -227,16 +230,28 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
                   ljArray,
                   pointerToIndexForTuple
                   );
-std::cout << "You used " << *pointerToIndexForTuple << "spaces in cuda" << std::endl;
-typedef std::numeric_limits< double > dbl;
-std::cout.precision(dbl::max_digits10);
+
+  std::cout << "You used " << *pointerToIndexForTuple << "spaces in cuda" << std::endl;
+  typedef std::numeric_limits< double > dbl;
+  std::cout.precision(dbl::max_digits10);
   for (int i = 0; i < *pointerToIndexForTuple; i++){
     std::cout << "(" << currentParticleArray[i] << ", " << neighborParticleArray[i] << ") : " << ljArray[i] << std::endl;
   }
 
+  std::cout << "sorting and printing tuples" << std::endl;
+  pc.sortCUDATuples(currentParticleArray, neighborParticleArray, ljArray, *pointerToIndexForTuple);
+
+  for (int i = 0; i < *pointerToIndexForTuple; i++){
+    std::cout << "(" << pc.col_vec_cuda[i] << ", " << pc.row_vec_cuda[i] << ") : " << pc.val_vec_cuda[i] << std::endl;
+  }
+  //pc.col_vec_cuda.resize(*pointerToIndexForTuple);
+  //pc.row_vec_cuda.resize(*pointerToIndexForTuple);
+  //pc.val_vec_cuda.resize(*pointerToIndexForTuple);
+
   free(currentParticleArray);
   free(neighborParticleArray);
   free(ljArray);
+
 #endif
 
   uint indexForTupleOpenMP = 0;
@@ -306,12 +321,26 @@ std::cout.precision(dbl::max_digits10);
       }
     }
   }
-//#endif
-std::cout << "You used " << indexForTupleOpenMP << "spaces in openmp" << std::endl;
+
+  //#endif
+  std::cout << "You used " << indexForTupleOpenMP << "spaces in openmp" << std::endl;
+
+  std::cout << "building vecs" << std::endl;
+  pc.col_vec_omp.resize(indexForTupleOpenMP);
+  pc.row_vec_omp.resize(indexForTupleOpenMP);
+  pc.val_vec_omp.resize(indexForTupleOpenMP);
 
   for (uint i = 0; i < indexForTupleOpenMP; i++){
     std::cout << "(" << currentParticleArrayOpenMP[i] << ", " << neighborParticleArrayOpenMP[i] << ") : " << ljArrayOpenMP[i] << std::endl;
   }
+
+#ifdef GOMC_CUDA
+
+
+
+
+#endif
+
 
   // setting energy and virial of LJ interaction
   potential.boxEnergy[box].inter = tempLJEn;

@@ -36,6 +36,7 @@ set(sources
    src/PDBSetup.cpp
    src/PDBOutput.cpp
    src/PRNGSetup.cpp
+   src/PrecisionChecker.cpp
    src/PSFOutput.cpp
    src/Reader.cpp
    src/Simulation.cpp
@@ -118,6 +119,7 @@ set(headers
    src/PDBSetup.h
    src/PRNG.h
    src/PRNGSetup.h
+   src/PrecisionChecker.h
    src/PSFOutput.h
    src/Reader.h
    src/SeedReader.h
