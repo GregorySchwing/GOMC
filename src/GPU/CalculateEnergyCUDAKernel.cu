@@ -18,6 +18,11 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 
 using namespace cub;
 
+__device__ int * DEV_currentParticleArray;
+__device__ int * DEV_neighborParticleArray;
+__device__ double * DEV_ljArray;
+__device__ uint * DEV_X;  
+
 void CallBoxInterGPU(VariablesCUDA *vars,
                      std::vector<int> cellVector,
                      std::vector<int> cellStartIndex,
@@ -35,7 +40,12 @@ void CallBoxInterGPU(VariablesCUDA *vars,
                      double sc_alpha,
                      uint sc_power,
                      uint const box,
-                     uint const atomsInsideBox)
+                     uint const atomsInsideBox,
+                     int * currentParticleArray,
+                     int * neighborParticleArray,
+                     double * ljArray,
+                     uint * pointerToIndexForTuple                  
+                    )
 {
   int atomNumber = coords.Count();
   int neighborListCount = neighborList.size() * NUMBER_OF_NEIGHBOR_CELL;
@@ -81,6 +91,34 @@ void CallBoxInterGPU(VariablesCUDA *vars,
   cudaMemcpy(vars->gpu_x, coords.x, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_y, coords.y, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_z, coords.z, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
+
+    
+  int * dev_currentParticleArray;
+  int * dev_neighborParticleArray;
+  double * dev_ljArray;
+  uint * dev_pointerToIndexForTuple;  
+
+  cudaGetSymbolAddress((void **)&dev_pointerToIndexForTuple, DEV_X);
+  cudaGetSymbolAddress((void **)&dev_currentParticleArray, DEV_currentParticleArray);
+  cudaGetSymbolAddress((void **)&dev_neighborParticleArray, DEV_neighborParticleArray);
+  cudaGetSymbolAddress((void **)&dev_ljArray, DEV_ljArray);
+
+  cudaMalloc((void**) &dev_pointerToIndexForTuple, sizeof(uint));
+  cudaMalloc((void**) &dev_currentParticleArray, atomNumber * atomNumber * sizeof(int));
+  cudaMalloc((void**) &dev_neighborParticleArray, atomNumber * atomNumber * sizeof(int));
+  cudaMalloc((void**) &dev_ljArray, atomNumber * atomNumber * sizeof(double));
+
+  cudaMemset(dev_pointerToIndexForTuple, 0, sizeof(uint));
+  cudaMemset(dev_currentParticleArray, 0, atomNumber * atomNumber * sizeof(int));
+  cudaMemset(dev_neighborParticleArray, 0, atomNumber * atomNumber * sizeof(int));
+  cudaMemset(dev_ljArray, 0.0, atomNumber * atomNumber * sizeof(double));
+
+/*
+  cudaMemcpyToSymbol(dev_currentParticleArray, currentParticleArray, atomsInsideBox * atomsInsideBox * sizeof(int), cudaMemcpyHostToDevice);
+  cudaMemcpyToSymbol(dev_neighborParticleArray, neighborParticleArray, atomsInsideBox * atomsInsideBox * sizeof(int), cudaMemcpyHostToDevice);
+  cudaMemcpyToSymbol(dev_ljArray, ljArray, atomsInsideBox * atomsInsideBox * sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpyToSymbol(dev_pointerToIndexForTuple, pointerToIndexForTuple, sizeof(int), cudaMemcpyHostToDevice);
+*/
 
   BoxInterGPU <<< blocksPerGrid, threadsPerBlock>>>(gpu_cellStartIndex,
       vars->gpu_cellVector,
@@ -131,9 +169,26 @@ void CallBoxInterGPU(VariablesCUDA *vars,
       vars->gpu_lambdaCoulomb,
       vars->gpu_isFraction,
       box,
-      atomsInsideBox);
+      atomsInsideBox,
+      dev_pointerToIndexForTuple,
+      dev_currentParticleArray,
+      dev_neighborParticleArray,
+      dev_ljArray   
+    );
   cudaDeviceSynchronize();
   checkLastErrorCUDA(__FILE__, __LINE__);
+
+  cudaMemcpy(pointerToIndexForTuple, dev_pointerToIndexForTuple, sizeof(uint), cudaMemcpyDeviceToHost);
+  cudaMemcpy(currentParticleArray, dev_currentParticleArray, *pointerToIndexForTuple * sizeof(int), cudaMemcpyDeviceToHost);
+  cudaMemcpy(neighborParticleArray, dev_neighborParticleArray, *pointerToIndexForTuple * sizeof(int), cudaMemcpyDeviceToHost);
+  cudaMemcpy(ljArray, dev_ljArray, *pointerToIndexForTuple * sizeof(double), cudaMemcpyDeviceToHost);
+
+  std::cout << "from within wrapper " << *pointerToIndexForTuple << std::endl;
+
+  cudaFree(dev_pointerToIndexForTuple);
+  cudaFree(dev_currentParticleArray);
+  cudaFree(dev_neighborParticleArray);
+  cudaFree(dev_ljArray);
 
   // ReduceSum
   void * d_temp_storage = NULL;
@@ -220,8 +275,14 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                             double *gpu_lambdaCoulomb,
                             bool *gpu_isFraction,
                             int box,
-                            uint atomsInsideBox)
+                            uint atomsInsideBox,
+                            uint * dev_pointerToIndexForTuple,
+                            int * dev_currentParticleArray,
+                            int * dev_neighborParticleArray,
+                            double * dev_ljArray   
+                          )
 {
+
   double distSq;
   double qi_qj_fact;
   double qqFact = 167000.0;
@@ -306,9 +367,23 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                                         gpu_rCut[0], gpu_rOn[0], gpu_count[0], lambdaVDW,
                                         sc_sigma_6, sc_alpha, sc_power, gpu_rMin,
                                         gpu_rMaxSq, gpu_expConst);
+
+        uint localIndex = atomicAdd(dev_pointerToIndexForTuple, (int)1);
+        printf("Thread IDx %d: has index %d\n", threadID, localIndex);
+        
+        dev_currentParticleArray[localIndex] = currentParticle;
+        dev_neighborParticleArray[localIndex] = neighborParticle;
+        dev_ljArray[localIndex] = CalcEnGPU(distSq, kA, kB,
+                                            gpu_sigmaSq, gpu_n, gpu_epsilon_Cn,
+                                            gpu_VDW_Kind[0], gpu_isMartini[0],
+                                            gpu_rCut[0], gpu_rOn[0], gpu_count[0], lambdaVDW,
+                                            sc_sigma_6, sc_alpha, sc_power, gpu_rMin,
+                                            gpu_rMaxSq, gpu_expConst);
+                                            
       }
     }
   }
+  __syncthreads();
 }
 
 __device__ double CalcCoulombGPU(double distSq,

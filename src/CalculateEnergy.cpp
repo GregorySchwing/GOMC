@@ -23,6 +23,9 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "GeomLib.h"
 #include "NumLib.h"
 #include <cassert>
+// GJS
+#include <limits>
+// GJS
 #ifdef GOMC_CUDA
 #include "CalculateEnergyCUDAKernel.cuh"
 #include "CalculateForceCUDAKernel.cuh"
@@ -188,6 +191,18 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
   int countpairs = 0;
   int atomsInsideBox = NumberOfParticlesInsideBox(box);
 
+  uint indexForTuple = 0;
+  uint * pointerToIndexForTuple;
+  pointerToIndexForTuple = &indexForTuple;
+
+  int * currentParticleArray;
+  int * neighborParticleArray;
+  double * ljArray;
+
+  currentParticleArray = (int*) calloc (atomsInsideBox * atomsInsideBox, sizeof(int));
+  neighborParticleArray = (int*) calloc (atomsInsideBox * atomsInsideBox, sizeof(int));
+  ljArray = (double*) calloc (atomsInsideBox * atomsInsideBox, sizeof(double));
+
 #ifdef GOMC_CUDA
   //update unitcell in GPU
   UpdateCellBasisCUDA(forcefield.particles->getCUDAVars(), box,
@@ -206,7 +221,22 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
                   neighborList, coords, boxAxes, electrostatic, particleCharge,
                   particleKind, particleMol, tempREn, tempLJEn, forcefield.sc_coul,
                   forcefield.sc_sigma_6, forcefield.sc_alpha,
-                  forcefield.sc_power, box, atomsInsideBox);
+                  forcefield.sc_power, box, atomsInsideBox,
+                  currentParticleArray,
+                  neighborParticleArray,
+                  ljArray,
+                  pointerToIndexForTuple
+                  );
+std::cout << "You used " << *pointerToIndexForTuple << "spaces" << std::endl;
+typedef std::numeric_limits< double > dbl;
+std::cout.precision(dbl::max_digits10);
+  for (int i = 0; i < *pointerToIndexForTuple; i++){
+    std::cout << "(" << currentParticleArray[i] << ", " << neighborParticleArray[i] << ") : " << ljArray[i] << std::endl;
+  }
+
+  free(currentParticleArray);
+  free(neighborParticleArray);
+  free(ljArray);
 #else
 #ifdef _OPENMP
   #pragma omp parallel for default(shared) \
