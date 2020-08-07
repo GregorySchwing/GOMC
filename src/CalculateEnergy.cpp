@@ -242,7 +242,7 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
   pc.sortCUDATuples(currentParticleArray, neighborParticleArray, ljArray, *pointerToIndexForTuple);
 
   for (int i = 0; i < *pointerToIndexForTuple; i++){
-    std::cout << "(" << pc.col_vec_cuda[i] << ", " << pc.row_vec_cuda[i] << ") : " << pc.val_vec_cuda[i] << std::endl;
+    std::cout << "(" << pc.row_vec_cuda[i] << ", " << pc.col_vec_cuda[i] << ") : " << pc.val_vec_cuda[i] << std::endl;
   }
   //pc.col_vec_cuda.resize(*pointerToIndexForTuple);
   //pc.row_vec_cuda.resize(*pointerToIndexForTuple);
