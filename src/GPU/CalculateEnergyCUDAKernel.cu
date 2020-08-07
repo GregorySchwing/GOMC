@@ -381,7 +381,6 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
       }
     }
   }
-  __syncthreads();
 }
 
 __device__ double CalcCoulombGPU(double distSq,
