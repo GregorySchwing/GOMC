@@ -227,7 +227,7 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
                   ljArray,
                   pointerToIndexForTuple
                   );
-std::cout << "You used " << *pointerToIndexForTuple << "spaces" << std::endl;
+std::cout << "You used " << *pointerToIndexForTuple << "spaces in cuda" << std::endl;
 typedef std::numeric_limits< double > dbl;
 std::cout.precision(dbl::max_digits10);
   for (int i = 0; i < *pointerToIndexForTuple; i++){
@@ -237,11 +237,26 @@ std::cout.precision(dbl::max_digits10);
   free(currentParticleArray);
   free(neighborParticleArray);
   free(ljArray);
-#else
+#endif
+
+  uint indexForTupleOpenMP = 0;
+  uint * pointerToIndexForTupleOpenMP;
+  pointerToIndexForTupleOpenMP = &indexForTupleOpenMP;
+
+  int * currentParticleArrayOpenMP;
+  int * neighborParticleArrayOpenMP;
+  double * ljArrayOpenMP;
+
+  currentParticleArrayOpenMP = (int*) calloc (atomsInsideBox * atomsInsideBox, sizeof(int));
+  neighborParticleArrayOpenMP = (int*) calloc (atomsInsideBox * atomsInsideBox, sizeof(int));
+  ljArrayOpenMP = (double*) calloc (atomsInsideBox * atomsInsideBox, sizeof(double));
+
+
 #ifdef _OPENMP
   #pragma omp parallel for default(shared) \
   private(currParticleIdx, currParticle, currCell, nCellIndex, neighborCell, endIndex, \
           nParticleIndex, nParticle, distSq, qi_qj_fact, virComponents)\
+  shared(indexForTupleOpenMP, currentParticleArrayOpenMP, neighborParticleArrayOpenMP, ljArrayOpenMP)\
   reduction(+:tempREn, tempLJEn)
 #endif
   // loop over all particles
@@ -277,12 +292,26 @@ std::cout.precision(dbl::max_digits10);
             }
             tempLJEn += forcefield.particles->CalcEn(distSq,
                         particleKind[currParticle], particleKind[nParticle], lambdaVDW);
+            
+            #pragma omp critical
+            {
+              indexForTupleOpenMP++;
+              currentParticleArrayOpenMP[indexForTupleOpenMP] = currParticle;
+              neighborParticleArrayOpenMP[indexForTupleOpenMP] = nParticle;
+              ljArrayOpenMP[indexForTupleOpenMP] = forcefield.particles->CalcEn(distSq,
+                        particleKind[currParticle], particleKind[nParticle], lambdaVDW);
+            }
           }
         }
       }
     }
   }
-#endif
+//#endif
+std::cout << "You used " << indexForTupleOpenMP << "spaces in openmp" << std::endl;
+
+  for (uint i = 0; i < indexForTupleOpenMP; i++){
+    std::cout << "(" << currentParticleArrayOpenMP[i] << ", " << neighborParticleArrayOpenMP[i] << ") : " << ljArrayOpenMP[i] << std::endl;
+  }
 
   // setting energy and virial of LJ interaction
   potential.boxEnergy[box].inter = tempLJEn;

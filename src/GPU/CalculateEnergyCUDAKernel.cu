@@ -368,9 +368,7 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                                         sc_sigma_6, sc_alpha, sc_power, gpu_rMin,
                                         gpu_rMaxSq, gpu_expConst);
 
-        uint localIndex = atomicAdd(dev_pointerToIndexForTuple, (int)1);
-        printf("Thread IDx %d: has index %d\n", threadID, localIndex);
-        
+        uint localIndex = atomicAdd(dev_pointerToIndexForTuple, (int)1);       
         dev_currentParticleArray[localIndex] = currentParticle;
         dev_neighborParticleArray[localIndex] = neighborParticle;
         dev_ljArray[localIndex] = CalcEnGPU(distSq, kA, kB,
