@@ -231,22 +231,8 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
                   pointerToIndexForTuple
                   );
 
-  std::cout << "You used " << *pointerToIndexForTuple << "spaces in cuda" << std::endl;
-  typedef std::numeric_limits< double > dbl;
-  std::cout.precision(dbl::max_digits10);
-  for (int i = 0; i < *pointerToIndexForTuple; i++){
-    std::cout << "(" << currentParticleArray[i] << ", " << neighborParticleArray[i] << ") : " << ljArray[i] << std::endl;
-  }
-
-  std::cout << "sorting and printing tuples" << std::endl;
+  std::cout << "You used " << *pointerToIndexForTuple << " spaces in cuda" << std::endl;
   pc.sortCUDATuples(currentParticleArray, neighborParticleArray, ljArray, *pointerToIndexForTuple);
-
-  for (int i = 0; i < *pointerToIndexForTuple; i++){
-    std::cout << "(" << pc.row_vec_cuda[i] << ", " << pc.col_vec_cuda[i] << ") : " << pc.val_vec_cuda[i] << std::endl;
-  }
-  //pc.col_vec_cuda.resize(*pointerToIndexForTuple);
-  //pc.row_vec_cuda.resize(*pointerToIndexForTuple);
-  //pc.val_vec_cuda.resize(*pointerToIndexForTuple);
 
   free(currentParticleArray);
   free(neighborParticleArray);
@@ -310,11 +296,11 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
             
             #pragma omp critical
             {
-              indexForTupleOpenMP++;
               currentParticleArrayOpenMP[indexForTupleOpenMP] = currParticle;
               neighborParticleArrayOpenMP[indexForTupleOpenMP] = nParticle;
               ljArrayOpenMP[indexForTupleOpenMP] = forcefield.particles->CalcEn(distSq,
                         particleKind[currParticle], particleKind[nParticle], lambdaVDW);
+              indexForTupleOpenMP++;
             }
           }
         }
@@ -323,18 +309,13 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
   }
 
   //#endif
-  std::cout << "You used " << indexForTupleOpenMP << "spaces in openmp" << std::endl;
-  std::cout << "sorting and printing tuples" << std::endl;
+  std::cout << "You used " << indexForTupleOpenMP << " spaces in openmp" << std::endl;
   pc.sortOMPTuples(currentParticleArrayOpenMP, neighborParticleArrayOpenMP, ljArrayOpenMP, indexForTupleOpenMP);
-  std::cout << "building vecs" << std::endl;
-  for (uint i = 0; i < indexForTupleOpenMP; i++){
-    std::cout << "(" << pc.row_vec_omp[i] << ", " << pc.col_vec_omp[i] << ") : " << pc.val_vec_omp[i] << std::endl;
-  }
 
   if (indexForTupleOpenMP == *pointerToIndexForTuple){
     for (uint i = 0; i < indexForTupleOpenMP; i++){
       if (pc.row_vec_omp[i] == pc.row_vec_cuda[i] && pc.col_vec_omp[i] == pc.col_vec_cuda[i]){
-        if(!pc.AlmostEqualUlps(pc.val_vec_omp[i], pc.val_vec_omp[i], 4)){
+        if(!pc.AlmostEqualUlps(pc.val_vec_omp[i], pc.val_vec_omp[i], 1)){
           std::cout << "Pair tuple indices differ in value!" << std::endl;
           std::cout << "OMP (" << pc.row_vec_omp[i] << ", " << pc.col_vec_omp[i] << ") : " << 
             pc.val_vec_omp[i] << " != CUDA (" << pc.row_vec_cuda[i] << ", " << pc.col_vec_cuda[i] << ") : " << 
@@ -353,10 +334,6 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
     std::cout << "OMP : " << indexForTupleOpenMP << "CUDA : " << *pointerToIndexForTuple << std::endl;
     exit(EXIT_FAILURE);
   }
-
-
-
-
 
   // setting energy and virial of LJ interaction
   potential.boxEnergy[box].inter = tempLJEn;
