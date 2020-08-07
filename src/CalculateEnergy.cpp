@@ -25,7 +25,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include <cassert>
 // GJS
 #include <limits>
-#include "PrecisionChecker.h"
+#include "PrecisionChecker.cuh"
 // GJS
 #ifdef GOMC_CUDA
 #include "CalculateEnergyCUDAKernel.cuh"

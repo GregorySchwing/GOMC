@@ -36,7 +36,6 @@ set(sources
    src/PDBSetup.cpp
    src/PDBOutput.cpp
    src/PRNGSetup.cpp
-   src/PrecisionChecker.cpp
    src/PSFOutput.cpp
    src/Reader.cpp
    src/Simulation.cpp
@@ -119,7 +118,6 @@ set(headers
    src/PDBSetup.h
    src/PRNG.h
    src/PRNGSetup.h
-   src/PrecisionChecker.h
    src/PSFOutput.h
    src/Reader.h
    src/SeedReader.h
@@ -190,14 +188,16 @@ set(cudaHeaders
     src/GPU/CalculateForceCUDAKernel.cuh
     src/GPU/CalculateEwaldCUDAKernel.cuh
     src/GPU/VariablesCUDA.cuh
-    src/GPU/CUDAMemoryManager.cuh)
+    src/GPU/CUDAMemoryManager.cuh
+    src/PrecisionChecker.cuh)
 
 set(cudaSources
     src/GPU/CalculateEnergyCUDAKernel.cu
     src/GPU/CalculateForceCUDAKernel.cu
     src/GPU/CalculateEwaldCUDAKernel.cu
     src/GPU/ConstantDefinitionsCUDAKernel.cu
-    src/GPU/CUDAMemoryManager.cu)
+    src/GPU/CUDAMemoryManager.cu
+    src/PrecisionChecker.cu)
 
 source_group("Header Files" FILES ${headers})
 source_group("Lib Headers" FILES ${libHeaders})
