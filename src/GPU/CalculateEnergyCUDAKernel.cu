@@ -183,7 +183,7 @@ void CallBoxInterGPU(VariablesCUDA *vars,
   cudaMemcpy(neighborParticleArray, dev_neighborParticleArray, *pointerToIndexForTuple * sizeof(int), cudaMemcpyDeviceToHost);
   cudaMemcpy(ljArray, dev_ljArray, *pointerToIndexForTuple * sizeof(double), cudaMemcpyDeviceToHost);
 
-  std::cout << "from within wrapper " << *pointerToIndexForTuple << std::endl;
+  std::cout << "from within CallBoxInter " << *pointerToIndexForTuple << std::endl;
 
   cudaFree(dev_pointerToIndexForTuple);
   cudaFree(dev_currentParticleArray);

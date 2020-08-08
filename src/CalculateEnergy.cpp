@@ -234,7 +234,7 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
                   pointerToIndexForTuple
                   );
 
-  std::cout << "You used " << *pointerToIndexForTuple << " spaces in cuda" << std::endl;
+  std::cout << "You used " << *pointerToIndexForTuple << " spaces in cuda in BoxInter" << std::endl;
   pc.sortCUDATuples(currentParticleArray, neighborParticleArray, ljArray, *pointerToIndexForTuple);
 
   free(currentParticleArray);
@@ -322,7 +322,7 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
   tempLJEnOMP = tempLJEn;
 
   //#endif
-  std::cout << "You used " << indexForTupleOpenMP << " spaces in openmp" << std::endl;
+  std::cout << "You used " << indexForTupleOpenMP << " spaces in openmp in BoxInter" << std::endl;
   pc.sortOMPTuples(currentParticleArrayOpenMP, neighborParticleArrayOpenMP, ljArrayOpenMP, indexForTupleOpenMP);
 
   if (indexForTupleOpenMP == *pointerToIndexForTuple){
@@ -355,6 +355,10 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
     std::cout << "OMP : " << indexForTupleOpenMP << "CUDA : " << *pointerToIndexForTuple << std::endl;
     exit(EXIT_FAILURE);
   }
+
+  free(currentParticleArrayOpenMP);
+  free(neighborParticleArrayOpenMP);
+  free(ljArrayOpenMP);
 
   // setting energy and virial of LJ interaction
   potential.boxEnergy[box].inter = tempLJEn;
@@ -408,7 +412,7 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   int currParticleIdx, currParticle, currCell, nCellIndex, neighborCell, endIndex, nParticleIndex, nParticle;
   uint atomsInsideBox = NumberOfParticlesInsideBox(box);
 
-#ifdef GOMC_CUDA
+//#ifdef GOMC_CUDA
   //update unitcell in GPU
   UpdateCellBasisCUDA(forcefield.particles->getCUDAVars(), box,
                       boxAxes.cellBasis[box].x, boxAxes.cellBasis[box].y,
@@ -422,15 +426,57 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
                            newAxes.cellBasis_Inv[box].z);
   }
 
+  double atomForceXCUDA = 0.0;
+
+  uint indexForTuple = 0;
+  uint * pointerToIndexForTuple;
+  pointerToIndexForTuple = &indexForTuple;
+
+  int * currentParticleArray;
+  int * neighborParticleArray;
+  double * ljArray;
+
+  currentParticleArray = (int*) calloc (atomsInsideBox * atomsInsideBox, sizeof(int));
+  neighborParticleArray = (int*) calloc (atomsInsideBox * atomsInsideBox, sizeof(int));
+  ljArray = (double*) calloc (atomsInsideBox * atomsInsideBox, sizeof(double));
+
+  PrecisionChecker pc(1);
+
   CallBoxForceGPU(forcefield.particles->getCUDAVars(), cellVector,
                   cellStartIndex, neighborList, mapParticleToCell,
                   coords, boxAxes, electrostatic, particleCharge,
                   particleKind, particleMol, tempREn, tempLJEn,
                   aForcex, aForcey, aForcez, mForcex, mForcey, mForcez,
                   atomCount, molCount, forcefield.sc_coul, forcefield.sc_sigma_6, forcefield.sc_alpha,
-                  forcefield.sc_power, box, atomsInsideBox);
+                  forcefield.sc_power, box, atomsInsideBox,
+                  currentParticleArray,
+                  neighborParticleArray,
+                  ljArray,
+                  pointerToIndexForTuple);
 
-#else
+  std::cout << "You used " << *pointerToIndexForTuple << " spaces in cuda in BoxForce" << std::endl;
+  pc.sortCUDATuples(currentParticleArray, neighborParticleArray, ljArray, *pointerToIndexForTuple);
+
+  free(currentParticleArray);
+  free(neighborParticleArray);
+  free(ljArray);
+
+  // Reset Force Arrays
+  ResetForce(atomForce, molForce, box);
+
+  uint indexForTupleOpenMP = 0;
+  uint * pointerToIndexForTupleOpenMP;
+  pointerToIndexForTupleOpenMP = &indexForTupleOpenMP;
+
+  int * currentParticleArrayOpenMP;
+  int * neighborParticleArrayOpenMP;
+  double * ljArrayOpenMP;
+
+  currentParticleArrayOpenMP = (int*) calloc (atomsInsideBox * atomsInsideBox, sizeof(int));
+  neighborParticleArrayOpenMP = (int*) calloc (atomsInsideBox * atomsInsideBox, sizeof(int));
+  ljArrayOpenMP = (double*) calloc (atomsInsideBox * atomsInsideBox, sizeof(double));
+
+//#else
 #if defined _OPENMP && _OPENMP >= 201511 // check if OpenMP version is 4.5
 #pragma omp parallel for default(shared) private(currParticle, currCell, nCellIndex, \
 neighborCell, endIndex, nParticleIndex, nParticle, distSq, qi_qj_fact, \
@@ -483,12 +529,60 @@ reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
             mForcex[particleMol[nParticle]] += -(forceLJ.x + forceReal.x);
             mForcey[particleMol[nParticle]] += -(forceLJ.y + forceReal.y);
             mForcez[particleMol[nParticle]] += -(forceLJ.z + forceReal.z);
+
+            #pragma omp critical
+            {
+              currentParticleArrayOpenMP[indexForTupleOpenMP] = currParticle;
+              neighborParticleArrayOpenMP[indexForTupleOpenMP] = nParticle;
+              ljArrayOpenMP[indexForTupleOpenMP] = forceLJ.x;
+              indexForTupleOpenMP++;
+            }
           }
         }
       }
     }
   }
-#endif
+
+  //#endif
+  std::cout << "You used " << indexForTupleOpenMP << " spaces in openmp in BoxForce" << std::endl;
+  pc.sortOMPTuples(currentParticleArrayOpenMP, neighborParticleArrayOpenMP, ljArrayOpenMP, indexForTupleOpenMP);
+
+  if (indexForTupleOpenMP == *pointerToIndexForTuple){
+    for (uint i = 0; i < indexForTupleOpenMP; i++){
+      if (pc.row_vec_omp[i] == pc.row_vec_cuda[i] && pc.col_vec_omp[i] == pc.col_vec_cuda[i]){
+        if(!pc.AlmostEqualUlps(pc.val_vec_omp[i], pc.val_vec_omp[i], 1)){
+          std::cout << "Pair tuple indices differ in value!" << std::endl;
+          std::cout << "OMP (" << pc.row_vec_omp[i] << ", " << pc.col_vec_omp[i] << ") : " << 
+            pc.val_vec_omp[i] << " != CUDA (" << pc.row_vec_cuda[i] << ", " << pc.col_vec_cuda[i] << ") : " << 
+            pc.val_vec_cuda[i] << std::endl;
+            exit(EXIT_FAILURE);
+        }
+      } else {
+            std::cout << "Pair tuple indices differ in order!" << std::endl;
+            std::cout << "OMP (" << pc.row_vec_omp[i] << ", " << pc.col_vec_omp[i] << ") : " << 
+            " != CUDA (" << pc.row_vec_cuda[i] << ", " << pc.col_vec_cuda[i] << ") : " << std::endl;
+            exit(EXIT_FAILURE);
+      }
+    }
+/*
+    if(!pc.AlmostEqualUlps(tempREnOMP, tempREnCUDA, 1) || !pc.AlmostEqualUlps(tempLJEnOMP, tempLJEnCUDA, 1)){
+      std::cout << "Energy reductions differ in value!" << std::endl;
+      std::cout << "REn OMP : " << tempREnOMP << " != REn CUDA : " << tempREnCUDA << std::endl;
+      std::cout << "LJEn OMP : " << tempLJEnOMP << " != LJEn CUDA : " << tempLJEnCUDA << std::endl;
+      exit(EXIT_FAILURE);
+    }
+*/
+  } else {
+    std::cout << "Number of pairs differs!" << std::endl;
+    std::cout << "OMP : " << indexForTupleOpenMP << "CUDA : " << *pointerToIndexForTuple << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  free(currentParticleArrayOpenMP);
+  free(neighborParticleArrayOpenMP);
+  free(ljArrayOpenMP);
+
+//#endif
   // setting energy and virial of LJ interaction
   potential.boxEnergy[box].inter = tempLJEn;
   // setting energy and virial of coulomb interaction
@@ -571,7 +665,7 @@ Virial CalculateEnergy::VirialCalc(const uint box)
                        pointerToIndexForTuple                      
                        );
 
-  std::cout << "You used " << *pointerToIndexForTuple << " spaces in cuda" << std::endl;
+  std::cout << "You used " << *pointerToIndexForTuple << " spaces in cuda in BoxInterForce" << std::endl;
   pc.sortCUDATuples(currentParticleArray, neighborParticleArray, ljArray, *pointerToIndexForTuple);
 
   free(currentParticleArray);
@@ -690,7 +784,7 @@ virC, comC, lambdaVDW, lambdaCoulomb) reduction(+:vT11, vT12, vT13, vT22, \
   rT11OMP = rT11;
 
   //#endif
-  std::cout << "You used " << indexForTupleOpenMP << " spaces in openmp" << std::endl;
+  std::cout << "You used " << indexForTupleOpenMP << " spaces in openmp in BoxInterForce" << std::endl;
   pc.sortOMPTuples(currentParticleArrayOpenMP, neighborParticleArrayOpenMP, ljArrayOpenMP, indexForTupleOpenMP);
 
   if (indexForTupleOpenMP == *pointerToIndexForTuple){
@@ -722,6 +816,10 @@ virC, comC, lambdaVDW, lambdaCoulomb) reduction(+:vT11, vT12, vT13, vT22, \
     std::cout << "OMP : " << indexForTupleOpenMP << "CUDA : " << *pointerToIndexForTuple << std::endl;
     exit(EXIT_FAILURE);
   }
+
+  free(currentParticleArrayOpenMP);
+  free(neighborParticleArrayOpenMP);
+  free(ljArrayOpenMP);
 
   // set the all tensor values
   tempVir.interTens[0][0] = vT11;
