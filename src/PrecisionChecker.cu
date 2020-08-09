@@ -1,3 +1,6 @@
+#ifdef GOMC_CUDA
+
+
 #include "PrecisionChecker.cuh"
 
 PrecisionChecker::PrecisionChecker(int i){}
@@ -79,3 +82,5 @@ bool PrecisionChecker::AlmostEqualUlps(double A, double B, int maxUlpsDiff)
         return true;
     return false;
 }
+
+#endif

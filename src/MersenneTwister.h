@@ -361,9 +361,7 @@ inline MTRand::uint32 MTRand::randInt( const uint32 n )
 
 inline double MTRand::rand()
 {
-  int i = randInt();
-  std::cout << "MersenneTwister" << i << std::cout;
-  return double(i) * (1.0 / 4294967295.0);
+  return double(randInt()) * (1.0 / 4294967295.0);
 }
 
 inline double MTRand::rand( const double n )

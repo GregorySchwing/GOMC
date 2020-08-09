@@ -192,6 +192,8 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
   int countpairs = 0;
   int atomsInsideBox = NumberOfParticlesInsideBox(box);
 
+#ifdef GOMC_CUDA
+
   uint indexForTuple = 0;
   uint * pointerToIndexForTuple;
   pointerToIndexForTuple = &indexForTuple;
@@ -208,8 +210,6 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
 
   double tempREnCUDA = 0.0, tempLJEnCUDA = 0.0;
 
-
-#ifdef GOMC_CUDA
   //update unitcell in GPU
   UpdateCellBasisCUDA(forcefield.particles->getCUDAVars(), box,
                       boxAxes.cellBasis[box].x, boxAxes.cellBasis[box].y,
@@ -321,6 +321,9 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
   tempREnOMP = tempREn;
   tempLJEnOMP = tempLJEn;
 
+#ifdef GOMC_CUDA
+
+
   //#endif
   std::cout << "You used " << indexForTupleOpenMP << " spaces in openmp in BoxInter" << std::endl;
   pc.sortOMPTuples(currentParticleArrayOpenMP, neighborParticleArrayOpenMP, ljArrayOpenMP, indexForTupleOpenMP);
@@ -355,6 +358,8 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
     std::cout << "OMP : " << indexForTupleOpenMP << "CUDA : " << *pointerToIndexForTuple << std::endl;
     exit(EXIT_FAILURE);
   }
+
+#endif
 
   free(currentParticleArrayOpenMP);
   free(neighborParticleArrayOpenMP);
@@ -412,7 +417,7 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   int currParticleIdx, currParticle, currCell, nCellIndex, neighborCell, endIndex, nParticleIndex, nParticle;
   uint atomsInsideBox = NumberOfParticlesInsideBox(box);
 
-//#ifdef GOMC_CUDA
+#ifdef GOMC_CUDA
   //update unitcell in GPU
   UpdateCellBasisCUDA(forcefield.particles->getCUDAVars(), box,
                       boxAxes.cellBasis[box].x, boxAxes.cellBasis[box].y,
@@ -462,6 +467,9 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   free(ljArray);
 
   // Reset Force Arrays
+
+#endif
+
   ResetForce(atomForce, molForce, box);
 
   uint indexForTupleOpenMP = 0;
@@ -476,7 +484,7 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   neighborParticleArrayOpenMP = (int*) calloc (atomsInsideBox * atomsInsideBox, sizeof(int));
   ljArrayOpenMP = (double*) calloc (atomsInsideBox * atomsInsideBox, sizeof(double));
 
-//#else
+
 #if defined _OPENMP && _OPENMP >= 201511 // check if OpenMP version is 4.5
 #pragma omp parallel for default(shared) private(currParticle, currCell, nCellIndex, \
 neighborCell, endIndex, nParticleIndex, nParticle, distSq, qi_qj_fact, \
@@ -543,7 +551,7 @@ reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
     }
   }
 
-  //#endif
+#ifdef GOMC_CUDA
   std::cout << "You used " << indexForTupleOpenMP << " spaces in openmp in BoxForce" << std::endl;
   pc.sortOMPTuples(currentParticleArrayOpenMP, neighborParticleArrayOpenMP, ljArrayOpenMP, indexForTupleOpenMP);
 
@@ -577,6 +585,8 @@ reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
     std::cout << "OMP : " << indexForTupleOpenMP << "CUDA : " << *pointerToIndexForTuple << std::endl;
     exit(EXIT_FAILURE);
   }
+
+  #endif
 
   free(currentParticleArrayOpenMP);
   free(neighborParticleArrayOpenMP);
@@ -620,6 +630,10 @@ Virial CalculateEnergy::VirialCalc(const uint box)
   int currParticleIdx, currParticle, currCell, nCellIndex, neighborCell, endIndex, nParticleIndex, nParticle;
   uint atomsInsideBox = NumberOfParticlesInsideBox(box);
 
+
+
+#ifdef GOMC_CUDA
+
   double rT11CUDA = 0.0;
 
   uint indexForTuple = 0;
@@ -636,7 +650,7 @@ Virial CalculateEnergy::VirialCalc(const uint box)
 
   PrecisionChecker pc(1);
 
-//#ifdef GOMC_CUDA
+
   //update unitcell in GPU
   UpdateCellBasisCUDA(forcefield.particles->getCUDAVars(), box,
                       currentAxes.cellBasis[box].x,
@@ -674,7 +688,8 @@ Virial CalculateEnergy::VirialCalc(const uint box)
 
   rT11CUDA = rT11;
 
-//#else
+#endif
+
   double rT11OMP = 0.0;
 
   uint indexForTupleOpenMP = 0;
@@ -780,6 +795,7 @@ virC, comC, lambdaVDW, lambdaCoulomb) reduction(+:vT11, vT12, vT13, vT22, \
     }
   }
 //#endif
+#ifdef GOMC_CUDA
 
   rT11OMP = rT11;
 
@@ -816,6 +832,8 @@ virC, comC, lambdaVDW, lambdaCoulomb) reduction(+:vT11, vT12, vT13, vT22, \
     std::cout << "OMP : " << indexForTupleOpenMP << "CUDA : " << *pointerToIndexForTuple << std::endl;
     exit(EXIT_FAILURE);
   }
+
+#endif
 
   free(currentParticleArrayOpenMP);
   free(neighborParticleArrayOpenMP);

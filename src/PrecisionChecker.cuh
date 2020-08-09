@@ -1,5 +1,8 @@
 // Author Bruce Dawson
 // https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
+#ifdef GOMC_CUDA
+
+
 
 #ifndef PRECISION_CHECKER_H
 #define PRECISION_CHECKER_H
@@ -106,4 +109,6 @@ public:
     PairIterator A_first_omp;   
     PairIterator A_last_omp;   
 };
+#endif
+
 #endif
