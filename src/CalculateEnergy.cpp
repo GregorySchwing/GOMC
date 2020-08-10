@@ -439,11 +439,16 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
 
   int * currentParticleArray;
   int * neighborParticleArray;
-  double * ljArray;
+  double * xForce;
+  double * yForce;
+  double * zForce;
+
 
   currentParticleArray = (int*) calloc (atomsInsideBox * atomsInsideBox, sizeof(int));
   neighborParticleArray = (int*) calloc (atomsInsideBox * atomsInsideBox, sizeof(int));
-  ljArray = (double*) calloc (atomsInsideBox * atomsInsideBox, sizeof(double));
+  xForce = (double*) calloc (atomsInsideBox * atomsInsideBox, sizeof(double));
+  yForce = (double*) calloc (atomsInsideBox * atomsInsideBox, sizeof(double));
+  zForce = (double*) calloc (atomsInsideBox * atomsInsideBox, sizeof(double));
 
   PrecisionChecker pc(1);
 
@@ -456,15 +461,19 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
                   forcefield.sc_power, box, atomsInsideBox,
                   currentParticleArray,
                   neighborParticleArray,
-                  ljArray,
+                  xForce,
+                  yForce,
+                  zForce,
                   pointerToIndexForTuple);
 
   std::cout << "You used " << *pointerToIndexForTuple << " spaces in cuda in BoxForce" << std::endl;
-  pc.sortCUDATuples(currentParticleArray, neighborParticleArray, ljArray, *pointerToIndexForTuple);
+  pc.sortCUDATuplesForce(currentParticleArray, neighborParticleArray, xForce, yForce, zForce, *pointerToIndexForTuple);
 
   free(currentParticleArray);
   free(neighborParticleArray);
-  free(ljArray);
+  free(xForce);
+  free(yForce);
+  free(zForce);
 
   // Reset Force Arrays
 

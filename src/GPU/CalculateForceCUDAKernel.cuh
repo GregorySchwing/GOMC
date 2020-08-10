@@ -79,7 +79,9 @@ void CallBoxForceGPU(VariablesCUDA *vars,
                      uint const atomsInsideBox,
                      int * currentParticleArray,
                      int * neighborParticleArray,
-                     double * ljArray,
+                     double * xForce,
+                     double * yForce,
+                     double * zForce,
                      uint * pointerToIndexForTuple);
 
 void CallVirialReciprocalGPU(VariablesCUDA *vars,
@@ -156,7 +158,9 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                             int atomsInsideBox,                     
                             int * currentParticleArray,
                             int * neighborParticleArray,
-                            double * ljArray,
+                            double * dev_xForce,
+                            double * dev_yForce,
+                            double * dev_zForce,
                             uint * pointerToIndexForTuple);
 
 __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,

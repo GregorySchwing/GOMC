@@ -21,6 +21,10 @@ using namespace cub;
 __device__ int * DEVF_currentParticleArray;
 __device__ int * DEVF_neighborParticleArray;
 __device__ double * DEVF_ljArray;
+__device__ double * DEVF_xForce;
+__device__ double * DEVF_yForce;
+__device__ double * DEVF_zForce;
+
 __device__ uint * DEVF_X;  
 
 void CallBoxInterForceGPU(VariablesCUDA *vars,
@@ -352,7 +356,9 @@ void CallBoxForceGPU(VariablesCUDA *vars,
                      uint const atomsInsideBox,                     
                      int * currentParticleArray,
                      int * neighborParticleArray,
-                     double * ljArray,
+                     double * xForce,
+                     double * yForce,
+                     double * zForce,
                      uint * pointerToIndexForTuple)
 {
   int atomNumber = coords.Count();
@@ -408,23 +414,32 @@ void CallBoxForceGPU(VariablesCUDA *vars,
 
   int * dev_currentParticleArray;
   int * dev_neighborParticleArray;
-  double * dev_ljArray;
+  double * dev_xForce;
+  double * dev_yForce;
+  double * dev_zForce;
   uint * dev_pointerToIndexForTuple; 
 
   cudaGetSymbolAddress((void **)&dev_pointerToIndexForTuple, DEVF_X);
   cudaGetSymbolAddress((void **)&dev_currentParticleArray, DEVF_currentParticleArray);
   cudaGetSymbolAddress((void **)&dev_neighborParticleArray, DEVF_neighborParticleArray);
-  cudaGetSymbolAddress((void **)&dev_ljArray, DEVF_ljArray);
+  cudaGetSymbolAddress((void **)&dev_xForce, DEVF_xForce);
+  cudaGetSymbolAddress((void **)&dev_yForce, DEVF_yForce);
+  cudaGetSymbolAddress((void **)&dev_zForce, DEVF_zForce);
 
   cudaMalloc((void**) &dev_pointerToIndexForTuple, sizeof(uint));
   cudaMalloc((void**) &dev_currentParticleArray, atomNumber * atomNumber * sizeof(int));
   cudaMalloc((void**) &dev_neighborParticleArray, atomNumber * atomNumber * sizeof(int));
-  cudaMalloc((void**) &dev_ljArray, atomNumber * atomNumber * sizeof(double));
+  cudaMalloc((void**) &dev_xForce, atomNumber * atomNumber * sizeof(double));
+  cudaMalloc((void**) &dev_yForce, atomNumber * atomNumber * sizeof(double));
+  cudaMalloc((void**) &dev_zForce, atomNumber * atomNumber * sizeof(double));
 
   cudaMemset(dev_pointerToIndexForTuple, 0, sizeof(uint));
   cudaMemset(dev_currentParticleArray, 0, atomNumber * atomNumber * sizeof(int));
   cudaMemset(dev_neighborParticleArray, 0, atomNumber * atomNumber * sizeof(int));
-  cudaMemset(dev_ljArray, 0.0, atomNumber * atomNumber * sizeof(double));
+  cudaMemset(dev_xForce, 0.0, atomNumber * atomNumber * sizeof(double));
+  cudaMemset(dev_yForce, 0.0, atomNumber * atomNumber * sizeof(double));
+  cudaMemset(dev_zForce, 0.0, atomNumber * atomNumber * sizeof(double));
+
 
   BoxForceGPU <<< blocksPerGrid, threadsPerBlock>>>(gpu_cellStartIndex,
       vars->gpu_cellVector,
@@ -486,7 +501,9 @@ void CallBoxForceGPU(VariablesCUDA *vars,
       atomsInsideBox,
       dev_currentParticleArray,
       dev_neighborParticleArray,
-      dev_ljArray,
+      dev_xForce,
+      dev_yForce,
+      dev_zForce,
       dev_pointerToIndexForTuple);
 
   checkLastErrorCUDA(__FILE__, __LINE__);
@@ -494,14 +511,18 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   cudaMemcpy(pointerToIndexForTuple, dev_pointerToIndexForTuple, sizeof(uint), cudaMemcpyDeviceToHost);
   cudaMemcpy(currentParticleArray, dev_currentParticleArray, *pointerToIndexForTuple * sizeof(int), cudaMemcpyDeviceToHost);
   cudaMemcpy(neighborParticleArray, dev_neighborParticleArray, *pointerToIndexForTuple * sizeof(int), cudaMemcpyDeviceToHost);
-  cudaMemcpy(ljArray, dev_ljArray, *pointerToIndexForTuple * sizeof(double), cudaMemcpyDeviceToHost);
+  cudaMemcpy(xForce, dev_xForce, *pointerToIndexForTuple * sizeof(double), cudaMemcpyDeviceToHost);
+  cudaMemcpy(yForce, dev_yForce, *pointerToIndexForTuple * sizeof(double), cudaMemcpyDeviceToHost);
+  cudaMemcpy(zForce, dev_zForce, *pointerToIndexForTuple * sizeof(double), cudaMemcpyDeviceToHost);
 
   std::cout << "from within CallBoxForce " << *pointerToIndexForTuple << std::endl;
 
   cudaFree(dev_pointerToIndexForTuple);
   cudaFree(dev_currentParticleArray);
   cudaFree(dev_neighborParticleArray);
-  cudaFree(dev_ljArray);
+  cudaFree(dev_xForce);
+  cudaFree(dev_yForce);
+  cudaFree(dev_zForce);
 
   // ReduceSum
   void * d_temp_storage = NULL;
@@ -910,7 +931,9 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                             int atomsInsideBox,
                             int * dev_currentParticleArray,
                             int * dev_neighborParticleArray,
-                            double * dev_ljArray,
+                            double * dev_xForce,
+                            double * dev_yForce,
+                            double * dev_zForce,
                             uint * dev_pointerToIndexForTuple)
 {
   int threadID = blockIdx.x * blockDim.x + threadIdx.x;
@@ -1035,7 +1058,9 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
         uint localIndex = atomicAdd(dev_pointerToIndexForTuple, (int)1);       
         dev_currentParticleArray[localIndex] = currentParticle;
         dev_neighborParticleArray[localIndex] = neighborParticle;
-        dev_ljArray[localIndex] = forceLJx;
+        dev_xForce[localIndex] = forceLJx;
+        dev_yForce[localIndex] = forceLJx;
+        dev_zForce[localIndex] = forceLJx;
       }
     }
   }

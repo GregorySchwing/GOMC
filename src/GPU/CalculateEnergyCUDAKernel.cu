@@ -340,6 +340,10 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
 
         lambdaVDW = DeviceGetLambdaVDW(mA, kA, mB, kB, box, gpu_isFraction,
                                        gpu_molIndex, gpu_kindIndex, gpu_lambdaVDW);
+                                       
+        uint localIndex = atomicAdd(dev_pointerToIndexForTuple, (int)1);       
+        dev_currentParticleArray[localIndex] = currentParticle;
+        dev_neighborParticleArray[localIndex] = neighborParticle;
 
         if(electrostatic) {
           qi_qj_fact = cA * cB * qqFact;
@@ -347,6 +351,21 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                                                  gpu_isFraction, gpu_molIndex,
                                                  gpu_kindIndex, gpu_lambdaCoulomb);
           gpu_REn[threadID] += CalcCoulombGPU(distSq, kA, kB,
+                                              qi_qj_fact, gpu_rCutLow[0],
+                                              gpu_ewald[0], gpu_VDW_Kind[0],
+                                              gpu_alpha[box],
+                                              gpu_rCutCoulomb[box],
+                                              gpu_isMartini[0],
+                                              gpu_diElectric_1[0],
+                                              lambdaCoulomb,
+                                              sc_coul,
+                                              sc_sigma_6,
+                                              sc_alpha,
+                                              sc_power,
+                                              gpu_sigmaSq,
+                                              gpu_count[0]);
+
+          dev_ljArray[localIndex] += CalcCoulombGPU(distSq, kA, kB,
                                               qi_qj_fact, gpu_rCutLow[0],
                                               gpu_ewald[0], gpu_VDW_Kind[0],
                                               gpu_alpha[box],
@@ -368,9 +387,6 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                                         sc_sigma_6, sc_alpha, sc_power, gpu_rMin,
                                         gpu_rMaxSq, gpu_expConst);
 
-        uint localIndex = atomicAdd(dev_pointerToIndexForTuple, (int)1);       
-        dev_currentParticleArray[localIndex] = currentParticle;
-        dev_neighborParticleArray[localIndex] = neighborParticle;
         dev_ljArray[localIndex] = CalcEnGPU(distSq, kA, kB,
                                             gpu_sigmaSq, gpu_n, gpu_epsilon_Cn,
                                             gpu_VDW_Kind[0], gpu_isMartini[0],

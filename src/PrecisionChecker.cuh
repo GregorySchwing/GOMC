@@ -16,15 +16,36 @@
 
 using namespace std;
 
+  typedef thrust::tuple<int,int,double,double,double> pairTupleForce;
   typedef thrust::tuple<int,int,double> pairTuple;
 
   typedef thrust::device_vector<int>::iterator                     IntIterator;
   typedef thrust::device_vector<double>::iterator                  DoubleIterator;
 
-  typedef thrust::tuple<IntIterator, IntIterator, DoubleIterator> PairIteratorTuple;
-  typedef thrust::zip_iterator<PairIteratorTuple>                   PairIterator;
+  typedef thrust::tuple<IntIterator, IntIterator, DoubleIterator, DoubleIterator, DoubleIterator> PairIteratorTupleForce;
 
-  struct cmp : public std::binary_function<pairTuple,pairTuple,bool>
+  typedef thrust::tuple<IntIterator, IntIterator, DoubleIterator> PairIteratorTuple;
+
+  typedef thrust::zip_iterator<PairIteratorTuple>                   PairIterator;
+  
+  typedef thrust::zip_iterator<PairIteratorTupleForce>                   PairIteratorForce;
+
+
+
+
+  struct cmpForce : public std::binary_function<PairIteratorTupleForce,PairIteratorTupleForce,bool>
+  {
+      __host__ __device__
+          bool operator()(const PairIteratorTupleForce& a, const PairIteratorTupleForce& b) const
+          {
+              if (thrust::get<0>(a) != thrust::get<0>(b))
+                  return thrust::get<0>(a) < thrust::get<0>(b);
+              else 
+                  return thrust::get<1>(a) < thrust::get<1>(b);
+          }
+  };
+
+    struct cmpEnergy : public std::binary_function<pairTuple,pairTuple,bool>
   {
       __host__ __device__
           bool operator()(const pairTuple& a, const pairTuple& b) const
@@ -42,6 +63,9 @@ public:
     explicit PrecisionChecker(int i);
     void sortCUDATuples(int * curr, int * neigh, double * val, int numberOfElements);
     void sortOMPTuples(int * curr, int * neigh, double * val, int numberOfElements);
+
+    void sortCUDATuplesForce(int * curr, int * neigh, double * forceX, double * forceY, double * forceZ, int numberOfElements);
+    void sortOMPTuplesForce(int * curr, int * neigh, double * forceX, double * forceY, double * forceZ, int numberOfElements);
 
     union Float_t
     {
@@ -88,9 +112,18 @@ public:
     thrust::host_vector<int> row_vec_cuda;
     thrust::host_vector<double> val_vec_cuda;
 
+    thrust::host_vector<double> valx_vec_cuda;
+    thrust::host_vector<double> valy_vec_cuda;
+    thrust::host_vector<double> valz_vec_cuda;
+
     thrust::host_vector<int> col_vec_omp;
     thrust::host_vector<int> row_vec_omp;
     thrust::host_vector<double> val_vec_omp;
+
+    thrust::host_vector<double> valx_vec_omp;
+    thrust::host_vector<double> valy_vec_omp;
+    thrust::host_vector<double> valz_vec_omp;
+
 
     thrust::host_vector<int> dimensions_vec;
     thrust::host_vector<int> ones;
@@ -99,15 +132,28 @@ public:
     thrust::device_vector<int> row_vec_dev_cuda;
     thrust::device_vector<double> val_vec_dev_cuda;
 
+    thrust::device_vector<double> valx_vec_dev_cuda;
+    thrust::device_vector<double> valy_vec_dev_cuda;
+    thrust::device_vector<double> valz_vec_dev_cuda;
+
+
     thrust::device_vector<int> col_vec_dev_omp;
     thrust::device_vector<int> row_vec_dev_omp;
     thrust::device_vector<double> val_vec_dev_omp;
 
+    thrust::device_vector<double> valx_vec_dev_omp;
+    thrust::device_vector<double> valy_vec_dev_omp;
+    thrust::device_vector<double> valz_vec_dev_omp;
 // Now we'll create some zip_iterators for A and B
     PairIterator A_first_cuda;   
     PairIterator A_last_cuda;   
     PairIterator A_first_omp;   
     PairIterator A_last_omp;   
+
+    PairIteratorForce A_first_cuda_force;   
+    PairIteratorForce A_last_cuda_force;   
+    PairIteratorForce A_first_omp_force;   
+    PairIteratorForce A_last_omp_force;  
 };
 #endif
 
