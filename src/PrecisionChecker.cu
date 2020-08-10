@@ -11,17 +11,17 @@ void PrecisionChecker::sortCUDATuples(int * curr, int * neigh, double * val, int
     thrust::device_vector< int > neighVec(neigh, neigh+numberOfElements);
     thrust::device_vector< double > valVec(val, val+numberOfElements);
 
-    row_vec_dev_cuda = currVec;
-    col_vec_dev_cuda = neighVec;
+    row_vec_dev_cuda_en = currVec;
+    col_vec_dev_cuda_en = neighVec;
     val_vec_dev_cuda = valVec;
 
-    A_first_cuda = thrust::make_zip_iterator(thrust::make_tuple(row_vec_dev_cuda.begin(), col_vec_dev_cuda.begin(), val_vec_dev_cuda.begin()));
-    A_last_cuda  = thrust::make_zip_iterator(thrust::make_tuple(row_vec_dev_cuda.end(),   col_vec_dev_cuda.end(),   val_vec_dev_cuda.end()));
+    A_first_cuda = thrust::make_zip_iterator(thrust::make_tuple(row_vec_dev_cuda_en.begin(), col_vec_dev_cuda_en.begin(), val_vec_dev_cuda.begin()));
+    A_last_cuda  = thrust::make_zip_iterator(thrust::make_tuple(row_vec_dev_cuda_en.end(),   col_vec_dev_cuda_en.end(),   val_vec_dev_cuda.end()));
 
     thrust::sort(A_first_cuda, A_last_cuda, cmpEnergy());
 
-    row_vec_cuda = row_vec_dev_cuda;
-    col_vec_cuda = col_vec_dev_cuda;
+    row_vec_cuda_en = row_vec_dev_cuda_en;
+    col_vec_cuda_en = col_vec_dev_cuda_en;
     val_vec_cuda = val_vec_dev_cuda;
 }
 
@@ -31,8 +31,8 @@ void PrecisionChecker::sortOMPTuples(int * curr, int * neigh, double * val, int 
     thrust::device_vector< int > neighVec(neigh, neigh+numberOfElements);
     thrust::device_vector< double > valVec(val, val+numberOfElements);
 
-    row_vec_dev_omp = currVec;
-    col_vec_dev_omp = neighVec;
+    row_vec_dev_omp_en = currVec;
+    col_vec_dev_omp_en = neighVec;
     val_vec_dev_omp = valVec;
 
     A_first_omp = thrust::make_zip_iterator(thrust::make_tuple(row_vec_dev_omp.begin(), col_vec_dev_omp.begin(), val_vec_dev_omp.begin()));
@@ -40,8 +40,8 @@ void PrecisionChecker::sortOMPTuples(int * curr, int * neigh, double * val, int 
 
     thrust::sort(A_first_omp, A_last_omp, cmpEnergy());
 
-    row_vec_omp = row_vec_dev_omp;
-    col_vec_omp = col_vec_dev_omp;
+    row_vec_omp_en = row_vec_dev_omp_en;
+    col_vec_omp_en = col_vec_dev_omp_en;
     val_vec_omp = val_vec_dev_omp;
 }
 

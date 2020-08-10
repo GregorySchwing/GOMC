@@ -112,9 +112,15 @@ public:
     thrust::host_vector<int> row_vec_cuda;
     thrust::host_vector<double> val_vec_cuda;
 
+    thrust::host_vector<int> col_vec_cuda_en;
+    thrust::host_vector<int> row_vec_cuda_en;
+
     thrust::host_vector<double> valx_vec_cuda;
     thrust::host_vector<double> valy_vec_cuda;
     thrust::host_vector<double> valz_vec_cuda;
+
+    thrust::host_vector<int> col_vec_omp_en;
+    thrust::host_vector<int> row_vec_omp_en;
 
     thrust::host_vector<int> col_vec_omp;
     thrust::host_vector<int> row_vec_omp;
@@ -128,18 +134,24 @@ public:
     thrust::host_vector<int> dimensions_vec;
     thrust::host_vector<int> ones;
 
+    thrust::device_vector<int> col_vec_dev_cuda_en;
+    thrust::device_vector<int> row_vec_dev_cuda_en;
+    thrust::device_vector<double> val_vec_dev_cuda;
+
     thrust::device_vector<int> col_vec_dev_cuda;
     thrust::device_vector<int> row_vec_dev_cuda;
-    thrust::device_vector<double> val_vec_dev_cuda;
 
     thrust::device_vector<double> valx_vec_dev_cuda;
     thrust::device_vector<double> valy_vec_dev_cuda;
     thrust::device_vector<double> valz_vec_dev_cuda;
 
 
+    thrust::device_vector<int> col_vec_dev_omp_en;
+    thrust::device_vector<int> row_vec_dev_omp_en;
+    thrust::device_vector<double> val_vec_dev_omp;
+
     thrust::device_vector<int> col_vec_dev_omp;
     thrust::device_vector<int> row_vec_dev_omp;
-    thrust::device_vector<double> val_vec_dev_omp;
 
     thrust::device_vector<double> valx_vec_dev_omp;
     thrust::device_vector<double> valy_vec_dev_omp;

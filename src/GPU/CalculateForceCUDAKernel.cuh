@@ -82,6 +82,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
                      double * xForce,
                      double * yForce,
                      double * zForce,
+                     double * energy,
                      uint * pointerToIndexForTuple);
 
 void CallVirialReciprocalGPU(VariablesCUDA *vars,
@@ -161,6 +162,7 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                             double * dev_xForce,
                             double * dev_yForce,
                             double * dev_zForce,
+                            double * energy,
                             uint * pointerToIndexForTuple);
 
 __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,

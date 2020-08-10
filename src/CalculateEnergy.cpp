@@ -442,6 +442,7 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   double * xForce;
   double * yForce;
   double * zForce;
+  double * energy;
 
 
   currentParticleArray = (int*) calloc (atomsInsideBox * atomsInsideBox, sizeof(int));
@@ -449,6 +450,7 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   xForce = (double*) calloc (atomsInsideBox * atomsInsideBox, sizeof(double));
   yForce = (double*) calloc (atomsInsideBox * atomsInsideBox, sizeof(double));
   zForce = (double*) calloc (atomsInsideBox * atomsInsideBox, sizeof(double));
+  energy = (double*) calloc (atomsInsideBox * atomsInsideBox, sizeof(double));
 
   PrecisionChecker pc(1);
 
@@ -464,16 +466,32 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
                   xForce,
                   yForce,
                   zForce,
+                  energy,
                   pointerToIndexForTuple);
 
   std::cout << "You used " << *pointerToIndexForTuple << " spaces in cuda in BoxForce" << std::endl;
+
+
+  int * currentParticleArrayEn;
+  int * neighborParticleArrayEn;
+
+  currentParticleArrayEn = (int*) calloc (*pointerToIndexForTuple, sizeof(int));
+  neighborParticleArrayEn = (int*) calloc (*pointerToIndexForTuple, sizeof(int));
+  
+  std::memcpy(currentParticleArrayEn, currentParticleArray, sizeof(int)*(*pointerToIndexForTuple))); // should be faster
+  std::memcpy(neighborParticleArrayEn, neighborParticleArray, sizeof(int)*(*pointerToIndexForTuple))); // should be faster
+
   pc.sortCUDATuplesForce(currentParticleArray, neighborParticleArray, xForce, yForce, zForce, *pointerToIndexForTuple);
+  pc.sortCUDATuples(currentParticleArrayEn, neighborParticleArrayEn, energy, *pointerToIndexForTuple);
 
   free(currentParticleArray);
   free(neighborParticleArray);
+  free(currentParticleArrayEn);
+  free(neighborParticleArrayEn);
   free(xForce);
   free(yForce);
   free(zForce);
+  free(energy);
 
   // Reset Force Arrays
 
@@ -489,9 +507,15 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   int * neighborParticleArrayOpenMP;
   double * ljArrayOpenMP;
 
-  currentParticleArrayOpenMP = (int*) calloc (atomsInsideBox * atomsInsideBox, sizeof(int));
-  neighborParticleArrayOpenMP = (int*) calloc (atomsInsideBox * atomsInsideBox, sizeof(int));
-  ljArrayOpenMP = (double*) calloc (atomsInsideBox * atomsInsideBox, sizeof(double));
+  double * xForceOpenMP;
+  double * yForceOpenMP;
+  double * zForceOpenMP;
+  double * energyOpenMP;
+
+  xForceOpenMP = (double*) calloc (atomsInsideBox * atomsInsideBox, sizeof(double));
+  yForceOpenMP = (double*) calloc (atomsInsideBox * atomsInsideBox, sizeof(double));
+  zForceOpenMP = (double*) calloc (atomsInsideBox * atomsInsideBox, sizeof(double));
+  energyOpenMP = (double*) calloc (atomsInsideBox * atomsInsideBox, sizeof(double));
 
 
 #if defined _OPENMP && _OPENMP >= 201511 // check if OpenMP version is 4.5
@@ -552,6 +576,22 @@ reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
               currentParticleArrayOpenMP[indexForTupleOpenMP] = currParticle;
               neighborParticleArrayOpenMP[indexForTupleOpenMP] = nParticle;
               ljArrayOpenMP[indexForTupleOpenMP] = forceLJ.x;
+
+              xForceOpenMP[indexForTupleOpenMP] = forceLJ.x + forceReal.x;
+              yForceOpenMP[indexForTupleOpenMP] = forceLJ.y + forceReal.y;
+              zForceOpenMP[indexForTupleOpenMP] = forceLJ.z + forceReal.z;
+
+              if (electrostatic) {
+                lambdaCoulomb = GetLambdaCoulomb(particleMol[currParticle],
+                                               particleMol[nParticle], box);
+                qi_qj_fact = particleCharge[currParticle] * particleCharge[nParticle] *
+                           num::qqFact;
+                energyOpenMP[indexForTupleOpenMP] += forcefield.particles->CalcCoulomb(distSq, particleKind[currParticle],
+                         particleKind[nParticle], qi_qj_fact, lambdaCoulomb, box);
+              }
+              energyOpenMP[indexForTupleOpenMP] += forcefield.particles->CalcEn(distSq, particleKind[currParticle],
+                        particleKind[nParticle], lambdaVDW);
+
               indexForTupleOpenMP++;
             }
           }
@@ -561,8 +601,20 @@ reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
   }
 
 #ifdef GOMC_CUDA
+
+  int * currentParticleArrayEnOMP;
+  int * neighborParticleArrayEnOMP;
+
+  currentParticleArrayEnOMP = (int*) calloc (*pointerToIndexForTuple, sizeof(int));
+  neighborParticleArrayEnOMP = (int*) calloc (*pointerToIndexForTuple, sizeof(int));
+  
+  std::memcpy(currentParticleArrayEnOMP, currentParticleArrayOpenMP, sizeof(int)*indexForTupleOpenMP); // should be faster
+  std::memcpy(neighborParticleArrayEnOMP, neighborParticleArrayOpenMP, sizeof(int)*indexForTupleOpenMP)); // should be faster
+
+
   std::cout << "You used " << indexForTupleOpenMP << " spaces in openmp in BoxForce" << std::endl;
-  pc.sortOMPTuples(currentParticleArrayOpenMP, neighborParticleArrayOpenMP, ljArrayOpenMP, indexForTupleOpenMP);
+  pc.sortOMPTuplesForce(currentParticleArrayOpenMP, neighborParticleArrayOpenMP, xForceOpenMP, yForceOpenMP, zForceOpenMP, indexForTupleOpenMP);
+  pc.sortOMPTuples(currentParticleArrayEnOMP, neighborParticleArrayEnOMP, ljArrayOpenMP, indexForTupleOpenMP);
 
   if (indexForTupleOpenMP == *pointerToIndexForTuple){
     for (uint i = 0; i < indexForTupleOpenMP; i++){
@@ -594,6 +646,9 @@ reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
     std::cout << "OMP : " << indexForTupleOpenMP << "CUDA : " << *pointerToIndexForTuple << std::endl;
     exit(EXIT_FAILURE);
   }
+
+  free(currentParticleArrayEnOMP);
+  free(neighborParticleArrayEnOMP);
 
   #endif
 
