@@ -418,7 +418,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   double * dev_xForce;
   double * dev_yForce;
   double * dev_zForce;
-  double * energy;
+  double * dev_energy;
 
   uint * dev_pointerToIndexForTuple; 
 
@@ -429,7 +429,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   cudaGetSymbolAddress((void **)&dev_yForce, DEVF_yForce);
   cudaGetSymbolAddress((void **)&dev_zForce, DEVF_zForce);
   
-  cudaGetSymbolAddress((void **)&dev_energy, DEV_ljArray);
+  cudaGetSymbolAddress((void **)&dev_energy, DEVF_ljArray);
 
   cudaMalloc((void**) &dev_pointerToIndexForTuple, sizeof(uint));
   cudaMalloc((void**) &dev_currentParticleArray, atomNumber * atomNumber * sizeof(int));
@@ -1032,7 +1032,7 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                                               gpu_sigmaSq,
                                               gpu_count[0]);
         // GJS
-          energy[localIndex] += CalcCoulombGPU(distSq, kA, kB,
+        dev_energy[localIndex] += CalcCoulombGPU(distSq, kA, kB,
                                               qi_qj_fact, gpu_rCutLow[0],
                                               gpu_ewald[0], gpu_VDW_Kind[0],
                                               gpu_alpha[box],
@@ -1052,7 +1052,7 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                                         gpu_rMin, gpu_rMaxSq, gpu_expConst);
 
         // GJS
-        energy[localIndex] += CalcEnGPU(distSq, kA, kB, gpu_sigmaSq, gpu_n,
+        dev_energy[localIndex] += CalcEnGPU(distSq, kA, kB, gpu_sigmaSq, gpu_n,
                                         gpu_epsilon_Cn, gpu_VDW_Kind[0],
                                         gpu_isMartini[0], gpu_rCut[0],
                                         gpu_rOn[0], gpu_count[0], lambdaVDW,

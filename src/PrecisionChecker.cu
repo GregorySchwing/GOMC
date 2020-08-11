@@ -44,7 +44,7 @@ void PrecisionChecker::sortOMPTuples(int * curr, int * neigh, double * val, int 
     col_vec_omp_en = col_vec_dev_omp_en;
     val_vec_omp = val_vec_dev_omp;
 }
-
+/*
 void PrecisionChecker::sortCUDATuplesForce(int * curr, int * neigh, double * forceX, double * forceY, double * forceZ, int numberOfElements){
 
     thrust::device_vector< int > currVec(curr, curr+numberOfElements);
@@ -115,7 +115,7 @@ void PrecisionChecker::sortOMPTuplesForce(int * curr, int * neigh, double * forc
     valy_vec_omp = valy_vec_dev_omp;
     valz_vec_omp = valz_vec_dev_omp;
 }
-
+*/
 
 bool PrecisionChecker::AlmostEqualUlps(float A, float B, int maxUlpsDiff)
 {

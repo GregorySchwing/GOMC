@@ -63,10 +63,10 @@ public:
     explicit PrecisionChecker(int i);
     void sortCUDATuples(int * curr, int * neigh, double * val, int numberOfElements);
     void sortOMPTuples(int * curr, int * neigh, double * val, int numberOfElements);
-
+/*
     void sortCUDATuplesForce(int * curr, int * neigh, double * forceX, double * forceY, double * forceZ, int numberOfElements);
     void sortOMPTuplesForce(int * curr, int * neigh, double * forceX, double * forceY, double * forceZ, int numberOfElements);
-
+*/
     union Float_t
     {
         Float_t(float num = 0.0f) : f(num) {}

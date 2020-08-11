@@ -70,10 +70,10 @@ void Simulation::RunSimulation(void)
     }
   }
   for (ulong step = startStep; step < totalSteps; step++) {
+    system->potential = system->calcEnergy.SystemTotal();
     system->moveSettings.AdjustMoves(step);
     system->ChooseAndRunMove(step);
     cpu->Output(step);
-        system->potential = system->calcEnergy.SystemTotal();
 
     if((step + 1) == cpu->equilSteps) {
       double currEnergy = system->potential.totalEnergy.total;
