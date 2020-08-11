@@ -485,7 +485,7 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   std::memcpy(currentParticleArrayEn, currentParticleArray, sizeof(int)*(*pointerToIndexForTuple)); // should be faster
   std::memcpy(neighborParticleArrayEn, neighborParticleArray, sizeof(int)*(*pointerToIndexForTuple)); // should be faster
 
- // pc.sortCUDATuplesForce(currentParticleArray, neighborParticleArray, xForce, yForce, zForce, *pointerToIndexForTuple);
+  pc.sortCUDATuplesForce(currentParticleArray, neighborParticleArray, xForce, yForce, zForce, *pointerToIndexForTuple);
   pc.sortCUDATuples(currentParticleArrayEn, neighborParticleArrayEn, energy, *pointerToIndexForTuple);
 
   free(currentParticleArray);
@@ -621,25 +621,61 @@ reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
   int * currentParticleArrayEnOMP;
   int * neighborParticleArrayEnOMP;
 
-  currentParticleArrayEnOMP = (int*) calloc (*pointerToIndexForTuple, sizeof(int));
-  neighborParticleArrayEnOMP = (int*) calloc (*pointerToIndexForTuple, sizeof(int));
+  currentParticleArrayEnOMP = (int*) calloc (atomsInsideBox * atomsInsideBox, sizeof(int));
+  neighborParticleArrayEnOMP = (int*) calloc (atomsInsideBox * atomsInsideBox, sizeof(int));
   
-  std::memcpy(currentParticleArrayEnOMP, currentParticleArrayOpenMP, sizeof(int)*indexForTupleOpenMP); // should be faster
-  std::memcpy(neighborParticleArrayEnOMP, neighborParticleArrayOpenMP, sizeof(int)*indexForTupleOpenMP); // should be faster
+  std::memcpy(currentParticleArrayEnOMP, currentParticleArrayOpenMP, sizeof(int)*atomsInsideBox * atomsInsideBox); // should be faster
+  std::memcpy(neighborParticleArrayEnOMP, neighborParticleArrayOpenMP, sizeof(int)*atomsInsideBox * atomsInsideBox); // should be faster
 
+  typedef std::numeric_limits< double > dbl;
+  std::cout.precision(dbl::max_digits10);
 
   std::cout << "You used " << indexForTupleOpenMP << " spaces in openmp in BoxForce" << std::endl;
-  //pc.sortOMPTuplesForce(currentParticleArrayOpenMP, neighborParticleArrayOpenMP, xForceOpenMP, yForceOpenMP, zForceOpenMP, indexForTupleOpenMP);
-  //pc.sortOMPTuples(currentParticleArrayEnOMP, neighborParticleArrayEnOMP, ljArrayOpenMP, indexForTupleOpenMP);
+  pc.sortOMPTuplesForce(currentParticleArrayOpenMP, neighborParticleArrayOpenMP, xForceOpenMP, yForceOpenMP, zForceOpenMP, indexForTupleOpenMP);
+  pc.sortOMPTuples(currentParticleArrayEnOMP, neighborParticleArrayEnOMP, energyOpenMP, indexForTupleOpenMP);
 
   if (indexForTupleOpenMP == *pointerToIndexForTuple){
+    for (uint i = 0; i < pc.row_vec_omp_en.size(); i++){
+      if (pc.row_vec_omp_en[i] == pc.row_vec_cuda_en[i] && pc.col_vec_omp_en[i] == pc.col_vec_cuda_en[i]){
+        if(!pc.AlmostEqualUlps(pc.val_vec_omp[i], pc.val_vec_cuda[i], 1)){
+          std::cout << "Pair tuple indices differ in energy value!" << std::endl;
+          std::cout << "OMP (" << pc.row_vec_omp_en[i] << ", " << pc.col_vec_omp_en[i] << ") : " << 
+            pc.val_vec_omp[i] << " != CUDA (" << pc.row_vec_cuda_en[i] << ", " << pc.col_vec_cuda_en[i] << ") : " << 
+            pc.val_vec_cuda[i] << std::endl;
+            exit(EXIT_FAILURE);
+        }
+      } else {
+            std::cout << "Pair tuple indices differ in order!" << std::endl;
+            std::cout << "OMP (" << pc.row_vec_omp_en[i] << ", " << pc.col_vec_omp_en[i] << ") : " << 
+            " != CUDA (" << pc.row_vec_cuda_en[i] << ", " << pc.col_vec_cuda_en[i] << ") : " << std::endl;
+            exit(EXIT_FAILURE);
+      }
+    }
+/*
+    // Use this to verify your boring reduction
+    if(!pc.AlmostEqualUlps(tempREnOMP, tempREnCUDA, 1) || !pc.AlmostEqualUlps(tempLJEnOMP, tempLJEnCUDA, 1)){
+      std::cout << "Energy reductions differ in value!" << std::endl;
+      std::cout << "REn OMP : " << tempREnOMP << " != REn CUDA : " << tempREnCUDA << std::endl;
+      std::cout << "LJEn OMP : " << tempLJEnOMP << " != LJEn CUDA : " << tempLJEnCUDA << std::endl;
+      exit(EXIT_FAILURE);
+    }
+*/
+  } else {
+    std::cout << "Number of pairs differs!" << std::endl;
+    std::cout << "OMP : " << indexForTupleOpenMP << "CUDA : " << *pointerToIndexForTuple << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+    if (indexForTupleOpenMP == *pointerToIndexForTuple){
     for (uint i = 0; i < pc.row_vec_omp.size(); i++){
       if (pc.row_vec_omp[i] == pc.row_vec_cuda[i] && pc.col_vec_omp[i] == pc.col_vec_cuda[i]){
-        if(!pc.AlmostEqualUlps(pc.val_vec_omp[i], pc.val_vec_omp[i], 1)){
-          std::cout << "Pair tuple indices differ in value!" << std::endl;
-          std::cout << "OMP (" << pc.row_vec_omp[i] << ", " << pc.col_vec_omp[i] << ") : " << 
-            pc.val_vec_omp[i] << " != CUDA (" << pc.row_vec_cuda[i] << ", " << pc.col_vec_cuda[i] << ") : " << 
-            pc.val_vec_cuda[i] << std::endl;
+        if(!pc.AlmostEqualUlps(pc.valx_vec_omp[i], pc.valx_vec_cuda[i], 1) || 
+            !pc.AlmostEqualUlps(pc.valy_vec_omp[i], pc.valy_vec_cuda[i], 1) || 
+              !pc.AlmostEqualUlps(pc.valz_vec_omp[i], pc.valz_vec_cuda[i], 1)){
+          std::cout << "Pair tuple indices differ in force value!" << std::endl;
+          std::cout << "OMP (" << pc.row_vec_omp[i] << ", " << pc.col_vec_omp[i] << ") : (" << 
+            pc.valx_vec_omp[i] << ", " << pc.valy_vec_omp[i] << ", " << pc.valz_vec_omp[i] << ") != CUDA (" << pc.row_vec_cuda[i] << ", " << pc.col_vec_cuda[i] << ") : (" << 
+            pc.valx_vec_cuda[i] << ", " << pc.valy_vec_cuda[i] << ", " << pc.valz_vec_cuda[i] << ")" <<  std::endl;
             exit(EXIT_FAILURE);
         }
       } else {

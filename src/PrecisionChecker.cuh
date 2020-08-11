@@ -33,10 +33,10 @@ using namespace std;
 
 
 
-  struct cmpForce : public std::binary_function<PairIteratorTupleForce,PairIteratorTupleForce,bool>
+  struct cmpForce : public std::binary_function<pairTupleForce,pairTupleForce,bool>
   {
       __host__ __device__
-          bool operator()(const PairIteratorTupleForce& a, const PairIteratorTupleForce& b) const
+          bool operator()(const pairTupleForce& a, const pairTupleForce& b) const
           {
               if (thrust::get<0>(a) != thrust::get<0>(b))
                   return thrust::get<0>(a) < thrust::get<0>(b);
@@ -61,12 +61,12 @@ class PrecisionChecker
 {
 public:
     explicit PrecisionChecker(int i);
-    void sortCUDATuples(int * curr, int * neigh, double * val, int numberOfElements);
-    void sortOMPTuples(int * curr, int * neigh, double * val, int numberOfElements);
-/*
-    void sortCUDATuplesForce(int * curr, int * neigh, double * forceX, double * forceY, double * forceZ, int numberOfElements);
-    void sortOMPTuplesForce(int * curr, int * neigh, double * forceX, double * forceY, double * forceZ, int numberOfElements);
-*/
+    void sortCUDATuples(int * curr, int * neigh, double * val, uint numberOfElements);
+    void sortOMPTuples(int * curr, int * neigh, double * val, uint numberOfElements);
+
+    void sortCUDATuplesForce(int * curr, int * neigh, double * forceX, double * forceY, double * forceZ, uint numberOfElements);
+    void sortOMPTuplesForce(int * curr, int * neigh, double * forceX, double * forceY, double * forceZ, uint numberOfElements);
+
     union Float_t
     {
         Float_t(float num = 0.0f) : f(num) {}
