@@ -12,7 +12,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <iomanip>
 #include "CUDAMemoryManager.cuh"
-
+#include <limits>
 #define EPSILON 0.001
 
 Simulation::Simulation(char const*const configFileName, MultiSim const*const& multisim)
@@ -89,6 +89,10 @@ void Simulation::RunSimulation(void)
     if((step + 1) % 1000 == 0)
       RunningCheck(step);
 #endif
+
+  typedef std::numeric_limits< double > dbl;
+  std::cout.precision(dbl::max_digits10);
+  std::cout << "Step " << step << " : " << system->potential.totalEnergy.total << std::endl;
   }
   if(!RecalculateAndCheck()) {
     std::cerr << "Warning: Updated energy differs from Recalculated Energy!\n";

@@ -242,11 +242,11 @@ inline uint MultiParticle::Transform()
   // Based on the reference force decided whether to displace or rotate each
   // individual particle.
   uint state = mv::fail_state::NO_FAIL;
-  uint m;
 
+  uint m;
   // move particles according to force and torque and store them in the new pos
 #ifdef _OPENMP
-  #pragma omp parallel for default(shared) private(m)
+  #pragma omp parallel for default(none) private(m)
 #endif
   for(m = 0; m < moleculeIndex.size(); m++) {
     if(moveType[moleculeIndex[m]]) {
@@ -324,7 +324,7 @@ inline long double MultiParticle::GetCoeff()
   double r_max = moveSetRef.GetRMAX(bPick);
   double t_max = moveSetRef.GetTMAX(bPick);
 #ifdef _OPENMP
-  #pragma omp parallel for default(shared) private(m, molNumber, lbt_old, lbt_new, lbf_old, lbf_new) reduction(*:w_ratio)
+  #pragma omp parallel for default(none) private(m, molNumber, lbt_old, lbt_new, lbf_old, lbf_new) shared(lBeta, r_max, t_max) reduction(*:w_ratio)
 #endif
   for(m = 0; m < moleculeIndex.size(); m++) {
     molNumber = moleculeIndex[m];

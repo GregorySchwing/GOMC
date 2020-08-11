@@ -1362,7 +1362,7 @@ void Ewald::BoxForceReciprocal(XYZArray const& molCoords,
             }
           }
 #ifdef _OPENMP
-          #pragma omp parallel for default(shared) private(i, dot, factor) \
+          #pragma omp parallel for default(none) private(i, dot, factor, p, kx, ky, kz, molCoords, lambdaCoef, particleCharge, prefact, sumRnew, sumInew, box)\
           reduction(+:X, Y, Z)
 #endif
           for(i = 0; i < imageSize[box]; i++) {
