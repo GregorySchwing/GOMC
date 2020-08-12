@@ -326,13 +326,13 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
 
   //#endif
   std::cout << "You used " << indexForTupleOpenMP << " spaces in openmp in BoxInter" << std::endl;
-  //pc.sortOMPTuples(currentParticleArrayOpenMP, neighborParticleArrayOpenMP, ljArrayOpenMP, indexForTupleOpenMP);
-/*
+  pc.sortOMPTuples(currentParticleArrayOpenMP, neighborParticleArrayOpenMP, ljArrayOpenMP, indexForTupleOpenMP);
+
   if (indexForTupleOpenMP == *pointerToIndexForTuple){
     for (uint i = 0; i < pc.row_vec_omp.size(); i++){
       if (pc.row_vec_omp[i] == pc.row_vec_cuda[i] && pc.col_vec_omp[i] == pc.col_vec_cuda[i]){
-        if(!pc.AlmostEqualUlps(pc.val_vec_omp[i], pc.val_vec_omp[i], 1)){
-          std::cout << "Pair tuple indices differ in value!" << std::endl;
+        if(!pc.AlmostEqualUlps(pc.val_vec_omp[i], pc.val_vec_cuda[i], 1)){
+          std::cout << "Pair tuple indices differ in energy value from BoxInter!" << std::endl;
           std::cout << "OMP (" << pc.row_vec_omp[i] << ", " << pc.col_vec_omp[i] << ") : " << 
             pc.val_vec_omp[i] << " != CUDA (" << pc.row_vec_cuda[i] << ", " << pc.col_vec_cuda[i] << ") : " << 
             pc.val_vec_cuda[i] << std::endl;
@@ -358,7 +358,7 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
     std::cout << "OMP : " << indexForTupleOpenMP << "CUDA : " << *pointerToIndexForTuple << std::endl;
     exit(EXIT_FAILURE);
   }
-*/
+
 #endif
 
   free(currentParticleArrayOpenMP);
