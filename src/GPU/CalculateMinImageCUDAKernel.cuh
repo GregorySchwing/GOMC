@@ -11,6 +11,29 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include <cuda_runtime.h>
 #include "ConstantDefinitionsCUDAKernel.cuh"
 
+#include <iostream>
+
+#include <string>       // std::string
+#include <sstream> 
+
+void toBinary(std::stringstream & o, char a) const
+{
+    const size_t size = sizeof(a) * 8;
+    for (int i = size - 1; i >= 0; --i){
+        bool b = a & (1UL << i);
+        o << b;
+    }
+}
+
+void toBinary(std::stringstream & o, double d) const
+{
+    const size_t size = sizeof(d);
+    for (int i = 0; i < size; ++i){
+        char* c = reinterpret_cast<char*>(&d) + i;
+        toBinary(o, *c);
+    }
+}
+
 __device__ inline void TransformSlantGPU(double &tx, double &ty, double &tz,
     double x, double y, double z,
     double *gpu_cell_x,
@@ -108,6 +131,16 @@ __device__ inline bool InRcutGPU(double &distSq, double &virX, double &virY,
     virZ = MinImageSignedGPU(virZ, zAxes, zHalfAxes);
     distSq = virX * virX + virY * virY + virZ * virZ;
   }
+
+  std::stringstream ss;
+
+  //ss << "dist (" << i << ", " << j << ") = \n\tx - ";
+  toBinary(ss,  virX); 
+  ss << "\n\ty - ";
+  toBinary(ss, virY);
+  ss << "\n\tz - ";
+  toBinary(ss, virZ);
+  ss << std::endl;
 
   return ((gpu_rCut * gpu_rCut) > distSq);
 }

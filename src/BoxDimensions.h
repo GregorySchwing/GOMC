@@ -19,12 +19,22 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 
 #include <cassert>
 
+#include <iostream>
+
+#include <string>       // std::string
+#include <sstream>    
+
 //Use shortcuts when calculating Rcut
 //#define RCUT_SHORTCUT
 
 class BoxDimensions
 {
 public:
+
+void toBinary(std::stringstream & o, char a) const;
+
+void toBinary(std::stringstream & o, double d) const;
+
   BoxDimensions()
   {
     axis.Init(BOX_TOTAL);
@@ -211,7 +221,20 @@ inline bool BoxDimensions::InRcut(double & distSq, XYZ & dist,
                                   XYZArray const& arr, const uint i,
                                   const uint j, const uint b) const
 {
+  std::stringstream ss;
+
   dist = MinImage(arr.Difference(i, j), b);
+
+  ss << "dist (" << i << ", " << j << ") = \n\tx - ";
+  toBinary(ss, dist.x); 
+  ss << "\n\ty - ";
+  toBinary(ss, dist.y);
+  ss << "\n\tz - ";
+  toBinary(ss, dist.z);
+  ss << std::endl;
+  
+  std::cout << ss.str() << std::endl;
+
   distSq = dist.x * dist.x + dist.y * dist.y + dist.z * dist.z;
   return (rCutSq[b] > distSq);
 }
