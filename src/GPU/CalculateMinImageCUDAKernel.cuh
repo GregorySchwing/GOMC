@@ -11,6 +11,28 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include <cuda_runtime.h>
 #include "ConstantDefinitionsCUDAKernel.cuh"
 
+#include <iostream>
+
+#include <string>       // std::string
+#include <sstream> 
+
+void toBinary(std::stringstream & o, char a) const
+{
+    const size_t size = sizeof(a) * 8;
+    for (int i = size - 1; i >= 0; --i){
+        bool b = a & (1UL << i);
+        o << b;
+    }
+}
+
+void toBinary(std::stringstream & o, double d) const
+{
+    const size_t size = sizeof(d);
+    for (int i = 0; i < size; ++i){
+        char* c = reinterpret_cast<char*>(&d) + i;
+        toBinary(o, *c);
+    }
+
 __device__ inline double3 Difference(double * x, double * y, double * z, uint i, uint j){
   return make_double3(x[i] - x[j], y[i] - y[j], z[i] - z[j]);
 }
@@ -112,6 +134,16 @@ __device__ inline bool InRcutGPU(double &distSq, double3 & dist,
     dist = MinImageGPU(dist, axis, halfAx);
     distSq = dist.x * dist.x + dist.y * dist.y + dist.z * dist.z;
   }
+
+  std::stringstream ss;
+
+  //ss << "dist (" << i << ", " << j << ") = \n\tx - ";
+  toBinary(ss,  virX); 
+  ss << "\n\ty - ";
+  toBinary(ss, virY);
+  ss << "\n\tz - ";
+  toBinary(ss, virZ);
+  ss << std::endl;
 
   return ((gpu_rCut * gpu_rCut) > distSq);
 }
