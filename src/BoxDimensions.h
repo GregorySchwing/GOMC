@@ -211,8 +211,31 @@ inline bool BoxDimensions::InRcut(double & distSq, XYZ & dist,
                                   XYZArray const& arr, const uint i,
                                   const uint j, const uint b) const
 {
-  dist = MinImage(arr.Difference(i, j), b);
-  distSq = dist.x * dist.x + dist.y * dist.y + dist.z * dist.z;
+  dist = arr.Difference(i, j);
+  
+  printf("Before MinImage dist (%d, %d) = \n\tx - %f, in binary : %lu", i,  j, dist.x, (union { double d; uint64_t u; }) {dist.x} .u);
+  printf("\n\ty - %f, in binary : %lu", dist.y, (union { double d; uint64_t u; }) {dist.y} .u);
+  printf("\n\tz - %f, in binary : %lu", dist.z, (union { double d; uint64_t u; }) {dist.z} .u);
+  printf("\n");
+
+  dist = MinImage(dist, b);
+  //distSq = dist.x * dist.x + dist.y * dist.y + dist.z * dist.z;
+  distSq = fma(dist.x, dist.x, fma(dist.y, dist.y, dist.z * dist.z));
+
+  printf("After MinImage dist (%d, %d) = \n\tx - %f, in binary : %lu", i,  j, dist.x, (union { double d; uint64_t u; }) {dist.x} .u);
+  printf("\n\ty - %f, in binary : %lu", dist.y, (union { double d; uint64_t u; }) {dist.y} .u);
+  printf("\n\tz - %f, in binary : %lu", dist.z, (union { double d; uint64_t u; }) {dist.z} .u);
+  printf("\n");
+
+  printf("distSq : %f, in binary : %lu\n", distSq, (union { double d; uint64_t u; }) {distSq} .u);
+  printf("rCutSq : %f, in binary : %lu\n", rCutSq[b], (union { double d; uint64_t u; }) {rCutSq[b]} .u);
+
+  if (rCutSq[b] > distSq){
+    printf("InRCut : true\n");
+  } else {
+    printf("InRCut : false\n");
+  }
+
   return (rCutSq[b] > distSq);
 }
 
@@ -222,8 +245,25 @@ inline bool BoxDimensions::InRcut(double & distSq, XYZ & dist,
                                   XYZArray const& arr2, const uint j,
                                   const uint b) const
 {
-  dist = MinImage(arr1.Difference(i, arr2, j), b);
+
+  dist = arr1.Difference(i, arr2, j);
+
+  printf("Before MinImage dist (%d, %d) = \n\tx - %f, in binary : %lu", i,  j, dist.x, (union { double d; uint64_t u; }) {dist.x} .u);
+  printf("\n\ty - %f, in binary : %lu", dist.y, (union { double d; uint64_t u; }) {dist.y} .u);
+  printf("\n\tz - %f, in binary : %lu", dist.z, (union { double d; uint64_t u; }) {dist.z} .u);
+  printf("\n");
+
+  dist = MinImage(dist, b);
   distSq = dist.x * dist.x + dist.y * dist.y + dist.z * dist.z;
+
+  printf("After MinImage dist (%d, %d) = \n\tx - %f, in binary : %lu", i,  j, dist.x, (union { double d; uint64_t u; }) {dist.x} .u);
+  printf("\n\ty - %f, in binary : %lu", dist.y, (union { double d; uint64_t u; }) {dist.y} .u);
+  printf("\n\tz - %f, in binary : %lu", dist.z, (union { double d; uint64_t u; }) {dist.z} .u);
+  printf("\n");
+
+  printf("distSq : %f, in binary : %lu\n", distSq, (union { double d; uint64_t u; }) {distSq} .u);
+  printf("rCutSq : %f, in binary : %lu\n", rCutSq[b], (union { double d; uint64_t u; }) {distSq} .u);
+
   return (rCutSq[b] > distSq);
 }
 
@@ -231,8 +271,27 @@ inline bool BoxDimensions::InRcut(double & distSq, XYZArray const& arr,
                                   const uint i, const uint j,
                                   const uint b) const
 {
-  XYZ dist = MinImage(arr.Difference(i, j), b);
+
+  XYZ dist = arr.Difference(i, j);
+  printf("From Force\n");
+
+  printf("Before MinImage dist (%d, %d) = \n\tx - %f, in binary : %lu", i,  j, dist.x, (union { double d; uint64_t u; }) {dist.x} .u);
+  printf("\n\ty - %f, in binary : %lu", dist.y, (union { double d; uint64_t u; }) {dist.y} .u);
+  printf("\n\tz - %f, in binary : %lu", dist.z, (union { double d; uint64_t u; }) {dist.z} .u);
+  printf("\n");
+
+
+  dist = MinImage(arr.Difference(i, j), b);
   distSq = dist.x * dist.x + dist.y * dist.y + dist.z * dist.z;
+
+  printf("After MinImage dist (%d, %d) = \n\tx - %f, in binary : %lu", i,  j, dist.x, (union { double d; uint64_t u; }) {dist.x} .u);
+  printf("\n\ty - %f, in binary : %lu", dist.y, (union { double d; uint64_t u; }) {dist.y} .u);
+  printf("\n\tz - %f, in binary : %lu", dist.z, (union { double d; uint64_t u; }) {dist.z} .u);
+  printf("\n");
+
+  printf("distSq : %f, in binary : %lu\n", distSq, (union { double d; uint64_t u; }) {distSq} .u);
+  printf("rCutSq : %f, in binary : %lu\n", rCutSq[b], (union { double d; uint64_t u; }) {distSq} .u);
+
   return (rCutSq[b] > distSq);
 }
 

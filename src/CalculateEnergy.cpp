@@ -185,7 +185,6 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
   int numberOfCells = neighborList.size();
   int atomNumber = currentCoords.Count();
   int currParticleIdx, currParticle, currCell, nCellIndex, neighborCell, endIndex, nParticleIndex, nParticle;
-  int countpairs = 0;
 
 #ifdef GOMC_CUDA
   //update unitcell in GPU
@@ -232,7 +231,7 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
 
         // avoid same particles and duplicate work
         if(currParticle < nParticle && particleMol[currParticle] != particleMol[nParticle]) {
-          countpairs++;
+          printf("From BoxInter\n");
           if(boxAxes.InRcut(distSq, virComponents, coords, currParticle, nParticle, box)) {
             lambdaVDW = GetLambdaVDW(particleMol[currParticle], particleMol[nParticle], box);
             if (electrostatic) {
@@ -348,6 +347,7 @@ reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
         nParticle = cellVector[nParticleIndex];
 
         if(currParticle < nParticle && particleMol[currParticle] != particleMol[nParticle]) {
+          printf("From BoxForce\n");
           if(boxAxes.InRcut(distSq, virComponents, coords, currParticle, nParticle, box)) {
             lambdaVDW = GetLambdaVDW(particleMol[currParticle], particleMol[nParticle], box);
             if (electrostatic) {
@@ -358,8 +358,26 @@ reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
               tempREn += forcefield.particles->CalcCoulomb(distSq, particleKind[currParticle],
                          particleKind[nParticle], qi_qj_fact, lambdaCoulomb, box);
             }
+
+
+        printf("cA : %f, in binary : %lu\n", particleCharge[currParticle], (union { double d; uint64_t u; }) {particleCharge[currParticle]} .u);
+        printf("cB : %f, in binary : %lu\n", particleCharge[nParticle], (union { double d; uint64_t u; }) {particleCharge[nParticle]} .u);
+        printf("kA : %d, in binary : %lu\n", particleKind[currParticle], (union { int d; uint64_t u; }) {particleKind[currParticle]} .u);
+        printf("kB : %d, in binary : %lu\n", particleKind[nParticle], (union { int d; uint64_t u; }) {particleKind[nParticle]} .u);
+        printf("mA : %d, in binary : %lu\n", particleMol[currParticle], (union { int d; uint64_t u; }) {particleMol[currParticle]} .u);
+        printf("mB : %d, in binary : %lu\n", particleMol[nParticle], (union { int d; uint64_t u; }) {particleMol[nParticle]} .u);
+
+        printf("lambdaVDW : %f, in binary : %lu\n", lambdaVDW, (union { double d; uint64_t u; }) {lambdaVDW} .u);
+
+
             tempLJEn += forcefield.particles->CalcEn(distSq, particleKind[currParticle],
                         particleKind[nParticle], lambdaVDW);
+
+        printf("LJEn straight method call : %f, in binary : %lu\n", forcefield.particles->CalcEn(distSq, particleKind[currParticle],
+                        particleKind[nParticle], lambdaVDW), (union { double d; uint64_t u; }) {forcefield.particles->CalcEn(distSq, particleKind[currParticle],
+                        particleKind[nParticle], lambdaVDW)} .u);
+
+        printf("tempLJEn running sum  : %f, in binary : %lu\n", tempLJEn, (union { double d; uint64_t u; }) {tempLJEn} .u);
 
             // Calculating the force
             if(electrostatic) {
@@ -464,6 +482,7 @@ Virial CalculateEnergy::VirialCalc(const uint box)
         if(currParticle < nParticle && particleMol[currParticle] != particleMol[nParticle]) {
           double distSq;
           XYZ virC;
+          printf("From BoxInterForce\n");
           if (currentAxes.InRcut(distSq, virC, currentCoords, currParticle,
                                  nParticle, box)) {
 
@@ -1549,6 +1568,7 @@ virComponents) reduction(+:tempREnOld, tempLJEnOld, tempREnNew, tempLJEnNew)
 #endif
       for(i = 0; i < nIndex.size(); i++) {
         distSq = 0.0;
+        printf("From SingleMoleculeInter\n");
         if (currentAxes.InRcut(distSq, virComponents, currentCoords, atom,
                                nIndex[i], box)) {
 

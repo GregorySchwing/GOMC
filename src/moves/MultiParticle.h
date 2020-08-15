@@ -169,6 +169,7 @@ inline uint MultiParticle::Prep(const double subDraw, const double movPerc)
     calcEwald->BoxForceReciprocal(coordCurrRef, atomForceRecRef, molForceRecRef,
                                   bPick);
 
+    printf("Call GetSingleMoveAccepted's BoxForce\n");
     //calculate short range energy and force for old positions
     calcEnRef.BoxForce(sysPotRef, coordCurrRef, atomForceRef, molForceRef,
                        boxDimRef, bPick);
@@ -245,9 +246,9 @@ inline uint MultiParticle::Transform()
   uint m;
 
   // move particles according to force and torque and store them in the new pos
-#ifdef _OPENMP
-  #pragma omp parallel for default(shared) private(m)
-#endif
+//#ifdef _OPENMP
+  //#pragma omp parallel for default(shared) private(m)
+//#endif
   for(m = 0; m < moleculeIndex.size(); m++) {
     if(moveType[moleculeIndex[m]]) {
       // rotate
@@ -323,9 +324,9 @@ inline long double MultiParticle::GetCoeff()
   uint m, molNumber;
   double r_max = moveSetRef.GetRMAX(bPick);
   double t_max = moveSetRef.GetTMAX(bPick);
-#ifdef _OPENMP
-  #pragma omp parallel for default(shared) private(m, molNumber, lbt_old, lbt_new, lbf_old, lbf_new) reduction(*:w_ratio)
-#endif
+//#ifdef _OPENMP
+  //#pragma omp parallel for default(shared) private(m, molNumber, lbt_old, lbt_new, lbf_old, lbf_new) reduction(*:w_ratio)
+//#endif
   for(m = 0; m < moleculeIndex.size(); m++) {
     molNumber = moleculeIndex[m];
     if(moveType[molNumber]) {
@@ -343,14 +344,16 @@ inline long double MultiParticle::GetCoeff()
     }
   }
 
+  printf("w_ratio : %Lf\n", w_ratio);
+
   // In case where force or torque is a large negative number (ex. -800)
   // the exp value becomes inf. In these situations we have to return 0 to
   // reject the move
-  // if(!std::isfinite(w_ratio)) {
-  //   // This error can be removed later on once we know this part actually works.
-  //   std::cout << "w_ratio is not a finite number. Auto-rejecting move.\n";
-  //   return 0.0;
-  // }
+   if(!std::isfinite(w_ratio)) {
+     // This error can be removed later on once we know this part actually works.
+     std::cout << "w_ratio is not a finite number. Auto-rejecting move.\n";
+     return 0.0;
+   }
   return w_ratio;
 }
 
@@ -358,10 +361,24 @@ inline void MultiParticle::Accept(const uint rejectState, const uint step)
 {
   // Here we compare the values of reference and trial and decide whether to
   // accept or reject the move
+typedef __int128 int128_t;
+typedef unsigned __int128 uint128_t;
+
   long double MPCoeff = GetCoeff();
   double uBoltz = exp(-BETA * (sysPotNew.Total() - sysPotRef.Total()));
   long double accept = MPCoeff * uBoltz;
   double pr = prng();
+
+  printf("sysPotNew.Total() : %f, in binary : %lu\n", sysPotNew.Total(), (union { double d; uint64_t u; }) {sysPotNew.Total()} .u);
+  printf("sysPotRef.Total() : %f, in binary : %lu\n", sysPotRef.Total(), (union { double d; uint64_t u; }) {sysPotRef.Total()} .u);
+  printf("sysPotNew.Total() - sysPotRef.Total() : %f, in binary : %lu\n", sysPotNew.Total() - sysPotRef.Total(), (union { double d; uint64_t u; }) {sysPotNew.Total() - sysPotRef.Total()} .u);
+
+
+  printf("MPCoeff : %Lf, in binary : %llx\n", MPCoeff, (unsigned long long)(((union { double d; uint128_t u; }) {MPCoeff} .u) & 0xFFFFFFFFFFFFFFFF));
+  printf("uBoltz : %f, in binary : %lu\n", uBoltz, (union { double d; uint64_t u; }) {uBoltz} .u);
+  printf("accept : %Lf, in binary : %llx\n", accept, (unsigned long long)(((union { double d; uint128_t u; }) {accept} .u) & 0xFFFFFFFFFFFFFFFF));
+  printf("pr : %f, in binary : %lu\n", pr, (union { double d; uint64_t u; }) {pr} .u);
+    
   bool result = (rejectState == mv::fail_state::NO_FAIL) && pr < accept;
   if(result) {
     sysPotRef = sysPotNew;
@@ -390,22 +407,39 @@ inline XYZ MultiParticle::CalcRandomTransform(XYZ const &lb, double const max)
   XYZ lbmax = lb * max;
   XYZ num;
   if(std::abs(lbmax.x) > MIN_FORCE && std::abs(lbmax.x) < MAX_FORCE) {
+    printf("x entered top\n");
     num.x = log(exp(-1.0 * lbmax.x) + 2 * prng() * sinh(lbmax.x)) / lb.x;
   } else {
+    printf("x entered bottom\n");
+
     num.x = prng.Sym(max);
   }
 
   if(std::abs(lbmax.y) > MIN_FORCE && std::abs(lbmax.y) < MAX_FORCE) {
+        printf("y entered top\n");
+
     num.y = log(exp(-1.0 * lbmax.y) + 2 * prng() * sinh(lbmax.y)) / lb.y;
   } else {
+        printf("y entered bottom\n");
+
     num.y = prng.Sym(max);
   }
 
   if(std::abs(lbmax.z) > MIN_FORCE && std::abs(lbmax.z) < MAX_FORCE) {
+            printf("z entered top\n");
+
     num.z = log(exp(-1.0 * lbmax.z) + 2 * prng() * sinh(lbmax.z)) / lb.z;
   } else {
+                printf("z entered bottom\n");
+
     num.z = prng.Sym(max);
   }
+
+  printf("In CalcRandomTransform\n");
+  printf("num.x - %f, in binary : %lu\n", num.x, (union { double d; uint64_t u; }) {num.x} .u);
+  printf("num.y - %f, in binary : %lu\n", num.y, (union { double d; uint64_t u; }) {num.y} .u);
+  printf("num.z - %f, in binary : %lu\n", num.z, (union { double d; uint64_t u; }) {num.z} .u);
+
 
   if(num.Length() >= boxDimRef.axis.Min(bPick)) {
     std::cout << "Trial Displacement exceed half of the box length in Multiparticle move.\n";
@@ -436,8 +470,17 @@ inline void MultiParticle::CalculateTrialDistRot()
       lbt = molTorqueRef.Get(molIndex) * lambda * BETA;
       r_k.Set(molIndex, CalcRandomTransform(lbt, r_max));
     } else { // displace
+      printf("In CalcTrialDistRot\n");
       lbf = (molForceRef.Get(molIndex) + molForceRecRef.Get(molIndex)) *
             lambda * BETA;
+
+
+  printf("lbf.x - %f, in binary : %lu\n", lbf.x, (union { double d; uint64_t u; }) {lbf.x} .u);
+    printf("lbf.y - %f, in binary : %lu\n", lbf.y, (union { double d; uint64_t u; }) {lbf.y} .u);
+  printf("lbf.z - %f, in binary : %lu\n", lbf.z, (union { double d; uint64_t u; }) {lbf.z} .u);
+
+  printf("t_max - %f, in binary : %lu\n", t_max, (union { double d; uint64_t u; }) {t_max} .u);
+
       t_k.Set(molIndex, CalcRandomTransform(lbf, t_max));
     }
   }
@@ -481,6 +524,9 @@ inline void MultiParticle::TranslateForceBiased(uint molIndex)
   // Copy the range into temporary array
   XYZArray temp(len);
   newMolsPos.CopyRange(temp, start, 0, len);
+  /// GJS - Should this line be here?
+  boxDimRef.UnwrapPBC(temp, bPick, shift);
+
   //Shift the coordinate and COM
   temp.AddAll(shift);
   newcom += shift;

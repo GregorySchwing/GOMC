@@ -696,6 +696,7 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
     int neighborParticle = gpu_cellVector[gpu_cellStartIndex[neighborCell] + neighborParticleIndex];
 
     if(currentParticle < neighborParticle && gpu_particleMol[currentParticle] != gpu_particleMol[neighborParticle]) {
+      printf("From BoxInterForce\n");
       if(InRcutGPU(distSq, virComponents, gpu_x, gpu_y, gpu_z, currentParticle,
                    neighborParticle, axis, halfAx, cutoff, gpu_nonOrth[0],
                    gpu_cell_x, gpu_cell_y, gpu_cell_z, gpu_Invcell_x, gpu_Invcell_y,
@@ -850,6 +851,7 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
     int neighborParticle = gpu_cellVector[gpu_cellStartIndex[neighborCell] + neighborParticleIndex];
 
     if(currentParticle < neighborParticle && gpu_particleMol[currentParticle] != gpu_particleMol[neighborParticle]) {
+      printf("From BoxForce\n");
       if(InRcutGPU(distSq, virComponents, gpu_x, gpu_y, gpu_z, 
                    currentParticle, neighborParticle,
                    axis, halfAx, cutoff, gpu_nonOrth[0], gpu_cell_x,
@@ -862,9 +864,19 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
         int mA = gpu_particleMol[currentParticle];
         int mB = gpu_particleMol[neighborParticle];
 
+printf("cA : %f, in binary : %lu\n", cA, (union { double d; uint64_t u; }) {cA} .u);
+printf("cB : %f, in binary : %lu\n", cB, (union { double d; uint64_t u; }) {cB} .u);
+printf("kA : %d, in binary : %lu\n", kA, (union { int d; uint64_t u; }) {kA} .u);
+printf("kB : %d, in binary : %lu\n", kB, (union { int d; uint64_t u; }) {kB} .u);
+printf("mA : %d, in binary : %lu\n", mA, (union { int d; uint64_t u; }) {mA} .u);
+printf("mB : %d, in binary : %lu\n", mB, (union { int d; uint64_t u; }) {mB} .u);
+
         lambdaVDW = DeviceGetLambdaVDW(mA, kA, mB, kB, box, gpu_isFraction,
                                        gpu_molIndex, gpu_kindIndex,
                                        gpu_lambdaVDW);
+
+printf("lambdaVDW : %f, in binary : %lu\n", lambdaVDW, (union { double d; uint64_t u; }) {lambdaVDW} .u);
+
         if(electrostatic) {
           qi_qj_fact = cA * cB * qqFact;
           lambdaCoulomb = DeviceGetLambdaCoulomb(mA, kA, mB, kB, box,
@@ -889,6 +901,24 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                                         gpu_rOn[0], gpu_count[0], lambdaVDW,
                                         sc_sigma_6, sc_alpha, sc_power,
                                         gpu_rMin, gpu_rMaxSq, gpu_expConst);
+
+printf("BoxForceGPU gpu_LJEn straight method call in thread %d : %f, in binary : %lu\n", threadID, CalcEnGPU(distSq, kA, kB, gpu_sigmaSq, gpu_n,
+gpu_epsilon_Cn, gpu_VDW_Kind[0],
+gpu_isMartini[0], gpu_rCut[0],
+gpu_rOn[0], gpu_count[0], lambdaVDW,
+sc_sigma_6, sc_alpha, sc_power,
+gpu_rMin, gpu_rMaxSq, gpu_expConst), (union { double d; uint64_t u; }) {CalcEnGPU(distSq, kA, kB, gpu_sigmaSq, gpu_n,
+                             gpu_epsilon_Cn, gpu_VDW_Kind[0],
+                             gpu_isMartini[0], gpu_rCut[0],
+                             gpu_rOn[0], gpu_count[0], lambdaVDW,
+                             sc_sigma_6, sc_alpha, sc_power,
+                             gpu_rMin, gpu_rMaxSq, gpu_expConst)} .u);
+
+
+printf("gpu_LJEn[%d] : %f, in binary : %lu\n", threadID, gpu_LJEn[threadID], (union { double d; uint64_t u; }) {gpu_LJEn[threadID]} .u);
+
+
+
         if(electrostatic) {
           double coulombVir = CalcCoulombForceGPU(distSq, qi_qj_fact,
                                                   gpu_VDW_Kind[0], gpu_ewald[0],

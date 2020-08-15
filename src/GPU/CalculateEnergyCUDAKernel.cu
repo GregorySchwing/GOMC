@@ -81,6 +81,14 @@ void CallBoxInterGPU(VariablesCUDA *vars,
   cudaMemcpy(vars->gpu_y, coords.y, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_z, coords.z, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
 
+  double3 axis = make_double3(boxAxes.GetAxis(box).x,
+                              boxAxes.GetAxis(box).y,
+                              boxAxes.GetAxis(box).z);
+
+  double3 halfAx = make_double3(boxAxes.GetAxis(box).x / 2.0,
+                                boxAxes.GetAxis(box).y / 2.0,
+                                boxAxes.GetAxis(box).z / 2.0);
+
   BoxInterGPU <<< blocksPerGrid, threadsPerBlock>>>(gpu_cellStartIndex,
       vars->gpu_cellVector,
       gpu_neighborList,
@@ -88,9 +96,8 @@ void CallBoxInterGPU(VariablesCUDA *vars,
       vars->gpu_x,
       vars->gpu_y,
       vars->gpu_z,
-      boxAxes.GetAxis(box).x,
-      boxAxes.GetAxis(box).y,
-      boxAxes.GetAxis(box).z,
+      axis,
+      halfAx,
       electrostatic,
       gpu_particleCharge,
       gpu_particleKind,
@@ -176,9 +183,8 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                             double *gpu_x,
                             double *gpu_y,
                             double *gpu_z,
-                            double xAxes,
-                            double yAxes,
-                            double zAxes,
+                            double3 axis,
+                            double3 halfAx,
                             bool electrostatic,
                             double *gpu_particleCharge,
                             int *gpu_particleKind,
@@ -252,19 +258,15 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
     int neighborParticle = gpu_cellVector[gpu_cellStartIndex[neighborCell] + neighborParticleIndex];
 
     if(currentParticle < neighborParticle && gpu_particleMol[currentParticle] != gpu_particleMol[neighborParticle]) {
+      printf("From BoxInter\n");
+
       // Check if they are within rcut
       distSq = 0;
-      double dx = gpu_x[currentParticle] - gpu_x[neighborParticle];
-      double dy = gpu_y[currentParticle] - gpu_y[neighborParticle];
-      double dz = gpu_z[currentParticle] - gpu_z[neighborParticle];
-
-      dx = min(fabs(dx), xAxes - fabs(dx));
-      dy = min(fabs(dy), yAxes - fabs(dy));
-      dz = min(fabs(dz), zAxes - fabs(dz));
-
-      distSq = dx * dx + dy * dy + dz * dz;
-
-      if((cutoff * cutoff) > distSq) {
+      if(InRcutGPU(distSq, gpu_x, gpu_y, gpu_z, 
+                   currentParticle, neighborParticle,
+                   axis, halfAx, cutoff, gpu_nonOrth[0], gpu_cell_x,
+                   gpu_cell_y, gpu_cell_z, gpu_Invcell_x, gpu_Invcell_y,
+                   gpu_Invcell_z)) {
         double cA = gpu_particleCharge[currentParticle];
         double cB = gpu_particleCharge[neighborParticle];
         int kA = gpu_particleKind[currentParticle];
@@ -301,6 +303,23 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                                         gpu_rCut[0], gpu_rOn[0], gpu_count[0], lambdaVDW,
                                         sc_sigma_6, sc_alpha, sc_power, gpu_rMin,
                                         gpu_rMaxSq, gpu_expConst);
+
+
+                                        printf("BoxInterGPU gpu_LJEn straight method call in thread %d : %f, in binary : %lu\n", threadID, 
+                                        CalcEnGPU(distSq, kA, kB,
+                                          gpu_sigmaSq, gpu_n, gpu_epsilon_Cn,
+                                          gpu_VDW_Kind[0], gpu_isMartini[0],
+                                          gpu_rCut[0], gpu_rOn[0], gpu_count[0], lambdaVDW,
+                                          sc_sigma_6, sc_alpha, sc_power, gpu_rMin,
+                                          gpu_rMaxSq, gpu_expConst), (union { double d; uint64_t u; }) {CalcEnGPU(distSq, kA, kB,
+                                            gpu_sigmaSq, gpu_n, gpu_epsilon_Cn,
+                                            gpu_VDW_Kind[0], gpu_isMartini[0],
+                                            gpu_rCut[0], gpu_rOn[0], gpu_count[0], lambdaVDW,
+                                            sc_sigma_6, sc_alpha, sc_power, gpu_rMin,
+                                            gpu_rMaxSq, gpu_expConst)} .u);
+
+                                        printf("gpu_LJEn[%d] : %f, in binary : %lu\n", threadID, gpu_LJEn[threadID], (union { double d; uint64_t u; }) {gpu_LJEn[threadID]} .u);
+
       }
     }
   }
@@ -366,7 +385,7 @@ __device__ double CalcEnGPU(double distSq, int kind1, int kind2,
   if((gpu_rCut * gpu_rCut) < distSq) {
     return 0.0;
   }
-
+  printf("From CalcEnGPU (%d, %d)\n", kind1, kind2);
   int index = FlatIndexGPU(kind1, kind2, gpu_count);
   if(gpu_VDW_Kind == GPU_VDW_STD_KIND) {
     return CalcEnParticleGPU(distSq, index, gpu_sigmaSq, gpu_n, gpu_epsilon_Cn,
@@ -620,6 +639,7 @@ __device__ double CalcEnParticleGPU(double distSq, int index,
                                     double sc_alpha,
                                     uint sc_power)
 {
+  printf("From CalcEnParticle");
   if(gpu_lambdaVDW >= 0.999999) {
     return CalcEnParticleGPUNoLambda(distSq, index, gpu_sigmaSq, gpu_n, gpu_epsilon_Cn);
   }
@@ -642,7 +662,15 @@ __device__ double CalcEnParticleGPUNoLambda(double distSq, int index,
   double rRat2 = gpu_sigmaSq[index] / distSq;
   double rRat4 = rRat2 * rRat2;
   double attract = rRat4 * rRat2;
-  double repulse = pow(rRat2, gpu_n[index] / 2.0);
+  double repulse = pow(rRat2, (gpu_n[index] * 0.5));
+  printf("distSq - %f, in binary : %lu\n", distSq, (union { double d; uint64_t u; }) {distSq} .u);
+  printf("gpu_sigmaSq[%d] - %f, in binary : %lu\n", index, gpu_sigmaSq[index], (union { double d; uint64_t u; }) {gpu_sigmaSq[index]} .u);
+  printf("rRat2 - %f, in binary : %lu\n", rRat2, (union { double d; uint64_t u; }) {rRat2} .u);
+  printf("rRat4 - %f, in binary : %lu\n", rRat4, (union { double d; uint64_t u; }) {rRat4} .u);
+  printf("attract - %f, in binary : %lu\n", attract, (union { double d; uint64_t u; }) {attract} .u);
+  printf("gpu_n[%d] - %f, in binary : %lu\n", index, gpu_n[index], (union { double d; uint64_t u; }) {gpu_n[index]} .u);
+  printf("gpu_epsilon_Cn[%d] * (repulse - attract) - %f, in binary : %lu\n", index, gpu_epsilon_Cn[index] * (repulse - attract), (union { double d; uint64_t u; }) {gpu_epsilon_Cn[index] * (repulse - attract)} .u);
+
   return gpu_epsilon_Cn[index] * (repulse - attract);
 }
 

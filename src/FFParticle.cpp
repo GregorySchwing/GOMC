@@ -296,6 +296,8 @@ inline void FFParticle::CalcCoulombAdd_1_4(double& en, const double distSq,
 inline double FFParticle::CalcEn(const double distSq, const uint kind1,
                                  const uint kind2, const double lambda) const
 {
+  printf("From CalcEnFFParticle");
+
   if(forcefield.rCutSq < distSq)
     return 0.0;
 
@@ -322,6 +324,14 @@ inline double FFParticle::CalcEn(const double distSq, const uint index) const
   double attract = rRat4 * rRat2;
   double n_ij = n[index];
   double repulse = pow(rRat2, (n_ij * 0.5));
+
+  printf("distSq - %f, in binary : %lu\n", distSq, (union { double d; uint64_t u; }) {distSq} .u);
+  printf("gpu_sigmaSq[%d] - %f, in binary : %lu\n", index, sigmaSq[index], (union { double d; uint64_t u; }) {sigmaSq[index]} .u);
+  printf("rRat2 - %f, in binary : %lu\n", rRat2, (union { double d; uint64_t u; }) {rRat2} .u);
+  printf("rRat4 - %f, in binary : %lu\n", rRat4, (union { double d; uint64_t u; }) {rRat4} .u);
+  printf("attract - %f, in binary : %lu\n", attract, (union { double d; uint64_t u; }) {attract} .u);
+  printf("n_ij - %f, in binary : %lu\n", n_ij, (union { double d; uint64_t u; }) {n_ij} .u);
+  printf("epsilon_cn[%d] * (repulse - attract) - %f, in binary : %lu\n", index, epsilon_cn[index] * (repulse - attract), (union { double d; uint64_t u; }) {epsilon_cn[index] * (repulse - attract)} .u);
 
   return (epsilon_cn[index] * (repulse - attract));
 }
