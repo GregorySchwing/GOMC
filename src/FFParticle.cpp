@@ -21,24 +21,6 @@ FFParticle::FFParticle(Forcefield &ff) : forcefield(ff), mass(NULL), nameFirst(N
   exp6 = ff.exp6;
 }
 
-void FFParticle::toBinary(std::stringstream & o, char a) const
-{
-    const size_t size = sizeof(a) * 8;
-    for (int i = size - 1; i >= 0; --i){
-        bool b = a & (1UL << i);
-        o << b;
-    }
-}
-
-void FFParticle::toBinary(std::stringstream & o, double d) const
-{
-    const size_t size = sizeof(d);
-    for (int i = 0; i < size; ++i){
-        char* c = reinterpret_cast<char*>(&d) + i;
-        toBinary(o, *c);
-    }
-}
-
 FFParticle::~FFParticle(void)
 {
   delete[] mass;
@@ -335,12 +317,6 @@ inline double FFParticle::CalcEn(const double distSq, const uint kind1,
 
 inline double FFParticle::CalcEn(const double distSq, const uint index) const
 {
-  std::stringstream ss;
-
-  ss << "sigmaSq Binary" << std::endl;
-  toBinary(ss, sigmaSq[index]);
-  ss << std::endl;
-  std::cout << ss.str() << std::endl;
   double rRat2 = sigmaSq[index] / distSq;
   double rRat4 = rRat2 * rRat2;
   double attract = rRat4 * rRat2;

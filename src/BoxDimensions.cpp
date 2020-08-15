@@ -10,25 +10,6 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 
 using namespace geom;
 
-void BoxDimensions::toBinary(std::stringstream & o, char a) const
-{
-    const size_t size = sizeof(a) * 8;
-    for (int i = size - 1; i >= 0; --i){
-        bool b = a & (1UL << i);
-        o << b;
-    }
-}
-
-void BoxDimensions::toBinary(std::stringstream & o, double d) const
-{
-    const size_t size = sizeof(d);
-    for (int i = 0; i < size; ++i){
-        char* c = reinterpret_cast<char*>(&d) + i;
-        toBinary(o, *c);
-    }
-}
-
-
 void BoxDimensions::Init(config_setup::RestartSettings const& restart,
                          config_setup::Volume const& confVolume,
                          pdb_setup::Cryst1 const& cryst,

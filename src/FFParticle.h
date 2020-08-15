@@ -16,10 +16,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #ifdef GOMC_CUDA
 #include "VariablesCUDA.cuh"
 #endif
-#include <iostream>
 
-#include <string>       // std::string
-#include <sstream>      // std::stringstream
 // Virial and LJ potential calculation:
 // U(rij) = cn * eps_ij * ( (sig_ij/rij)^n - (sig_ij/rij)^6)
 //
@@ -48,10 +45,6 @@ class Forcefield;
 
 struct FFParticle {
 public:
-
-void toBinary(std::stringstream & o, char a) const;
-
-void toBinary(std::stringstream & o, double d) const;
 
   FFParticle(Forcefield &ff);
   virtual ~FFParticle(void);
