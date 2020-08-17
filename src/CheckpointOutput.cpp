@@ -1,5 +1,5 @@
 /*******************************************************************************
-GPU OPTIMIZED MONTE CARLO (GOMC) 2.51
+GPU OPTIMIZED MONTE CARLO (GOMC) 2.60
 Copyright (C) 2018  GOMC Group
 A copy of the GNU General Public License can be found in the COPYRIGHT.txt
 along with this program, also can be found at <http://www.gnu.org/licenses/>.
@@ -94,7 +94,9 @@ void CheckpointOutput::printRandomNumbers()
   // there is a save function inside MersenneTwister.h file
   // to read back we can use the load function
   const int N = 624;
-  uint32_t* saveArray = new uint32_t[N];
+  // The MT::save function also appends the "left" variable,
+  // so need to allocate one more array element
+  uint32_t* saveArray = new uint32_t[N+1];
   prngRef.GetGenerator()->save(saveArray);
   for(int i = 0; i < N; i++) {
     outputUintIn8Chars(saveArray[i]);
@@ -111,6 +113,8 @@ void CheckpointOutput::printRandomNumbers()
   // let's save seedValue just in case
   // not sure if that is used or not, or how important it is
   outputUintIn8Chars(prngRef.GetGenerator()->seedValue);
+  
+  delete[] saveArray;
 }
 
 #if GOMC_LIB_MPI
@@ -196,7 +200,7 @@ void CheckpointOutput::printMoveSettingsData()
   printVector1DDouble(moveSetRef.mp_r_max);
 }
 
-void CheckpointOutput::printVector3DDouble(vector< vector< vector <double> > > data)
+void CheckpointOutput::printVector3DDouble(std::vector< std::vector< std::vector<double> > > data)
 {
   // print size of tempTries
   ulong size_x = data.size();
@@ -216,7 +220,7 @@ void CheckpointOutput::printVector3DDouble(vector< vector< vector <double> > > d
   }
 }
 
-void CheckpointOutput::printVector3DUint(vector< vector< vector <uint> > > data)
+void CheckpointOutput::printVector3DUint(std::vector< std::vector< std::vector<uint> > > data)
 {
   // print size of tempTries
   ulong size_x = data.size();
@@ -236,7 +240,7 @@ void CheckpointOutput::printVector3DUint(vector< vector< vector <uint> > > data)
   }
 }
 
-void CheckpointOutput::printVector2DUint(vector< vector< uint > > data)
+void CheckpointOutput::printVector2DUint(std::vector< std::vector< uint > > data)
 {
   // print size of array
   ulong size_x = data.size();
@@ -244,7 +248,7 @@ void CheckpointOutput::printVector2DUint(vector< vector< uint > > data)
   outputUintIn8Chars(size_x);
   outputUintIn8Chars(size_y);
 
-  // print array iteself
+  // print array itself
   for(int i = 0; i < size_x; i++) {
     for(int j = 0; j < size_y; j++) {
       outputUintIn8Chars(data[i][j]);
@@ -252,7 +256,7 @@ void CheckpointOutput::printVector2DUint(vector< vector< uint > > data)
   }
 }
 
-void CheckpointOutput::printVector1DDouble(vector< double > data)
+void CheckpointOutput::printVector1DDouble(std::vector< double > data)
 {
   // print size of array
   ulong size_x = data.size();
