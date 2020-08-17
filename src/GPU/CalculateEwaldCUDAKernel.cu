@@ -347,6 +347,14 @@ void CallBoxForceReciprocalGPU(
   cudaMemcpy(gpu_startMol, &startMol[0], sizeof(int) * startMol.size(), cudaMemcpyHostToDevice);
   cudaMemcpy(gpu_lengthMol, &lengthMol[0], sizeof(int) * lengthMol.size(), cudaMemcpyHostToDevice);
 
+  double3 axis = make_double3(boxAxes.GetAxis(box).x,
+  boxAxes.GetAxis(box).y,
+  boxAxes.GetAxis(box).z);
+
+  double3 halfAx = make_double3(boxAxes.GetAxis(box).x / 2.0,
+  boxAxes.GetAxis(box).y / 2.0,
+  boxAxes.GetAxis(box).z / 2.0);
+
   checkLastErrorCUDA(__FILE__, __LINE__);
   BoxForceReciprocalGPU<<<blocksPerGrid, threadsPerBlock>>>(
     vars->gpu_aForceRecx,
@@ -379,9 +387,15 @@ void CallBoxForceReciprocalGPU(
     vars->gpu_molIndex,
     vars->gpu_kindIndex,
     vars->gpu_lambdaCoulomb,
-    boxAxes.GetAxis(box).x,
-    boxAxes.GetAxis(box).y,
-    boxAxes.GetAxis(box).z,
+    axis,
+    halfAx,
+    vars->gpu_nonOrth,
+    vars->gpu_cell_x[box],
+    vars->gpu_cell_y[box],
+    vars->gpu_cell_z[box],
+    vars->gpu_Invcell_x[box],
+    vars->gpu_Invcell_y[box],
+    vars->gpu_Invcell_z[box],
     box
   );
   cudaDeviceSynchronize();
@@ -435,9 +449,15 @@ __global__ void BoxForceReciprocalGPU(
   int *gpu_molIndex,
   int *gpu_kindIndex,
   double *gpu_lambdaCoulomb,
-  double axx,
-  double axy,
-  double axz,
+  double3 axis,
+  double3 halfAx,
+  int *gpu_nonOrth,
+  double *gpu_cell_x,
+  double *gpu_cell_y,
+  double *gpu_cell_z,
+  double *gpu_Invcell_x,
+  double *gpu_Invcell_y,
+  double *gpu_Invcell_z,
   int box
 )
 {
@@ -445,7 +465,7 @@ __global__ void BoxForceReciprocalGPU(
   int laneID = threadIdx.x % 32;
   int warpID = threadIdx.x / 32;
   int particleID = blockIdx.x;
-  double forceX = 0.0, forceY = 0.0, forceZ = 0.0;
+  double3 force;
   int moleculeID = gpu_particleMol[particleID];
   int kindID = gpu_particleKind[particleID];
   if(!gpu_particleHasNoCharge[particleID]) {
@@ -454,23 +474,28 @@ __global__ void BoxForceReciprocalGPU(
     // loop over other particles within the same molecule
     if(threadIdx.x == 0) {
       double intraForce = 0.0, distSq = 0.0, dist = 0.0;
-      double distVectX = 0.0, distVectY = 0.0, distVectZ = 0.0;
+      double3 distVect; 
       int lastParticleWithinSameMolecule = gpu_startMol[particleID] + gpu_lengthMol[particleID];
       for(int otherParticle = gpu_startMol[particleID];
         otherParticle < lastParticleWithinSameMolecule;
         otherParticle++)
       {
         if(particleID != otherParticle) {
-          DeviceInRcut(distSq, distVectX, distVectY, distVectZ, gpu_x, gpu_y, gpu_z, particleID, otherParticle, axx, axy, axz, box);
+          double dummyVar = 0.0;
+          InRcutGPU(distSq, distVect, gpu_x, gpu_y, gpu_z, 
+                    particleID, otherParticle,
+                    axis, halfAx, dummyVar, gpu_nonOrth[0], gpu_cell_x,
+                    gpu_cell_y, gpu_cell_z, gpu_Invcell_x, gpu_Invcell_y,
+                    gpu_Invcell_z);
           dist = sqrt(distSq);
 
           double expConstValue = exp(-1.0 * alphaSq * distSq);
           double qiqj = gpu_particleCharge[particleID] * gpu_particleCharge[otherParticle] * qqFact;
           intraForce = qiqj * lambdaCoef * lambdaCoef / distSq;
           intraForce *= ((erf(alpha * dist) / dist) - constValue * expConstValue);
-          forceX -= intraForce * distVectX;
-          forceY -= intraForce * distVectY;
-          forceZ -= intraForce * distVectZ;
+          force.x -= intraForce * distVect.x;
+          force.y -= intraForce * distVect.y;
+          force.z -= intraForce * distVect.z;
         }
       }
     }
@@ -484,39 +509,39 @@ __global__ void BoxForceReciprocalGPU(
       double factor = 2.0 * gpu_particleCharge[particleID] * gpu_prefact[vectorIndex] * lambdaCoef *
         (sin(dot) * gpu_sumRnew[vectorIndex] - cos(dot) * gpu_sumInew[vectorIndex]);
         
-      forceX += factor * gpu_kx[vectorIndex];
-      forceY += factor * gpu_ky[vectorIndex];
-      forceZ += factor * gpu_kz[vectorIndex];
+      force.x += factor * gpu_kx[vectorIndex];
+      force.y += factor * gpu_ky[vectorIndex];
+      force.z += factor * gpu_kz[vectorIndex];
     }
   }
 
   // perform reduction at this point
   int warpSize = 32;
   for (int offset = warpSize/2; offset > 0; offset /= 2) {
-    forceX += __shfl_down_sync(FULL_MASK, forceX, offset);
-    forceY += __shfl_down_sync(FULL_MASK, forceY, offset);
-    forceZ += __shfl_down_sync(FULL_MASK, forceZ, offset);
+    force.x += __shfl_down_sync(FULL_MASK, force.x, offset);
+    force.y += __shfl_down_sync(FULL_MASK, force.y, offset);
+    force.z += __shfl_down_sync(FULL_MASK, force.z, offset);
   }
   if(laneID == 0) {
-    shared[warpID*3+0] = forceX;
-    shared[warpID*3+1] = forceY;
-    shared[warpID*3+2] = forceZ;
+    shared[warpID*3+0] = force.x;
+    shared[warpID*3+1] = force.y;
+    shared[warpID*3+2] = force.z;
   }
 
   // first thread inside the block will write back to global memory
   __syncthreads();
   if(threadIdx.x == 0) {
     for(int w=1; w<8; w++) {
-      forceX += shared[w*3+0];
-      forceY += shared[w*3+1];
-      forceZ += shared[w*3+2];
+      force.x += shared[w*3+0];
+      force.y += shared[w*3+1];
+      force.z += shared[w*3+2];
     }
-    gpu_aForceRecx[particleID] = forceX;
-    gpu_aForceRecy[particleID] = forceY;
-    gpu_aForceRecz[particleID] = forceZ;
-    atomicAdd(&gpu_mForceRecx[moleculeID], forceX);
-    atomicAdd(&gpu_mForceRecy[moleculeID], forceY);
-    atomicAdd(&gpu_mForceRecz[moleculeID], forceZ);
+    gpu_aForceRecx[particleID] = force.x;
+    gpu_aForceRecy[particleID] = force.y;
+    gpu_aForceRecz[particleID] = force.z;
+    atomicAdd(&gpu_mForceRecx[moleculeID], force.x);
+    atomicAdd(&gpu_mForceRecy[moleculeID], force.y);
+    atomicAdd(&gpu_mForceRecz[moleculeID], force.z);
   }
 }
 

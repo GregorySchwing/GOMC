@@ -46,35 +46,6 @@ __device__ inline double MinImageSignedGPU(double raw, double ax, double halfAx)
   return raw;
 }
 
-__device__ inline void DeviceInRcut(
-  double &distSq,
-  double &distX,
-  double &distY,
-  double &distZ,
-  double *gpu_x,
-  double *gpu_y,
-  double *gpu_z,
-  int particleID,
-  int otherParticle,
-  double axx,
-  double axy,
-  double axz,
-  int box
-)
-{
-  // calculate difference
-  double diff_x = gpu_x[particleID] - gpu_x[otherParticle];
-  double diff_y = gpu_y[particleID] - gpu_y[otherParticle];
-  double diff_z = gpu_z[particleID] - gpu_z[otherParticle];
-
-  // min image
-  distX = MinImageSignedGPU(diff_x, axx, axx/2.0);
-  distY = MinImageSignedGPU(diff_y, axy, axy/2.0);
-  distZ = MinImageSignedGPU(diff_z, axz, axz/2.0);
-
-  distSq = distX * distX + distY * distY + distZ * distZ;
-}
-
 __device__ inline double3 MinImageGPU(double3 rawVec, double3 axis, double3 halfAx){
   rawVec.x = MinImageSignedGPU(rawVec.x, axis.x, halfAx.x);
   rawVec.y = MinImageSignedGPU(rawVec.y, axis.y, halfAx.y);
@@ -104,9 +75,9 @@ __device__ inline bool InRcutGPU(double &distSq,
                       gpu_cell_z);
   } else {
     dist = MinImageGPU(dist, axis, halfAx);
-    distSq = dist.x * dist.x + dist.y * dist.y + dist.z * dist.z;
   }
 
+  distSq = dist.x * dist.x + dist.y * dist.y + dist.z * dist.z;
   return ((gpu_rCut * gpu_rCut) > distSq);
 }
 
@@ -132,9 +103,9 @@ __device__ inline bool InRcutGPU(double &distSq, double3 & dist,
                       gpu_cell_z);
   } else {
     dist = MinImageGPU(dist, axis, halfAx);
-    distSq = dist.x * dist.x + dist.y * dist.y + dist.z * dist.z;
   }
 
+  distSq = dist.x * dist.x + dist.y * dist.y + dist.z * dist.z;
   return ((gpu_rCut * gpu_rCut) > distSq);
 }
 
