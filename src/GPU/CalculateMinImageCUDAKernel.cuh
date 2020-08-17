@@ -46,6 +46,35 @@ __device__ inline double MinImageSignedGPU(double raw, double ax, double halfAx)
   return raw;
 }
 
+__device__ inline void DeviceInRcut(
+  double &distSq,
+  double &distX,
+  double &distY,
+  double &distZ,
+  double *gpu_x,
+  double *gpu_y,
+  double *gpu_z,
+  int particleID,
+  int otherParticle,
+  double axx,
+  double axy,
+  double axz,
+  int box
+)
+{
+  // calculate difference
+  double diff_x = gpu_x[particleID] - gpu_x[otherParticle];
+  double diff_y = gpu_y[particleID] - gpu_y[otherParticle];
+  double diff_z = gpu_z[particleID] - gpu_z[otherParticle];
+
+  // min image
+  distX = MinImageSignedGPU(diff_x, axx, axx/2.0);
+  distY = MinImageSignedGPU(diff_y, axy, axy/2.0);
+  distZ = MinImageSignedGPU(diff_z, axz, axz/2.0);
+
+  distSq = distX * distX + distY * distY + distZ * distZ;
+}
+
 __device__ inline double3 MinImageGPU(double3 rawVec, double3 axis, double3 halfAx){
   rawVec.x = MinImageSignedGPU(rawVec.x, axis.x, halfAx.x);
   rawVec.y = MinImageSignedGPU(rawVec.y, axis.y, halfAx.y);
@@ -121,11 +150,11 @@ __device__ inline double DotProductGPU(double kx, double ky, double kz,
 }
 
 __device__ inline double DeviceGetLambdaVDW(int molA, int kindA, int molB,
-    int kindB, int box,
-    bool *gpu_isFraction,
-    int *gpu_molIndex,
-    int *gpu_kindIndex,
-    double *gpu_lambdaVDW)
+                                            int kindB, int box,
+                                            bool *gpu_isFraction,
+                                            int *gpu_molIndex,
+                                            int *gpu_kindIndex,
+                                            double *gpu_lambdaVDW)
 {
   double lambda = 1.0;
   if(gpu_isFraction[box]) {
@@ -140,11 +169,11 @@ __device__ inline double DeviceGetLambdaVDW(int molA, int kindA, int molB,
 }
 
 __device__ inline double DeviceGetLambdaCoulomb(int molA, int kindA, int molB,
-    int kindB, int box,
-    bool *gpu_isFraction,
-    int *gpu_molIndex,
-    int *gpu_kindIndex,
-    double *gpu_lambdaCoulomb)
+                                                int kindB, int box,
+                                                bool *gpu_isFraction,
+                                                int *gpu_molIndex,
+                                                int *gpu_kindIndex,
+                                                double *gpu_lambdaCoulomb)
 {
   double lambda = 1.0;
   if(gpu_isFraction[box]) {
@@ -156,6 +185,21 @@ __device__ inline double DeviceGetLambdaCoulomb(int molA, int kindA, int molB,
     }
   }
   return lambda;
+}
+
+__device__ inline double DeviceGetLambdaCoulomb(int mol, int kind, int box,
+                                                bool *gpu_isFraction,
+                                                int *gpu_molIndex,
+                                                int *gpu_kindIndex,
+                                                double *gpu_lambdaCoulomb)
+{
+  double val = 1.0;
+  if(gpu_isFraction[box]) {
+    if((gpu_molIndex[box] == mol) && (gpu_kindIndex[box] == kind)) {
+      val = gpu_lambdaCoulomb[box];
+    }
+  }
+  return val;
 }
 
 // Add atomic operations for GPUs that do not support it
