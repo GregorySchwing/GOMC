@@ -16,6 +16,8 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #define NUMBER_OF_NEIGHBOR_CELL 27
 #define PARTICLE_PER_BLOCK 64
+#define MAX_THREADS_PER_BLOCK 512
+#define MIN_BLOCKS_PER_MP     729
 
 using namespace cub;
 
@@ -368,6 +370,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   double3 halfAx = make_double3(boxAxes.GetAxis(box).x / 2.0,
                                 boxAxes.GetAxis(box).y / 2.0,
                                 boxAxes.GetAxis(box).z / 2.0);
+  checkLastErrorCUDA(__FILE__, __LINE__);
 
   BoxForceGPU <<< blocksPerGrid, threadsPerBlock>>>(gpu_cellStartIndex,
                                                     vars->gpu_cellVector,
@@ -759,7 +762,9 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
   }
 }
 
-__global__ void BoxForceGPU(int *gpu_cellStartIndex,
+__global__ void 
+__launch_bounds__(MAX_THREADS_PER_BLOCK, MIN_BLOCKS_PER_MP)
+BoxForceGPU(int *gpu_cellStartIndex,
                             int *gpu_cellVector,
                             int *gpu_neighborList,
                             int numberOfCells,
