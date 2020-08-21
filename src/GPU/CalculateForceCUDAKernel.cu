@@ -665,9 +665,9 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
                                  bool *gpu_isFraction,
                                  int box)
 {
-  __shared__ double shared_neighborcoordsx[PARTICLE_PER_BLOCK_FORCE*3];
-  __shared__ double shared_neighborcoordsy[PARTICLE_PER_BLOCK_FORCE*3];
-  __shared__ double shared_neighborcoordsz[PARTICLE_PER_BLOCK_FORCE*3];
+  __shared__ double shared_neighborcoordsx[PARTICLE_PER_BLOCK_FORCE];
+  __shared__ double shared_neighborcoordsy[PARTICLE_PER_BLOCK_FORCE];
+  __shared__ double shared_neighborcoordsz[PARTICLE_PER_BLOCK_FORCE];
 
   double distSq;
   double3 virComponents;
@@ -865,9 +865,9 @@ should be stored in shared memory for broadcasting.
  If we used it for current particle then we would get abysmal slowdown as all
  the threads in a warp broadcast one at a time
 */
-  __shared__ double shared_neighborcoordsx[PARTICLE_PER_BLOCK_FORCE*3];
-  __shared__ double shared_neighborcoordsy[PARTICLE_PER_BLOCK_FORCE*3];
-  __shared__ double shared_neighborcoordsz[PARTICLE_PER_BLOCK_FORCE*3];
+  __shared__ double shared_neighborcoordsx[PARTICLE_PER_BLOCK_FORCE];
+  __shared__ double shared_neighborcoordsy[PARTICLE_PER_BLOCK_FORCE];
+  __shared__ double shared_neighborcoordsz[PARTICLE_PER_BLOCK_FORCE];
 
   int threadID = blockIdx.x * blockDim.x + threadIdx.x;
 
