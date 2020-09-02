@@ -123,8 +123,9 @@ endif()
 option(GOMC_GTEST    "Build unit tests for GOMC using GTest Framework " OFF)
 if(GOMC_GTEST)
   include(${PROJECT_SOURCE_DIR}/CMake/GOMCGTestSetup.cmake)
-  add_executable(tests ${sources} ${headers} ${libHeaders} ${libSources})
-
+  add_executable(example ${PROJECT_SOURCE_DIR}/src/example.cpp)
+  target_link_libraries(example gtest gmock_main)
+  add_test(NAME example_test COMMAND example)
 endif()
 
 
