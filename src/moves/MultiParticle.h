@@ -33,7 +33,7 @@ public:
   virtual void PrintAcceptKind();
   void PrepCFCMC(const uint box);
 
-private:
+//private:
   uint bPick;
   uint typePick;
   double lambda;
