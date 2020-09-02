@@ -120,6 +120,11 @@ if (OPENMP_FOUND)
 endif()
 
 # Setup GTest
-include(${PROJECT_SOURCE_DIR}/CMake/GOMCGTestSetup.cmake)
+option(GOMC_GTEST    "Build unit tests for GOMC using GTest Framework " OFF)
+if(GOMC_GTEST)
+  include(${PROJECT_SOURCE_DIR}/CMake/GOMCGTestSetup.cmake)
+  add_executable(tests ${sources} ${headers} ${libHeaders} ${libSources})
+
+endif()
 
 
