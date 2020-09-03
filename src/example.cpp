@@ -1,83 +1,79 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "MultiParticle.h"
-
+#include <limits>
 
 class MPTest : public ::testing::Test {
  protected:
   void SetUp() override {
-     lb_new = XYZ(1.0, 1.0, 1.0);
-     lb_old = XYZ(1.0, 1.0, 1.0);
-     k = XYZ(1.0, 1.0, 1.0);
-     max = 0.0;
+    // Basic Example
+    lb_new = XYZ(1.0, 1.0, 1.0);
+    lb_old = XYZ(1.0, 1.0, 1.0);
+    k = XYZ(1.0, 1.0, 1.0);
+    max = 0.0;
+
+    // Tiny Max, Giant Old,
+    double giantOLD = 1E296;
+    lb_new_TMGO = XYZ(   std::numeric_limits<double>::infinity(), 
+                    std::numeric_limits<double>::infinity(), 
+                    std::numeric_limits<double>::infinity());
+    giant_lb_old = XYZ(giantOLD, giantOLD, giantOLD);
+    k = XYZ(1.0, 1.0, 1.0);
+    tinyMax = 1E-307;
+
+
+  // Giant Max, Tiny Old,  INF New
+    double tinyOLD = 1E-307;
+    lb_new_GMTO = XYZ(   std::numeric_limits<double>::infinity(), 
+                    std::numeric_limits<double>::infinity(), 
+                    std::numeric_limits<double>::infinity());
+    tiny_lb_old = XYZ(tinyOLD, tinyOLD, tinyOLD);
+    k = XYZ(1.0, 1.0, 1.0);
+    giantMax = 1E296;
   }
 
   // void TearDown() override {}
+  // Basic Example
     XYZ lb_new; 
     XYZ lb_old;
     XYZ k; 
     double max;
-    //StaticVals statV;
-    //System sys;
+
+  // Tiny Max, Giant Old
+    XYZ lb_new_TMGO; 
+    XYZ giant_lb_old;
+    XYZ k_TMGO; 
+    double tinyMax;
+
+
+  // Giant Max, Tiny Old
+    XYZ lb_new_GMTO; 
+    XYZ tiny_lb_old;
+    XYZ lb_new_inf; 
+    XYZ k_GMTO; 
+    double giantMax;
+
     MultiParticle * mv;
 
 };
 
-TEST_F(MPTest, IsInitializedToOne) {
-  EXPECT_EQ(lb_new.x, 1.0);
+TEST_F(MPTest, IsInitializedCorrectly) {
+  EXPECT_EQ(lb_new_TMGO.x, std::numeric_limits<double>::infinity());
+  EXPECT_EQ(lb_new_TMGO.x * 0, 0);
+
+  EXPECT_GT(giant_lb_old.x * tinyMax, MIN_FORCE);
+  EXPECT_LT(giant_lb_old.x * tinyMax, MAX_FORCE);
+  EXPECT_GT(tiny_lb_old.x * giantMax, MIN_FORCE);
+  EXPECT_LT(tiny_lb_old.x * giantMax, MAX_FORCE);
 }
 
 TEST_F(MPTest, CalcWRatio) {
   EXPECT_EQ(mv->CalculateWRatio(lb_new, lb_old, k, max), 1.0);
-}
+    // Tiny Max, Giant Old
+  EXPECT_NE(mv->CalculateWRatio(lb_new_TMGO, giant_lb_old, k, tinyMax), std::numeric_limits<double>::infinity());
+    // Giant Max, Tiny Old
+  EXPECT_NE(mv->CalculateWRatio(lb_new_GMTO, tiny_lb_old, k, giantMax), std::numeric_limits<double>::infinity());
 
-// Simple test, does not use gmock
-/*TEST(Dummy, foobar)
-{
-    EXPECT_EQ(MultiParticle::CalculateWRatio(), 0);
-}
-*/
+  ASSERT_TRUE(isfinite(mv->CalculateWRatio(lb_new_GMTO, tiny_lb_old, k, giantMax)));
 
-// Real class we want to mock
-class TeaBreak
-{
-public:
-    virtual ~TeaBreak() {}
-
-    // Return minutes taken to make the drinks
-    int morningTea()
-    {
-        return makeCoffee(true,  1) +
-               makeCoffee(false, 0.5) +
-               makeHerbalTea();
-    }
-
-private:
-    virtual int makeCoffee(bool milk, double sugars) = 0;
-    virtual int makeHerbalTea() = 0;
-};
-
-// Mock class
-class MockTeaBreak : public TeaBreak
-{
-public:
-    MOCK_METHOD2(makeCoffee,    int(bool milk, double sugars));
-    MOCK_METHOD0(makeHerbalTea, int());
-};
-
-
-using ::testing::Return;
-using ::testing::_;
-
-// Mocked test
-TEST(TeaBreakTest, MorningTea)
-{
-    MockTeaBreak  teaBreak;
-    EXPECT_CALL(teaBreak, makeCoffee(_,_))
-        .WillOnce(Return(2))
-        .WillOnce(Return(1));
-    EXPECT_CALL(teaBreak, makeHerbalTea())
-        .WillOnce(Return(3));
-
-    EXPECT_LE(teaBreak.morningTea(), 6);
 }
