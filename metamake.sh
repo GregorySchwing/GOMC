@@ -55,4 +55,4 @@ cd bin
 #export CC=${ICC_PATH}
 #export CXX=${ICPC_PATH}
 cmake -DGOMC_GTEST=ON ..
-make -j8 example
+make -j8 example NVT
