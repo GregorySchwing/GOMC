@@ -13,6 +13,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include <string>
 #include <vector>
 #include <map>
+#include "BondAdjacencyList.h"
 
 namespace config_setup
 {
@@ -26,6 +27,8 @@ class FFSetup;
 
 namespace mol_setup
 {
+
+
 //!structure to contain an atom's data during initialization
 class Atom
 {
@@ -97,6 +100,20 @@ public:
   bool incomplete;
 };
 
+class ResidueLookupElem
+{
+public:
+  char mySegid[11];
+  ResidueLookupElem *next;      // stored as a linked list
+  int firstResid;               // valid resid is >= firstResid
+  int lastResid;                // valid resid is <= lastResid
+  //ResizeArray<int> atomIndex;   // 0-based index for first atom in residue
+
+  ResidueLookupElem(void) { next = 0; firstResid = -1; lastResid = -1; }
+  ~ResidueLookupElem(void) { delete next; }
+};
+
+
 //List of dihedrals with atom at one end, atom first
 std::vector<Dihedral> AtomEndDihs(const MolKind& molKind, uint atom);
 //List of dihedrals with atom and partner in middle, atom in a1
@@ -136,7 +153,11 @@ void PrintMolMapBrief(const MolMap& kindMap);
 //wrapper struct for consistent interface
 class MolSetup
 {
+
 public:
+  class Atom;
+  int read_atoms(FILE *, unsigned int nAtoms);
+
   //reads BoxTotal PSFs and merges the data, placing the results in kindMap
   //returns 0 if read is successful, -1 on a failure
   int Init(const config_setup::RestartSettings& restart,
@@ -146,5 +167,8 @@ public:
 
 //private:
   mol_setup::MolMap kindMap;
+  //mol_setup::MolKind mk;
+  std::vector<mol_setup::Atom> allAtoms;
+
 };
 #endif

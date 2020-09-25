@@ -280,6 +280,31 @@ void MolSetup::AssignKinds(const pdb_setup::Atoms& pdbAtoms, const FFSetup& ffDa
   std::cout << std::endl;
 }
 
+int MolSetup::read_atoms(FILE *psf, unsigned int nAtoms)
+{
+  char input[512];
+  unsigned int atomID = 0;
+  unsigned int molID;
+  char segment[11], moleculeName[11], atomName[11], atomType[11];
+  double charge, mass;
+
+  while (atomID < nAtoms) {
+    char* check = fgets(input, 511, psf);
+    if (check == NULL) {
+      fprintf(stderr, "ERROR: Could not find all atoms in PSF file ");
+      return READERROR;
+    }
+    //skip comment/blank lines
+    if (input[0] == '!' || str::AllWS(input))
+      continue;
+    //parse line
+    sscanf(input, " %u %s %u %s %s %s %lf %lf ",
+           &atomID, segment, &molID,
+           moleculeName, atomName, atomType, &charge, &mass);
+    allAtoms.push_back(mol_setup::Atom(atomName, atomType, charge, mass));
+  }
+}
+
 namespace
 {
 
@@ -586,10 +611,13 @@ int ReadPSF(const char* psfFilename, MolMap& kindMap)
   }
   //make sure molecule has bonds, appears before !NBOND
   count = atoi(input);
+  BondAdjacencyList b(psf, nAtoms, count);
+  /*
   if (ReadPSFBonds(psf, kindMap, firstAtomLookup, count) == READERROR) {
     fclose(psf);
     return READERROR;
   }
+  */
   //find angle header+count
   fseek(psf, 0, SEEK_SET);
   while (strstr(input, "!NTHETA") == NULL) {
@@ -675,6 +703,10 @@ int ReadPSFAtoms(FILE* psf, MolMap& kindMap, unsigned int nAtoms)
     it->second.incomplete = false;
   }
   return 0;
+}
+
+int read_bonds(FILE* psf){
+  
 }
 
 //adds bonds in psf to kindMap
