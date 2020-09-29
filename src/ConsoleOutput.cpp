@@ -16,6 +16,9 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 
 #include <iostream>                 // std::cout, std::fixed
 #include <iomanip>                  // std::setprecision
+#include <limits>
+
+typedef std::numeric_limits< double > dbl;
 
 void ConsoleOutput::DoOutput(const ulong step)
 {
@@ -265,7 +268,7 @@ void ConsoleOutput::PrintEnergy(const uint box, Energy const& en,
   title += numStr + ":";
   printElementStep(title, step + 1, elementWidth);
 
-  printElement(en.total, elementWidth);
+  printElement(en.total, elementWidth+dbl::max_digits10, dbl::max_digits10);
   printElement(en.intraBond, elementWidth);
   printElement(en.intraNonbond, elementWidth);
   printElement(en.inter, elementWidth);
