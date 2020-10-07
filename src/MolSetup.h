@@ -98,6 +98,10 @@ public:
   uint firstAtomID, firstMolID;
   //true while the molecule is still open for modification during PSF read
   bool incomplete;
+
+  // This replaces the count we made when parsing the PDB file
+  uint kindCount;
+
 };
 
 //List of dihedrals with atom at one end, atom first
