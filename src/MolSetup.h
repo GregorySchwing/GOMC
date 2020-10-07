@@ -100,20 +100,6 @@ public:
   bool incomplete;
 };
 
-class ResidueLookupElem
-{
-public:
-  char mySegid[11];
-  ResidueLookupElem *next;      // stored as a linked list
-  int firstResid;               // valid resid is >= firstResid
-  int lastResid;                // valid resid is <= lastResid
-  //ResizeArray<int> atomIndex;   // 0-based index for first atom in residue
-
-  ResidueLookupElem(void) { next = 0; firstResid = -1; lastResid = -1; }
-  ~ResidueLookupElem(void) { delete next; }
-};
-
-
 //List of dihedrals with atom at one end, atom first
 std::vector<Dihedral> AtomEndDihs(const MolKind& molKind, uint atom);
 //List of dihedrals with atom and partner in middle, atom in a1
@@ -166,9 +152,15 @@ public:
   void AssignKinds(const pdb_setup::Atoms& pdbAtoms, const FFSetup& ffData);
 
   int read_atoms(FILE *, unsigned int nAtoms, std::vector<mol_setup::Atom> & allAtoms);
-  int createMapFromBondAdjacencyList( std::vector< std::vector<uint> > & moleculeXAtomIDY, 
+
+  typedef std::map<std::__cxx11::string, mol_setup::MolKind> MolMap;
+  static void copyBondInfoIntoMapEntry(const BondAdjacencyList & bondAdjList, MolMap::iterator & mapEntry);
+
+  int createMapFromBondAdjacencyList( const BondAdjacencyList & bondAdjList,
+                                      std::vector< std::vector<uint> > & moleculeXAtomIDY, 
                                       std::vector<mol_setup::Atom> & allAtoms,
                                       mol_setup::MolMap & kindMap);
+
 //private:
   mol_setup::MolMap kindMap;
   //mol_setup::MolKind mk;

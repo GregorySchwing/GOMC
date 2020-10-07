@@ -306,7 +306,8 @@ int read_atoms(FILE *psf, unsigned int nAtoms, std::vector<mol_setup::Atom> & al
   }
 }
 
-int createMapFromBondAdjacencyList( std::vector< std::vector<uint> > & moleculeXAtomIDY, 
+int createMapFromBondAdjacencyList( const BondAdjacencyList & bondAdjList,
+                                    std::vector< std::vector<uint> > & moleculeXAtomIDY, 
                                     std::vector<mol_setup::Atom> & allAtoms,
                                     mol_setup::MolMap & kindMap)
 
@@ -371,6 +372,7 @@ int createMapFromBondAdjacencyList( std::vector< std::vector<uint> > & moleculeX
         }
         itForEntry->second.incomplete = false;
         stringSuffix++;
+        MolSetup::copyBondInfoIntoMapEntry(bondAdjList, itForEntry);
       }
     } else {
       // Normal Map Entry
@@ -393,21 +395,42 @@ int createMapFromBondAdjacencyList( std::vector< std::vector<uint> > & moleculeX
         }
         //still building a molecule...
         else if (it->second.incomplete) {
-          if (allAtoms[moleculeXAtomIDY[i][0]].residueID != it->second.firstMolID)
+          if (allAtoms[moleculeXAtomIDY[i][0]].residueID != it->second.firstMolID){
             it->second.incomplete = false;
-          else
-            it->second.atoms.push_back(mol_setup::Atom( allAtoms[moleculeXAtomIDY[i][0]].name, 
-                                                        allAtoms[moleculeXAtomIDY[i][0]].residue,
-                                                        allAtoms[moleculeXAtomIDY[i][0]].residueID,
-                                                        allAtoms[moleculeXAtomIDY[i][0]].type, 
-                                                        allAtoms[moleculeXAtomIDY[i][0]].charge, 
-                                                        allAtoms[moleculeXAtomIDY[i][0]].mass));          
+            MolSetup::copyBondInfoIntoMapEntry(bondAdjList, it);
+          } else{
+            it->second.atoms.push_back(mol_setup::Atom( allAtoms[moleculeXAtomIDY[i][j]].name, 
+                                                        allAtoms[moleculeXAtomIDY[i][j]].residue,
+                                                        allAtoms[moleculeXAtomIDY[i][j]].residueID,
+                                                        allAtoms[moleculeXAtomIDY[i][j]].type, 
+                                                        allAtoms[moleculeXAtomIDY[i][j]].charge, 
+                                                        allAtoms[moleculeXAtomIDY[i][j]].mass));      
+          }    
         }
       }  
     }    
   }
   return 0;
 }
+
+typedef std::map<std::__cxx11::string, mol_setup::MolKind> MolMap;
+void MolSetup::copyBondInfoIntoMapEntry(const BondAdjacencyList & bondAdjList, MolMap::iterator & mapEntry){
+
+    unsigned int molBegin = mapEntry->second.firstAtomID - 1;
+    //index AFTER last atom in molecule
+    unsigned int molEnd = molBegin + mapEntry->second.atoms.size();
+    //assign the bond
+    for (uint i = molBegin; i < molEnd; i++){
+      adjNode* ptr = bondAdjList.head[i];
+      while (ptr != nullptr) {
+        if (i < ptr->val) {
+          mapEntry->second.bonds.push_back(Bond(i-molBegin, ptr->val-molBegin));
+        }    
+        ptr = ptr->next;
+      }
+    }
+}
+
 
 namespace
 {
@@ -712,8 +735,7 @@ int ReadPSF(const char* psfFilename, MolMap& kindMap)
   count = atoi(input);
   std::vector< std::vector<uint> > moleculeXAtomIDY;
   BondAdjacencyList bondAdjList(psf, nAtoms, count, moleculeXAtomIDY);
-  createMapFromBondAdjacencyList(moleculeXAtomIDY, allAtoms, kindMap);
-  PrintMolMapVerbose(kindMap);
+  createMapFromBondAdjacencyList(bondAdjList, moleculeXAtomIDY, allAtoms, kindMap);
   //build list of start particles for each type, so we can find it and skip
   //everything else
   std::vector<std::pair<unsigned int, std::string> > firstAtomLookup;

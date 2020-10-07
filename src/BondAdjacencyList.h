@@ -44,6 +44,5 @@ void DFSUtil(int v, adjNode * node, adjNode ** head, bool * visited, std::vector
 
 graphEdge * edges;
 
-//~BondAdjacencyList();
 };
 #endif

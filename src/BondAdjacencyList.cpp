@@ -70,9 +70,10 @@ BondAdjacencyList::BondAdjacencyList(FILE* psf, uint nAtoms, uint nBonds, std::v
         head[start_ver] = newNode;
     
     }
+    /* For debugging
     for (uint i = 0; i < this->nAtoms; i++)
         display_AdjList(head[i], i);
-
+    */
     connectedComponents(moleculeXAtomIDY);
 }
 
@@ -111,11 +112,12 @@ void BondAdjacencyList::connectedComponents(std::vector< std::vector<uint> > & m
         { 
             // print all reachable vertices 
             // from v 
-            std::cout << "Calling DFSUtil" << std::endl;
+            /* For debugging
+            std::cout << "Calling DFSUtil" << std::endl; */
             std::vector<uint> moleculeX;
             DFSUtil(v, this->head[v], this->head, visited, moleculeX); 
             moleculeXAtomIDY.push_back(moleculeX);
-            std::cout << "\n"; 
+            /* For debugging std::cout << "\n"; */
         } 
     } 
     delete[] visited; 
@@ -125,7 +127,7 @@ void BondAdjacencyList::DFSUtil(int v, adjNode * node, adjNode ** head, bool * v
 { 
     // Mark the current node as visited and print it 
     visited[v] = true; 
-    std::cout << v << " "; 
+    /* For debugging std::cout << v << " "; */
     moleculeX.push_back(v);
     // Recur for all the vertices 
     // adjacent to this vertex
