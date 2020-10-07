@@ -33,15 +33,15 @@ namespace mol_setup
 class Atom
 {
 public:
-  Atom(std::string const& l_name, std::string const& l_type,
+  Atom(std::string const& l_name, std::string const& l_residue, uint l_resID, std::string const& l_type,
        const double l_charge, const double l_mass) :
-    name(l_name), type(l_type), charge(l_charge), mass(l_mass) {}
+    name(l_name), residue(l_residue), residueID(l_resID), type(l_type), charge(l_charge), mass(l_mass) {}
   //private:
   //name (within a molecule) and type (for forcefield params)
-  std::string name, type;
+  std::string name, type, residue;
   double charge, mass;
   //kind index
-  uint kind;
+  uint kind, residueID;
 };
 
 class Dihedral
@@ -148,6 +148,7 @@ int ReadCombinePSF(MolMap& kindMap, const std::string* psfFilename,
 
 void PrintMolMapVerbose(const MolMap& kindMap);
 void PrintMolMapBrief(const MolMap& kindMap);
+
 }
 
 //wrapper struct for consistent interface
@@ -156,7 +157,6 @@ class MolSetup
 
 public:
   class Atom;
-  int read_atoms(FILE *, unsigned int nAtoms);
 
   //reads BoxTotal PSFs and merges the data, placing the results in kindMap
   //returns 0 if read is successful, -1 on a failure
@@ -165,10 +165,12 @@ public:
 
   void AssignKinds(const pdb_setup::Atoms& pdbAtoms, const FFSetup& ffData);
 
+  int read_atoms(FILE *, unsigned int nAtoms, std::vector<mol_setup::Atom> & allAtoms);
+  int createMapFromBondAdjacencyList( std::vector< std::vector<uint> > & moleculeXAtomIDY, 
+                                      std::vector<mol_setup::Atom> & allAtoms,
+                                      mol_setup::MolMap & kindMap);
 //private:
   mol_setup::MolMap kindMap;
   //mol_setup::MolKind mk;
-  std::vector<mol_setup::Atom> allAtoms;
-
 };
 #endif

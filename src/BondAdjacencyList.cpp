@@ -22,7 +22,7 @@ adjNode* BondAdjacencyList::getAdjListNode(int value, int weight, adjNode* head)
     return newNode;
 }
 
-BondAdjacencyList::BondAdjacencyList(FILE* psf, uint nAtoms, uint nBonds){
+BondAdjacencyList::BondAdjacencyList(FILE* psf, uint nAtoms, uint nBonds, std::vector< std::vector<uint> > & moleculeXAtomIDY){
 
     this->nAtoms = nAtoms;
     this->nBonds = nBonds;
@@ -73,7 +73,7 @@ BondAdjacencyList::BondAdjacencyList(FILE* psf, uint nAtoms, uint nBonds){
     for (uint i = 0; i < this->nAtoms; i++)
         display_AdjList(head[i], i);
 
-    connectedComponents();
+    connectedComponents(moleculeXAtomIDY);
 }
 
 // Destructor
@@ -98,7 +98,7 @@ void BondAdjacencyList::display_AdjList(adjNode* ptr, int i)
 
 // Method to print connected components in an 
 // undirected graph 
-void BondAdjacencyList::connectedComponents() 
+void BondAdjacencyList::connectedComponents(std::vector< std::vector<uint> > & moleculeXAtomIDY) 
 { 
     // Mark all the vertices as not visited 
     bool *visited = new bool[this->nAtoms]; 
@@ -112,20 +112,21 @@ void BondAdjacencyList::connectedComponents()
             // print all reachable vertices 
             // from v 
             std::cout << "Calling DFSUtil" << std::endl;
-            DFSUtil(v, this->head[v], this->head, visited); 
-  
+            std::vector<uint> moleculeX;
+            DFSUtil(v, this->head[v], this->head, visited, moleculeX); 
+            moleculeXAtomIDY.push_back(moleculeX);
             std::cout << "\n"; 
         } 
     } 
     delete[] visited; 
 } 
   
-void BondAdjacencyList::DFSUtil(int v, adjNode * node, adjNode ** head, bool * visited) 
+void BondAdjacencyList::DFSUtil(int v, adjNode * node, adjNode ** head, bool * visited, std::vector<uint> & moleculeX) 
 { 
     // Mark the current node as visited and print it 
     visited[v] = true; 
     std::cout << v << " "; 
-  
+    moleculeX.push_back(v);
     // Recur for all the vertices 
     // adjacent to this vertex
     while (node != nullptr){
@@ -134,7 +135,7 @@ void BondAdjacencyList::DFSUtil(int v, adjNode * node, adjNode ** head, bool * v
         if (visited[v]==false){
             visited[v] = true; 
             // Evaluate adjacency list of outgoing edge for prev visited
-            DFSUtil(v, head[v], head, visited);
+            DFSUtil(v, head[v], head, visited, moleculeX);
         }
         // Go to next node original node's adjacency list
         node = node->next;

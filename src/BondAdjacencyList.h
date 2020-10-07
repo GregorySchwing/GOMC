@@ -35,14 +35,15 @@ uint nAtoms;  // number of nodes in the graph
 uint nBonds; // number of edges in the graph
 
 
-BondAdjacencyList(FILE* psf, uint nAtoms, uint nBonds);
+BondAdjacencyList(FILE* psf, uint nAtoms, uint nBonds, std::vector< std::vector<uint> > & moleculeXAtomIDY);
 ~BondAdjacencyList();
 adjNode* getAdjListNode(int value, int weight, adjNode* head);
 void display_AdjList(adjNode* ptr, int i);
-void connectedComponents();
-void DFSUtil(int v, adjNode * node, adjNode ** head, bool * visited);
+void connectedComponents(std::vector< std::vector<uint> > & moleculeXAtomIDY);
+void DFSUtil(int v, adjNode * node, adjNode ** head, bool * visited, std::vector<uint> & moleculeX);
 
 graphEdge * edges;
+
 //~BondAdjacencyList();
 };
 #endif
