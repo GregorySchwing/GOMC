@@ -343,8 +343,8 @@ int createMapFromBondAdjacencyList( std::vector< std::vector<uint> > & moleculeX
         }
       }
       if (!existingProtein){
-        std::string fragName = "frag" + stringSuffix;
-        MolMap::iterator itForEntry = kindMap.insert(std::make_pair(std::string(allAtoms[moleculeXAtomIDY[i][0]].residue), MolKind())).first;
+        std::string fragName = "frag_" + std::to_string(stringSuffix);
+        MolMap::iterator itForEntry = kindMap.insert(std::make_pair(std::string(fragName), MolKind())).first;
         for (uint j = 0; j < moleculeXAtomIDY[i].size(); j++){
             // I subtracted 1 when creating the Bond Adjacency List
             // Add it back so we are consistent with previous implementation.
@@ -361,12 +361,12 @@ int createMapFromBondAdjacencyList( std::vector< std::vector<uint> > & moleculeX
           }
           //still building a molecule...
           else {
-              itForEntry->second.atoms.push_back(mol_setup::Atom( allAtoms[moleculeXAtomIDY[i][0]].name, 
-                                                                  allAtoms[moleculeXAtomIDY[i][0]].residue,
-                                                                  allAtoms[moleculeXAtomIDY[i][0]].residueID,
-                                                                  allAtoms[moleculeXAtomIDY[i][0]].type, 
-                                                                  allAtoms[moleculeXAtomIDY[i][0]].charge, 
-                                                                  allAtoms[moleculeXAtomIDY[i][0]].mass));          
+              itForEntry->second.atoms.push_back(mol_setup::Atom( allAtoms[moleculeXAtomIDY[i][j]].name, 
+                                                                  allAtoms[moleculeXAtomIDY[i][j]].residue,
+                                                                  allAtoms[moleculeXAtomIDY[i][j]].residueID,
+                                                                  allAtoms[moleculeXAtomIDY[i][j]].type, 
+                                                                  allAtoms[moleculeXAtomIDY[i][j]].charge, 
+                                                                  allAtoms[moleculeXAtomIDY[i][j]].mass));          
           }
         }
         itForEntry->second.incomplete = false;
