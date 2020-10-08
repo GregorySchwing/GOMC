@@ -64,6 +64,7 @@ void BriefDihKinds(MolKind& kind, const FFSetup& ffData);
 int ReadPSF(const char* psfFilename, MolMap& kindMap);
 //adds atoms and molecule data in psf to kindMap
 //pre: stream is at !NATOMS   post: stream is at end of atom section
+/*
 int ReadPSFAtoms(FILE* psf,
                  MolMap& kindMap, uint nAtoms);
 //adds bonds in psf to kindMap
@@ -72,6 +73,7 @@ int ReadPSFAtoms(FILE* psf,
 int ReadPSFBonds(FILE* psf, MolMap& kindMap,
                  std::vector<std::pair<uint, std::string> >& firstAtom,
                  const uint nbonds);
+*/
 //adds angles in psf to kindMap
 //pre: stream is before !NTHETA   post: stream is in angle section just
 //after the first appearance of the last molecule
@@ -355,24 +357,10 @@ int createMapFromBondAdjacencyList( const BondAdjacencyList & bondAdjList,
             // Add it back so we are consistent with previous implementation.
             // This value used to come directly from psf atom id.
           if (j == 0){
-            itForEntry->second.firstAtomID = moleculeXAtomIDY[i][0] + 1;
-            itForEntry->second.firstMolID = allAtoms[moleculeXAtomIDY[i][0]].residueID;
-            itForEntry->second.atoms.push_back(mol_setup::Atom( allAtoms[moleculeXAtomIDY[i][0]].name, 
-                                                                allAtoms[moleculeXAtomIDY[i][0]].residue,
-                                                                allAtoms[moleculeXAtomIDY[i][0]].residueID,
-                                                                allAtoms[moleculeXAtomIDY[i][0]].type, 
-                                                                allAtoms[moleculeXAtomIDY[i][0]].charge, 
-                                                                allAtoms[moleculeXAtomIDY[i][0]].mass));
+            itForEntry->second.firstAtomID.push_back(moleculeXAtomIDY[i][j] + 1);
+            itForEntry->second.firstMolID.push_back(allAtoms[moleculeXAtomIDY[i][j]].residueID);
           }
-          //still building a molecule...
-          else {
-              itForEntry->second.atoms.push_back(mol_setup::Atom( allAtoms[moleculeXAtomIDY[i][j]].name, 
-                                                                  allAtoms[moleculeXAtomIDY[i][j]].residue,
-                                                                  allAtoms[moleculeXAtomIDY[i][j]].residueID,
-                                                                  allAtoms[moleculeXAtomIDY[i][j]].type, 
-                                                                  allAtoms[moleculeXAtomIDY[i][j]].charge, 
-                                                                  allAtoms[moleculeXAtomIDY[i][j]].mass));          
-          }
+          itForEntry->second.atoms.push_back(allAtoms[moleculeXAtomIDY[i][j]]);         
         }
         itForEntry->second.incomplete = false;
         itForEntry->second.kindCount++;
@@ -380,52 +368,34 @@ int createMapFromBondAdjacencyList( const BondAdjacencyList & bondAdjList,
         MolSetup::copyBondInfoIntoMapEntry(bondAdjList, itForEntry);
       }
     } else {
-        // Normal Map Entry
-        MolMap::iterator it = kindMap.find(allAtoms[moleculeXAtomIDY[i][0]].residue);
-        //found new molecule kind...
-        if (it == kindMap.end()) {
-          for (uint j = 0; j < moleculeXAtomIDY[i].size(); j++){
-            if (j == 0){
-              it = kindMap.insert(std::make_pair(std::string(allAtoms[moleculeXAtomIDY[i][0]].residue), MolKind())).first;
-              // I subtracted 1 when creating the Bond Adjacency List
-              // Add it back so we are consistent with previous implementation.
-              // This value used to come directly from psf atom id.
-              it->second.firstAtomID = moleculeXAtomIDY[i][0] + 1;
-              it->second.firstMolID = allAtoms[moleculeXAtomIDY[i][0]].residueID;
-              it->second.atoms.push_back(mol_setup::Atom( allAtoms[moleculeXAtomIDY[i][0]].name, 
-                                                          allAtoms[moleculeXAtomIDY[i][0]].residue,
-                                                          allAtoms[moleculeXAtomIDY[i][0]].residueID,
-                                                          allAtoms[moleculeXAtomIDY[i][0]].type, 
-                                                          allAtoms[moleculeXAtomIDY[i][0]].charge, 
-                                                          allAtoms[moleculeXAtomIDY[i][0]].mass));
-            }
-            //still building a molecule...
-            else if (it->second.incomplete) {
-              if (allAtoms[moleculeXAtomIDY[i][0]].residueID != it->second.firstMolID){
-                it->second.incomplete = false;
-                MolSetup::copyBondInfoIntoMapEntry(bondAdjList, it);
-              } else{
-                it->second.atoms.push_back(mol_setup::Atom( allAtoms[moleculeXAtomIDY[i][j]].name, 
-                                                            allAtoms[moleculeXAtomIDY[i][j]].residue,
-                                                            allAtoms[moleculeXAtomIDY[i][j]].residueID,
-                                                            allAtoms[moleculeXAtomIDY[i][j]].type, 
-                                                            allAtoms[moleculeXAtomIDY[i][j]].charge, 
-                                                            allAtoms[moleculeXAtomIDY[i][j]].mass));      
-              }    
-            }
+      // Normal Map Entry
+      MolMap::iterator it = kindMap.find(allAtoms[moleculeXAtomIDY[i][0]].residue);
+      //found new molecule kind...
+      if (it == kindMap.end()) {
+        for (uint j = 0; j < moleculeXAtomIDY[i].size(); j++){
+          if (j == 0){
+            it = kindMap.insert(std::make_pair(std::string(allAtoms[moleculeXAtomIDY[i][j]].residue), MolKind())).first;
+            // I subtracted 1 when creating the Bond Adjacency List
+            // Add it back so we are consistent with previous implementation.
+            // This value used to come directly from psf atom id.
+            it->second.firstAtomID.push_back(moleculeXAtomIDY[i][j] + 1);
+            it->second.firstMolID.push_back(allAtoms[moleculeXAtomIDY[i][j]].residueID);
           }
-        } else {
-          it->second.kindCount++;
+          it->second.atoms.push_back(allAtoms[moleculeXAtomIDY[i][j]]);
         }
-      }  
-    } 
+        MolSetup::copyBondInfoIntoMapEntry(bondAdjList, it);
+      } else {
+        it->second.kindCount++;
+      }
+    }  
+  } 
   return 0;
 }
 
 typedef std::map<std::__cxx11::string, mol_setup::MolKind> MolMap;
 void MolSetup::copyBondInfoIntoMapEntry(const BondAdjacencyList & bondAdjList, MolMap::iterator & mapEntry){
 
-    unsigned int molBegin = mapEntry->second.firstAtomID - 1;
+    unsigned int molBegin = mapEntry->second.firstAtomID.front() - 1;
     //index AFTER last atom in molecule
     unsigned int molEnd = molBegin + mapEntry->second.atoms.size();
     //assign the bond
@@ -446,8 +416,8 @@ namespace
 
 void AssignMolKinds(MolKind& kind, const pdb_setup::Atoms& pdbData, const std::string& name)
 {
-  uint index = std::find(pdbData.resKindNames.begin(),
-                         pdbData.resKindNames.end(), name) - pdbData.resKindNames.end();
+  // In the case of multiresidue molecule, I may need a std::vector<uint>
+  uint index = std::find(pdbData.resKindNames.begin(), pdbData.resKindNames.end(), name) - pdbData.resKindNames.end();
   kind.kindIndex = index;
 }
 
@@ -749,7 +719,7 @@ int ReadPSF(const char* psfFilename, MolMap& kindMap)
   //everything else
   std::vector<std::pair<unsigned int, std::string> > firstAtomLookup;
   for (MolMap::iterator it = kindMap.begin(); it != kindMap.end(); ++it) {
-    firstAtomLookup.push_back(std::make_pair(it->second.firstAtomID, it->first));
+    firstAtomLookup.push_back(std::make_pair(it->second.firstAtomID.front(), it->first));
   }
   std::sort(firstAtomLookup.begin(), firstAtomLookup.end());
   /*
@@ -806,7 +776,7 @@ int ReadPSF(const char* psfFilename, MolMap& kindMap)
 
   return nAtoms;
 }
-
+/*
 //adds atoms and molecule data in psf to kindMap
 //pre: stream is at !NATOMS   post: stream is at end of atom section
 int ReadPSFAtoms(FILE* psf, MolMap& kindMap, unsigned int nAtoms)
@@ -901,7 +871,7 @@ int ReadPSFBonds(FILE* psf, MolMap& kindMap,
   }
   return 0;
 }
-
+*/
 //adds angles in psf to kindMap
 //pre: stream is before !NTHETA   post: stream is in angle section just after
 //the first appearance of the last molecule

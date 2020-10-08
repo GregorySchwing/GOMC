@@ -38,28 +38,57 @@ void Molecules::Init(Setup & setup, Forcefield & forcefield,
 {
   pdb_setup::Atoms& atoms = setup.pdb.atoms;
   //Molecule kinds arrays/data.
+  count = 0;
   kindsCount = setup.mol.kindMap.size();
   countByKind = new uint[kindsCount];
   kinds = new MoleculeKind[kindsCount];
 
-  //Molecule instance arrays/data
-  count = atoms.startIdxRes.size();
+  // A intermediate vector to store these values so I add kIndex in sorted order.
+  std::vector<unsigned int> firstAtomIndex;
+  // A intermediate vector to store these values so I add kIndex in sorted order.
+  std::vector<unsigned int> kIndexVector;
+
+  uint mk = 0;
+  typedef std::map<std::__cxx11::string, mol_setup::MolKind> MolMap;
+  for (MolMap::iterator it = setup.mol.kindMap.begin(); it != setup.mol.kindMap.end(); ++it) {
+
+    countByKind[mk] = it->second.kindCount;
+    count += it->second.kindCount;
+
+    /* This needs to handle being initialized from frag_x */
+    kinds[mk].Init(it->first, setup, forcefield, sys);
+
+    // Insert all of a given molecule kind's instance's firstAtomID's into a sorted vector
+    //  It must be sorted so it lines up the xyz data from the pdb file.
+    for (std::vector<uint>::iterator nestedIt = it->second.firstAtomID.begin(); 
+                      nestedIt != it->second.firstAtomID.end(); ++nestedIt) {
+      // Find sorted position
+      auto sortedIt = std::upper_bound( firstAtomIndex.begin(), 
+                                  firstAtomIndex.end(), *nestedIt); //1
+      // Save sorted position
+      int sortedPosition = std::distance(sortedIt, firstAtomIndex.begin());
+      // Add in sorted position
+      firstAtomIndex.insert(sortedIt, *nestedIt); //2 
+      // Use the sorted position in firstAtomIndex as a position to add kIndex.
+      kIndexVector.insert(kIndexVector.begin() + sortedPosition, mk);
+    }
+    /* This needs to handle being initialized from frag_x */
+    // OLD WAY kinds[mk].Init(atoms.resKindNames[mk]
+  }
+
   if (count == 0) {
-    std::cerr << "Error: No Molecule was found in the PDB file(s)!" << std::endl;
+    std::cerr << "Error: No Molecules were found in the PSF file(s)!" << std::endl;
     exit(EXIT_FAILURE);
   }
 
+  /* This reflects increasing ordered starting Atom indices ordered to match PDB file(s)*/
   start = new uint [count + 1];
-  start = vect::TransferInto<uint>(start, atoms.startIdxRes);
-  start[count] = atoms.x.size();
-  kIndex = vect::transfer<uint>(atoms.resKinds);
+  kIndex = vect::transfer<uint>(kIndexVector);
+  start = vect::transfer<uint>(firstAtomIndex);
   chain = vect::transfer<char>(atoms.chainLetter);
-  for (uint mk = 0 ; mk < kindsCount; mk++) {
-    countByKind[mk] =
-      std::count(atoms.resNames.begin(), atoms.resNames.end(),
-                 atoms.resKindNames[mk]);
-    kinds[mk].Init(atoms.resKindNames[mk], setup, forcefield, sys);
-  }
+  start[count] = atoms.x.size();
+  /* This reflect increasing ordered atom indices ordered to match PDB file(s)*/
+
 
 #if ENSEMBLE == GCMC
   //check to have all the molecules in psf file that defined in config file
