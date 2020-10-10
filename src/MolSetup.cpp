@@ -344,6 +344,11 @@ int createMapFromBondAdjacencyList( const BondAdjacencyList & bondAdjList,
           if (k == moleculeXAtomIDY[i].size()){
             existingProtein = true;
             lookupIt->second.kindCount++;
+            // I subtracted 1 when creating the Bond Adjacency List
+            // Add it back so we are consistent with previous implementation.
+            // This value used to come directly from psf atom id.
+            lookupIt->second.firstAtomID.push_back(moleculeXAtomIDY[i][0] + 1);
+            lookupIt->second.firstMolID.push_back(allAtoms[moleculeXAtomIDY[i][0]].residueID);
           }
         } else {
           lookupIt++;
@@ -375,18 +380,20 @@ int createMapFromBondAdjacencyList( const BondAdjacencyList & bondAdjList,
         for (uint j = 0; j < moleculeXAtomIDY[i].size(); j++){
           if (j == 0){
             it = kindMap.insert(std::make_pair(std::string(allAtoms[moleculeXAtomIDY[i][j]].residue), MolKind())).first;
-            // I subtracted 1 when creating the Bond Adjacency List
-            // Add it back so we are consistent with previous implementation.
-            // This value used to come directly from psf atom id.
-            it->second.firstAtomID.push_back(moleculeXAtomIDY[i][j] + 1);
-            it->second.firstMolID.push_back(allAtoms[moleculeXAtomIDY[i][j]].residueID);
+            it->second.firstAtomID.push_back(moleculeXAtomIDY[i][0] + 1);
+            it->second.firstMolID.push_back(allAtoms[moleculeXAtomIDY[i][0]].residueID);
           }
           it->second.atoms.push_back(allAtoms[moleculeXAtomIDY[i][j]]);
         }
         MolSetup::copyBondInfoIntoMapEntry(bondAdjList, it);
       } else {
-        it->second.kindCount++;
-      }
+        // I subtracted 1 when creating the Bond Adjacency List
+        // Add it back so we are consistent with previous implementation.
+        // This value used to come directly from psf atom id.
+        it->second.firstAtomID.push_back(moleculeXAtomIDY[i][0] + 1);
+        it->second.firstMolID.push_back(allAtoms[moleculeXAtomIDY[i][0]].residueID);
+      } 
+      it->second.kindCount++;
     }  
   } 
   return 0;
@@ -395,7 +402,7 @@ int createMapFromBondAdjacencyList( const BondAdjacencyList & bondAdjList,
 typedef std::map<std::__cxx11::string, mol_setup::MolKind> MolMap;
 void MolSetup::copyBondInfoIntoMapEntry(const BondAdjacencyList & bondAdjList, MolMap::iterator & mapEntry){
 
-    unsigned int molBegin = mapEntry->second.firstAtomID.front() - 1;
+    unsigned int molBegin = (mapEntry->second.firstAtomID.front()) - 1;
     //index AFTER last atom in molecule
     unsigned int molEnd = molBegin + mapEntry->second.atoms.size();
     //assign the bond

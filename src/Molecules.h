@@ -101,6 +101,8 @@ public:
   uint count;
   uint* countByKind;
   char* chain;
+  // So we dont push to our vectors on the second Init, during InitOver() call  
+  bool firstInit = true;
 
   MoleculeKind * kinds;
   uint kindsCount;
@@ -109,6 +111,14 @@ public:
   double* pairVirCorrections;
 
   bool printFlag;
+
+  // Vector of pairs for sorting the kIndexVector by firstAtomIndex
+  std::vector<std::pair<unsigned int, unsigned int> > firstAtomXKindY;
+
+  // A intermediate vector to store these values so I add kIndex in sorted order.
+  std::vector<unsigned int> firstAtomIndex;
+  // A intermediate vector to store these values so I add kIndex in sorted order.
+  std::vector<unsigned int> kIndexVector;
 };
 
 
