@@ -35,7 +35,6 @@ void MoleculeLookup::Init(const Molecules& mols,
   }
 
   for(uint m = 0; m < mols.count; ++m) {
-    uint i = mols.firstAtomIndex[m];
     uint box = atomData.box[mols.firstAtomIndex[m]];
     uint kind = mols.kIndex[m];
     indexVector[box][kind].push_back(m);

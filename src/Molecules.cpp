@@ -31,6 +31,9 @@ Molecules::~Molecules(void)
   delete[] kinds;
   delete[] pairEnCorrections;
   delete[] pairVirCorrections;
+  firstAtomXKindY.clear();
+  firstAtomIndex.clear();
+  kIndexVector.clear();
 }
 
 void Molecules::Init(Setup & setup, Forcefield & forcefield,
@@ -55,12 +58,11 @@ void Molecules::Init(Setup & setup, Forcefield & forcefield,
     
     // Insert all of a given molecule kind's instance's firstAtomID's into a sorted vector
     //  It must be sorted so it lines up the xyz data from the pdb file.
-    if (firstInit){
-      for (std::vector<uint>::iterator nestedIt = it->second.firstAtomID.begin(); 
-                        nestedIt != it->second.firstAtomID.end(); ++nestedIt) {
-        firstAtomXKindY.push_back(std::make_pair(*nestedIt, mk));
-      }
+    for (std::vector<uint>::iterator nestedIt = it->second.firstAtomID.begin(); 
+                      nestedIt != it->second.firstAtomID.end(); ++nestedIt) {
+      firstAtomXKindY.push_back(std::make_pair(*nestedIt, mk));
     }
+    
     /* This needs to handle being initialized from frag_x */
     // OLD WAY kinds[mk].Init(atoms.resKindNames[mk]
     mk++;
@@ -71,27 +73,25 @@ void Molecules::Init(Setup & setup, Forcefield & forcefield,
     exit(EXIT_FAILURE);
   }
 
-  if (firstInit){
 
-    std::sort(firstAtomXKindY.begin(), firstAtomXKindY.end());
+  std::sort(firstAtomXKindY.begin(), firstAtomXKindY.end());
 
-    /* Lambda expressions to extract the ordered firsts (firstAtomIndex) and second (kIndexVector) in the pair
-    entries in vector of pairs as their own respective vectors.
-    */
-    std::transform(begin(firstAtomXKindY), end(firstAtomXKindY),
-                std::back_inserter(firstAtomIndex),
-                [](auto const& pair){ return pair.first; });
+  /* Lambda expressions to extract the ordered firsts (firstAtomIndex) and second (kIndexVector) in the pair
+  entries in vector of pairs as their own respective vectors.
+  */
+  std::transform(begin(firstAtomXKindY), end(firstAtomXKindY),
+              std::back_inserter(firstAtomIndex),
+              [](auto const& pair){ return pair.first; });
 
-    std::transform(begin(firstAtomXKindY), end(firstAtomXKindY),
-                std::back_inserter(kIndexVector),
-                [](auto const& pair){ return pair.second; });
+  std::transform(begin(firstAtomXKindY), end(firstAtomXKindY),
+              std::back_inserter(kIndexVector),
+              [](auto const& pair){ return pair.second; });
 
-    // start wants to start from 0
-    for(auto& element : firstAtomIndex)
-      element -= 1;
+  // start wants to start from 0
+  for(auto& element : firstAtomIndex)
+    element -= 1;
 
-    firstInit = false;
-  }
+  
 
   /* This reflects increasing ordered starting Atom indices ordered to match PDB file(s)*/
   start = new uint [count + 1];
