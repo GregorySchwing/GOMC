@@ -41,17 +41,6 @@ void BoxDimensions::Init(config_setup::RestartSettings const& restart,
       cellBasis[b].Scale(1, axis.Get(b).y);
       cellBasis[b].Scale(2, axis.Get(b).z);
     } else if(confVolume.hasVolume) {
-      XYZArray confV = confVolume.axis[b];
-      double x = confV.x[0];
-      double y = confV.y[1];
-      double z = confV.z[2];
-
-      double x1 = cellBasis[b].x[0];
-      double y1 = cellBasis[b].y[1];
-      double z1 = cellBasis[b].z[2];
-      
-
-
       confVolume.axis[b].CopyRange(cellBasis[b], 0, 0, 3);
     } else {
       fprintf(stderr,

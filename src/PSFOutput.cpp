@@ -37,8 +37,11 @@ PSFOutput::PSFOutput(const Molecules& molecules, const System &sys,
   molLookRef(sys.molLookup)
 {
   molKinds.resize(molMap.size());
-  for(uint i = 0; i < kindNames.size(); ++i) {
-    molKinds[i] = molMap[kindNames[i]];
+  uint i = 0;
+  typedef std::map<std::__cxx11::string, mol_setup::MolKind> MolMap;
+  for (MolMap::iterator it = molMap.begin(); it != molMap.end(); ++it) {
+    molKinds[i] = it->second;
+    i++;
   }
   CountMolecules();
 }
