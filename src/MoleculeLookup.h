@@ -125,6 +125,7 @@ private:
   //index [BOX_TOTAL * kind + box + 1] is the element after the end
   //of that kind/box
   uint* boxAndKindStart;
+  uint* boxAndKindSwappableCounts;
   uint boxAndKindStartCount;
   uint numKinds;
   std::vector <uint> fixedAtom;

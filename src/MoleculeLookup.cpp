@@ -24,6 +24,20 @@ void MoleculeLookup::Init(const Molecules& mols,
   boxAndKindStart = new uint[numKinds * BOX_TOTAL + 1];
   boxAndKindStartCount = numKinds * BOX_TOTAL + 1;
 
+  /* Assume the swappable molecules are sorted 
+  at the beggining of each boxAndKindStart section.
+
+  AR Box 1
+  a b c d e f g
+  ^ ^ ^
+  Swappable
+  boxAndKindSwappableCounts[BOX_TOTAL * kind + box] is 
+  the number of swappable elements of that kind/box in molLookup
+  
+  Then all we need is counts for the swappable ones */
+  boxAndKindSwappableCounts = new uint[numKinds * BOX_TOTAL + 1];
+
+
   // vector[box][kind] = list of mol indices for kind in box
   std::vector<std::vector<std::vector<uint> > > indexVector;
   indexVector.resize(BOX_TOTAL);
