@@ -113,6 +113,11 @@ private:
 #ifdef VARIABLE_PARTICLE_NUMBER
   void Shift(const uint index, const uint currentBox,
              const uint intoBox, const uint kind);
+
+  /* Check if the last element in the section is swappable,
+  and if so, switch it with the first nonswappable entry in
+  the section */
+  void SatisfyLoopInvariant(uint oldIndex, uint newIndex, uint section);
 #endif
 
 
