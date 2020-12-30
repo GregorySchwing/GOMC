@@ -70,20 +70,47 @@ TEST(MolLookupTest, CheckShiftMolTest) {
     for (int i = 0; i < MOLCOUNT; i++){
         if (i == ml->NumInBox(0))
             std::cout << " - ";
-        //std::cout << ml->fixedAtom[ml->molLookup[i]] << " ";
         std::cout << ml->molLookup[i] << " ";
     }
     std::cout << std::endl;
+    
+    for (int i = 0; i < MOLCOUNT; i++){
+        if (i == ml->NumInBox(0))
+            std::cout << " - ";
+        std::cout << ml->fixedAtom[ml->molLookup[i]] << " ";
+    }
+    std::cout << std::endl;
+
     std::cout << "Shifting " << mol << std::endl;
     for (int i = 0; i < MOLCOUNT; i++){
         if (i == ml->NumInBox(0))
             std::cout << " - ";
-        //std::cout << ml->fixedAtom[ml->molLookup[i]] << " ";
         std::cout << ml->molLookup[i] << " ";
     }
     std::cout << std::endl;
 
+    for (int i = 0; i < MOLCOUNT; i++){
+        if (i == ml->NumInBox(0))
+            std::cout << " - ";
+        std::cout << ml->fixedAtom[ml->molLookup[i]] << " ";
+    }
+    std::cout << std::endl;
+
     ml->ShiftMolBox(mol, currentBox, intoBox, kind);
+
+    for (int i = 0; i < MOLCOUNT; i++){
+        if (i == ml->NumInBox(0))
+            std::cout << " - ";
+        std::cout << ml->molLookup[i] << " ";
+    }
+    std::cout << std::endl;
+
+    for (int i = 0; i < MOLCOUNT; i++){
+        if (i == ml->NumInBox(0))
+            std::cout << " - ";
+        std::cout << ml->fixedAtom[ml->molLookup[i]] << " ";
+    }
+    std::cout << std::endl;
 
     for (int i = 0; i < MOLCOUNT; i++){
         EXPECT_EQ(ml->fixedAtom[ml->molLookup[i]], copyOfFixedAtom[i]);
@@ -104,12 +131,32 @@ TEST(MolLookupTest, CheckShiftMolTest) {
     for (int i = 0; i < MOLCOUNT; i++){
         if (i == ml->NumInBox(0))
             std::cout << " - ";
-        //std::cout << ml->fixedAtom[ml->molLookup[i]] << " ";
         std::cout << ml->molLookup[i] << " ";
     }
     std::cout << std::endl;
 
+    for (int i = 0; i < MOLCOUNT; i++){
+        if (i == ml->NumInBox(0))
+            std::cout << " - ";
+        std::cout << ml->fixedAtom[ml->molLookup[i]] << " ";
+    }
+    std::cout << std::endl;
+
     ml->ShiftMolBox(mol, currentBox, intoBox, kind);
+
+    for (int i = 0; i < MOLCOUNT; i++){
+        if (i == ml->NumInBox(0))
+            std::cout << " - ";
+        std::cout << ml->molLookup[i] << " ";
+    }
+    std::cout << std::endl;
+
+    for (int i = 0; i < MOLCOUNT; i++){
+        if (i == ml->NumInBox(0))
+            std::cout << " - ";
+        std::cout << ml->fixedAtom[ml->molLookup[i]] << " ";
+    }
+    std::cout << std::endl;
 
     for (int i = 0; i < MOLCOUNT; i++){
         EXPECT_EQ(ml->fixedAtom[ml->molLookup[i]], copyOfFixedAtom[i]);
@@ -145,12 +192,32 @@ TEST(MolLookupTest, CheckShiftMolTest) {
     for (int i = 0; i < MOLCOUNT; i++){
         if (i == ml->NumInBox(0))
             std::cout << " - ";
-        //std::cout << ml->fixedAtom[ml->molLookup[i]] << " ";
         std::cout << ml->molLookup[i] << " ";
     }
     std::cout << std::endl;
 
+    for (int i = 0; i < MOLCOUNT; i++){
+        if (i == ml->NumInBox(0))
+            std::cout << " - ";
+        std::cout << ml->fixedAtom[ml->molLookup[i]] << " ";
+    }
+    std::cout << std::endl;
+
     ml->ShiftMolBox(mol, currentBox, intoBox, kind);
+
+    for (int i = 0; i < MOLCOUNT; i++){
+        if (i == ml->NumInBox(0))
+            std::cout << " - ";
+        std::cout << ml->molLookup[i] << " ";
+    }
+    std::cout << std::endl;
+
+    for (int i = 0; i < MOLCOUNT; i++){
+        if (i == ml->NumInBox(0))
+            std::cout << " - ";
+        std::cout << ml->fixedAtom[ml->molLookup[i]] << " ";
+    }
+    std::cout << std::endl;
 
     for (int i = 0; i < MOLCOUNT; i++){
         EXPECT_EQ(ml->fixedAtom[ml->molLookup[i]], copyOfFixedAtom[i]);
@@ -174,12 +241,32 @@ TEST(MolLookupTest, CheckShiftMolTest) {
     for (int i = 0; i < MOLCOUNT; i++){
         if (i == ml->NumInBox(0))
             std::cout << " - ";
-        //std::cout << ml->fixedAtom[ml->molLookup[i]] << " ";
         std::cout << ml->molLookup[i] << " ";
     }
     std::cout << std::endl;
 
+    for (int i = 0; i < MOLCOUNT; i++){
+        if (i == ml->NumInBox(0))
+            std::cout << " - ";
+        std::cout << ml->fixedAtom[ml->molLookup[i]] << " ";
+    }
+    std::cout << std::endl;
+
     ml->ShiftMolBox(mol, currentBox, intoBox, kind);
+
+    for (int i = 0; i < MOLCOUNT; i++){
+        if (i == ml->NumInBox(0))
+            std::cout << " - ";
+        std::cout << ml->molLookup[i] << " ";
+    }
+    std::cout << std::endl;
+
+    for (int i = 0; i < MOLCOUNT; i++){
+        if (i == ml->NumInBox(0))
+            std::cout << " - ";
+        std::cout << ml->fixedAtom[ml->molLookup[i]] << " ";
+    }
+    std::cout << std::endl;
 
     for (int i = 0; i < MOLCOUNT; i++){
         EXPECT_EQ(ml->fixedAtom[ml->molLookup[i]], copyOfFixedAtom[i]);
@@ -207,11 +294,32 @@ TEST(MolLookupTest, CheckShiftMolTest) {
     for (int i = 0; i < MOLCOUNT; i++){
         if (i == ml->NumInBox(0))
             std::cout << " - ";
-        //std::cout << ml->fixedAtom[ml->molLookup[i]] << " ";
         std::cout << ml->molLookup[i] << " ";
     }
     std::cout << std::endl;
+
+    for (int i = 0; i < MOLCOUNT; i++){
+        if (i == ml->NumInBox(0))
+            std::cout << " - ";
+        std::cout << ml->fixedAtom[ml->molLookup[i]] << " ";
+    }
+    std::cout << std::endl;
+
     ml->ShiftMolBox(mol, currentBox, intoBox, kind);
+
+    for (int i = 0; i < MOLCOUNT; i++){
+        if (i == ml->NumInBox(0))
+            std::cout << " - ";
+        std::cout << ml->molLookup[i] << " ";
+    }
+    std::cout << std::endl;
+
+    for (int i = 0; i < MOLCOUNT; i++){
+        if (i == ml->NumInBox(0))
+            std::cout << " - ";
+        std::cout << ml->fixedAtom[ml->molLookup[i]] << " ";
+    }
+    std::cout << std::endl;
 
     for (int i = 0; i < MOLCOUNT; i++){
         EXPECT_EQ(ml->fixedAtom[ml->molLookup[i]], copyOfFixedAtom[i]);
