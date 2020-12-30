@@ -66,6 +66,9 @@ public:
   //Returns number of given kind in given box
   uint NumKindInBox(const uint kind, const uint box) const;
 
+  //Returns number of given kind in given box that are swappable
+  uint NumKindInBoxSwappable(const uint kind, const uint box) const;
+
   //!Returns total number of molecules in a given box
   uint NumInBox(const uint box) const;
 
@@ -158,7 +161,10 @@ inline uint MoleculeLookup::NumKindInBox(const uint kind, const uint box) const
          boxAndKindStart[box * numKinds + kind];
 }
 
-
+inline uint MoleculeLookup::NumKindInBoxSwappable(const uint kind, const uint box) const
+{
+  return boxAndKindSwappableCounts[box * numKinds + kind];
+}
 
 class MoleculeLookup::box_iterator
 {

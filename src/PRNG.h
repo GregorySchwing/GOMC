@@ -353,8 +353,8 @@ public:
     return rejectState;
   }
 
-  //Returns false if none of that kind of molecule in selected box or molecule
-  //is fixed using tag (beta >= 1).
+  /* Returns false if none of that kind of molecule in selected box or molecule
+     is fixed using tag (beta >= 1). Only selects from swappable molecules. */
   uint PickMol2(uint & m, uint & mk, const uint b,
                 const double subDraw, const double subPerc)
   {
@@ -375,16 +375,14 @@ public:
     mk = molLookRef.GetCanSwapKind(k);
 
     //Pick molecule with the help of molecule lookup table.
-    if ((molLookRef.NumKindInBox(mk, b) == 0)) {
+    if ((molLookRef.NumKindInBoxSwappable(mk, b) == 0)) {
       rejectState = mv::fail_state::NO_MOL_OF_KIND_IN_BOX;
     } else {
       //Among the ones of that kind in that box, pick one @ random.
       //Molecule with a tag (beta == 2 and beta == 1) cannot be selected.
-      do {
-        uint mOff = randIntExc(molLookRef.NumKindInBox(mk, b));
-        //Lookup true index in table.
-        m = molLookRef.GetMolNum(mOff, mk, b);
-      } while(molLookRef.IsNoSwap(m));
+      uint mOff = randIntExc(molLookRef.NumKindInBoxSwappable(mk, b));
+      //Lookup true index in table.
+      m = molLookRef.GetMolNum(mOff, mk, b);
     }
 
     return rejectState;
