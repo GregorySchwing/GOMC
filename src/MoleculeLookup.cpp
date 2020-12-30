@@ -184,6 +184,7 @@ void MoleculeLookup::Shift(const uint index, const uint currentBox,
       uint temp = molLookup[oldIndex];
       molLookup[oldIndex] = molLookup[newIndex];
       molLookup[newIndex] = temp;
+      /*
       for (int i = 0; i < fixedAtom.size(); i++){
         if (i == NumInBox(0))
           std::cout << " - ";
@@ -191,7 +192,9 @@ void MoleculeLookup::Shift(const uint index, const uint currentBox,
         std::cout << molLookup[i] << " ";
       }
       std::cout << std::endl;
+      */
       SatisfyLoopInvariantDownshift(oldIndex, newIndex, section);
+      /*
       for (int i = 0; i < fixedAtom.size(); i++){
         if (i == NumInBox(0))
           std::cout << " - ";
@@ -199,10 +202,12 @@ void MoleculeLookup::Shift(const uint index, const uint currentBox,
         std::cout << molLookup[i] << " ";
       }
       std::cout << std::endl;
+      */
       oldIndex = newIndex;
       --section;
     }
     /* Last iteration - since we add to the back of the section in this if condition */
+      /*
       for (int i = 0; i < fixedAtom.size(); i++){
         if (i == NumInBox(0))
           std::cout << " - ";
@@ -210,7 +215,9 @@ void MoleculeLookup::Shift(const uint index, const uint currentBox,
         std::cout << molLookup[i] << " ";
       }
       std::cout << std::endl;
+      */
       SatisfyLoopInvariantDownshift(oldIndex, boxAndKindStart[section]-1, section);
+      /*
       for (int i = 0; i < fixedAtom.size(); i++){
         if (i == NumInBox(0))
           std::cout << " - ";
@@ -218,6 +225,7 @@ void MoleculeLookup::Shift(const uint index, const uint currentBox,
         std::cout << molLookup[i] << " ";
       }
       std::cout << std::endl;
+      */
   /* transfer from box 0 to box 1 */  
   /* currentBox < intoBox */
   } else {
@@ -228,6 +236,7 @@ void MoleculeLookup::Shift(const uint index, const uint currentBox,
       uint temp = molLookup[oldIndex];
       molLookup[oldIndex] = molLookup[newIndex];
       molLookup[newIndex] = temp;
+      /*
       for (int i = 0; i < fixedAtom.size(); i++){
         if (i == NumInBox(0))
           std::cout << " - ";
@@ -235,7 +244,9 @@ void MoleculeLookup::Shift(const uint index, const uint currentBox,
         std::cout << molLookup[i] << " ";
       }
       std::cout << std::endl;
+      */
       SatisfyLoopInvariantUpshift(oldIndex, boxAndKindStart[section-1], section-1);
+      /*
       for (int i = 0; i < fixedAtom.size(); i++){
         if (i == NumInBox(0))
           std::cout << " - ";
@@ -243,6 +254,7 @@ void MoleculeLookup::Shift(const uint index, const uint currentBox,
         std::cout << molLookup[i] << " ";
       }
       std::cout << std::endl;
+      */
       oldIndex = newIndex;
     }
     /* No Last Iteration since we add to the front 
