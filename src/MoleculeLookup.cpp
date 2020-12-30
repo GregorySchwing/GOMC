@@ -57,16 +57,14 @@ void MoleculeLookup::Init(const Molecules& mols,
     uint kind = mols.kIndex[m];
 
     fixedAtom[m] = atomData.molBeta[m];
-    /* push back if nonswappable, insert to front if swappable */
+    /* increment count if swappable */
     if (fixedAtom[m] == 0){
-      indexVector[box][kind].insert(indexVector[box][kind].begin(), m);
-      //indexVector[box][kind].push_back(m);
-
+      //indexVector[box][kind].insert(indexVector[box][kind].begin(), m);
+      indexVector[box][kind].push_back(m);
       boxAndKindSwappableCounts[box * numKinds + kind]++;
     } else {
       indexVector[box][kind].push_back(m);
     }
-
 
     //Find the kind that can be swap(beta == 0) or move(beta == 0 or 2)
     if(fixedAtom[m] == 0) {
@@ -86,6 +84,20 @@ void MoleculeLookup::Init(const Molecules& mols,
     }
   }
 
+  for (uint b = 0; b < BOX_TOTAL; ++b) {
+    for (uint k = 0; k < numKinds; ++k) {
+      std::vector<std::pair<uint, uint>> pairsForSorting;
+      for(int i = 0; i < indexVector[b][k].size(); i++){
+        pairsForSorting.push_back(std::make_pair(fixedAtom[indexVector[b][k][i]], indexVector[b][k][i]));
+      }
+      std::sort(pairsForSorting.begin(), pairsForSorting.end());
+      for(int i = 0; i < indexVector[b][k].size(); i++){
+        indexVector[b][k][i] = pairsForSorting[i].second;
+      }
+    }
+  }
+
+
 /* We need to initialize a boxAndKindStart for the swappable counts */
 
   uint* progress = molLookup;
@@ -97,7 +109,6 @@ void MoleculeLookup::Init(const Molecules& mols,
     }
   }
   boxAndKindStart[numKinds * BOX_TOTAL] = mols.count;
-
 }
 
 uint MoleculeLookup::NumInBox(const uint box) const
@@ -173,12 +184,40 @@ void MoleculeLookup::Shift(const uint index, const uint currentBox,
       uint temp = molLookup[oldIndex];
       molLookup[oldIndex] = molLookup[newIndex];
       molLookup[newIndex] = temp;
-      //SatisfyLoopInvariant(oldIndex, newIndex, section);
+      for (int i = 0; i < fixedAtom.size(); i++){
+        if (i == NumInBox(0))
+          std::cout << " - ";
+        //std::cout << fixedAtom[molLookup[i]] << " ";
+        std::cout << molLookup[i] << " ";
+      }
+      std::cout << std::endl;
+      SatisfyLoopInvariantDownshift(oldIndex, newIndex, section);
+      for (int i = 0; i < fixedAtom.size(); i++){
+        if (i == NumInBox(0))
+          std::cout << " - ";
+        //std::cout << fixedAtom[molLookup[i]] << " ";
+        std::cout << molLookup[i] << " ";
+      }
+      std::cout << std::endl;
       oldIndex = newIndex;
       --section;
     }
-    /* Last iteration */
-    //SatisfyLoopInvariant(oldIndex, boxAndKindStart[section]-1, section);
+    /* Last iteration - since we add to the back of the section in this if condition */
+      for (int i = 0; i < fixedAtom.size(); i++){
+        if (i == NumInBox(0))
+          std::cout << " - ";
+        //std::cout << fixedAtom[molLookup[i]] << " ";
+        std::cout << molLookup[i] << " ";
+      }
+      std::cout << std::endl;
+      SatisfyLoopInvariantDownshift(oldIndex, boxAndKindStart[section]-1, section);
+      for (int i = 0; i < fixedAtom.size(); i++){
+        if (i == NumInBox(0))
+          std::cout << " - ";
+        //std::cout << fixedAtom[molLookup[i]] << " ";
+        std::cout << molLookup[i] << " ";
+      }
+      std::cout << std::endl;
   /* transfer from box 0 to box 1 */  
   /* currentBox < intoBox */
   } else {
@@ -189,16 +228,32 @@ void MoleculeLookup::Shift(const uint index, const uint currentBox,
       uint temp = molLookup[oldIndex];
       molLookup[oldIndex] = molLookup[newIndex];
       molLookup[newIndex] = temp;
-      //SatisfyLoopInvariant(oldIndex, boxAndKindStart[section-1], section-1);
+      for (int i = 0; i < fixedAtom.size(); i++){
+        if (i == NumInBox(0))
+          std::cout << " - ";
+        //std::cout << fixedAtom[molLookup[i]] << " ";
+        std::cout << molLookup[i] << " ";
+      }
+      std::cout << std::endl;
+      SatisfyLoopInvariantUpshift(oldIndex, boxAndKindStart[section-1], section-1);
+      for (int i = 0; i < fixedAtom.size(); i++){
+        if (i == NumInBox(0))
+          std::cout << " - ";
+        //std::cout << fixedAtom[molLookup[i]] << " ";
+        std::cout << molLookup[i] << " ";
+      }
+      std::cout << std::endl;
       oldIndex = newIndex;
     }
+    /* No Last Iteration since we add to the front 
+       of the section in this else condition */
   }
 }
 
-void MoleculeLookup::SatisfyLoopInvariant(uint oldIndex, uint newIndex, uint section){
+void MoleculeLookup::SatisfyLoopInvariantDownshift(uint oldIndex, uint newIndex, uint section){
   
   /* Edge case - first call : 
-      It doesn't enter if condition if the shifted mol was the last swappable,
+      It doesn't enter if condition if the shifted mol was the last swappable or we swapped in place,
       else if there is at least one swappable left it swaps the position of the last swappable 
       (since we decremented boxAndKindSwappableCounts it points to 1 less than the first 
       nonswappable, which is the last swappable).
@@ -213,7 +268,62 @@ void MoleculeLookup::SatisfyLoopInvariant(uint oldIndex, uint newIndex, uint sec
       first nonswappable in the section).
   */
 
-   /* This implies a swappable molecule is in the last position */
+   /* This implies a swappable molecule is in the last position and we didn't swap in place*/
+  if (boxAndKindSwappableCounts[section] > 0 && oldIndex != newIndex){
+    /*
+        S* represents the molecule we are shifting down/up
+        i.e. boxAndKindSwappableCounts[section] = 2
+
+        BoxAndKindStart
+           |
+           v
+           0      1        2       3   
+          swap    swap  nonswap    S* 
+        newIndex                oldIndex
+
+      newIndex = boxAndKindStart[section]++;
+      uint temp = molLookup[oldIndex];
+      molLookup[oldIndex] = molLookup[newIndex];
+      molLookup[newIndex] = temp;
+
+              BoxAndKindStart
+                  |
+                  v
+            0     1         2       3   
+           S*    swap    nonswap   swap    
+        newIndex                 oldIndex
+
+    */
+
+    uint firstNonSwappableIndex = newIndex + boxAndKindSwappableCounts[section];
+    uint temp = molLookup[oldIndex];
+    molLookup[oldIndex] = molLookup[firstNonSwappableIndex];
+    molLookup[firstNonSwappableIndex] = temp;
+
+    /*
+                  BoxAndKindStart
+                  |
+                  v
+            0     1     2      3   
+           S*    swap  swap  nonswap
+        newIndex            oldIndex
+
+    */
+  }
+}
+
+void MoleculeLookup::SatisfyLoopInvariantUpshift(uint oldIndex, uint newIndex, uint section){
+  
+  /* Edge case - first call : 
+      It doesn't enter if condition if the shifted mol was the last swappable,
+      else if there is at least one swappable left it swaps the position of the last swappable 
+      (since we decremented boxAndKindSwappableCounts it points to 1 less than the first 
+      nonswappable, which is the last swappable).
+      with the old Index, which holds the value of the old first value, 
+      which by the loop invariant was necessarily swappable.
+  */
+
+   /* This implies a swappable molecule is in the last position*/
   if (boxAndKindSwappableCounts[section] > 0){
     /*
         S* represents the molecule we are shifting down/up

@@ -117,7 +117,18 @@ private:
   /* Check if the last element in the section is swappable,
   and if so, switch it with the first nonswappable entry in
   the section */
-  void SatisfyLoopInvariant(uint oldIndex, uint newIndex, uint section);
+
+  /* Due to differences in the way upshifting and downshifting are implemented,
+  We needed to separate these methods into two.  The only difference is
+  the inclusion of a second condition in the entry if statement
+  if ( ... && oldIndex != newIndex )
+  in downshift.  This is due to the first call to SatLoopInvDownshift incorrectly 
+  swapping the mol we are shifting with the last swappable mol in a section,
+  if we are shifting the first swappable mol in a kind.   
+  */
+  void SatisfyLoopInvariantDownshift(uint oldIndex, uint newIndex, uint section);
+  void SatisfyLoopInvariantUpshift(uint oldIndex, uint newIndex, uint section);
+
 #endif
 
 
