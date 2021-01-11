@@ -3,7 +3,7 @@
 # Check if nvcc is available
 if command -v nvcc &> /dev/null
 then
-	nvcc_version=($(python scripts/get_cuda_version.py))
+	nvcc_version=($(python3 scripts/get_cuda_version.py))
 	# Check cuda version, if less than 11 then download CUB, otherwise skip
 	if [[ "$nvcc_version" < "11" ]]
 	then
@@ -68,4 +68,4 @@ ICPC_PATH="$(which icpc 2>/dev/null)"
 export CC=${ICC_PATH}
 export CXX=${ICPC_PATH}
 cmake ..
-make -j8
+make -j8 NVT

@@ -30,7 +30,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include <sys/utsname.h>
 #define HOSTNAME
 #endif
-
+#include "nvToolsExt.h"
 namespace
 {
 std::ostream& PrintTime(std::ostream& stream);
@@ -50,6 +50,7 @@ void PrintGPUHardwareInfo();
 
 int main(int argc, char *argv[])
 {
+  nvtxRangePushA("initGOMC");
 #ifdef RECORD_DEBUG
 #ifdef GOMC_CUDA
   remove("gpu.debug");
@@ -149,10 +150,15 @@ int main(int argc, char *argv[])
     }
 #else
     Simulation sim(inputFileString.c_str());
+    nvtxRangePop();
+    nvtxRangePushA("runGOMC");
     sim.RunSimulation();
+    nvtxRangePop();
+    nvtxRangePushA("closeGOMC");
     PrintSimulationFooter();
 #endif
   }
+  nvtxRangePop();
   return 0;
 }
 

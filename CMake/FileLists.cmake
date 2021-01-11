@@ -187,7 +187,8 @@ set(libHeaders
    lib/StrLib.h
    lib/StrStrmLib.h
    lib/VectorLib.h
-   lib/FloydWarshallCycle.h)
+   lib/FloydWarshallCycle.h
+    /usr/local/cuda-11.2/nsight-systems-2020.4.3/target-linux-x64/nvtx/include/nvtx3/nvToolsExt.h)
 
 set(libSources
     lib/FloydWarshallCycle.cpp)

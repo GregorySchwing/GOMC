@@ -63,6 +63,9 @@ endif()
 # Set Source and Header files
 include(${PROJECT_SOURCE_DIR}/CMake/FileLists.cmake)
 
+## Add CUDA's NVTX library
+find_library( NVTX_LIBRARY nvToolsExt /usr/local/cuda/lib64 ) 
+
 # Find if CUDA exists and what is the version number
 include(CheckLanguage)
 check_language(CUDA)
@@ -77,6 +80,6 @@ include(${PROJECT_SOURCE_DIR}/CMake/GOMCCPUSetup.cmake)
 # find OpenMP and set it up
 find_package(OpenMP)
 if (OPENMP_FOUND)
-	set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+	set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS} -ldl")
+	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -ldl")
 endif()

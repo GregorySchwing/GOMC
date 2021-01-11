@@ -22,7 +22,7 @@ if(ENSEMBLE_NVT)
    add_executable(NVT ${sources} ${headers} ${libHeaders} ${libSources})
    set_target_properties(NVT PROPERTIES 
       OUTPUT_NAME ${NVT_name}
-      COMPILE_FLAGS "${NVT_flags}")
+      COMPILE_FLAGS "${NVT_flags} -ldl")
    if(WIN32)
       #needed for hostname
       target_link_libraries(NVT ws2_32)
@@ -30,6 +30,7 @@ if(ENSEMBLE_NVT)
    if(MPI_FOUND)
       target_link_libraries(NVT ${MPI_LIBRARIES})
    endif()
+   target_link_libraries(NVT ${NVTX_LIBRARY})
 endif()
 
 if(ENSEMBLE_GEMC)

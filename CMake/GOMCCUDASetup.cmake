@@ -44,6 +44,7 @@ if(ENSEMBLE_GPU_NVT)
     endif()
     if(MPI_FOUND)
 	    target_link_libraries(GPU_NVT ${MPI_LIBRARIES})
+        target_link_libraries(GPU_NVT ${NVTX_LIBRARY})
     endif()
 endif()
 
