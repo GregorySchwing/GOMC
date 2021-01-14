@@ -35,7 +35,7 @@ double stringtod(const std::string& s)
 void ConfigSetup::NormalizeMovePercentages(config_setup::MovePercents & moves, double & sum){
   if (sum == 0.0){
     std::cout << "Error: Sum is zero, so normalize would divide by zero.\n" <<
-    "Please provide non-zero frequencies to eligible moves in your ensemble." << 
+    "Please provide non-zero frequencies to eligible moves in your ensemble.\n" << 
     "Ineligible moves for NVT : Transfer, Volume, MEMC, CFCMC" << std::endl << 
     "Ineligible moves for NPT : Transfer, MEMC, CFCMC" << std::endl << 
     "Ineligible moves for GCMC : Volume" << std::endl << 
