@@ -184,9 +184,7 @@ struct MovePercents {
   double displace, rotate, intraSwap, intraMemc, regrowth, crankShaft,
          multiParticle;
   bool multiParticleEnabled;
-#ifdef VARIABLE_VOLUME
   double volume;
-#endif
 #ifdef VARIABLE_PARTICLE_NUMBER
   double transfer, memc, cfcmc;
 #endif
@@ -375,12 +373,8 @@ struct OutputEnables {
 
 struct TrackedVars {
   OutputEnables energy, pressure;
-#ifdef VARIABLE_VOLUME
   OutputEnables volume;
-#endif
-#ifdef VARIABLE_PARTICLE_NUMBER
   OutputEnables molNum;
-#endif
   OutputEnables density;
   OutputEnables surfaceTension;
 };

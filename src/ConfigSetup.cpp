@@ -197,15 +197,15 @@ ConfigSetup::ConfigSetup(void)
   sys.cbmcTrials.bonded.dih = UINT_MAX;
   sys.cbmcTrials.nonbonded.first = UINT_MAX;
   sys.cbmcTrials.nonbonded.nth = UINT_MAX;
-  out.statistics.vars.molNum.block = false;
-  out.statistics.vars.molNum.fluct = false;
   sys.volume.cstVolBox0 = false;
 #endif
 #ifdef VARIABLE_VOLUME
   sys.moves.volume = DBL_MAX;
+#endif
+  out.statistics.vars.molNum.block = false;
+  out.statistics.vars.molNum.fluct = false;
   out.statistics.vars.volume.block = false;
   out.statistics.vars.volume.fluct = false;
-#endif
   out.statistics.vars.density.block = false;
   out.statistics.vars.density.fluct = false;
 }
@@ -1122,12 +1122,10 @@ void ConfigSetup::Init(const char *fileName, MultiSim const*const& multisim)
       out.statistics.vars.pressure.block = checkBool(line[1]);
       out.statistics.vars.pressure.fluct = checkBool(line[2]);
     }
-#ifdef VARIABLE_PARTICLE_NUMBER
     else if(CheckString(line[0], "OutMolNum")) {
       out.statistics.vars.molNum.block = checkBool(line[1]);
       out.statistics.vars.molNum.fluct = checkBool(line[2]);
     }
-#endif
     else if(CheckString(line[0], "OutDensity")) {
       out.statistics.vars.density.block = checkBool(line[1]);
       out.statistics.vars.density.fluct = checkBool(line[2]);
@@ -1135,12 +1133,10 @@ void ConfigSetup::Init(const char *fileName, MultiSim const*const& multisim)
       out.statistics.vars.surfaceTension.block = checkBool(line[1]);
       out.statistics.vars.surfaceTension.fluct = checkBool(line[2]);
     }
-#ifdef VARIABLE_VOLUME
     else if(CheckString(line[0], "OutVolume")) {
       out.statistics.vars.volume.block = checkBool(line[1]);
       out.statistics.vars.volume.fluct = checkBool(line[2]);
     }
-#endif
     else if(CheckString(line[0], "Random_Seed")) {
       if (line.size() > 2 && multisim != NULL) {
         in.prng.seed = stringtoi(line[multisim->worldRank + 1]);
@@ -1581,17 +1577,19 @@ double sum;
   if(sys.moves.transfer == DBL_MAX) {
     std::cout << "Warning: Molecule swap move frequency is not specified!\n";
   }
-  if(sum = std::abs(sys.moves.displace + sys.moves.rotate + sys.moves.transfer +
+  sum = sys.moves.displace + sys.moves.rotate + sys.moves.transfer +
               sys.moves.intraSwap + sys.moves.volume + sys.moves.regrowth +
               sys.moves.memc + sys.moves.intraMemc + sys.moves.crankShaft +
-              sys.moves.multiParticle + sys.moves.cfcmc - 1.0) > 0.001) {
+              sys.moves.multiParticle + sys.moves.cfcmc;
+  if(std::abs(sum - 1.0) > 0.001) {
     std::cout << "Error: Sum of move frequencies is not equal to one!\n";
     NormalizeMovePercentages(sys.moves, sum);
   }
 #elif ENSEMBLE == NPT
-  if(sum = std::abs(sys.moves.displace + sys.moves.rotate + sys.moves.intraSwap +
-              sys.moves.volume + sys.moves.regrowth + sys.moves.intraMemc +
-              sys.moves.crankShaft + sys.moves.multiParticle - 1.0) > 0.001) {
+  sum = sys.moves.displace + sys.moves.rotate + sys.moves.intraSwap +
+                sys.moves.volume + sys.moves.regrowth + sys.moves.intraMemc +
+                sys.moves.crankShaft + sys.moves.multiParticle;
+  if(std::abs(sum - 1.0) > 0.001) {
     std::cout << "Error: Sum of move frequencies is not equal to one!\n";
     NormalizeMovePercentages(sys.moves, sum);
   }
@@ -1600,17 +1598,19 @@ double sum;
   if(sys.moves.transfer == DBL_MAX) {
     std::cout << "Warning: Molecule swap move frequency is not specified!\n";
   }
-  if(sum = std::abs(sys.moves.displace + sys.moves.rotate + sys.moves.intraSwap +
+  sum = sys.moves.displace + sys.moves.rotate + sys.moves.intraSwap +
               sys.moves.transfer + sys.moves.regrowth + sys.moves.memc +
               sys.moves.intraMemc + sys.moves.crankShaft +
-              sys.moves.multiParticle + sys.moves.cfcmc - 1.0) > 0.001) {
+              sys.moves.multiParticle + sys.moves.cfcmc;
+  if(std::abs(sum - 1.0) > 0.001) {
     std::cout << "Error: Sum of move frequencies is not equal to one!!\n";
     NormalizeMovePercentages(sys.moves, sum);
   }
 #else
-  if(sum = std::abs(sys.moves.displace + sys.moves.rotate + sys.moves.intraSwap +
+  sum = sys.moves.displace + sys.moves.rotate + sys.moves.intraSwap +
               sys.moves.regrowth + sys.moves.intraMemc + sys.moves.crankShaft +
-              sys.moves.multiParticle - 1.0) > 0.001) {
+              sys.moves.multiParticle;
+  if(std::abs(sum - 1.0) > 0.001) {
     std::cout << "Error: Sum of move frequencies is not equal to one!!\n";
     NormalizeMovePercentages(sys.moves, sum);
   }
@@ -2042,22 +2042,18 @@ double sum;
     printf("Note: Pressure Calculation Inactivated. Surface Tension average output will be ignored.\n");
     out.statistics.vars.surfaceTension.block = false;
   }
-#ifdef VARIABLE_PARTICLE_NUMBER
   if(!out.statistics.settings.block.enable && out.statistics.vars.molNum.block) {
     printf("Note: Average output Inactivated. Molecule average output will be ignored.\n");
     out.statistics.vars.molNum.block = false;
   }
-#endif
   if(!out.statistics.settings.block.enable && out.statistics.vars.density.block) {
     printf("Note: Average output Inactivated. Density average output will be ignored.\n");
     out.statistics.vars.density.block = false;
   }
-#ifdef VARIABLE_VOLUME
   if(!out.statistics.settings.block.enable && out.statistics.vars.volume.block) {
     printf("Note: Average output Inactivated. Volume average output will be ignored.\n");
     out.statistics.vars.volume.block = false;
   }
-#endif
   if(!out.console.enable && out.statistics.vars.energy.fluct) {
     printf("Note: Console output Inactivated. Energy output will be ignored.\n");
     out.statistics.vars.energy.fluct = false;
@@ -2074,19 +2070,15 @@ double sum;
     printf("Note: Pressure Calculation Inactivated. Surface Tension output will be ignored.\n");
     out.statistics.vars.surfaceTension.fluct = false;
   }
-#ifdef VARIABLE_PARTICLE_NUMBER
   if(!out.console.enable && out.statistics.vars.molNum.fluct) {
     printf("Note: Console output Inactivated. Molecule output will be ignored.\n");
   }
-#endif
   if(!out.console.enable && out.statistics.vars.density.fluct) {
     printf("Note: Console output Inactivated. Density output will be ignored.\n");
   }
-#ifdef VARIABLE_VOLUME
   if(!out.console.enable && out.statistics.vars.volume.fluct) {
     printf("Note: Console output Inactivated. Volume output will be ignored.\n");
   }
-#endif
 }
 
 const std::string config_setup::PRNGKind::KIND_RANDOM = "RANDOM";
