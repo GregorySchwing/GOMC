@@ -44,14 +44,8 @@ DCCyclic::DCCyclic(System& sys, const Forcefield& ff,
   std::vector<uint> bondCount(totAtom, 0);
   isRing.resize(totAtom, false);
   ringIdx.resize(totAtom, -1);
-  FloydWarshallCycle fwc(totAtom);
-  //Count the number of bonds for each atom
-  for (uint b = 0; b < setupKind.bonds.size(); ++b) {
-    const Bond& bond = setupKind.bonds[b];
-    ++bondCount[bond.a0];
-    ++bondCount[bond.a1];
-    fwc.AddEdge(bond.a0, bond.a1);
-  }
+  FloydWarshallCycle fwc(totAtom, setupKind, bondCount);
+
   cyclicAtoms = fwc.GetAllCommonCycles();
   //Find the ringindex that each atom belongs to
   for (uint atom = 0; atom < totAtom; ++atom) {
@@ -152,6 +146,7 @@ DCCyclic::DCCyclic(System& sys, const Forcefield& ff,
   }
 
   InitCrankShaft(setupKind);
+  
 }
 
 void DCCyclic::InitCrankShaft(const mol_setup::MolKind& kind)
