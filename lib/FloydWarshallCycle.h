@@ -8,12 +8,15 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include <vector>
 #include <algorithm>
 #include <assert.h>
-
+#include "MolSetup.h"
+#include <limits>
 class FloydWarshallCycle
 {
 public:
   // In constructor you have to mention the number of nodes
-  FloydWarshallCycle(int numberOfNodes);
+  FloydWarshallCycle(int numberOfNodes,
+                     const mol_setup::MolKind & setupKind, 
+                     std::vector<uint> & bondCount);
   ~FloydWarshallCycle();
 
   // You can add more edges to the graph by calling this function
@@ -32,7 +35,7 @@ private:
   int numberOfNodes;
 
   // This vector will hold the edges as a 2D array. Each edge will be a 2 element vector -> (src, dest)
-  std::vector< std::vector<int> > connections;
+  std::vector< std::pair <int,int> > connections;
 
   // This vector will hold the weights of the edges.
   // We assume every connection has a weight of 1

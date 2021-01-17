@@ -6,7 +6,9 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 ********************************************************************************/
 #include "FloydWarshallCycle.h"
 
-FloydWarshallCycle::FloydWarshallCycle(int non)
+FloydWarshallCycle::FloydWarshallCycle( int non, 
+                                        const mol_setup::MolKind & setupKind, 
+                                        std::vector<uint> & bondCount)
 {
   // let's check couple of things before we start
   // number of nodes probably greater than zero
@@ -37,10 +39,7 @@ void FloydWarshallCycle::AddEdge(int src, int dest)
   // make sure src and dest are not something crazy!
   assert(src >= 0);
   assert(dest >= 0);
-
-  std::vector<int> temp;
-  temp.push_back(src);
-  temp.push_back(dest);
+  std::pair <int,int> temp = std::make_pair (src,dest);
   connections.push_back(temp);
 }
 
@@ -129,8 +128,8 @@ std::vector<int> FloydWarshallCycle::getPath(int src, int dest)
 
 std::vector<int> FloydWarshallCycle::getPath(int connectionIndex)
 {
-  int src = connections[connectionIndex][0];
-  int dest = connections[connectionIndex][1];
+  int src = connections[connectionIndex].first;
+  int dest = connections[connectionIndex].second;
   std::vector<int> path;
   if (next[src][dest] == -1)
     return path;
@@ -146,7 +145,7 @@ void FloydWarshallCycle::setDefaults()
 {
   for (int i = 0; i < numberOfNodes; i++)
     for (int j = 0; j < numberOfNodes; j++) {
-      graph[i][j] = 10000;
+      graph[i][j] = std::numeric_limits<int>::max();
       next[i][j] = -1;
     }
 }
@@ -154,9 +153,10 @@ void FloydWarshallCycle::setDefaults()
 void FloydWarshallCycle::setValues(int exceptThisOne)
 {
   for (int j = 0; j < connections.size(); j++) {
+    //for ( std::vector <std::pair<int,int> >::const_iterator it = connections.begin() ; itt != connections.end; it++){
     if (exceptThisOne != j) {
-      int zero = connections[j][0];
-      int one = connections[j][1];
+      int zero = connections[j].first;
+      int one = connections[j].second;
       graph[zero][one] = 1;
       graph[one][zero] = 1;
       next[zero][one] = one;
@@ -169,7 +169,7 @@ std::vector<int> FloydWarshallCycle::getConnectionsFor(int index)
 {
   std::vector<int> conn;
   for (int i = 0; i < connections.size(); i++) {
-    if (connections[i][0] == index || connections[i][1] == index)
+    if (connections[i].first == index || connections[i].second == index)
       conn.push_back(i);
   }
   return conn;
