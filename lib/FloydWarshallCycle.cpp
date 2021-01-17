@@ -27,6 +27,13 @@ FloydWarshallCycle::FloydWarshallCycle( int non,
 
   // double check
   assert(graph.size() == numberOfNodes);
+  //Count the number of bonds for each atom
+  for (uint b = 0; b < setupKind.bonds.size(); ++b) {
+    const mol_setup::Bond& bond = setupKind.bonds[b];
+    ++bondCount[bond.a0];
+    ++bondCount[bond.a1];
+    AddEdge(bond.a0, bond.a1);
+  }
 }
 
 
@@ -145,7 +152,7 @@ void FloydWarshallCycle::setDefaults()
 {
   for (int i = 0; i < numberOfNodes; i++)
     for (int j = 0; j < numberOfNodes; j++) {
-      graph[i][j] = std::numeric_limits<int>::max();
+      graph[i][j] = 10000;
       next[i][j] = -1;
     }
 }
