@@ -23,6 +23,54 @@ adjNode* BondAdjacencyList::getAdjListNode(int value, int weight, adjNode* head)
     return newNode;
 }
 
+BondAdjacencyList::BondAdjacencyList(uint nAtoms, const mol_setup::MolKind & setupKind, std::vector<uint> & bondCount){
+
+    this->nAtoms = nAtoms;
+    this->nBonds = setupKind.bonds.size();
+
+    edges = new graphEdge[nBonds];
+
+    unsigned int atom0, atom1;
+    int dummy;
+    // Loads all the bonds into edges array
+    for (uint i = 0; i < nBonds; i++) {
+    const mol_setup::Bond& bond = setupKind.bonds[i];    
+    edges[i].weight = 1;
+    edges[i].start_ver = bond.a0-1;
+    edges[i].end_ver = bond.a1-1;
+    /* For later usage in CBMC */
+    ++bondCount[bond.a0];
+    ++bondCount[bond.a1];
+    }
+
+    // allocate new node
+    head = new adjNode*[nAtoms]();
+    // initialize head pointer for all vertices
+    for (uint i = 0; i < nAtoms; i++)
+        head[i] = nullptr;
+    // construct directed graph by adding edges to it
+    for (uint i = 0; i < nBonds; i++)  {
+        int start_ver = edges[i].start_ver;
+        int end_ver = edges[i].end_ver;
+        int weight = edges[i].weight;
+        // insert in the beginning
+        adjNode* newNode = getAdjListNode(end_ver, weight, head[start_ver]);
+           
+        // point head pointer to new node
+        head[start_ver] = newNode;
+ 
+        start_ver = edges[i].end_ver;
+        end_ver = edges[i].start_ver;
+        weight = edges[i].weight;
+        // insert in the beginning
+        newNode = getAdjListNode(end_ver, weight, head[start_ver]);
+            
+        // point head pointer to new node
+        head[start_ver] = newNode;
+    
+    }
+}
+
 BondAdjacencyList::BondAdjacencyList(FILE* psf, uint nAtoms, uint nBonds, std::vector< std::vector<uint> > & moleculeXAtomIDY){
 
     this->nAtoms = nAtoms;

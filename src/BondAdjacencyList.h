@@ -16,6 +16,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <limits.h>
 #include <algorithm>
+#include "MolSetup.h"
 
 
 // stores adjacency list items
@@ -32,11 +33,11 @@ struct graphEdge {
 class BondAdjacencyList{
 public:
 
-adjNode **head;                //adjacency list as array of pointers
+adjNode **head;//adjacency list as array of pointers
 uint nAtoms;  // number of nodes in the graph
 uint nBonds; // number of edges in the graph
 
-
+BondAdjacencyList(uint nAtoms, const mol_setup::MolKind & setupKind, std::vector<uint> & bondCount);
 BondAdjacencyList(FILE* psf, uint nAtoms, uint nBonds, std::vector< std::vector<uint> > & moleculeXAtomIDY);
 ~BondAdjacencyList();
 adjNode* getAdjListNode(int value, int weight, adjNode* head);
