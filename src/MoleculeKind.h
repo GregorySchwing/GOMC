@@ -12,6 +12,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "SubdividedArray.h"
 #include "Geometry.h"            //members
 #include "CBMC.h"
+#include "CircuitFinder.h"
 
 #include <string>
 #include <vector>
@@ -150,6 +151,9 @@ public:
   GeomFeature dihedrals;
   bool oneThree, oneFour;
 
+  std::vector<uint> bondCount;
+  CircuitFinder * CF;
+
   std::string name;
   std::vector<std::string> atomNames, atomTypeNames, resNames;
   double molMass;
@@ -173,7 +177,6 @@ private:
                 Setup& set);
 
   cbmc::CBMC* builder;
-
   uint numAtoms;
   uint * atomKind;
   double * atomCharge;

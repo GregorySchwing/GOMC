@@ -89,6 +89,16 @@ void MoleculeKind::Init
   angles.Init(molData.angles, bondList);
   dihedrals.Init(molData.dihedrals, bondList);
 
+  CF = new CircuitFinder(molData.atoms.size());
+  bondCount.resize(NumAtoms(), 0);
+  // Count the number of bonds for each atom
+  // Add edges to molecule graph
+  for (uint i = 0; i < molData.bonds.size(); ++i) {
+    ++bondCount[bondList.part1[i]];
+    ++bondCount[bondList.part2[i]];
+    CF->addEdge(bondList.part1[i], bondList.part2[i]);
+    CF->addEdge(bondList.part2[i], bondList.part1[i]);
+  }
   //Once-through topology objects
 
   oneThree = oneFour = false;

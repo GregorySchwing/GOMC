@@ -128,3 +128,40 @@ std::vector< std::vector<int> > CircuitFinder::GetAllCommonCycles()
 
   return commons;
 }
+
+void CircuitFinder::breadthFirstSearch(){
+  for (int i = 0; i < V; i++){
+    for (auto it : AK[V]){
+      BFSUtil(V, it, 1);
+    }
+  }
+}
+
+void CircuitFinder::BFSUtil(int V, int next, int depth){
+  if (depth == 1) {
+    visited[V].push_back(next);
+    exactly_1_bonds_apart[V].push_back(next);
+    for (auto it : AK[next]){
+      BFSUtil(V, it, 2);
+    }
+  } else if (depth == 2 && 
+      std::find(visited[V].begin(), visited[V].end(), next) == visited[V].end()) {
+    visited[V].push_back(next);
+    exactly_2_bonds_apart[V].push_back(next);
+    for (auto it : AK[next]){
+      BFSUtil(V, it, 3);
+    }
+  } else if (depth == 3 && 
+      std::find(visited[V].begin(), visited[V].end(), next) == visited[V].end()){
+    visited[V].push_back(next);
+    exactly_3_bonds_apart[V].push_back(next);
+    return;
+  } else {
+    /* Depth > 3 or visited previously, since BFS gives the shortest path property
+      we don't want to visit twice */
+    return;
+  }
+
+  std::cout << "Something went wrong in CircuitFinder::BFSUtil" << std::endl;
+  exit(EXIT_FAILURE);
+}

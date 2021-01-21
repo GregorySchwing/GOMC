@@ -78,6 +78,8 @@ private:
   std::vector<bool> visited;
   std::vector<DCComponent*> shaftNodes;
   XYZArray coords;
+  const std::vector<uint> & bondCount;
+
 };
 }
 

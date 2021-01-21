@@ -85,6 +85,7 @@ private:
   std::vector<bool> visited, destVisited;
   std::vector<DCComponent*> crankshaft;
   std::vector< std::vector<int> > cyclicAtoms;
+  const std::vector<uint> & bondCount;
   XYZArray coords;
   uint totAtom;
 };

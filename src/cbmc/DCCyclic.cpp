@@ -22,7 +22,7 @@ namespace cbmc
 {
 DCCyclic::DCCyclic(System& sys, const Forcefield& ff,
                    const MoleculeKind& kind, const Setup& set)
-  : data(sys, ff, set)
+  : data(sys, ff, set), bondCount(kind.bondCount)
 {
   using namespace mol_setup;
   MolMap::const_iterator it = set.mol.kindMap.find(kind.name);
@@ -41,20 +41,10 @@ DCCyclic::DCCyclic(System& sys, const Forcefield& ff,
   coords.Init(totAtom);
 
   std::vector<uint> atomToNode(totAtom, 0);
-  std::vector<uint> bondCount(totAtom, 0);
   isRing.resize(totAtom, false);
   ringIdx.resize(totAtom, -1);
-  CircuitFinder CF(totAtom);
 
-  //Count the number of bonds for each atom
-  for (uint b = 0; b < setupKind.bonds.size(); ++b) {
-    const Bond& bond = setupKind.bonds[b];
-    ++bondCount[bond.a0];
-    ++bondCount[bond.a1];
-    CF.addEdge(bond.a0, bond.a1);
-    CF.addEdge(bond.a1, bond.a0);
-  }
-  cyclicAtoms = CF.GetAllCommonCycles();
+  cyclicAtoms = kind.CF->GetAllCommonCycles();
   //Find the ringindex that each atom belongs to
   for (uint atom = 0; atom < totAtom; ++atom) {
     if (bondCount[atom] < 2) {

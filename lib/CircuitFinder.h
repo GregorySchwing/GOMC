@@ -32,22 +32,37 @@ class CircuitFinder
 
   int V, E;
 
+  std::vector< std::vector<int> > visited;
+  std::vector< std::vector<int> > exactly_1_bonds_apart;
+  std::vector< std::vector<int> > exactly_2_bonds_apart;
+  std::vector< std::vector<int> > exactly_3_bonds_apart;
+
   void unblock(int U);
   bool circuit(int V);
   void SaveCycle();
   void run();
 
+  void BFSUtil(int V, int next, int depth);
+
 public:
   void addEdge(int src, int dest);
 
   CircuitFinder(int N)
-    : AK(N), Blocked(N), B(N) {
+    : 
+    /* Circuit Finding Vars */
+    AK(N), Blocked(N), B(N), 
+    /* BFS Vars */
+    visited(N), exactly_2_bonds_apart(N), exactly_3_bonds_apart(N) {
         V = N;
         E = 0;
   }
   bool haveCommonElements(std::vector<int> first, std::vector<int> second);
   std::vector<int> returnCombinedSet(std::vector<int> first, std::vector<int> second);
   std::vector< std::vector<int> > GetAllCommonCycles();
+
+  void breadthFirstSearch();
+  
+
 };
 
 #endif // CIRCUIT_FINDER_H

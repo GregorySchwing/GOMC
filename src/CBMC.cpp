@@ -19,12 +19,8 @@ namespace cbmc
 CBMC* MakeCBMC(System& sys, const Forcefield& ff,
                const MoleculeKind& kind, const Setup& set)
 {
-
-  std::vector<uint> bondCount(kind.NumAtoms(), 0);
-  for (uint i = 0; i < kind.bondList.count; ++i) {
-    bondCount[kind.bondList.part1[i]]++;
-    bondCount[kind.bondList.part2[i]]++;
-  }
+// We used to do boundCount here for no apparent reason unless scope somehow
+// extended to these subclasses
 
   bool cyclic = (kind.NumBonds() > kind.NumAtoms() - 1) ? true : false;
 

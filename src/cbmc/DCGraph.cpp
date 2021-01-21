@@ -18,7 +18,7 @@ namespace cbmc
 {
 DCGraph::DCGraph(System& sys, const Forcefield& ff,
                  const MoleculeKind& kind, const Setup& set)
-  : data(sys, ff, set)
+  : data(sys, ff, set), bondCount(kind.bondCount)
 {
   using namespace mol_setup;
   MolMap::const_iterator it = set.mol.kindMap.find(kind.name);
@@ -30,13 +30,6 @@ DCGraph::DCGraph(System& sys, const Forcefield& ff,
   coords.Init(setupKind.atoms.size());
 
   std::vector<uint> atomToNode(setupKind.atoms.size(), 0);
-  std::vector<uint> bondCount(setupKind.atoms.size(), 0);
-  //Count the number of bonds for each atom
-  for (uint b = 0; b < setupKind.bonds.size(); ++b) {
-    const Bond& bond = setupKind.bonds[b];
-    ++bondCount[bond.a0];
-    ++bondCount[bond.a1];
-  }
 
   //Find the node (number of bound > 1)
   //Construct the starting node (DCFreeHedron)
