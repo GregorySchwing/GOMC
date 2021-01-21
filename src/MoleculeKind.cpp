@@ -72,6 +72,23 @@ void MoleculeKind::Init
 
   InitAtoms(molData);
 
+  /* 
+   Bonds being numbered from 0 .. n is neccessary for building the graph of the molecule.
+   We have bonds and atoms numbered by the unique atom ID from the psf file.  We also already built
+   a graph of the simulation, and we found the connected components.  There is nothing stopping 
+   us from simply taking the heads of the connected components and deep copying them into a subgraph.
+   However, the atom & bond indices would be noncontinous and undefined.  Instead of changing the 
+   rest of GOMC to use these new indices, we will renumber them from 0 to n.
+
+   Since we can't guaruntee continuity in the bond numbering, i.e. if we have a disulfide bond 
+   between far off amino acids, we can't get clever with
+   the smallest atom number by subtracting that number from all atom and bond indices.  
+   Therefore, we have to iterate through the bonds in an molecule and renumber them one by one.
+  */
+  bondList.Init(molData.bonds);
+  angles.Init(molData.angles, bondList);
+  dihedrals.Init(molData.dihedrals, bondList);
+
   //Once-through topology objects
 
   oneThree = oneFour = false;
@@ -93,9 +110,7 @@ void MoleculeKind::Init
   sortedNB_1_4.Init(nonBonded_1_4, numAtoms);
   sortedNB.Init(nonBonded, numAtoms);
   sortedEwaldNB.Init(nonEwaldBonded, numAtoms);
-  bondList.Init(molData.bonds);
-  angles.Init(molData.angles, bondList);
-  dihedrals.Init(molData.dihedrals, bondList);
+
 
 #ifdef VARIABLE_PARTICLE_NUMBER
   builder = cbmc::MakeCBMC(sys, forcefield, *this, setup);
