@@ -150,11 +150,7 @@ int main(int argc, char *argv[])
     }
 #else
     Simulation sim(inputFileString.c_str());
-    nvtxRangePop();
-    nvtxRangePushA("runGOMC");
     sim.RunSimulation();
-    nvtxRangePop();
-    nvtxRangePushA("closeGOMC");
     PrintSimulationFooter();
 #endif
   }

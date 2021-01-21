@@ -63,6 +63,8 @@ void Simulation::RunSimulation(void)
       cpu->Output(frameSteps[i] - 1);
     }
   }
+  nvtxRangePop();
+  nvtxRangePushA("runGOMC");
   for (ulong step = startStep; step < totalSteps; step++) {
     system->moveSettings.AdjustMoves(step);
     system->ChooseAndRunMove(step);
@@ -112,7 +114,9 @@ void Simulation::RunSimulation(void)
     if((step + 1) % 1000 == 0)
       RecalculateAndCheck();
 #endif
-  }
+}
+  nvtxRangePop();
+  nvtxRangePushA("closeGOMC");
   if(!RecalculateAndCheck()) {
     std::cerr << "Warning: Updated energy differs from Recalculated Energy!\n";
   }
