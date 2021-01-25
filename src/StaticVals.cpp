@@ -16,7 +16,7 @@ void StaticVals::Init(Setup & set, System& sys)
   //Standard inits
   simEventFreq.Init(set.config.sys.step);
   forcefield.Init(set);
-  mol.Init(set, forcefield, sys);
+  mol.Init(set, forcefield, sys, *this);
 #ifndef VARIABLE_VOLUME
   boxDimensions->Init(set.config.in.restart, set.config.sys.volume,
                       set.pdb.cryst, forcefield);
@@ -35,7 +35,7 @@ void StaticVals::Init(Setup & set, System& sys)
 void StaticVals::InitOver(Setup & set, System& sys)
 {
   mol.~Molecules();
-  mol.Init(set, forcefield, sys);
+  mol.Init(set, forcefield, sys, *this);
 }
 
 void StaticVals::InitMovePercents(config_setup::MovePercents const& perc)

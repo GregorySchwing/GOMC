@@ -34,6 +34,16 @@ public:
     }
   }
 
+  /* Create New Box for IntraMolCellList */
+  BoxDimensions(int n)
+  {
+    axis.Init(n);
+    halfAx.Init(n);
+    for (uint b = 0; b < n; b++) {
+      cellBasis[b] = XYZArray(3);
+    }
+  }
+
   BoxDimensions(BoxDimensions const& other);
 
   virtual ~BoxDimensions() {};

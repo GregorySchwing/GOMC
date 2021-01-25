@@ -34,7 +34,7 @@ Molecules::~Molecules(void)
 }
 
 void Molecules::Init(Setup & setup, Forcefield & forcefield,
-                     System & sys)
+                     System & sys, StaticVals& statV)
 {
   pdb_setup::Atoms& atoms = setup.pdb.atoms;
   //Molecule kinds arrays/data.
@@ -59,7 +59,7 @@ void Molecules::Init(Setup & setup, Forcefield & forcefield,
     countByKind[mk] =
       std::count(setup.mol.molVars.moleculeNames.begin(), setup.mol.molVars.moleculeNames.end(),
                  setup.mol.molVars.moleculeKindNames[mk]);
-    kinds[mk].Init(setup.mol.molVars.moleculeKindNames[mk], setup, forcefield, sys);
+    kinds[mk].Init(setup.mol.molVars.moleculeKindNames[mk], setup, forcefield, sys, *this, statV);
   }
 
 #if ENSEMBLE == GCMC

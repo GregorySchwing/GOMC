@@ -27,6 +27,7 @@ set(sources
    src/Geometry.cpp
    src/HistOutput.cpp
    src/InputFileReader.cpp
+   src/IntraMolCellList.cpp
    src/Main.cpp
    src/MoleculeKind.cpp
    src/MoleculeLookup.cpp
@@ -109,6 +110,7 @@ set(headers
    src/HistOutput.h
    src/InputAbstracts.h
    src/InputFileReader.h
+   src/IntraMolCellList.h
    src/MersenneTwister.h
    src/MoleculeKind.h
    src/MoleculeLookup.h
@@ -187,12 +189,10 @@ set(libHeaders
    lib/StrLib.h
    lib/StrStrmLib.h
    lib/VectorLib.h
-   lib/BCC.h
    lib/CircuitFinder.h
    lib/FloydWarshallCycle.h)
 
 set(libSources
-    lib/BCC.cpp
     lib/CircuitFinder.cpp
     lib/FloydWarshallCycle.cpp)
 

@@ -19,7 +19,7 @@ class Atoms;
 class FFSetup;
 class Forcefield;
 class System;
-
+class StaticVals;
 #include "MoleculeKind.h" //For member var.
 
 //Note: This info is static and will never change in current ensembles
@@ -40,7 +40,7 @@ public:
   }
 
   void Init(Setup& setup, Forcefield& forcefield,
-            System& sys);
+            System& sys, StaticVals& statV);
 
   uint NumAtomsByMol(const uint m) const
   {

@@ -1038,6 +1038,7 @@ void CalculateEnergy::MolNonbond(double & energy,
   double distSq;
   double qi_qj_fact;
 
+  /* Loop through all the pairwise interactions for a given molecule */
   for (uint i = 0; i < molKind.nonBonded.count; ++i) {
     uint p1 = mols.start[molIndex] + molKind.nonBonded.part1[i];
     uint p2 = mols.start[molIndex] + molKind.nonBonded.part2[i];

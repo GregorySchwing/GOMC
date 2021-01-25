@@ -60,6 +60,11 @@ CellList::CellList(const CellList & other) : mols(other.mols)
   //head(other.head);
 }
 
+XYZ CellList::GetCellZeroCenter(uint box){
+  return XYZ(cellSize[box].x/2, cellSize[box].y/2, cellSize[box].z/2);
+}
+
+
 
 void CellList::SetCutoff()
 {
@@ -257,6 +262,17 @@ void CellList::GridBox(BoxDimensions& dims, const XYZArray& pos,
     AddMol(*it, b, pos);
     ++it;
   }
+}
+
+void CellList::GridOne(BoxDimensions& dims, const XYZArray& pos,
+                       const MoleculeLookup& lookup, const uint b, uint molIndex)
+{
+  dimensions = &dims;
+  list.resize(pos.Count());
+  ResizeGridBox(dims, b);
+  head[b].assign(edgeCells[b][0] * edgeCells[b][1] *
+                 edgeCells[b][2], END_CELL);
+  AddMol(molIndex, b, pos);
 }
 
 

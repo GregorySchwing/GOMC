@@ -13,7 +13,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "Geometry.h"            //members
 #include "CBMC.h"
 #include "CircuitFinder.h"
-
+#include "IntraMolCellList.h"
 #include <string>
 #include <vector>
 
@@ -41,7 +41,8 @@ struct MolPick;
 class System;
 class Forcefield;
 class Setup;
-
+class Molecules;
+class StaticVals;
 class MoleculeKind
 {
 public:
@@ -79,7 +80,9 @@ public:
   void Init(std::string const& l_name,
             Setup const& setup,
             Forcefield const& forcefield,
-            System & sys);
+            System & sys,
+            const Molecules & mols,
+            StaticVals& statV);
 
   //Invoke CBMC, oldMol and newMol will be modified
   void Build(cbmc::TrialMol& oldMol, cbmc::TrialMol& newMol,
@@ -153,6 +156,7 @@ public:
 
   std::vector<uint> bondCount;
   CircuitFinder * CF;
+  IntraMolCellList * imcl;
 
   std::string name;
   std::vector<std::string> atomNames, atomTypeNames, resNames;
@@ -163,6 +167,8 @@ public:
   bool isMultiResidue;
   std::vector<uint> intraMoleculeResIDs;
 
+  bool requiresIntraMolCellList;
+  
 #if ENSEMBLE == GCMC
   double chemPot;
 #endif

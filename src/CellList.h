@@ -31,6 +31,8 @@ public:
   void GridAll(BoxDimensions& dims, const XYZArray& pos, const MoleculeLookup& lookup);
   void GridBox(BoxDimensions& dims, const XYZArray& pos, const MoleculeLookup& lookup,
                const uint b);
+  void GridOne(BoxDimensions& dims, const XYZArray& pos, const MoleculeLookup& lookup,
+              const uint b, uint molIndex);             
   void GetCellListNeighbor(uint box, int coordinateSize, std::vector<int> &cellVector,
                            std::vector<int> &cellStartIndex, std::vector<int> &mapParticleToCell) const;
   std::vector< std::vector<int> > GetNeighborList(uint box) const;
@@ -61,6 +63,7 @@ public:
 
   //GJS - Compare this cell list with another for evaluating parallel tempering correctness
   bool CompareCellList(CellList & other, int coordinateSize);
+  XYZ GetCellZeroCenter(uint box);
   void PrintList();
 
   std::vector<int> list;

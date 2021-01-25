@@ -13,6 +13,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "Geometry.h"
 #include "Setup.h"
 #include "CBMC.h"
+#include "System.h"
 
 #include <vector>
 #include <map>
@@ -27,7 +28,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 
 void MoleculeKind::Init
 (std::string const& l_name, Setup const& setup,
- Forcefield const& forcefield, System& sys)
+ Forcefield const& forcefield, System& sys, const Molecules & mols, StaticVals& statV)
 {
   mol_setup::MolMap::const_iterator dataIterator =
     setup.mol.kindMap.find(l_name);
@@ -99,6 +100,9 @@ void MoleculeKind::Init
     CF->addEdge(bondList.part1[i], bondList.part2[i]);
     CF->addEdge(bondList.part2[i], bondList.part1[i]);
   }
+
+  imcl = new IntraMolCellList(mols, sys.boxDimRef, molData.firstMolID, sys);
+
   //Once-through topology objects
 
   oneThree = oneFour = false;
