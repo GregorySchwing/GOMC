@@ -1,8 +1,6 @@
 #include <gtest/gtest.h>
 
 #include "MoleculeLookup.h"
-#include "MoleculeLookup.cpp"
-
 
 TEST(MolLookupTest, CheckConsensusBeta) {
     /*
