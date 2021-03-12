@@ -8,13 +8,6 @@ include_directories(src/cbmc)
 include_directories(src/moves)
 include_directories(src/GPU)
 
-# Enable google test
-# for now we will disable testing for intel compiler
-if(NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
-  enable_testing()
-  include(test/GoogleTest.cmake)
-endif()
-
 #Out-of-source build
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
@@ -45,6 +38,13 @@ configure_file(
 	"${PROJECT_BINARY_DIR}/GOMC_Config.h"
 	)
 include_directories("${PROJECT_BINARY_DIR}")
+
+# Enable google test
+# for now we will disable testing for intel compiler
+if(NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+  enable_testing()
+  include(test/GoogleTest.cmake)
+endif()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -stdlib=libc++") 

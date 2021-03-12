@@ -5,6 +5,7 @@ set(TestSources
     test/src/MolLookupTest.cpp
     test/src/CircuitTester.cpp
     test/src/PSFParserTest.cpp
+    test/src/ParallelTemperingTest.cpp
 )
 
 set(TestHeaders
@@ -22,6 +23,7 @@ set(GOMCSources
     lib/CircuitFinder.cpp
     src/InputFileReader.cpp
     lib/FloydWarshallCycle.cpp
+    src/Simulation.cpp
 )
 
 set(GOMCHeaders
@@ -35,4 +37,6 @@ set(GOMCHeaders
     lib/CircuitFinder.h
     src/InputFileReader.h
     lib/FloydWarshallCycle.h
+    GOMC_Config.h
+    src/Simulation.h
 )
