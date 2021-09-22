@@ -3,15 +3,9 @@
 use_cuda=0
 use_profiler=0
 use_gtest=0
-<<<<<<< 1a70225e34d443837fb1766af8c995ef1fc3fd71
 use_gcc=0
 use_mpi=0
 use_debug=0
-=======
-use_mpi=0
-use_debug=0
-MPI="off"
->>>>>>> first push
 ENSEMBLES=""
 CMAKEARGS=""
 
@@ -90,22 +84,15 @@ then
 	fi
 fi
 
-<<<<<<< 1a70225e34d443837fb1766af8c995ef1fc3fd71
 while getopts 'mptgd' opt; do
-=======
-while getopts 'mptd' opt; do
->>>>>>> first push
     case "$opt" in
         p)
             use_profiler=1;;
         m)
             use_mpi=1
             CMAKEARGS+="-DGOMC_MPI=on ";;
-<<<<<<< 1a70225e34d443837fb1766af8c995ef1fc3fd71
         g)
             use_gcc=1;;
-=======
->>>>>>> first push
         t)
             use_gtest=1;;
         d)
@@ -116,11 +103,7 @@ while getopts 'mptd' opt; do
             echo "-t (disables Intel compiler to allow GTests to compile),"
             echo "-m, enables MPI support (Required for Parallel Tempering)"
             echo "-d, enables Debug Mode compilation"
-<<<<<<< 1a70225e34d443837fb1766af8c995ef1fc3fd71
             echo "For combined usage: -ptmg"
-=======
-            echo "For combined usage: -ptm"
->>>>>>> first push
             exit 1
     esac
 done
@@ -144,7 +127,6 @@ done
 mkdir -p bin
 cd bin
 
-<<<<<<< 1a70225e34d443837fb1766af8c995ef1fc3fd71
 if (( !use_gtest )); then
     if (( !use_gcc )); 
     then
@@ -164,21 +146,6 @@ if (( !use_gtest )); then
     fi
 else
     if (( use_mpi )); 
-=======
-if (( !$use_gtest )); then
-    ICC_PATH="$(which icc 2> /dev/null)"
-    ICPC_PATH="$(which icpc 2> /dev/null)"
-    if [ -z "$ICC_PATH" ]
-    then
-        export CC="$(which gcc 2> /dev/null)"
-        export CXX="$(which g++ 2> /dev/null)"
-    else
-        export CC=${ICC_PATH}
-        export CXX=${ICPC_PATH}
-    fi
-else
-    if (( $use_mpi )); 
->>>>>>> first push
     then
         ENSEMBLES+="GOMC_NVT_MPI_Test "
 		ENSEMBLES+="GOMC_NPT_MPI_Test "
@@ -195,11 +162,6 @@ else
     export CC="$(which gcc 2> /dev/null)"
     export CXX="$(which g++ 2> /dev/null)"
 fi
-<<<<<<< 1a70225e34d443837fb1766af8c995ef1fc3fd71
-=======
-
-echo "Ensembles To Compile: $ENSEMBLES"
->>>>>>> first push
 
 echo "Ensembles To Compile: $ENSEMBLES"
 
@@ -212,18 +174,10 @@ if (( use_profiler )); then
     fi
 fi
 
-<<<<<<< 1a70225e34d443837fb1766af8c995ef1fc3fd71
 if (( use_debug )); then
-=======
-if (( $use_debug )); then
->>>>>>> first push
 	echo "Enabling Debug Compilation "
 	CMAKEARGS+="-DCMAKE_BUILD_TYPE=Debug "
 fi
 
 cmake .. $CMAKEARGS
-<<<<<<< 1a70225e34d443837fb1766af8c995ef1fc3fd71
 make -j8 $ENSEMBLES
-=======
-make -j8 $ENSEMBLES
->>>>>>> first push
