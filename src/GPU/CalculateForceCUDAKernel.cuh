@@ -40,7 +40,8 @@ void CallBoxForceGPU(VariablesCUDA *vars,
                      double sc_sigma_6,
                      double sc_alpha,
                      uint sc_power,
-                     uint const box);
+                     uint const box,
+                     bool wolf);
 
 void CallBoxInterForceGPU(VariablesCUDA *vars,
                           const std::vector<int> &cellVector,
@@ -70,7 +71,8 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
                           double sc_sigma_6,
                           double sc_alpha,
                           uint sc_power,
-                          uint const box);
+                          uint const box,
+                          bool wolf);
 
 void CallVirialReciprocalGPU(VariablesCUDA *vars,
                              XYZArray const &currentCoords,
@@ -140,7 +142,8 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                             double *gpu_lambdaVDW,
                             double *gpu_lambdaCoulomb,
                             bool *gpu_isFraction,
-                            int box);
+                            int box,
+                            bool wolf);
 
 __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
                                  int *gpu_cellVector,
@@ -203,7 +206,8 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
                                  double *gpu_lambdaVDW,
                                  double *gpu_lambdaCoulomb,
                                  bool *gpu_isFraction,
-                                 int box);
+                                 int box,
+                                 bool wolf);
 
 __global__ void VirialReciprocalGPU(double *gpu_x,
                                     double *gpu_y,
