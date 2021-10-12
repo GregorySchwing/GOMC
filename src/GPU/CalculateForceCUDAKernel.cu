@@ -47,7 +47,8 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
                           double sc_sigma_6,
                           double sc_alpha,
                           uint sc_power,
-                          uint const box)
+                          uint const box,
+                          bool wolf)
 {
   int atomNumber = currentCoords.Count();
   int molNumber = currentCOM.Count();
@@ -201,7 +202,8 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
       vars->gpu_lambdaVDW,
       vars->gpu_lambdaCoulomb,
       vars->gpu_isFraction,
-      box);
+      box,
+      wolf);
   checkLastErrorCUDA(__FILE__, __LINE__);
   cudaDeviceSynchronize();
   // ReduceSum // Virial of LJ
@@ -312,7 +314,8 @@ void CallBoxForceGPU(VariablesCUDA *vars,
                      double sc_alpha,
                      double qqFact,
                      uint sc_power,
-                     uint const box)
+                     uint const box,
+                     bool wolf)
 {
   int atomNumber = coords.Count();
   int *gpu_particleKind, *gpu_particleMol;
@@ -430,7 +433,8 @@ void CallBoxForceGPU(VariablesCUDA *vars,
       vars->gpu_lambdaVDW,
       vars->gpu_lambdaCoulomb,
       vars->gpu_isFraction,
-      box);
+      box,
+      wolf);
   cudaDeviceSynchronize();
   checkLastErrorCUDA(__FILE__, __LINE__);
   // LJ ReduceSum
@@ -656,7 +660,8 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
                                  double *gpu_lambdaVDW,
                                  double *gpu_lambdaCoulomb,
                                  bool *gpu_isFraction,
-                                 int box)
+                                 int box,
+                                 bool wolf)
 {
   double distSq;
   double3 virComponents;
@@ -824,7 +829,8 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                             double *gpu_lambdaVDW,
                             double *gpu_lambdaCoulomb,
                             bool *gpu_isFraction,
-                            int box)
+                            int box,
+                            bool wolf)
 {
   int threadID = blockIdx.x * blockDim.x + threadIdx.x;
   double distSq;
@@ -908,7 +914,8 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                                   lambdaCoulomb, sc_coul, sc_sigma_6,
                                   sc_alpha, sc_power,
                                   gpu_sigmaSq,
-                                  gpu_count[0]);
+                                  gpu_count[0],
+                                  wolf);
 
             double coulombVir = CalcCoulombForceGPU(distSq, qi_qj_fact,
                                                     gpu_VDW_Kind[0], gpu_ewald[0],

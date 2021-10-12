@@ -35,7 +35,8 @@ void CallBoxInterGPU(VariablesCUDA *vars,
                      double sc_alpha,
                      double qqFact,
                      uint sc_power,
-                     uint const box)
+                     uint const box,
+                     bool wolf)
 {
   int atomNumber = coords.Count();
   int neighborListCount = neighborList.size() * NUMBER_OF_NEIGHBOR_CELL;
@@ -139,7 +140,8 @@ void CallBoxInterGPU(VariablesCUDA *vars,
       vars->gpu_lambdaVDW,
       vars->gpu_lambdaCoulomb,
       vars->gpu_isFraction,
-      box);
+      box,
+      wolf);
   cudaDeviceSynchronize();
   checkLastErrorCUDA(__FILE__, __LINE__);
 
@@ -227,7 +229,8 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                             double *gpu_lambdaVDW,
                             double *gpu_lambdaCoulomb,
                             bool *gpu_isFraction,
-                            int box)
+                            int box,
+                            bool wolf)
 {
   int threadID = blockIdx.x * blockDim.x + threadIdx.x;
   double REn = 0.0, LJEn = 0.0;
@@ -290,7 +293,8 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                                   gpu_rCutCoulomb[box], gpu_isMartini[0],
                                   gpu_diElectric_1[0], lambdaCoulomb, sc_coul,
                                   sc_sigma_6, sc_alpha, sc_power, gpu_sigmaSq,
-                                  gpu_count[0]);
+                                  gpu_count[0],
+                                  wolf);
           }
         }
       }
@@ -319,7 +323,8 @@ __device__ double CalcCoulombGPU(double distSq,
                                  double sc_alpha,
                                  uint sc_power,
                                  double *gpu_sigmaSq,
-                                 int gpu_count)
+                                 int gpu_count,
+                                 bool wolf)
 {
   if((gpu_rCutCoulomb * gpu_rCutCoulomb) < distSq) {
     return 0.0;
