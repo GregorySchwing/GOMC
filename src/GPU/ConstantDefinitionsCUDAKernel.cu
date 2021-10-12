@@ -32,7 +32,9 @@ void InitGPUForceField(VariablesCUDA &vars, double const *sigmaSq,
                        double const *n, int VDW_Kind, int isMartini,
                        int count, double Rcut, double const *rCutCoulomb,
                        double RcutLow, double Ron, double const *alpha,
-                       int ewald, double diElectric_1)
+                       int ewald, double diElectric_1, double const * wolfAlpha,
+                       double const * wolfFactor1, double const * wolfFactor2, 
+                       double const * wolfFactor3, int coulKind)
 {
   int countSq = count * count;
   CUMALLOC((void**) &vars.gpu_sigmaSq, countSq * sizeof(double));

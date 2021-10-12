@@ -48,7 +48,7 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
                           double sc_alpha,
                           uint sc_power,
                           uint const box,
-                          bool wolf)
+                          bool gpu_wolf)
 {
   int atomNumber = currentCoords.Count();
   int molNumber = currentCOM.Count();
@@ -203,7 +203,7 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
       vars->gpu_lambdaCoulomb,
       vars->gpu_isFraction,
       box,
-      wolf);
+      gpu_wolf);
   checkLastErrorCUDA(__FILE__, __LINE__);
   cudaDeviceSynchronize();
   // ReduceSum // Virial of LJ
@@ -314,7 +314,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
                      double sc_alpha,
                      uint sc_power,
                      uint const box,
-                     bool wolf)
+                     bool gpu_wolf)
 {
   int atomNumber = coords.Count();
   int *gpu_particleKind, *gpu_particleMol;
@@ -432,7 +432,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
       vars->gpu_lambdaCoulomb,
       vars->gpu_isFraction,
       box,
-      wolf);
+      gpu_wolf);
   cudaDeviceSynchronize();
   checkLastErrorCUDA(__FILE__, __LINE__);
   // LJ ReduceSum
@@ -659,7 +659,7 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
                                  double *gpu_lambdaCoulomb,
                                  bool *gpu_isFraction,
                                  int box,
-                                 bool wolf)
+                                 bool gpu_wolf)
 {
   double distSq;
   double3 virComponents;
@@ -827,7 +827,7 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                             double *gpu_lambdaCoulomb,
                             bool *gpu_isFraction,
                             int box,
-                            bool wolf)
+                            bool gpu_wolf)
 {
   int threadID = blockIdx.x * blockDim.x + threadIdx.x;
   double distSq;
@@ -913,7 +913,7 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                                   sc_alpha, sc_power,
                                   gpu_sigmaSq,
                                   gpu_count[0],
-                                  wolf);
+                                  gpu_wolf);
 
             double coulombVir = CalcCoulombForceGPU(distSq, qi_qj_fact,
                                                     gpu_VDW_Kind[0], gpu_ewald[0],

@@ -35,7 +35,7 @@ void CallBoxInterGPU(VariablesCUDA *vars,
                      double sc_alpha,
                      uint sc_power,
                      uint const box,
-                     bool wolf)
+                     bool gpu_wolf)
 {
   int atomNumber = coords.Count();
   int neighborListCount = neighborList.size() * NUMBER_OF_NEIGHBOR_CELL;
@@ -139,7 +139,7 @@ void CallBoxInterGPU(VariablesCUDA *vars,
       vars->gpu_lambdaCoulomb,
       vars->gpu_isFraction,
       box,
-      wolf);
+      gpu_wolf);
   cudaDeviceSynchronize();
   checkLastErrorCUDA(__FILE__, __LINE__);
 
@@ -227,7 +227,7 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                             double *gpu_lambdaCoulomb,
                             bool *gpu_isFraction,
                             int box,
-                            bool wolf)
+                            bool gpu_wolf)
 {
   int threadID = blockIdx.x * blockDim.x + threadIdx.x;
   double REn = 0.0, LJEn = 0.0;
@@ -292,7 +292,7 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                                   gpu_diElectric_1[0], lambdaCoulomb, sc_coul,
                                   sc_sigma_6, sc_alpha, sc_power, gpu_sigmaSq,
                                   gpu_count[0],
-                                  wolf);
+                                  gpu_wolf);
           }
         }
       }
@@ -322,7 +322,7 @@ __device__ double CalcCoulombGPU(double distSq,
                                  uint sc_power,
                                  double *gpu_sigmaSq,
                                  int gpu_count,
-                                 bool wolf)
+                                 bool gpu_wolf)
 {
   if((gpu_rCutCoulomb * gpu_rCutCoulomb) < distSq) {
     return 0.0;
@@ -396,10 +396,11 @@ __device__ double CalcCoulombParticleGPU(double distSq, int index, double qi_qj_
     int gpu_ewald, double gpu_alpha,
     double gpu_lambdaCoulomb, bool sc_coul,
     double sc_sigma_6, double sc_alpha,
-    uint sc_power, double *gpu_sigmaSq)
+    uint sc_power, double *gpu_sigmaSq,
+    int gpu_wolf)
 {
   if(gpu_lambdaCoulomb >= 0.999999) {
-    return CalcCoulombParticleGPUNoLambda(distSq, qi_qj_fact, gpu_ewald, gpu_alpha);
+    return CalcCoulombParticleGPUNoLambda(distSq, qi_qj_fact, gpu_ewald, gpu_alpha, gpu_wolf);
   }
   if(sc_coul) {
     double sigma6 = gpu_sigmaSq[index] * gpu_sigmaSq[index] * gpu_sigmaSq[index];
@@ -408,23 +409,28 @@ __device__ double CalcCoulombParticleGPU(double distSq, int index, double qi_qj_
     double lambdaCoef = sc_alpha * pow((1.0 - gpu_lambdaCoulomb), (double)sc_power);
     double softDist6 = lambdaCoef * sigma6 * dist6;
     double softRsq = cbrt(softDist6);
-    return gpu_lambdaCoulomb * CalcCoulombParticleGPUNoLambda(softRsq, qi_qj_fact, gpu_ewald, gpu_alpha);
+    return gpu_lambdaCoulomb * CalcCoulombParticleGPUNoLambda(softRsq, qi_qj_fact, gpu_ewald, gpu_alpha, gpu_wolf);
   } else {
-    return gpu_lambdaCoulomb * CalcCoulombParticleGPUNoLambda(distSq, qi_qj_fact, gpu_ewald, gpu_alpha);
+    return gpu_lambdaCoulomb * CalcCoulombParticleGPUNoLambda(distSq, qi_qj_fact, gpu_ewald, gpu_alpha, gpu_wolf);
   }
 }
 
 __device__ double CalcCoulombParticleGPUNoLambda(double distSq,
     double qi_qj_fact,
     int gpu_ewald,
-    double gpu_alpha)
+    double gpu_alpha,
+    int gpu_wolf)
 {
   double dist = sqrt(distSq);
   double value = 1.0;
   if(gpu_ewald) {
     value = erfc(gpu_alpha * dist);
+  } else if (gpu_wolf) {
+    value = 1.0;
+  } else {
+    value = qi_qj_fact * value / dist;
   }
-  return qi_qj_fact * value / dist;
+  return value;
 }
 
 __device__ double CalcCoulombShiftGPU(double distSq, int index, double qi_qj_fact,
