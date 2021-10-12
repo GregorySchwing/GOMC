@@ -31,7 +31,7 @@ void CallBoxInterGPU(VariablesCUDA *vars,
                      double qqFact,
                      uint sc_power,
                      uint const box,
-                     bool wolf);
+                     bool gpu_wolf);
 
 __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                             int *gpu_cellVector,
@@ -81,7 +81,7 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                             double *gpu_lambdaCoulomb,
                             bool *gpu_isFraction,
                             int box,
-                            bool wolf);
+                            bool gpu_wolf);
 
 
 __device__ double CalcCoulombGPU(double distSq, int kind1, int kind2,
@@ -93,7 +93,7 @@ __device__ double CalcCoulombGPU(double distSq, int kind1, int kind2,
                                  double sc_sigma_6, double sc_alpha,
                                  uint sc_power, double *gpu_sigmaSq,
                                  int gpu_count,
-                                 bool wolf);
+                                 bool gpu_wolf);
 __device__ double CalcCoulombVirGPU(double distSq, double qi_qj,
                                     double gpu_rCutCoulomb, double gpu_alpha,
                                     int gpu_VDW_Kind, int gpu_ewald,
@@ -117,7 +117,8 @@ __device__ double CalcCoulombParticleGPU(double distSq, int index, double qi_qj_
 __device__ double CalcCoulombParticleGPUNoLambda(double distSq,
     double qi_qj_fact,
     int gpu_ewald,
-    double gpu_alpha);
+    double gpu_alpha,
+    int gpu_wolf);
 __device__ double CalcCoulombShiftGPU(double distSq, int index, double qi_qj_fact,
                                       int gpu_ewald, double gpu_alpha,
                                       double gpu_rCut, double gpu_lambdaCoulomb,
