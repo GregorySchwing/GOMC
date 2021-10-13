@@ -64,6 +64,7 @@ public:
     gpu_rOn = NULL;
     gpu_alpha = NULL;
     gpu_rCutCoulomb = NULL;
+    gpu_rCutCoulombSq = NULL;
     gpu_ewald = NULL;
     gpu_diElectric_1 = NULL;
     gpu_aForcex = NULL;
@@ -97,6 +98,7 @@ public:
   int *gpu_startAtomIdx; //start atom index of the molecule
   double *gpu_rCut;
   double *gpu_rCutCoulomb;
+  double *gpu_rCutCoulombSq;
   double *gpu_rCutLow;
   double *gpu_rOn;
   double *gpu_alpha;
