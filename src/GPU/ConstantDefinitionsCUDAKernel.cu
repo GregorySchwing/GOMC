@@ -49,6 +49,7 @@ void InitGPUForceField(VariablesCUDA &vars, double const *sigmaSq,
   CUMALLOC((void**) &vars.gpu_count, sizeof(int));
   CUMALLOC((void**) &vars.gpu_rCut, sizeof(double));
   CUMALLOC((void**) &vars.gpu_rCutCoulomb, BOX_TOTAL * sizeof(double));
+  CUMALLOC((void**) &vars.gpu_rCutCoulombSq, BOX_TOTAL * sizeof(double));
   CUMALLOC((void**) &vars.gpu_rCutLow, sizeof(double));
   CUMALLOC((void**) &vars.gpu_rOn, sizeof(double));
   CUMALLOC((void**) &vars.gpu_alpha, BOX_TOTAL * sizeof(double));
@@ -82,6 +83,8 @@ void InitGPUForceField(VariablesCUDA &vars, double const *sigmaSq,
   cudaMemcpy(vars.gpu_count, &count, sizeof(int), cudaMemcpyHostToDevice);
   cudaMemcpy(vars.gpu_rCut, &Rcut, sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars.gpu_rCutCoulomb, rCutCoulomb, BOX_TOTAL * sizeof(double),
+             cudaMemcpyHostToDevice);
+  cudaMemcpy(vars.gpu_rCutCoulomb, rCutCoulombSq, BOX_TOTAL * sizeof(double),
              cudaMemcpyHostToDevice);
   cudaMemcpy(vars.gpu_rCutLow, &RcutLow, sizeof(double),
              cudaMemcpyHostToDevice);
