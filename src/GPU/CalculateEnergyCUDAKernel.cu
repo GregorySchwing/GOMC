@@ -339,10 +339,10 @@ __device__ double CalcCoulombGPU(double distSq,
                                  double *gpu_sigmaSq,
                                  int gpu_count,
                                  int gpu_wolf,
-                                 int coulKind,
-                                 double wolfAlpha,
-                                 double wolfFactor1,
-                                 double wolfFactor2)
+                                 int gpu_coulKind,
+                                 double gpu_wolfAlpha,
+                                 double gpu_wolfFactor1,
+                                 double gpu_wolfFactor2)
 {
   if(gpu_rCutCoulombSq < distSq) {
     return 0.0;
@@ -363,10 +363,10 @@ __device__ double CalcCoulombGPU(double distSq,
                                   sc_power, 
                                   gpu_sigmaSq,
                                   gpu_wolf,
-                                  coulKind,
-                                  wolfAlpha,
-                                  wolfFactor1,
-                                  wolfFactor2);
+                                  gpu_coulKind,
+                                  gpu_wolfAlpha,
+                                  gpu_wolfFactor1,
+                                  gpu_wolfFactor2);
   } else if(gpu_VDW_Kind == GPU_VDW_SHIFT_KIND) {
     return CalcCoulombShiftGPU(distSq, 
                                index, 
@@ -381,10 +381,10 @@ __device__ double CalcCoulombGPU(double distSq,
                                sc_power, 
                                gpu_sigmaSq,
                                gpu_wolf,
-                               coulKind,
-                               wolfAlpha,
-                               wolfFactor1,
-                               wolfFactor2);
+                               gpu_coulKind,
+                               gpu_wolfAlpha,
+                               gpu_wolfFactor1,
+                               gpu_wolfFactor2);
   } else if(gpu_VDW_Kind == GPU_VDW_EXP6_KIND) {
     return CalcCoulombExp6GPU(distSq, 
                               index, 
@@ -399,10 +399,10 @@ __device__ double CalcCoulombGPU(double distSq,
                               sc_power, 
                               gpu_sigmaSq,
                               gpu_wolf,
-                              coulKind,
-                              wolfAlpha,
-                              wolfFactor1,
-                              wolfFactor2);
+                              gpu_coulKind,
+                              gpu_wolfAlpha,
+                              gpu_wolfFactor1,
+                              gpu_wolfFactor2);
   } else if(gpu_VDW_Kind == GPU_VDW_SWITCH_KIND && gpu_isMartini) {
     return CalcCoulombSwitchMartiniGPU(distSq, 
                                        index, 
@@ -418,10 +418,10 @@ __device__ double CalcCoulombGPU(double distSq,
                                        sc_power, 
                                        gpu_sigmaSq,
                                        gpu_wolf,
-                                       coulKind,
-                                       wolfAlpha,
-                                       wolfFactor1,
-                                       wolfFactor2);
+                                       gpu_coulKind,
+                                       gpu_wolfAlpha,
+                                       gpu_wolfFactor1,
+                                       gpu_wolfFactor2);
   } else
     return CalcCoulombSwitchGPU(distSq, 
                                 index, 
@@ -437,10 +437,10 @@ __device__ double CalcCoulombGPU(double distSq,
                                 sc_power,
                                 gpu_sigmaSq,
                                 gpu_wolf,
-                                coulKind,
-                                wolfAlpha,
-                                wolfFactor1,
-                                wolfFactor2);
+                                gpu_coulKind,
+                                gpu_wolfAlpha,
+                                gpu_wolfFactor1,
+                                gpu_wolfFactor2);
 }
 
 __device__ double CalcEnGPU(double distSq, int kind1, int kind2,
