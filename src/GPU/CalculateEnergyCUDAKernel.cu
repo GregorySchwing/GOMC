@@ -34,8 +34,7 @@ void CallBoxInterGPU(VariablesCUDA *vars,
                      double sc_sigma_6,
                      double sc_alpha,
                      uint sc_power,
-                     uint const box,
-                     bool gpu_wolf)
+                     uint const box)
 {
   int atomNumber = coords.Count();
   int neighborListCount = neighborList.size() * NUMBER_OF_NEIGHBOR_CELL;
@@ -139,7 +138,11 @@ void CallBoxInterGPU(VariablesCUDA *vars,
       vars->gpu_lambdaCoulomb,
       vars->gpu_isFraction,
       box,
-      gpu_wolf);
+      vars->gpu_wolf,
+      vars->gpu_coulKind,
+      vars->gpu_wolfAlpha,
+      vars->gpu_wolfFactor1,
+      vars->gpu_wolfFactor2);
   cudaDeviceSynchronize();
   checkLastErrorCUDA(__FILE__, __LINE__);
 
@@ -227,7 +230,11 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                             double *gpu_lambdaCoulomb,
                             bool *gpu_isFraction,
                             int box,
-                            bool gpu_wolf)
+                            int *gpu_wolf,
+                            int *coulKind,
+                            double * wolfAlpha,
+                            double * wolfFactor1,
+                            double * wolfFactor2)
 {
   int threadID = blockIdx.x * blockDim.x + threadIdx.x;
   double REn = 0.0, LJEn = 0.0;
@@ -292,7 +299,13 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                                   gpu_diElectric_1[0], lambdaCoulomb, sc_coul,
                                   sc_sigma_6, sc_alpha, sc_power, gpu_sigmaSq,
                                   gpu_count[0],
-                                  gpu_wolf);
+                                  gpu_wolf,
+                                  coulKind,
+                                  wolfAlpha,
+                                  wolfFactor1,
+                                  wolfFactor2,
+                                  gpu_rCutCoulomb,
+                                  box);
           }
         }
       }
@@ -322,7 +335,13 @@ __device__ double CalcCoulombGPU(double distSq,
                                  uint sc_power,
                                  double *gpu_sigmaSq,
                                  int gpu_count,
-                                 bool gpu_wolf)
+                                 int *gpu_wolf,
+                                 int *coulKind,
+                                 double * wolfAlpha,
+                                 double * wolfFactor1,
+                                 double * wolfFactor2,
+                                 double * rCutCoulomb,
+                                 int box)
 {
   if((gpu_rCutCoulomb * gpu_rCutCoulomb) < distSq) {
     return 0.0;
@@ -332,7 +351,14 @@ __device__ double CalcCoulombGPU(double distSq,
   if(gpu_VDW_Kind == GPU_VDW_STD_KIND) {
     return CalcCoulombParticleGPU(distSq, index, qi_qj_fact, gpu_ewald, gpu_alpha,
                                   gpu_lambdaCoulomb, sc_coul, sc_sigma_6,
-                                  sc_alpha, sc_power, gpu_sigmaSq);
+                                  sc_alpha, sc_power, gpu_sigmaSq,
+                                  gpu_wolf,
+                                  coulKind,
+                                  wolfAlpha,
+                                  wolfFactor1,
+                                  wolfFactor2,
+                                  rCutCoulomb,
+                                  box);
   } else if(gpu_VDW_Kind == GPU_VDW_SHIFT_KIND) {
     return CalcCoulombShiftGPU(distSq, index, qi_qj_fact, gpu_ewald, gpu_alpha,
                                gpu_rCutCoulomb, gpu_lambdaCoulomb, sc_coul,
@@ -397,10 +423,26 @@ __device__ double CalcCoulombParticleGPU(double distSq, int index, double qi_qj_
     double gpu_lambdaCoulomb, bool sc_coul,
     double sc_sigma_6, double sc_alpha,
     uint sc_power, double *gpu_sigmaSq,
-    int gpu_wolf)
+    int *gpu_wolf,
+    int *coulKind,
+    double * wolfAlpha,
+    double * wolfFactor1,
+    double * wolfFactor2,
+    double * rCutCoulomb,
+    int box)
 {
   if(gpu_lambdaCoulomb >= 0.999999) {
-    return CalcCoulombParticleGPUNoLambda(distSq, qi_qj_fact, gpu_ewald, gpu_alpha, gpu_wolf);
+    return CalcCoulombParticleGPUNoLambda(distSq, 
+                                          qi_qj_fact, 
+                                          gpu_ewald, 
+                                          gpu_alpha, 
+                                          gpu_wolf,
+                                          coulKind,
+                                          wolfAlpha,
+                                          wolfFactor1,
+                                          wolfFactor2,
+                                          rCutCoulomb,
+                                          box);
   }
   if(sc_coul) {
     double sigma6 = gpu_sigmaSq[index] * gpu_sigmaSq[index] * gpu_sigmaSq[index];
@@ -409,9 +451,23 @@ __device__ double CalcCoulombParticleGPU(double distSq, int index, double qi_qj_
     double lambdaCoef = sc_alpha * pow((1.0 - gpu_lambdaCoulomb), (double)sc_power);
     double softDist6 = lambdaCoef * sigma6 * dist6;
     double softRsq = cbrt(softDist6);
-    return gpu_lambdaCoulomb * CalcCoulombParticleGPUNoLambda(softRsq, qi_qj_fact, gpu_ewald, gpu_alpha, gpu_wolf);
+    return gpu_lambdaCoulomb * CalcCoulombParticleGPUNoLambda(softRsq, qi_qj_fact, gpu_ewald, gpu_alpha,
+                                                              gpu_wolf,
+                                                              coulKind,
+                                                              wolfAlpha,
+                                                              wolfFactor1,
+                                                              wolfFactor2,
+                                                              rCutCoulomb,
+                                                              box);  
   } else {
-    return gpu_lambdaCoulomb * CalcCoulombParticleGPUNoLambda(distSq, qi_qj_fact, gpu_ewald, gpu_alpha, gpu_wolf);
+    return gpu_lambdaCoulomb * CalcCoulombParticleGPUNoLambda(distSq, qi_qj_fact, gpu_ewald, gpu_alpha,
+                                                              gpu_wolf,
+                                                              coulKind,
+                                                              wolfAlpha,
+                                                              wolfFactor1,
+                                                              wolfFactor2,
+                                                              rCutCoulomb,
+                                                              box);
   }
 }
 
@@ -419,14 +475,28 @@ __device__ double CalcCoulombParticleGPUNoLambda(double distSq,
     double qi_qj_fact,
     int gpu_ewald,
     double gpu_alpha,
-    int gpu_wolf)
+    int *gpu_wolf,
+    int *coulKind,
+    double * wolfAlpha,
+    double * wolfFactor1,
+    double * wolfFactor2,
+    double * rCutCoulomb,
+    int box)
 {
   double dist = sqrt(distSq);
   double value = 1.0;
   if(gpu_ewald) {
     value = erfc(gpu_alpha * dist);
   } else if (gpu_wolf) {
-    value = 1.0;
+    // V_DSP -- (16) from Gezelter 2006
+    value = erfc(wolfAlpha[box] * dist)/dist;
+    value -= wolfFactor1[box];
+    // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
+    if(coulKind){
+      double distDiff = dist-rCutCoulomb[box];
+      value += wolfFactor2[box]*distDiff;
+    } 
+    value *= qi_qj_fact;
   } else {
     value = qi_qj_fact * value / dist;
   }
