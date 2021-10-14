@@ -273,11 +273,15 @@ __device__ double CalcCoulombVirParticleGPU(double distSq, double qi_qj,
     int gpu_wolf,
     int gpu_coulKind,
     double gpu_wolfAlpha,
-    double gpu_wolfFactor1,
     double gpu_wolfFactor2,
     double gpu_wolfFactor3);
 __device__ double CalcCoulombVirParticleGPU(double distSq, double qi_qj,
-    int gpu_ewald, double gpu_alpha);
+    int gpu_ewald, double gpu_alpha,
+    int gpu_wolf,
+    int gpu_coulKind,
+    double gpu_wolfAlpha,
+    double gpu_wolfFactor2,
+    double gpu_wolfFactor3);
 __device__ double CalcCoulombVirShiftGPU(double distSq, double qi_qj,
     int gpu_ewald, double gpu_alpha,
     int index, double gpu_sigmaSq,
@@ -287,11 +291,15 @@ __device__ double CalcCoulombVirShiftGPU(double distSq, double qi_qj,
     int gpu_wolf,
     int gpu_coulKind,
     double gpu_wolfAlpha,
-    double gpu_wolfFactor1,
     double gpu_wolfFactor2,
     double gpu_wolfFactor3);
 __device__ double CalcCoulombVirShiftGPU(double distSq, double qi_qj,
-    int gpu_ewald, double gpu_alpha);
+    int gpu_ewald, double gpu_alpha,
+    int gpu_wolf,
+    int gpu_coulKind,
+    double gpu_wolfAlpha,
+    double gpu_wolfFactor2,
+    double gpu_wolfFactor3);
 __device__ double CalcCoulombVirExp6GPU(double distSq, double qi_qj,
                                         int gpu_ewald, double gpu_alpha,
                                         int index, double gpu_sigmaSq,
@@ -301,11 +309,15 @@ __device__ double CalcCoulombVirExp6GPU(double distSq, double qi_qj,
                                         int gpu_wolf,
                                         int gpu_coulKind,
                                         double gpu_wolfAlpha,
-                                        double gpu_wolfFactor1,
                                         double gpu_wolfFactor2,
                                         double gpu_wolfFactor3);
 __device__ double CalcCoulombVirExp6GPU(double distSq, double qi_qj,
-                                        int gpu_ewald, double gpu_alpha);
+                                        int gpu_ewald, double gpu_alpha,
+                                        int gpu_wolf,
+                                        int gpu_coulKind,
+                                        double gpu_wolfAlpha,
+                                        double gpu_wolfFactor2,
+                                        double gpu_wolfFactor3);
 __device__ double CalcCoulombVirSwitchMartiniGPU(double distSq, double qi_qj,
     int gpu_ewald,
     double gpu_alpha,
@@ -321,14 +333,18 @@ __device__ double CalcCoulombVirSwitchMartiniGPU(double distSq, double qi_qj,
     int gpu_wolf,
     int gpu_coulKind,
     double gpu_wolfAlpha,
-    double gpu_wolfFactor1,
     double gpu_wolfFactor2,
     double gpu_wolfFactor3);
 __device__ double CalcCoulombVirSwitchMartiniGPU(double distSq, double qi_qj,
     int gpu_ewald,
     double gpu_alpha,
     double gpu_rCut,
-    double gpu_diElectric_1);
+    double gpu_diElectric_1,
+    int gpu_wolf,
+    int gpu_coulKind,
+    double gpu_wolfAlpha,
+    double gpu_wolfFactor2,
+    double gpu_wolfFactor3);
 __device__ double CalcCoulombVirSwitchGPU(double distSq, double qi_qj,
     int gpu_ewald, double gpu_alpha,
     double gpu_rCut, int index,
@@ -339,12 +355,16 @@ __device__ double CalcCoulombVirSwitchGPU(double distSq, double qi_qj,
     int gpu_wolf,
     int gpu_coulKind,
     double gpu_wolfAlpha,
-    double gpu_wolfFactor1,
     double gpu_wolfFactor2,
     double gpu_wolfFactor3);
 __device__ double CalcCoulombVirSwitchGPU(double distSq, double qi_qj,
     int gpu_ewald, double gpu_alpha,
-    double gpu_rCut);
+    double gpu_rCut,
+    int gpu_wolf,
+    int gpu_coulKind,
+    double gpu_wolfAlpha,
+    double gpu_wolfFactor2,
+    double gpu_wolfFactor3);
 
 //VDW Calculation
 //*****************************************************************//
@@ -420,7 +440,6 @@ __device__ inline double CalcCoulombForceGPU(double distSq, double qi_qj,
     int gpu_wolf,
     int gpu_coulKind,
     double gpu_wolfAlpha,
-    double gpu_wolfFactor1,
     double gpu_wolfFactor2,
     double gpu_wolfFactor3)
 {
@@ -436,7 +455,6 @@ __device__ inline double CalcCoulombForceGPU(double distSq, double qi_qj,
                                      gpu_wolf,
                                      gpu_coulKind,
                                      gpu_wolfAlpha,
-                                     gpu_wolfFactor1,
                                      gpu_wolfFactor2,
                                      gpu_wolfFactor3);
   } else if(gpu_VDW_Kind == GPU_VDW_SHIFT_KIND) {
@@ -446,7 +464,6 @@ __device__ inline double CalcCoulombForceGPU(double distSq, double qi_qj,
                                     gpu_wolf,
                                     gpu_coulKind,
                                     gpu_wolfAlpha,
-                                    gpu_wolfFactor1,
                                     gpu_wolfFactor2,
                                     gpu_wolfFactor3);
   } else if(gpu_VDW_Kind == GPU_VDW_EXP6_KIND) {
@@ -456,7 +473,6 @@ __device__ inline double CalcCoulombForceGPU(double distSq, double qi_qj,
                                  gpu_wolf,
                                  gpu_coulKind,
                                  gpu_wolfAlpha,
-                                 gpu_wolfFactor1,
                                  gpu_wolfFactor2,
                                  gpu_wolfFactor3);
   } else if(gpu_VDW_Kind == GPU_VDW_SWITCH_KIND && gpu_isMartini) {
@@ -468,7 +484,6 @@ __device__ inline double CalcCoulombForceGPU(double distSq, double qi_qj,
                                           gpu_wolf,
                                           gpu_coulKind,
                                           gpu_wolfAlpha,
-                                          gpu_wolfFactor1,
                                           gpu_wolfFactor2,
                                           gpu_wolfFactor3);
   } else
@@ -479,7 +494,6 @@ __device__ inline double CalcCoulombForceGPU(double distSq, double qi_qj,
                                    gpu_wolf,
                                    gpu_coulKind,
                                    gpu_wolfAlpha,
-                                   gpu_wolfFactor1,
                                    gpu_wolfFactor2,
                                    gpu_wolfFactor3);
 }
