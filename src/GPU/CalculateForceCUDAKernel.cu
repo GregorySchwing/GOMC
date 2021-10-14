@@ -178,6 +178,7 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
       vars->gpu_count,
       vars->gpu_rCut,
       vars->gpu_rCutCoulomb,
+      vars->gpu_rCutCoulombSq,
       vars->gpu_rCutLow,
       vars->gpu_rOn,
       vars->gpu_alpha,
@@ -202,7 +203,12 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
       vars->gpu_lambdaCoulomb,
       vars->gpu_isFraction,
       box,
-      vars->gpu_wolf);
+      vars->gpu_wolf,
+      vars->gpu_coulKind,
+      vars->gpu_wolfAlpha,
+      vars->gpu_wolfFactor1,
+      vars->gpu_wolfFactor2,
+      vars->gpu_wolfFactor3);
   checkLastErrorCUDA(__FILE__, __LINE__);
   cudaDeviceSynchronize();
   // ReduceSum // Virial of LJ
@@ -437,7 +443,8 @@ void CallBoxForceGPU(VariablesCUDA *vars,
       vars->gpu_coulKind,
       vars->gpu_wolfAlpha,
       vars->gpu_wolfFactor1,
-      vars->gpu_wolfFactor2);
+      vars->gpu_wolfFactor2,
+      vars->gpu_wolfFactor3);
   cudaDeviceSynchronize();
   checkLastErrorCUDA(__FILE__, __LINE__);
   // LJ ReduceSum
@@ -640,6 +647,7 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
                                  int *gpu_count,
                                  double *gpu_rCut,
                                  double *gpu_rCutCoulomb,
+                                 double *gpu_rCutCoulombSq,
                                  double *gpu_rCutLow,
                                  double *gpu_rOn,
                                  double *gpu_alpha,
@@ -664,7 +672,12 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
                                  double *gpu_lambdaCoulomb,
                                  bool *gpu_isFraction,
                                  int box,
-                                 int *gpu_wolf)
+                                 int *gpu_wolf,
+                                 int *gpu_coulKind,
+                                 double * gpu_wolfAlpha,
+                                 double * gpu_wolfFactor1,
+                                 double * gpu_wolfFactor2,
+                                 double * gpu_wolfFactor3)
 {
   double distSq;
   double3 virComponents;
@@ -757,10 +770,17 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
                                    gpu_lambdaCoulomb);
             double pRF = CalcCoulombForceGPU(distSq, qi_qj, gpu_VDW_Kind[0], gpu_ewald[0],
                                              gpu_isMartini[0], gpu_alpha[box],
-                                             gpu_rCutCoulomb[box], gpu_diElectric_1[0],
+                                             gpu_rCutCoulomb[box], gpu_rCutCoulombSq[box],
+                                             gpu_diElectric_1[0],
                                              gpu_sigmaSq, sc_coul, sc_sigma_6, sc_alpha,
                                              sc_power, lambdaCoulomb, gpu_count[0],
-                                             kA, kB);
+                                             kA, kB,
+                                             gpu_wolf[0],
+                                             gpu_coulKind[0],
+                                             gpu_wolfAlpha[box],
+                                             gpu_wolfFactor1[box],
+                                             gpu_wolfFactor2[box],
+                                             gpu_wolfFactor3[box]);
 
             gpu_rT11[threadID] += pRF * (virComponents.x * diff_com.x);
             gpu_rT22[threadID] += pRF * (virComponents.y * diff_com.y);
@@ -838,7 +858,8 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                             int *coulKind,
                             double * wolfAlpha,
                             double * wolfFactor1,
-                            double * wolfFactor2)
+                            double * wolfFactor2,
+                            double * wolfFactor3)
 {
   int threadID = blockIdx.x * blockDim.x + threadIdx.x;
   double distSq;
@@ -935,11 +956,18 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                                                     gpu_isMartini[0],
                                                     gpu_alpha[box],
                                                     gpu_rCutCoulomb[box],
+                                                    gpu_rCutCoulombSq[box],
                                                     gpu_diElectric_1[0],
                                                     gpu_sigmaSq, sc_coul,
                                                     sc_sigma_6, sc_alpha,
                                                     sc_power, lambdaCoulomb,
-                                                    gpu_count[0], kA, kB);
+                                                    gpu_count[0], kA, kB,
+                                                    gpu_wolf[0],
+                                                    coulKind[0],
+                                                    wolfAlpha[box],
+                                                    wolfFactor1[box],
+                                                    wolfFactor2[box],
+                                                    wolfFactor3[box]);
             forceReal.x = virComponents.x * coulombVir;
             forceReal.y = virComponents.y * coulombVir;
             forceReal.z = virComponents.z * coulombVir;

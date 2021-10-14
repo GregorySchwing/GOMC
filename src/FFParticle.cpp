@@ -484,7 +484,7 @@ inline double FFParticle::CalcCoulombVir(const double distSq,
         wolf_electrostatic_force -= forcefield.wolfFactor2[b];
       } 
       wolf_electrostatic_force *= qi_qj;
-      //      return wolf_electrostatic_force; 
+      // return wolf_electrostatic_force; 
       // Since GOMC converts the force vectors to unit vectors
       // Divide by the magnitude
       return wolf_electrostatic_force/dist; 
