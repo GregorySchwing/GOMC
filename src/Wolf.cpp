@@ -69,11 +69,6 @@ void Wolf::Init() {
     molSelfEnergies.resize(mols.kindsCount);
     std::vector<double> & molSelfEnergiesRef = molSelfEnergies;
 
-// Each thread calculates a kind
-#ifdef _OPENMP
-    #pragma omp parallel for default(none) private(molSelfEnergy, i, j, length) \
-    shared(molSelfEnergiesRef)
-#endif
     for (i = 0; i < mols.GetKindsCount(); i++) {
       MoleculeKind const& thisKind = mols.kinds[i];
       length = thisKind.NumAtoms();
@@ -196,12 +191,6 @@ double Wolf::BoxSelf(uint box) const
         double lambdaCoef = 1.0;
         const std::vector<double> & molSelfEnergiesRef = molSelfEnergies;
 
-// Each thread calculates a kind
-#ifdef _OPENMP
-    #pragma omp parallel for default(none) private(molSelfEnergy, i, j, length, molNum, lambdaCoef) \
-    shared(box, molSelfEnergiesRef) \
-    reduction(+:self)
-#endif
         for (i = 0; i < mols.GetKindsCount(); i++) {
           MoleculeKind const& thisKind = mols.kinds[i];
           molNum = molLookup.NumKindInBox(i, box);
