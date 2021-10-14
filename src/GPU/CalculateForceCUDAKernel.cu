@@ -1127,7 +1127,13 @@ __device__ double CalcCoulombVirParticleGPU(double distSq, double qi_qj,
     int index, double gpu_sigmaSq,
     bool sc_coul, double sc_sigma_6,
     double sc_alpha, uint sc_power,
-    double gpu_lambdaCoulomb)
+    double gpu_lambdaCoulomb,
+    int gpu_wolf,
+    int gpu_coulKind,
+    double gpu_wolfAlpha,
+    double gpu_wolfFactor1,
+    double gpu_wolfFactor2,
+    double gpu_wolfFactor3)
 {
   if(gpu_lambdaCoulomb >= 0.999999) {
     return CalcCoulombVirParticleGPU(distSq, qi_qj, gpu_ewald, gpu_alpha);
