@@ -146,7 +146,8 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                             int *coulKind,
                             double * wolfAlpha,
                             double * wolfFactor1,
-                            double * wolfFactor2);
+                            double * wolfFactor2,
+                            double * wolfFactor3);
 
 __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
                                  int *gpu_cellVector,
@@ -186,6 +187,7 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
                                  int *gpu_count,
                                  double *gpu_rCut,
                                  double *gpu_rCutCoulomb,
+                                 double *gpu_rCutCoulombSq,
                                  double *gpu_rCutLow,
                                  double *gpu_rOn,
                                  double *gpu_alpha,
@@ -210,7 +212,12 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
                                  double *gpu_lambdaCoulomb,
                                  bool *gpu_isFraction,
                                  int box,
-                                 int *gpu_wolf);
+                                 int *gpu_wolf,
+                                 int *gpu_coulKind,
+                                 double * gpu_wolfAlpha,
+                                 double * gpu_wolfFactor1,
+                                 double * gpu_wolfFactor2,
+                                 double * gpu_wolfFactor3);
 
 __global__ void VirialReciprocalGPU(double *gpu_x,
                                     double *gpu_y,
@@ -368,6 +375,7 @@ __device__ inline double CalcCoulombForceGPU(double distSq, double qi_qj,
     int gpu_isMartini,
     double gpu_alpha,
     double gpu_rCutCoulomb,
+    double gpu_rCutCoulombSq,
     double gpu_diElectric_1,
     double *gpu_sigmaSq,
     bool sc_coul,
@@ -376,7 +384,13 @@ __device__ inline double CalcCoulombForceGPU(double distSq, double qi_qj,
     uint sc_power,
     double gpu_lambdaCoulomb,
     int gpu_count, int kind1,
-    int kind2)
+    int kind2,
+    int gpu_wolf,
+    int gpu_coulKind,
+    double gpu_wolfAlpha,
+    double gpu_wolfFactor1,
+    double gpu_wolfFactor2,
+    double gpu_wolfFactor3)
 {
   if((gpu_rCutCoulomb * gpu_rCutCoulomb) < distSq) {
     return 0.0;
