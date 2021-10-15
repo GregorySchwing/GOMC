@@ -65,23 +65,11 @@ void InitGPUForceField(VariablesCUDA &vars, double const *sigmaSq,
 
   // allocate gpu memory for wolf variables
   CUMALLOC((void**) &vars.gpu_wolf, sizeof(int));
-    checkLastErrorCUDA(__FILE__, __LINE__);
-
   CUMALLOC((void**) &vars.gpu_coulKind, sizeof(int));
-    checkLastErrorCUDA(__FILE__, __LINE__);
-
   CUMALLOC((void**) &vars.gpu_wolfAlpha, (int)BOX_TOTAL * sizeof(double));
-    checkLastErrorCUDA(__FILE__, __LINE__);
-
   CUMALLOC((void**) &vars.gpu_wolfFactor1, (int)BOX_TOTAL * sizeof(double));
-    checkLastErrorCUDA(__FILE__, __LINE__);
-
   CUMALLOC((void**) &vars.gpu_wolfFactor2, (int)BOX_TOTAL * sizeof(double));
-    checkLastErrorCUDA(__FILE__, __LINE__);
-
   CUMALLOC((void**) &vars.gpu_wolfFactor3, (int)BOX_TOTAL * sizeof(double));
-  checkLastErrorCUDA(__FILE__, __LINE__);
-
 
   cudaMemcpy(vars.gpu_sigmaSq, sigmaSq, countSq * sizeof(double),
              cudaMemcpyHostToDevice);
@@ -98,8 +86,6 @@ void InitGPUForceField(VariablesCUDA &vars, double const *sigmaSq,
              cudaMemcpyHostToDevice);
   cudaMemcpy(vars.gpu_rCutCoulombSq, rCutCoulombSq, BOX_TOTAL * sizeof(double),
              cudaMemcpyHostToDevice);
-               checkLastErrorCUDA(__FILE__, __LINE__);
-
   cudaMemcpy(vars.gpu_rCutLow, &RcutLow, sizeof(double),
              cudaMemcpyHostToDevice);
   cudaMemcpy(vars.gpu_rOn, &Ron, sizeof(double), cudaMemcpyHostToDevice);
@@ -110,23 +96,13 @@ void InitGPUForceField(VariablesCUDA &vars, double const *sigmaSq,
              cudaMemcpyHostToDevice);
 
   cudaMemcpy(vars.gpu_wolf, &wolf, sizeof(int), cudaMemcpyHostToDevice);
-    checkLastErrorCUDA(__FILE__, __LINE__);
-
-  cudaMemcpy(vars.gpu_coulKind, &coulKind, sizeof(double), cudaMemcpyHostToDevice);
-    checkLastErrorCUDA(__FILE__, __LINE__);
-
+  cudaMemcpy(vars.gpu_coulKind, &coulKind, sizeof(int), cudaMemcpyHostToDevice);
   cudaMemcpy(vars.gpu_wolfAlpha, wolfAlpha, BOX_TOTAL * sizeof(double),
              cudaMemcpyHostToDevice);
-               checkLastErrorCUDA(__FILE__, __LINE__);
-
   cudaMemcpy(vars.gpu_wolfFactor1, wolfFactor1, BOX_TOTAL * sizeof(double),
              cudaMemcpyHostToDevice);
-               checkLastErrorCUDA(__FILE__, __LINE__);
-
   cudaMemcpy(vars.gpu_wolfFactor2, wolfFactor2, BOX_TOTAL * sizeof(double),
              cudaMemcpyHostToDevice); 
-               checkLastErrorCUDA(__FILE__, __LINE__);
-
   cudaMemcpy(vars.gpu_wolfFactor3, wolfFactor3, BOX_TOTAL * sizeof(double),
              cudaMemcpyHostToDevice);  
   
