@@ -554,6 +554,7 @@ __device__ double CalcCoulombParticleGPUNoLambda(double distSq,
   double value = 1.0;
   if(gpu_ewald) {
     value = erfc(gpu_alpha * dist);
+    value = qi_qj_fact * value / dist;
   } else if (gpu_wolf) {
     // V_DSP -- (16) from Gezelter 2006
     value = erfc(gpu_wolfAlpha * dist)/dist;
@@ -642,7 +643,7 @@ __device__ double CalcCoulombShiftGPUNoLambda(double distSq, double qi_qj_fact,
   double value = 1.0;
   if(gpu_ewald) {
     value = gpu_alpha * dist;
-    return qi_qj_fact * (1.0 - erf(value)) / dist;
+    value = qi_qj_fact * (1.0 - erf(value)) / dist;
   } else if (gpu_wolf) {
     // V_DSP -- (16) from Gezelter 2006
     value = erfc(gpu_wolfAlpha * dist)/dist;
@@ -734,6 +735,7 @@ __device__ double CalcCoulombExp6GPUNoLambda(double distSq, double qi_qj_fact,
   double value = 1.0;
   if(gpu_ewald) {
     value = erfc(gpu_alpha * dist);
+    value = qi_qj_fact * value / dist;
   } else if (gpu_wolf) {
     // V_DSP -- (16) from Gezelter 2006
     value = erfc(gpu_wolfAlpha * dist)/dist;
@@ -838,7 +840,7 @@ __device__ double CalcCoulombSwitchMartiniGPUNoLambda(double distSq,
       value += gpu_wolfFactor2*distDiff;
     } 
     value *= qi_qj_fact;
-  } else {
+  } else {  
     // in Martini, the Coulomb switching distance is zero, so we will have
     // sqrt(distSq) - rOnCoul =  sqrt(distSq)
     double rij_ronCoul_3 = dist * distSq;
@@ -946,7 +948,7 @@ __device__ double CalcCoulombSwitchGPUNoLambda(double distSq,
   double dist = sqrt(distSq);
   if(gpu_ewald) {
     value = gpu_alpha * dist;
-    return qi_qj_fact * (1.0 - erf(value)) / dist;
+    value = qi_qj_fact * (1.0 - erf(value)) / dist;
   } else if (gpu_wolf) {
     // V_DSP -- (16) from Gezelter 2006
     value = erfc(gpu_wolfAlpha * dist)/dist;
