@@ -11,12 +11,15 @@
 #include "COM.h"
 #include <cstdint>
 #include <cstring>
+#include "MoleculeLookup.h"
+
 
 class ReplicaCommunicator{
   public:
   #if GOMC_LIB_MPI
     ReplicaCommunicator();
     void exchangeXYZArrayNonBlocking(XYZArray * myXYZArray, int exchangePartner);
+    void exchangeMolLookupNonBlocking(MoleculeLookup & molLook, int exchangePartner);
     void exchangeMolLookupNonBlocking(uint * molLookup, 
                                       uint molLookupCount, 
                                       uint * boxAndKindStart,
@@ -32,6 +35,17 @@ class ReplicaCommunicator{
                                       int * atomIndex,
                                       int * atomKind,
                                       double * atomCharge);
+    void exchangeMoleculesNonBlocking(Molecules & mols, int exchangePartner);
+    void exchangeMoleculesNonBlocking( uint* start,
+                                      uint count,
+                                      uint* kIndex,
+                                      uint kIndexCount,
+                                      uint kindsCount,
+                                      uint* countByKind,
+                                      char* chain,
+                                      double* pairEnCorrections,
+                                      double* pairVirCorrections,
+                                      int exchangePartner);
   void exchangeBoxDimensionsNonBlocking(BoxDimensions * myBoxDimensions, int exchangePartner);
   #endif
 };

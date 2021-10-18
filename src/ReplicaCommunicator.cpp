@@ -36,6 +36,29 @@ void ReplicaCommunicator::exchangeXYZArrayNonBlocking(XYZArray * myXYZArray, int
     swap(*myXYZArray, inBuffer);
 }
 
+void ReplicaCommunicator::exchangeMolLookupNonBlocking(MoleculeLookup & molLook, int exchangePartner){
+    exchangeMolLookupNonBlocking(molLook.molLookup, 
+                                molLook.molLookupCount, 
+                                molLook.boxAndKindStart,
+                                molLook.boxAndKindStartCount,
+                                molLook.boxAndKindSwappable,
+                                molLook.boxAndKindSwappableCount,
+                                exchangePartner,
+                                molLook.fixedMolecule,
+                                molLook.canSwapKind,
+                                molLook.canMoveKind,
+                                molLook.molIndex,
+                                molLook.molKind,
+                                molLook.atomIndex,
+                                molLook.atomKind,
+                                molLook.atomCharge);
+}
+
+/* Once I convert checkpoint from modifying output to reproducing the original
+   Molecules and Molecule Lookup, I will only need to swap the molLookup, boxAndKindStart,
+   and boxAndKindSwappable
+*/
+
 void ReplicaCommunicator::exchangeMolLookupNonBlocking(uint * molLookup, 
                                                         uint molLookupCount, 
                                                         uint * boxAndKindStart,
@@ -51,6 +74,7 @@ void ReplicaCommunicator::exchangeMolLookupNonBlocking(uint * molLookup,
                                                         int * atomIndex,
                                                         int * atomKind,
                                                         double * atomCharge)
+
 {
     int atomCount = fixedMolecule.size();
 
@@ -175,6 +199,31 @@ void ReplicaCommunicator::exchangeMolLookupNonBlocking(uint * molLookup,
     delete inBufferAtomIndex;
     delete inBufferAtomKind;
     delete inBufferAtomCharge;
+
+}
+
+/* Potential problems are redefinition of kind 0, kind 1, dependending on replica inputs */
+void ReplicaCommunicator::exchangeMoleculesNonBlocking(Molecules & mols, int exchangePartner){
+
+}
+void ReplicaCommunicator::exchangeMoleculesNonBlocking( uint* start,
+                                                        uint count,
+                                                        uint* kIndex,
+                                                        uint kIndexCount,
+                                                        uint kindsCount,
+                                                        uint* countByKind,
+                                                        char* chain,
+                                                        double* pairEnCorrections,
+                                                        double* pairVirCorrections,
+                                                        int exchangePartner){
+    int atomCount = start[count];
+
+    uint * outBufferStart = new uint[count];
+    uint * outBufferKIndex = new uint[kIndexCount];
+    uint * outBufferCountByKind = new uint[kindsCount];
+    char * outBufferChain = new char[atomCount];
+    double * outBufferPairEnCorrections[kindsCount * kindsCount];
+    double * outBufferPairVirCorrections[kindsCount * kindsCount];
 
 }
 
