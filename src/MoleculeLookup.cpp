@@ -28,10 +28,14 @@ void MoleculeLookup::Init(const Molecules& mols,
   atomCharge = new double[atomData.beta.size()];
 
   //+1 to store end value
-  boxAndKindStart = new uint[numKinds * BOX_TOTAL + 1];
-  boxAndKindSwappableCounts = new uint[numKinds * BOX_TOTAL];
-
   boxAndKindStartCount = numKinds * BOX_TOTAL + 1;
+  // Just counts
+  boxAndKindSwappableCount = numKinds * BOX_TOTAL;
+
+
+  boxAndKindStart = new uint[boxAndKindStartCount];
+  boxAndKindSwappable = new uint[boxAndKindSwappableCount];
+
 
   // vector[box][kind] = list of mol indices for kind in box
   std::vector<std::vector<std::vector<uint> > > indexVector;
@@ -39,7 +43,7 @@ void MoleculeLookup::Init(const Molecules& mols,
   fixedMolecule.resize(mols.count);
 
   for (int i = 0; i < numKinds * BOX_TOTAL; i++){
-    boxAndKindSwappableCounts[i] = 0;
+    boxAndKindSwappable[i] = 0;
   }
 
 
@@ -77,7 +81,7 @@ void MoleculeLookup::Init(const Molecules& mols,
           canMoveKind.end())
         canMoveKind.push_back(kind);
 
-      boxAndKindSwappableCounts[box * numKinds + kind]++;
+      boxAndKindSwappable[box * numKinds + kind]++;
 
     } else if(fixedMolecule[m] == 2) {
       if(std::find(canMoveKind.begin(), canMoveKind.end(), kind) ==
@@ -159,8 +163,8 @@ void MoleculeLookup::Shift(const uint index, const uint currentBox,
   uint newIndex;
   uint section = currentBox * numKinds + kind;
 
-  boxAndKindSwappableCounts[section]--;
-  boxAndKindSwappableCounts[intoBox * numKinds + kind]++;
+  boxAndKindSwappable[section]--;
+  boxAndKindSwappable[intoBox * numKinds + kind]++;
 
   if(currentBox >= intoBox) {
     while (section != intoBox * numKinds + kind) {

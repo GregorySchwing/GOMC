@@ -17,7 +17,22 @@ class ReplicaCommunicator{
   #if GOMC_LIB_MPI
     ReplicaCommunicator();
     void exchangeXYZArrayNonBlocking(XYZArray * myXYZArray, int exchangePartner);
-    void exchangeBoxDimensionsNonBlocking(BoxDimensions * myBoxDimensions, int exchangePartner);
+    void exchangeMolLookupNonBlocking(uint * molLookup, 
+                                      uint molLookupCount, 
+                                      uint * boxAndKindStart,
+                                      uint boxAndKindStartCount,
+                                      uint * boxAndKindSwappable,
+                                      uint boxAndKindSwappableCount,
+                                      int exchangePartner,
+                                      std::vector<uint> & fixedMolecule,
+                                      std::vector<uint> & canSwapKind,
+                                      std::vector <uint> & canMoveKind,
+                                      int * molIndex,
+                                      int * molKind,
+                                      int * atomIndex,
+                                      int * atomKind,
+                                      double * atomCharge);
+  void exchangeBoxDimensionsNonBlocking(BoxDimensions * myBoxDimensions, int exchangePartner);
   #endif
 };
 

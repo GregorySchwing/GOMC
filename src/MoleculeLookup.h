@@ -28,7 +28,7 @@ class MoleculeLookup
 {
 public:
 
-  MoleculeLookup() : molLookup(NULL), boxAndKindStart(NULL), boxAndKindSwappableCounts(NULL),
+  MoleculeLookup() : molLookup(NULL), boxAndKindStart(NULL), boxAndKindSwappable(NULL),
    molIndex(NULL), atomIndex(NULL), molKind(NULL), atomKind(NULL), atomCharge(NULL) {}
 
   ~MoleculeLookup()
@@ -40,7 +40,7 @@ public:
     delete[] molKind;
     delete[] atomKind;
     delete[] atomCharge;
-    delete[] boxAndKindSwappableCounts;
+    delete[] boxAndKindSwappable;
   }
 
   //Initialize this object to be consistent with Molecules mols
@@ -179,8 +179,8 @@ uint GetConsensusMolBeta( const uint pStart,
   //index [BOX_TOTAL * kind + box + 1] is the element after the end
   //of that kind/box
   uint* boxAndKindStart;
-  uint* boxAndKindSwappableCounts;
-  uint boxAndKindStartCount;
+  uint* boxAndKindSwappable;
+  uint boxAndKindStartCount, boxAndKindSwappableCount;
   uint numKinds;
   std::vector <uint> fixedMolecule;
   std::vector <uint> canSwapKind; //Kinds that can move intra and inter box
@@ -203,7 +203,7 @@ inline uint MoleculeLookup::NumKindInBox(const uint kind, const uint box) const
 
 inline uint MoleculeLookup::NumKindInBoxSwappable(const uint kind, const uint box) const
 {
-  return boxAndKindSwappableCounts[box * numKinds + kind];
+  return boxAndKindSwappable[box * numKinds + kind];
 }
 
 class MoleculeLookup::box_iterator
