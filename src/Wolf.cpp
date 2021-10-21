@@ -212,10 +212,10 @@ double Wolf::BoxSelf(uint box) const
         }
         // M_2_SQRTPI is 2/sqrt(PI), so need to multiply by 0.5 to get sqrt(PI)
         if (isVlugtWolf || isCassandraWolf){
-          self *= ((ff.wolfAlpha[box] * M_2_SQRTPI * 0.5) + ff.wolfFactor1[box]);
+          self *= ((ff.wolfAlpha[box] * M_2_SQRTPI * 0.5) + ff.wolfFactor1[box] * 0.5);
         } else {
           // we eliminate the alpha/root(pi) using Wolf,mod from Gross et al
-          self *= ff.wolfFactor1[box];
+          self *= ff.wolfFactor1[box] * 0.5;
         }
 
         GOMC_EVENT_STOP(1, GomcProfileEvent::SELF_BOX);
