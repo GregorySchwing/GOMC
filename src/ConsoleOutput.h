@@ -15,7 +15,9 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "PDBSetup.h"
 #include "MoveConst.h"
 #include "OutputVars.h"
+#include <limits>
 
+typedef std::numeric_limits< double > dbl;
 class System;
 namespace config_setup
 {
@@ -67,7 +69,8 @@ public:
   virtual void DoOutput(const ulong step);
   virtual void DoOutputRestart(const ulong step);
 private:
-  const static int elementWidth = 16;
+
+  const static int elementWidth = 40;
   bool enableEnergy, enablePressure, enableDens, enableVolume, enableMol;
   bool enableSurfTension, enableStat;
   void PrintMove(const uint box, const ulong step) const;
