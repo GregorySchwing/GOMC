@@ -471,11 +471,12 @@ void ConsoleOutput::printElement(const double t, const int width,
                                  uint percision) const
 {
   const char separator = ' ';
+  std::cout.precision(dbl::max_digits10);
   if(std::abs(t) > 1e99) {
-    std::cout << std::right << std::scientific << std::setprecision(percision - 1) <<
+    std::cout << std::right << std::scientific <<
               std::setw(width) << std::setfill(separator) << t;
   } else {
-    std::cout << std::right << std::scientific << std::setprecision(percision) <<
+    std::cout << std::right << std::scientific <<
               std::setw(width) << std::setfill(separator) << t;
   }
 
@@ -484,6 +485,7 @@ void ConsoleOutput::printElement(const double t, const int width,
 void ConsoleOutput::printElement(const uint t, const int width) const
 {
   const char separator = ' ';
+  std::cout.precision(dbl::max_digits10);
   std::cout << std::right << std::scientific  << std::setw(width) <<
             std::setfill(separator) << t;
 }
