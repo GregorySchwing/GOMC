@@ -272,7 +272,7 @@ double Wolf::MolCorrection(uint molIndex, uint box) const
               // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
               if(coulKind){
                 double distDiff = dist-rCutCoulomb[box];
-                correction += wolfFactor2[box]*distDiff;
+                dampenedCorr += wolfFactor2[box]*distDiff;
               } 
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
 
@@ -301,7 +301,7 @@ double Wolf::MolCorrection(uint molIndex, uint box) const
               // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
               if(coulKind){
                 double distDiff = dist-rCutCoulomb[box];
-                correction += wolfFactor2[box]*distDiff;
+                dampenedCorr += wolfFactor2[box]*distDiff;
               } 
               dampenedCorr -= wolfFactor1[box];
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
@@ -329,7 +329,7 @@ double Wolf::MolCorrection(uint molIndex, uint box) const
               // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
               if(coulKind){
                 double distDiff = dist-rCutCoulomb[box];
-                correction += wolfFactor2[box]*distDiff;
+                dampenedCorr += wolfFactor2[box]*distDiff;
               } 
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
         }
@@ -348,7 +348,7 @@ double Wolf::MolCorrection(uint molIndex, uint box) const
             if(coulKind && !isVlugtWolf){
               double distDiff = dist-rCutCoulomb[box];
               // Subtract because we negate the correction term at the end
-              correction += wolfFactor2[box]*distDiff;
+              dampenedCorr += wolfFactor2[box]*distDiff;
             } 
             correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(j) * dampenedCorr;
         } else if (isVlugtWolf) {
@@ -457,7 +457,7 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol) const
               // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
               if(coulKind){
                 double distDiff = dist-rCutCoulomb[box];
-                correction += wolfFactor2[box]*distDiff;
+                dampenedCorr += wolfFactor2[box]*distDiff;
               } 
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
 
@@ -486,7 +486,7 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol) const
               // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
               if(coulKind){
                 double distDiff = dist-rCutCoulomb[box];
-                correction += wolfFactor2[box]*distDiff;
+                dampenedCorr += wolfFactor2[box]*distDiff;
               } 
               dampenedCorr -= wolfFactor1[box];
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
@@ -514,7 +514,7 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol) const
               // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
               if(coulKind){
                 double distDiff = dist-rCutCoulomb[box];
-                correction += wolfFactor2[box]*distDiff;
+                dampenedCorr += wolfFactor2[box]*distDiff;
               } 
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
         }
@@ -533,7 +533,7 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol) const
             if(coulKind && !isVlugtWolf){
               double distDiff = dist-rCutCoulomb[box];
               // Subtract because we negate the correction term at the end
-              correction += wolfFactor2[box]*distDiff;
+              dampenedCorr += wolfFactor2[box]*distDiff;
             } 
             correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(j) * dampenedCorr;
         } else if (isVlugtWolf) {
@@ -590,7 +590,7 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
               // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
               if(coulKind){
                 double distDiff = dist-rCutCoulomb[box];
-                correction += wolfFactor2[box]*distDiff;
+                dampenedCorr += wolfFactor2[box]*distDiff;
               } 
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
 
@@ -619,7 +619,7 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
               // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
               if(coulKind){
                 double distDiff = dist-rCutCoulomb[box];
-                correction += wolfFactor2[box]*distDiff;
+                dampenedCorr += wolfFactor2[box]*distDiff;
               } 
               dampenedCorr -= wolfFactor1[box];
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
@@ -647,7 +647,7 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
               // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
               if(coulKind){
                 double distDiff = dist-rCutCoulomb[box];
-                correction += wolfFactor2[box]*distDiff;
+                dampenedCorr += wolfFactor2[box]*distDiff;
               } 
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
         }
@@ -666,7 +666,7 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
             if(coulKind && !isVlugtWolf){
               double distDiff = dist-rCutCoulomb[box];
               // Subtract because we negate the correction term at the end
-              correction += wolfFactor2[box]*distDiff;
+              dampenedCorr += wolfFactor2[box]*distDiff;
             } 
             correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(j) * dampenedCorr;
         } else if (isVlugtWolf) {
@@ -754,7 +754,7 @@ void Wolf::ChangeCorrection(Energy *energyDiff, Energy &dUdL_Coul,
               // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
               if(coulKind){
                 double distDiff = dist-rCutCoulomb[box];
-                correction += wolfFactor2[box]*distDiff;
+                dampenedCorr += wolfFactor2[box]*distDiff;
               } 
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
 
@@ -783,7 +783,7 @@ void Wolf::ChangeCorrection(Energy *energyDiff, Energy &dUdL_Coul,
               // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
               if(coulKind){
                 double distDiff = dist-rCutCoulomb[box];
-                correction += wolfFactor2[box]*distDiff;
+                dampenedCorr += wolfFactor2[box]*distDiff;
               } 
               dampenedCorr -= wolfFactor1[box];
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
@@ -811,7 +811,7 @@ void Wolf::ChangeCorrection(Energy *energyDiff, Energy &dUdL_Coul,
               // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
               if(coulKind){
                 double distDiff = dist-rCutCoulomb[box];
-                correction += wolfFactor2[box]*distDiff;
+                dampenedCorr += wolfFactor2[box]*distDiff;
               } 
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
         }
@@ -829,7 +829,7 @@ void Wolf::ChangeCorrection(Energy *energyDiff, Energy &dUdL_Coul,
             // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
             if(coulKind && !isVlugtWolf){
               double distDiff = dist-rCutCoulomb[box];
-              correction += wolfFactor2[box]*distDiff;
+              dampenedCorr += wolfFactor2[box]*distDiff;
             } 
             correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(j) * dampenedCorr;
         } else if (isVlugtWolf) {
