@@ -1399,6 +1399,10 @@ void ConfigSetup::fillDefaults(void)
     sys.elect.enable = true;
   }
 
+  if(sys.elect.wolf == true) {
+    sys.elect.enable = true;
+  }
+
   if(sys.moves.rotate == DBL_MAX) {
     sys.moves.rotate = 0.000;
     printf("%-40s %-4.4f \n", "Default: Rotation move frequency",
