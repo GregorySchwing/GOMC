@@ -672,8 +672,13 @@ void ConfigSetup::Init(const char *fileName, MultiSim const*const& multisim)
               printf("%-40s %-s \n", "Info: Wolf Vlugt Implementation", "Active");
               sys.elect.readWolfKind = true;
             } else if (CheckString(line[1], "Cassandra")) {
+<<<<<<< HEAD
               sys.ff.WOLF_KIND = sys.ff.WOLF_VLUGT_KIND;
               printf("%-40s %-s \n", "Info: Wolf Vlugt Implementation", "Active");
+=======
+              sys.ff.WOLF_KIND = sys.ff.WOLF_CASSANDRA_KIND;
+              printf("%-40s %-s \n", "Info: Wolf Cassandra Implementation", "Active");
+>>>>>>> 45f13dcc466e03c9179003effcc582e897733719
               sys.elect.readWolfKind = true;
             } else {
               std::cout <<  "Error: Wolf Kind incorrectly specified!" << std::endl <<

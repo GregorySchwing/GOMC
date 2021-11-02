@@ -6,6 +6,10 @@ use_gtest=0
 use_gcc=0
 use_mpi=0
 use_debug=0
+<<<<<<< HEAD
+=======
+MPI="off"
+>>>>>>> 45f13dcc466e03c9179003effcc582e897733719
 ENSEMBLES=""
 CMAKEARGS=""
 
@@ -127,8 +131,13 @@ done
 mkdir -p bin
 cd bin
 
+<<<<<<< HEAD
 if (( !use_gtest )); then
     if (( !use_gcc )); 
+=======
+if (( !$use_gtest )); then
+    if (( !$use_gcc )); 
+>>>>>>> 45f13dcc466e03c9179003effcc582e897733719
     then
         ICC_PATH="$(which icc 2> /dev/null)"
         ICPC_PATH="$(which icpc 2> /dev/null)"
@@ -145,7 +154,11 @@ if (( !use_gtest )); then
         export CXX="$(which g++ 2> /dev/null)"
     fi
 else
+<<<<<<< HEAD
     if (( use_mpi )); 
+=======
+    if (( $use_mpi )); 
+>>>>>>> 45f13dcc466e03c9179003effcc582e897733719
     then
         ENSEMBLES+="GOMC_NVT_MPI_Test "
 		ENSEMBLES+="GOMC_NPT_MPI_Test "
@@ -162,6 +175,11 @@ else
     export CC="$(which gcc 2> /dev/null)"
     export CXX="$(which g++ 2> /dev/null)"
 fi
+<<<<<<< HEAD
+=======
+
+echo "Ensembles To Compile: $ENSEMBLES"
+>>>>>>> 45f13dcc466e03c9179003effcc582e897733719
 
 echo "Ensembles To Compile: $ENSEMBLES"
 
@@ -174,7 +192,11 @@ if (( use_profiler )); then
     fi
 fi
 
+<<<<<<< HEAD
 if (( use_debug )); then
+=======
+if (( $use_debug )); then
+>>>>>>> 45f13dcc466e03c9179003effcc582e897733719
 	echo "Enabling Debug Compilation "
 	CMAKEARGS+="-DCMAKE_BUILD_TYPE=Debug "
 fi
