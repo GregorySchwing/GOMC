@@ -6,10 +6,6 @@ use_gtest=0
 use_gcc=0
 use_mpi=0
 use_debug=0
-<<<<<<< HEAD
-=======
-MPI="off"
->>>>>>> 45f13dcc466e03c9179003effcc582e897733719
 ENSEMBLES=""
 CMAKEARGS=""
 
