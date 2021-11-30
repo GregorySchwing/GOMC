@@ -144,6 +144,8 @@ void Forcefield::InitBasicVals(config_setup::SystemVals const& val,
     OneThree = false, OneFour = true, OneN = true;
   } else if(exckind == val.exclude.EXC_ONEFOUR_KIND) {
     OneThree = false, OneFour = false, OneN = true;
+  } else if(exckind == val.exclude.EXC_ONEN_KIND) {
+    OneThree = false, OneFour = false, OneN = false;
   } else {
     std::cout << "Error: Unknown exclude value.\n";
     exit(EXIT_FAILURE);

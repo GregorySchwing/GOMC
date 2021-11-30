@@ -137,8 +137,8 @@ struct Temperature {
 struct Exclude {
   uint EXCLUDE_KIND;
 
-  static const std::string EXC_ONETWO, EXC_ONETHREE, EXC_ONEFOUR;
-  static const uint EXC_ONETWO_KIND, EXC_ONETHREE_KIND, EXC_ONEFOUR_KIND;
+  static const std::string EXC_ONETWO, EXC_ONETHREE, EXC_ONEFOUR, EXC_ONEN;
+  static const uint EXC_ONETWO_KIND, EXC_ONETHREE_KIND, EXC_ONEFOUR_KIND, EXC_ONEN_KIND;
 };
 
 struct PotentialConfig {

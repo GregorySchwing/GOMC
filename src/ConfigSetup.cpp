@@ -628,6 +628,9 @@ void ConfigSetup::Init(const char *fileName, MultiSim const*const& multisim)
       } else if(line[1] == sys.exclude.EXC_ONEFOUR) {
         sys.exclude.EXCLUDE_KIND = sys.exclude.EXC_ONEFOUR_KIND;
         printf("%-40s %-s \n", "Info: Exclude", "ONE-FOUR");
+      } else if(line[1] == sys.exclude.EXC_ONEN) {
+        sys.exclude.EXCLUDE_KIND = sys.exclude.EXC_ONEN_KIND;
+        printf("%-40s %-s \n", "Info: Exclude", "ONE-N");
       }
     } else if(CheckString(line[0], "Ewald")) {
       sys.elect.ewald = checkBool(line[1]);
@@ -2554,6 +2557,8 @@ const std::string config_setup::FFValues::WOLF_GROSS = "GROSS";
 const std::string config_setup::Exclude::EXC_ONETWO = "1-2";
 const std::string config_setup::Exclude::EXC_ONETHREE = "1-3";
 const std::string config_setup::Exclude::EXC_ONEFOUR = "1-4";
+const std::string config_setup::Exclude::EXC_ONEN = "1-N";
+
 
 const uint config_setup::FFValues::VDW_STD_KIND = 0;
 const uint config_setup::FFValues::VDW_SHIFT_KIND = 1;
@@ -2568,3 +2573,4 @@ const uint config_setup::FFValues::WOLF_CASSANDRA_KIND = 3;
 const uint config_setup::Exclude::EXC_ONETWO_KIND = 0;
 const uint config_setup::Exclude::EXC_ONETHREE_KIND = 1;
 const uint config_setup::Exclude::EXC_ONEFOUR_KIND = 2;
+const uint config_setup::Exclude::EXC_ONEN_KIND = 3;
