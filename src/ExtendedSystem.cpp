@@ -40,12 +40,17 @@ void ExtendedSystem::Init(PDBSetup &pdb, Velocity &vel,  config_setup::Input inp
   }
   // Read the binary coordinate and update the PDB coordinate
   if(inputFiles.restart.restartFromBinaryCoorFile) {
+    binaryCoor.clear();
+    std::cout << pdb.atoms.beta.size() << std::endl;
+    binaryCoor.resize(pdb.atoms.beta.size());
     ReadCoordinate(pdb, inputFiles, molLookup, mols);
     UpdateCoordinate(pdb, molLookup, mols);    
     UpdateMinMaxAtoms(pdb, inputFiles, molLookup, mols);
   }
   // Read the binary velocity and update the buffer
   if(inputFiles.restart.restartFromBinaryVelFile) {
+    binaryVeloc.clear();
+    binaryVeloc.resize(pdb.atoms.beta.size());
     ReadVelocity(pdb, inputFiles, molLookup, mols);
     UpdateVelocity(vel, molLookup, mols);
   }
@@ -78,37 +83,18 @@ void ExtendedSystem::UpdateCoordinate(PDBSetup &pdb,
 
 void ExtendedSystem::ReadCoordinate(PDBSetup &pdb, config_setup::Input inputFiles, MoleculeLookup & molLookup,
                                      Molecules & mols){
-    // We must read restart PDB, which hold correct
-  // number atom info in each Box
-  numAtoms = 0;
-  boxStart[0] = 0;
-  for(int b = 0; b < BOX_TOTAL; b++) {
-    if(inputFiles.files.binaryCoorInput.defined[b]) {
-      if (mols.restartFromCheckpoint){
-        numAtomsInBox[b] = molLookup.restartedNumAtomsInBox[b];
-      } else {
-        numAtomsInBox[b] = pdb.atoms.numAtomsInBox[b];
-      }
-    }
-  }
 
-  for(int b = 0; b < BOX_TOTAL; b++) {
-    if(inputFiles.files.binaryCoorInput.defined[b]) {
-      numAtoms += numAtomsInBox[b];
-      if (b == 1)
-        boxStart[1] = numAtomsInBox[0];
-    }
-  }
-
-  binaryCoor.clear();
-  binaryCoor.resize(numAtoms);
   for(int b = 0; b < BOX_TOTAL; b++) {
     if(inputFiles.files.binaryCoorInput.defined[b]) {
       std::string fName = inputFiles.files.binaryCoorInput.name[b];  
-      if (mols.restartFromCheckpoint)
-        read_binary_file(fName.c_str(), &binaryCoor[boxStart[b]], molLookup.restartedNumAtomsInBox[b]);
-      else
-        read_binary_file(fName.c_str(), &binaryCoor[boxStart[b]], pdb.atoms.numAtomsInBox[b]);
+      if (mols.restartFromCheckpoint){
+        std::cout << pdb.atoms.boxAtomOffset[b]  << std::endl;
+        std::cout << pdb.atoms.numAtomsInBox[b] << std::endl;
+        std::cout << molLookup.restartedNumAtomsInBox[b] << std::endl;
+        read_binary_file(fName.c_str(), &binaryCoor[pdb.atoms.boxAtomOffset[b]], molLookup.restartedNumAtomsInBox[b]);
+      }else{
+        read_binary_file(fName.c_str(), &binaryCoor[pdb.atoms.boxAtomOffset[b]], pdb.atoms.numAtomsInBox[b]);
+      }
     }
   }
 }
@@ -121,26 +107,8 @@ void ExtendedSystem::UpdateMinMaxAtoms(PDBSetup &pdb,
   for (uint b = 0; b < BOX_TOTAL; b++) {
     if(inputFiles.files.binaryCoorInput.defined[b]) {
       int stRange, endRange;
-      // -1 because we want to exclude the last array index  
-      // Box 0
-      // [0, numAtomsBox0)
-      // Box 1
-      // [numAtomsBox0, numAtomsBox0 + numAtomsBox1)
-
-      // To prevent segfault
-      if (numAtomsInBox[b] == 0)
-        return;
-
-      if (b == 0){
-        stRange = 0;
-        endRange = numAtomsInBox[0] - 1;
-      } else if (b == 1) {
-        stRange = numAtomsInBox[0];
-        endRange = stRange + numAtomsInBox[1] - 1;
-      } else {
-        std::cout << "Error: Only Box 0 and Box 1 supported!" << std::endl;
-        exit(EXIT_FAILURE);
-      }
+      stRange = pdb.atoms.boxAtomOffset[b];
+      endRange = pdb.atoms.boxAtomOffset[b+1];
 
       pdb.atoms.min[b].x = *std::min_element(binaryCoorSOA.x + stRange, binaryCoorSOA.x + endRange);
       pdb.atoms.min[b].y = *std::min_element(binaryCoorSOA.y + stRange, binaryCoorSOA.y + endRange);
@@ -156,40 +124,15 @@ void ExtendedSystem::UpdateMinMaxAtoms(PDBSetup &pdb,
 
 void ExtendedSystem::ReadVelocity(PDBSetup &pdb, config_setup::Input inputFiles, MoleculeLookup & molLookup,
                                      Molecules & mols){
-    // We must read restart PDB, which hold correct
-  // number atom info in each Box
-  // We define local variables here, for case that
-  // Binary Velocity is provided but not binary coordinates.
-  int numAtoms = 0;
-  int boxStart[BOX_TOTAL];
-  int numAtomsInBox[BOX_TOTAL];
-  boxStart[0] = 0;
-  for(int b = 0; b < BOX_TOTAL; b++) {
-    if(inputFiles.files.binaryVelInput.defined[b]) {
-      if (mols.restartFromCheckpoint){
-        numAtomsInBox[b] = molLookup.restartedNumAtomsInBox[b];
-      } else {
-        numAtomsInBox[b] = pdb.atoms.numAtomsInBox[b];
-      }
-    }
-  }
 
   for(int b = 0; b < BOX_TOTAL; b++) {
     if(inputFiles.files.binaryVelInput.defined[b]) {
-      numAtoms += numAtomsInBox[b];
-      if (b == 1)
-        boxStart[1] = numAtomsInBox[0];
-    }
-  }
-  binaryVeloc.clear();
-  binaryVeloc.resize(numAtoms);
-  for(int b = 0; b < BOX_TOTAL; b++) {
-    if(inputFiles.files.binaryVelInput.defined[b]) {
       std::string fName = inputFiles.files.binaryVelInput.name[b];  
-      if (mols.restartFromCheckpoint)
-        read_binary_file(fName.c_str(), &binaryVeloc[boxStart[b]], molLookup.restartedNumAtomsInBox[b]);
-      else
-        read_binary_file(fName.c_str(), &binaryVeloc[boxStart[b]], pdb.atoms.numAtomsInBox[b]);
+      if (mols.restartFromCheckpoint){
+        read_binary_file(fName.c_str(), &binaryVeloc[pdb.atoms.boxAtomOffset[b]], molLookup.restartedNumAtomsInBox[b]);
+      } else{
+        read_binary_file(fName.c_str(), &binaryVeloc[pdb.atoms.boxAtomOffset[b]], pdb.atoms.numAtomsInBox[b]);
+      }
     }
   }
 }

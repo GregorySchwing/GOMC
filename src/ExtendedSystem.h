@@ -75,11 +75,6 @@ class ExtendedSystem  {
     bool hasCellBasis[BOX_TOTAL];
     // Stores the binary coordinates of both boxes
     std::vector<XYZ> binaryCoor;
-    // For Loading 
-    int numAtoms;
-    int numAtomsInBox[BOX_TOTAL];
-    int boxStart[BOX_TOTAL];
-
     // Stores the binary velocities of both boxes
     std::vector<XYZ> binaryVeloc;
 };

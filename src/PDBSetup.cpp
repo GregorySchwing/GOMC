@@ -172,12 +172,12 @@ void Atoms::Clear()
 
 void Atoms::GetMinMaxAtoms(const uint b){
   int stRange, endRange;
-  
+
+  boxAtomOffset[b+1] = boxAtomOffset[b] + numAtomsInBox[b];
+
   // To prevent segfault
   if (numAtomsInBox[b] == 0)
     return;
-
-  boxAtomOffset[b+1] = boxAtomOffset[b] + numAtomsInBox[b];
 
   stRange = boxAtomOffset[b];
   endRange = boxAtomOffset[b+1];
