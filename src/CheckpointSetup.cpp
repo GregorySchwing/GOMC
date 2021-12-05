@@ -47,6 +47,10 @@ void CheckpointSetup::loadCheckpointFile(){
   cereal::BinaryInputArchive ia(ifs);
   ia >> chkObj;
   SetCheckpointData();
+  molLookupRef.AllocateMemory(molLookupRef.molLookupCount,
+                              molLookupRef.atomCount,
+                              molLookupRef.boxAndKindStartLength,
+                              molLookupRef.boxAndKindSwappableLength);
   ia(cereal::binary_data( molLookupRef.molLookup, sizeof(std::uint32_t) * molLookupRef.molLookupCount ));
   ia(cereal::binary_data( molLookupRef.boxAndKindStart, sizeof(std::uint32_t) * molLookupRef.boxAndKindStartLength ));
   ia(cereal::binary_data( molLookupRef.boxAndKindSwappableCounts, sizeof(std::uint32_t) * molLookupRef.boxAndKindSwappableLength ));

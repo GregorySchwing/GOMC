@@ -57,6 +57,11 @@ public:
       delete[] boxAndKindSwappableCounts;
   }
 
+void AllocateMemory(int molLookupCount,
+                    int atomCount,
+                    int boxAndKindStartLength,
+                    int boxAndKindSwappableLength);
+
   MoleculeLookup& operator=(const MoleculeLookup & rhs);
   bool operator==(const MoleculeLookup & rhs);
 

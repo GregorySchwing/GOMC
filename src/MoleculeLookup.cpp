@@ -284,7 +284,25 @@ MoleculeLookup& MoleculeLookup::operator=(const MoleculeLookup & rhs){
   atomCount = rhs.atomCount;
   numKinds = rhs.numKinds;
 
-  if (molLookup == NULL)
+  fixedMolecule = rhs.fixedMolecule;
+  canSwapKind = rhs.canSwapKind; //Kinds that can move intra and inter box
+  canMoveKind = rhs.canMoveKind; //Kinds that can move intra box only
+
+  /* For consistent trajectory ordering across checkpoints */
+  restartMoleculeIndices = rhs.restartMoleculeIndices;
+  for (int b = 0; b < BOX_TOTAL; ++b)
+    restartedNumAtomsInBox[b] = rhs.restartedNumAtomsInBox[b];
+
+  return *this;
+
+}
+
+
+void MoleculeLookup::AllocateMemory(int molLookupCount,
+                                    int atomCount,
+                                    int boxAndKindStartLength,
+                                    int boxAndKindSwappableLength){
+ if (molLookup == NULL)
     molLookup = new uint[molLookupCount];
   if (molIndex == NULL)
     molIndex = new int[atomCount];
@@ -300,18 +318,6 @@ MoleculeLookup& MoleculeLookup::operator=(const MoleculeLookup & rhs){
     boxAndKindStart = new uint[boxAndKindStartLength];
   if (boxAndKindSwappableCounts == NULL)
     boxAndKindSwappableCounts = new uint[boxAndKindSwappableLength];
-
-  fixedMolecule = rhs.fixedMolecule;
-  canSwapKind = rhs.canSwapKind; //Kinds that can move intra and inter box
-  canMoveKind = rhs.canMoveKind; //Kinds that can move intra box only
-
-  /* For consistent trajectory ordering across checkpoints */
-  restartMoleculeIndices = rhs.restartMoleculeIndices;
-  for (int b = 0; b < BOX_TOTAL; ++b)
-    restartedNumAtomsInBox[b] = rhs.restartedNumAtomsInBox[b];
-
-  return *this;
-
 }
 
 bool MoleculeLookup::operator==(const MoleculeLookup & rhs){
