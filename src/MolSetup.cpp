@@ -549,8 +549,8 @@ void createKindMap (mol_setup::MoleculeVariables & molVars,
           }
         }
         if(multiResidue){  
-          fragName = "PROT" + uniqueSuffixGenerator.uint2String(molVars.stringSuffix);
-          molVars.stringSuffix++;
+          fragName = "PROT" + uniqueSuffixGenerator.uint2String(molVars.stringSuffixMultiResidue);
+          molVars.stringSuffixMultiResidue++;
           printf("\n%-40s \n", "Warning: A molecule containing > 1 residue is detected.");
           printf("The simulation will name it %s.\n", fragName.c_str());
           printf("See the chart at the end of the output log describing this entry.\n");
