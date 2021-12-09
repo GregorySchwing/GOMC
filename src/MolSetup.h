@@ -137,6 +137,7 @@ public:
   std::vector<Bond> donors;
   std::vector<Bond> acceptors;
 
+  std::string name;
   std::string mapKey;
   uint kindIndex;
 

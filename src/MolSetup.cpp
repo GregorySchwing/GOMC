@@ -569,25 +569,31 @@ void createKindMap (mol_setup::MoleculeVariables & molVars,
               ++intraResID;
               kindMap[fragName].intraMoleculeResIDs.push_back(intraResID);
             }
+            // Can replace this with a description of the protein eventually
+            kindMap[fragName].name = fragName;
           }
         } else {
-          fragName = allAtoms[it->front()].residue;
-          kindMap[allAtoms[it->front()].residue] = MolKind();
+          fragName = "MOL" + uniqueSuffixGenerator.uint2String(molVars.stringSuffixMultiResidue);
+          molVars.stringSuffixNonMultiResidue++;
+          kindMap[fragName] = MolKind();
           kindMap[fragName].isMultiResidue = false;
           for (std::vector<uint>::const_iterator connectedComponentIt = it->cbegin();
           connectedComponentIt != it->cend(); connectedComponentIt++){
             kindMap[fragName].atoms.push_back(allAtoms[*connectedComponentIt]);
           }
+          kindMap[fragName].name = allAtoms[it->front()].residue;
         }
         kindMap[fragName].firstAtomID = it->front() + 1;
         kindMap[fragName].firstMolID = allAtoms[it->front()].residueID;
         kindMap[fragName].kindIndex = molVars.molKindIndex;
+        kindMap[fragName].mapKey = fragName;
+
         molVars.startIdxMolecules.push_back(startIdxAtomBoxOffset + kindMap[fragName].firstAtomID - 1);
         molVars.moleculeKinds.push_back(kindMap[fragName].kindIndex);
         molVars.moleculeKindNames.push_back(fragName);
         molVars.moleculeNames.push_back(fragName);
         molVars.moleculeSegmentNames.push_back(allAtoms[it->front()].segment);
-        
+
         MolSetup::copyBondInfoIntoMapEntry(bondAdjList, kindMap, fragName);
         molVars.molKindIndex++;
         if (newSize){
