@@ -69,7 +69,7 @@ void ExtendedSystem::Init(PDBSetup &pdb, Velocity &vel,  config_setup::Input & i
   }
 
   // Read the binary coordinate and update the PDB coordinate
-  if(inputFiles.restart.restartFromBinaryCoorFile) {
+  if(inputFiles.restart.restartFromBinaryCoorFile && !inputFiles.restart.recalcTrajectory) {
     binaryCoor.clear();
     binaryCoor.resize(pdb.atoms.beta.size());
     ReadCoordinate(pdb, inputFiles, molLookup, mols);
