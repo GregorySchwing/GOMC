@@ -39,8 +39,11 @@ Simulation::Simulation(char const*const configFileName, MultiSim const*const& mu
   cpu->Init(set.pdb, set.config.in, set.config.out, set.config.sys, set.config.sys.step.equil,
             totalSteps, startStep);
             
-  if(totalSteps == 0) {
+  if(totalSteps == 0 && !set.config.in.restart.restartFromBinaryCoorFile) {
     frameSteps = set.pdb.GetFrameSteps(set.config.in.files.pdb.name);
+  } else if (totalSteps == 0 && set.config.in.restart.restartFromBinaryCoorFile){
+      system->xsc.ReadDCDHeader(set.pdb, set.config.in, system->molLookup, staticValues->mol);
+      system->xsc.GetDCDFrameSteps(set.config.in, frameSteps);
   }
 
 #if GOMC_LIB_MPI

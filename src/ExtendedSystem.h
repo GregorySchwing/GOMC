@@ -40,6 +40,10 @@ class ExtendedSystem  {
   bool operator==(const ExtendedSystem & other);
   void Init(PDBSetup &pdb, Velocity &vel, config_setup::Input & inputFiles,
             MoleculeLookup & molLookup, Molecules & mols);
+  void ReadDCDHeader(PDBSetup &pdb, config_setup::Input & inputFiles,
+            MoleculeLookup & molLookup, Molecules & mols);
+  void GetDCDFrameSteps(config_setup::Input & inputFiles,
+                        std::vector<ulong> & frameSteps);
   private:
     // Reads the xsc file and store/calculate cellBasis data
     void ReadExtendedSystem(const char *filename, const int box);
@@ -51,7 +55,7 @@ class ExtendedSystem  {
                           MoleculeLookup & molLookup,
                           Molecules & mols);
     void ReadCoordinate(PDBSetup &pdb, config_setup::Input & inputFiles, MoleculeLookup & molLookup,
-                                     Molecules & mols);
+                          Molecules & mols);                                    
     void UpdateMinMaxAtoms(PDBSetup &pdb,
                           config_setup::Input & inputFiles, 
                           MoleculeLookup & molLookup,
@@ -86,6 +90,20 @@ class ExtendedSystem  {
 
     // Stores the binary velocities of both boxes
     std::vector<XYZ> binaryVeloc;
+
+    // DCD Recalc Traj Vars
+    /*    NSET - Number of sets of coordinates            */
+    /*    ISTART - Starting timestep of DCD file            */
+    /*    NSAVC - Timesteps between DCD saves            */
+    /*    DELTA - length of a timestep                */
+    int fd[BOX_TOTAL];
+    int *N[BOX_TOTAL];
+    int *NSET[BOX_TOTAL];
+    int *ISTART[BOX_TOTAL];
+    int *NSAVC[BOX_TOTAL];
+    double *DELTA[BOX_TOTAL];
+    int *NAMNF[BOX_TOTAL];
+    int **FREEINDEXES[BOX_TOTAL];
 };
 
 

@@ -128,6 +128,36 @@ void ExtendedSystem::ReadCoordinate(PDBSetup &pdb, config_setup::Input & inputFi
   }
 }
 
+void ExtendedSystem::ReadDCDHeader(PDBSetup &pdb, config_setup::Input & inputFiles, MoleculeLookup & molLookup,
+                              Molecules & mols){
+  for(int b = 0; b < BOX_TOTAL; b++) {
+    if(inputFiles.files.binaryCoorInput.defined[b]) {
+      std::string fName = inputFiles.files.binaryCoorInput.name[b];  
+      fd[b] = open_dcd_read(fName.c_str());
+      read_dcdheader(fd[b], N[b], NSET[b], ISTART[b], 
+           NSAVC[b], DELTA[b], NAMNF[b], 
+           FREEINDEXES[b]);
+    }
+  }
+}
+
+void ExtendedSystem::GetDCDFrameSteps(config_setup::Input & inputFiles,
+                                      std::vector<ulong> & frameSteps){
+  int numAtoms, numSteps, startStep, saveInterval;
+  for (uint b = 0; b < BOX_TOTAL; ++b){
+    if(inputFiles.files.binaryCoorInput.defined[b]) {
+      numAtoms = *(N[b]);
+      numSteps = *(NSET[b]);
+      startStep = *(ISTART[b]);
+      saveInterval = *(NSAVC[b]);
+      for (int i = 0; i < numSteps; ++i){
+        frameSteps.push_back(startStep + i*saveInterval);
+      }
+    }
+  }
+}
+
+
 void ExtendedSystem::UpdateMinMaxAtoms(PDBSetup &pdb,
                                       config_setup::Input & inputFiles, 
                                       MoleculeLookup & molLookup,

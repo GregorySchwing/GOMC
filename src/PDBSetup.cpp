@@ -34,7 +34,7 @@ void Remarks::SetRestart(config_setup::RestartSettings const& r )
 
   for(uint b = 0; b < BOX_TOTAL; b++) {
     if(recalcTrajectory)
-      reached[b] = false;
+      reached[b] = restartFromBinary;
     else
       reached[b] = true;
   }
@@ -103,6 +103,7 @@ void Atoms::SetRestart(config_setup::RestartSettings const& r )
 {
   restart = r.enable;
   recalcTrajectory = r.recalcTrajectory;
+  restartFromBinary = r.restartFromBinaryCoorFile;
 }
 
 void Atoms::Assign(std::string const& resName,
@@ -141,7 +142,7 @@ void Atoms::Read(FixedWidthReader & file)
   .Get(l_y, field::y::POS).Get(l_z, field::z::POS)
   .Get(l_occ, field::occupancy::POS)
   .Get(l_beta, field::beta::POS);
-  if(recalcTrajectory && (uint)l_occ != currBox) {
+  if(recalcTrajectory && (uint)l_occ != currBox && !restartFromBinary) {
     return;
   }
   Assign(resName, l_chain, l_x, l_y, l_z, l_beta, l_occ);
@@ -217,7 +218,10 @@ void PDBSetup::Init(config_setup::RestartSettings const& restart,
     cryst.SetBox(b);
     atoms.SetBox(b);
     std::string alias;
-    if(remarks.recalcTrajectory) {
+    // Recalc Traj with DCD.  Read PDB like normal
+    if(remarks.recalcTrajectory && remarks.restartFromBinary) {
+      alias = pdbAlias[b];
+    } else if (remarks.recalcTrajectory){
       sstrm::Converter toStr;
       std::string numStr = "";
       toStr << frameNum;
@@ -252,7 +256,7 @@ void PDBSetup::Init(config_setup::RestartSettings const& restart,
     }
     // If the recalcTrajectory is true and reached was still false
     // it means we couldn't find a remark and hence have to exit with error
-    if(!remarks.reached[b] && remarks.recalcTrajectory) {
+    if(!remarks.reached[b] && remarks.recalcTrajectory && !remarks.restartFromBinary) {
       std::cerr << "Error: Recalculate Trajectory is active..." << std::endl
                 << ".. and couldn't find remark in PDB file!" << std::endl;
       exit(EXIT_FAILURE);

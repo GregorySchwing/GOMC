@@ -122,7 +122,7 @@ public:
   std::vector<double> occ;  //occ value of each atom
   std::vector<uint> box;
   std::vector<std::string> resNames;
-  bool restart, firstResInFile, recalcTrajectory;
+  bool restart, firstResInFile, recalcTrajectory, restartFromBinary;
   //CurrRes is used to store res vals, currBox is used to
   //determine box either via the file (new) or the occupancy
   //(restart), count allows overwriting of coordinates during
