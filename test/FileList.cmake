@@ -3,10 +3,10 @@ set(TestSources
     test/src/BitLibTest.cpp
     test/src/EndianTest.cpp
     test/src/MolLookupTest.cpp
-    #test/src/CircuitTester.cpp
+    test/src/CircuitTester.cpp
     #test/src/PSFParserTest.cpp
-    test/src/ConsistentTrajectoryTest.cpp
-    test/src/CheckpointTest.cpp
+    #test/src/ConsistentTrajectoryTest.cpp
+    #test/src/CheckpointTest.cpp
 )
 
 set(TestHeaders
