@@ -142,12 +142,16 @@ void System::Init(Setup & set)
   //check if we have to use cached version of Ewald or not.
   bool ewald = set.config.sys.elect.ewald;
   bool wolf = set.config.sys.elect.wolf;
+  bool wolfCalibration = set.config.sys.elect.wolfCalibration;
 
 #ifdef GOMC_CUDA
   if(ewald)
     calcEwald = new Ewald(statV, *this);
   else if (wolf)
     calcEwald = new Wolf(statV, *this);
+  else if (wolfCalibration)
+    calcEwald = new Wolf(statV, *this);
+    refEwald =  new Ewald(statV, *this);
   else
     calcEwald = new NoEwald(statV, *this);
 #else
@@ -158,7 +162,10 @@ void System::Init(Setup & set)
     calcEwald = new Ewald(statV, *this);
   else if (wolf)
     calcEwald = new Wolf(statV, *this);
-  else
+  else if (wolfCalibration){
+      calcEwald = new Wolf(statV, *this);
+      refEwald =  new Ewald(statV, *this);
+  } else
     calcEwald = new NoEwald(statV, *this);
 #endif
 

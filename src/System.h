@@ -125,7 +125,8 @@ public:
 
   CalculateEnergy calcEnergy;
   Ewald *calcEwald;
-
+  // Only used for Wolf Calibration.
+  Ewald *refEwald;
   /* For checkpoint restoration */
   CheckpointSetup checkpointSet;
   bool restartFromCheckpoint;

@@ -210,6 +210,7 @@ struct ElectroStatic {
   bool enable;
   bool ewald;
   bool wolf;
+  bool wolfCalibration;
   bool cache;
   bool cutoffCoulombRead[BOX_TOTAL];
   double tolerance;
@@ -217,6 +218,15 @@ struct ElectroStatic {
   double dielectric;
   double cutoffCoulomb[BOX_TOTAL];
   double wolfAlpha[BOX_TOTAL];
+  // Wolf Calibration
+  bool wolfAlphaRangeRead[BOX_TOTAL];
+  bool wolfCutoffCoulombRangeRead[BOX_TOTAL];
+  double wolfAlphaStart[BOX_TOTAL];
+  double wolfAlphaEnd[BOX_TOTAL];
+  double wolfAlphaDelta[BOX_TOTAL];
+  double wolfCutoffCoulombStart[BOX_TOTAL];
+  double wolfCutoffCoulombEnd[BOX_TOTAL];
+  double wolfCutoffCoulombDelta[BOX_TOTAL];
   ElectroStatic(void)
   {
     std::fill_n(cutoffCoulombRead, BOX_TOTAL, false);
