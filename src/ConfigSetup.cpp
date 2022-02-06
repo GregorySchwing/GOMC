@@ -714,18 +714,18 @@ void ConfigSetup::Init(const char *fileName, MultiSim const*const& multisim)
     } else if (CheckString(line[0], "WolfAlphaRange")){
         if(line.size() == 5) {
           uint b = stringtoi(line[1]);
-          sys.elect.wolfAlphaRangeRead[b] = true;
-          sys.elect.wolfAlphaStart[b] = stringtod(line[2]);
-          sys.elect.wolfAlphaEnd[b] = stringtod(line[3]);
-          sys.elect.wolfAlphaDelta[b] = stringtod(line[4]);
-          printf("%-40s %d %-8s %-1.3E %-8s %-1.3E %-8s %-1.3E\n", "Info: Wolf Alpha Range Box", b, "START", sys.elect.wolfAlphaStart[b],
-           "END", sys.elect.wolfAlphaEnd[b],  "DELTA", sys.elect.wolfAlphaDelta[b]);
+          sys.wolfCal.wolfAlphaRangeRead[b] = true;
+          sys.wolfCal.wolfAlphaStart[b] = stringtod(line[2]);
+          sys.wolfCal.wolfAlphaEnd[b] = stringtod(line[3]);
+          sys.wolfCal.wolfAlphaDelta[b] = stringtod(line[4]);
+          printf("%-40s %d %-8s %-1.3E %-8s %-1.3E %-8s %-1.3E\n", "Info: Wolf Alpha Range Box", b, "START", sys.wolfCal.wolfAlphaStart[b],
+           "END", sys.wolfCal.wolfAlphaEnd[b],  "DELTA", sys.wolfCal.wolfAlphaDelta[b]);
         } else {
           std::cout <<  "Error: WolfAlphaRange requires 4 arguments!" << std::endl <<
           "Usage: WolfAlphaRange\tBOX\tSTART\tEND\tDELTA" << std::endl;
         }
     } else if(CheckString(line[0], "WolfCalibration")){
-        sys.elect.wolfCalibration = checkBool(line[1]);
+        sys.wolfCal.enable = checkBool(line[1]);
     } else if(CheckString(line[0], "Tolerance")) {
       sys.elect.tolerance = stringtod(line[1]);
       printf("%-40s %-1.3E \n", "Info: Ewald Summation Tolerance",
@@ -746,13 +746,13 @@ void ConfigSetup::Init(const char *fileName, MultiSim const*const& multisim)
     } else if (CheckString(line[0], "WolfCutoffCoulombRange")){
         if(line.size() == 5) {
           uint b = stringtoi(line[1]);
-          sys.elect.wolfCutoffCoulombRangeRead[b] = true;
-          sys.elect.wolfCutoffCoulombStart[b] = stringtod(line[2]);
-          sys.elect.wolfCutoffCoulombEnd[b] = stringtod(line[3]);
-          sys.elect.wolfCutoffCoulombDelta[b] = stringtod(line[4]);
+          sys.wolfCal.wolfCutoffCoulombRangeRead[b] = true;
+          sys.wolfCal.wolfCutoffCoulombStart[b] = stringtod(line[2]);
+          sys.wolfCal.wolfCutoffCoulombEnd[b] = stringtod(line[3]);
+          sys.wolfCal.wolfCutoffCoulombDelta[b] = stringtod(line[4]);
           printf("%-40s %d %-8s %-1.3E %-8s %-1.3E %-8s %-1.3E\n", "Info: Wolf Cutoff Coulomb Range Box", b, 
-          "START", sys.elect.wolfCutoffCoulombStart[b], "END", sys.elect.wolfCutoffCoulombEnd[b],  
-          "DELTA", sys.elect.wolfCutoffCoulombDelta[b]);
+          "START", sys.wolfCal.wolfCutoffCoulombStart[b], "END", sys.wolfCal.wolfCutoffCoulombEnd[b],  
+          "DELTA", sys.wolfCal.wolfCutoffCoulombDelta[b]);
         } else {
           std::cout <<  "Error: WolfCutoffCoulombRange requires 4 arguments!" << std::endl <<
           "Usage: WolfCutoffCoulombRange\tBOX\tSTART\tEND\tDELTA" << std::endl;
@@ -1813,11 +1813,11 @@ void ConfigSetup::verifyInputs(void)
     //exit(EXIT_FAILURE);
   }
 
-  if(sys.elect.wolfCalibration){
+  if(sys.wolfCal.enable){
     bool readAllRequired = true;
     for(i = 0 ; i < BOX_TOTAL ; i++) {
-      readAllRequired &= sys.elect.wolfAlphaRangeRead[i];
-      readAllRequired &= sys.elect.wolfCutoffCoulombRangeRead[i];
+      readAllRequired &= sys.wolfCal.wolfAlphaRangeRead[i];
+      readAllRequired &= sys.wolfCal.wolfCutoffCoulombRangeRead[i];
     }
     if(!readAllRequired){
       printf("Error: Wolf Calibration alpha range and coloumb range is not set for all boxes!");

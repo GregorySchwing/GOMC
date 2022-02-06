@@ -136,7 +136,8 @@ void StaticVals::IsBoxOrthogonal(const double cellAngle[][3])
 StaticVals::StaticVals(Setup & set) : intraMemcVal(set.config.sys.intraMemcVal),
   freeEnVal(set.config.sys.freeEn), memcVal(set.config.sys.memcVal),
   neMTMCVal(set.config.sys.neMTMCVal), targetedSwapVal(set.config.sys.targetedSwapCollection),
-  intraTargetedSwapVal(set.config.sys.intraTargetedSwapCollection)
+  intraTargetedSwapVal(set.config.sys.intraTargetedSwapCollection),
+  wolfCal(set.config.sys.wolfCal)
   
 {
   multiParticleEnabled = set.config.sys.moves.multiParticleEnabled;

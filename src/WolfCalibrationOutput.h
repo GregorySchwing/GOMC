@@ -32,6 +32,15 @@ public:
 private:
   System & sysRef;
   StaticVals const& statValRef;
+  uint stepsPerSample;
+  const config_setup::WolfCalibration&  wolfCal;
+
+  uint numberOfRCutStates[BOX_TOTAL];
+  uint numberOfAlphaStates[BOX_TOTAL];
+
+  //const CalculateEnergy& calcEn;
+  std::ofstream outF[BOX_TOTAL];
+  std::string name[BOX_TOTAL];
 };
 
 #endif

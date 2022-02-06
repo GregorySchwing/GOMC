@@ -50,6 +50,8 @@ public:
   double totalPerc;
   config_setup::MEMCVal  intraMemcVal;
   config_setup::FreeEnergy  freeEnVal;
+  config_setup::WolfCalibration  wolfCal;
+
 
   //Only include these variables if they're static for this ensemble...
 #ifndef  VARIABLE_PARTICLE_NUMBER

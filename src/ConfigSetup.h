@@ -218,15 +218,6 @@ struct ElectroStatic {
   double dielectric;
   double cutoffCoulomb[BOX_TOTAL];
   double wolfAlpha[BOX_TOTAL];
-  // Wolf Calibration
-  bool wolfAlphaRangeRead[BOX_TOTAL];
-  bool wolfCutoffCoulombRangeRead[BOX_TOTAL];
-  double wolfAlphaStart[BOX_TOTAL];
-  double wolfAlphaEnd[BOX_TOTAL];
-  double wolfAlphaDelta[BOX_TOTAL];
-  double wolfCutoffCoulombStart[BOX_TOTAL];
-  double wolfCutoffCoulombEnd[BOX_TOTAL];
-  double wolfCutoffCoulombDelta[BOX_TOTAL];
   ElectroStatic(void)
   {
     std::fill_n(cutoffCoulombRead, BOX_TOTAL, false);
@@ -819,6 +810,32 @@ struct FreeEnergy {
   }
 };
 
+struct WolfCalibration {
+  bool enable;
+  bool wolfAlphaRangeRead[BOX_TOTAL];
+  bool wolfCutoffCoulombRangeRead[BOX_TOTAL];
+  double wolfAlphaStart[BOX_TOTAL];
+  double wolfAlphaEnd[BOX_TOTAL];
+  double wolfAlphaDelta[BOX_TOTAL];
+  double wolfCutoffCoulombStart[BOX_TOTAL];
+  double wolfCutoffCoulombEnd[BOX_TOTAL];
+  double wolfCutoffCoulombDelta[BOX_TOTAL];
+  WolfCalibration(void)
+  {
+
+    for (uint b = 0; b < BOX_TOTAL; ++b) {
+      wolfAlphaRangeRead[b] = false;
+      wolfCutoffCoulombRangeRead[b] = false;
+      wolfAlphaStart[b] = 0.0;
+      wolfAlphaEnd[b] = 0.0;
+      wolfAlphaDelta[b] = 0.0;
+      wolfCutoffCoulombStart[b] = 0.0;
+      wolfCutoffCoulombEnd[b] = 0.0;
+      wolfCutoffCoulombDelta[b] = 0.0;
+    }
+  }
+};
+
 struct SystemVals {
   ElectroStatic elect;
   Temperature T;
@@ -831,6 +848,7 @@ struct SystemVals {
   MEMCVal memcVal, intraMemcVal;
   NEMTMCVal neMTMCVal;
   FreeEnergy freeEn;
+  WolfCalibration wolfCal;
   TargetSwapCollection targetedSwapCollection;
   TargetSwapCollection intraTargetedSwapCollection;
 #if ENSEMBLE == GCMC
