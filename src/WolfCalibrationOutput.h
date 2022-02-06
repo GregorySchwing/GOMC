@@ -25,12 +25,13 @@ public:
   virtual void DoOutput(const ulong step) {}
   virtual void DoOutputRestart(const ulong step) {}  
   virtual void Init(pdb_setup::Atoms const& atoms,
-                    config_setup::Output const& output) {}
+                    config_setup::Output const& output);
   virtual void Sample(const ulong step) {}
 
 
 private:
-
+  System & sysRef;
+  StaticVals const& statValRef;
 };
 
 #endif

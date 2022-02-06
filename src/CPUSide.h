@@ -19,6 +19,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "CheckpointOutput.h"
 #include "EnPartCntSampleOutput.h"
 #include "FreeEnergyOutput.h"
+#include "WolfCalibrationOutput.h"
 #include "PSFOutput.h"
 
 #include <vector>
@@ -50,6 +51,7 @@ private:
   BlockAverages block;
   Histogram hist;
   CheckpointOutput checkpoint;
+  WolfCalibrationOutput wolfCalibration;
 #if ENSEMBLE == GCMC
   EnPartCntSample sample_N_E;
 #endif

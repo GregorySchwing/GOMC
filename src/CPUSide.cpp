@@ -15,7 +15,8 @@ CPUSide::CPUSide(System & sys, StaticVals & statV, Setup & set) :
   psf(statV.mol, sys, set), 
   xstBinary(sys, statV),
   console(varRef), block(varRef),
-  hist(varRef), checkpoint(sys, statV)
+  hist(varRef), checkpoint(sys, statV),
+  wolfCalibration(sys, statV)
 #if ENSEMBLE == GCMC
   , sample_N_E(varRef)
 #endif
@@ -45,6 +46,8 @@ void CPUSide::Init( PDBSetup const& pdbSet,
     outObj.push_back(&block);
   if (out.restart.settings.enable)
     outObj.push_back(&checkpoint);
+  if (sys.elect.wolfCalibration)
+    outObj.push_back(&wolfCalibration);
 
 #if ENSEMBLE == GCMC
   outObj.push_back(&hist);

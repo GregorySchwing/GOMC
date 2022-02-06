@@ -10,5 +10,12 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "GOMC_Config.h"
 
 
-WolfCalibrationOutput::WolfCalibrationOutput(System & sys, StaticVals const& statV){
+WolfCalibrationOutput::WolfCalibrationOutput(System & sys, StaticVals const& statV):
+sysRef(sys), statValRef(statV)
+{
+}
+
+void WolfCalibrationOutput::Init(pdb_setup::Atoms const& atoms,
+                            config_setup::Output const& output) {
+
 }
