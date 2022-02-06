@@ -864,7 +864,7 @@ struct HistFiles { /* : ReadableBase*/
 //Files for output.
 struct OutFiles {
   /* For split pdb, psf, and dcd files , BOX 0 and BOX 1 */
-  FileNames<BOX_TOTAL> pdb, splitPSF, dcd;
+  FileNames<BOX_TOTAL> pdb, splitPSF, dcd, wolfCalibration;
 
   /* For merged PSF */
   FileName psf, seed;
@@ -901,7 +901,7 @@ struct Statistics {
   TrackedVars vars;
 };
 struct Output {
-  SysState state, restart, state_dcd, restart_dcd;
+  SysState state, restart, state_dcd, restart_dcd, wolfCalibration;
   SysState restart_vel;
   Statistics statistics;
   EventSettings console, checkpoint;

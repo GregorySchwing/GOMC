@@ -115,6 +115,8 @@ ConfigSetup::ConfigSetup(void)
 #endif
   out.checkpoint.enable = false;
   out.checkpoint.frequency = ULONG_MAX;
+  out.wolfCalibration.settings.enable = false;
+  out.wolfCalibration.settings.frequency = false;
   out.statistics.settings.uniqueStr.val = "";
   out.state.settings.frequency = ULONG_MAX;
   out.restart.settings.frequency = ULONG_MAX;
@@ -1332,6 +1334,17 @@ void ConfigSetup::Init(const char *fileName, MultiSim const*const& multisim)
                out.statistics.settings.block.frequency);
       } else
         printf("%-40s %-s \n", "Info: Average output", "Inactive");
+    } else if(CheckString(line[0], "WolfCalibrationFreq")) {
+      if(line.size() == 3){
+        out.wolfCalibration.settings.enable = checkBool(line[1]);
+        out.wolfCalibration.settings.frequency = stringtoi(line[2]);
+      }
+      if(out.wolfCalibration.settings.enable){
+        printf("%-40s %-lu \n", "Info: Wolf Calibration output frequency",
+          out.wolfCalibration.settings.frequency);
+      } else {
+        printf("%-40s %-s \n", "Info: Wolf Calibration output", "Inactive");
+      }
     }
 #if ENSEMBLE == GCMC
     else if(CheckString(line[0], "HistogramFreq")) {
