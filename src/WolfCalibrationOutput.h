@@ -18,9 +18,7 @@ class WolfCalibrationOutput : public OutputableBase
 public:
   WolfCalibrationOutput(System & sys, StaticVals const& statV);
 
-  ~WolfCalibrationOutput()
-  {
-  }
+  ~WolfCalibrationOutput();
 
   virtual void DoOutput(const ulong step) {}
   virtual void DoOutputRestart(const ulong step) {}  
@@ -30,6 +28,10 @@ public:
 
 
 private:
+
+  //void WriteHeader(void);
+  std::string GetString(double a, uint p);
+
   System & sysRef;
   StaticVals const& statValRef;
   uint stepsPerSample;
@@ -37,6 +39,14 @@ private:
 
   uint numberOfRCutStates[BOX_TOTAL];
   uint numberOfAlphaStates[BOX_TOTAL];
+
+  double * alphas;
+  double * rcutcoulombs;
+  double * energyDiff;
+
+
+  bool explicitlyAddEndAlpha[BOX_TOTAL];
+  bool explicitlyAddEndRCut[BOX_TOTAL];
 
   //const CalculateEnergy& calcEn;
   std::ofstream outF[BOX_TOTAL];
