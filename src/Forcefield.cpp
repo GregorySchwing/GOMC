@@ -21,6 +21,7 @@ Forcefield::Forcefield()
   OneThree = false; //default behavior is to turn off 1-3 interaction
   OneFour = true;   // to turn on 1-4 interaction
   OneN = true;      // and turn on 1-n interaction
+  numberOfRCutsForCalibration = 0;
 }
 
 Forcefield::~Forcefield()

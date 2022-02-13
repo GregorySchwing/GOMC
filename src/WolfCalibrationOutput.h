@@ -42,7 +42,7 @@ private:
 
   double * alphas;
   double * rcutcoulombs;
-  double * energyDiff;
+  double * electrostaticEnergies;
 
 
   bool explicitlyAddEndAlpha[BOX_TOTAL];

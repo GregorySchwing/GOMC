@@ -19,7 +19,7 @@ sysRef(sys), statValRef(statV), wolfCal(statV.wolfCal)
   {
       delete[] alphas;
       delete[] rcutcoulombs;
-      delete[] energyDiff;
+      delete[] electrostaticEnergies;
   }
 
 void WolfCalibrationOutput::Init(pdb_setup::Atoms const& atoms,
@@ -53,7 +53,7 @@ void WolfCalibrationOutput::Init(pdb_setup::Atoms const& atoms,
       }
       rcutcoulombs = new double[totalRCutStates];
       alphas = new double[totalAlphaStates];
-      energyDiff =  new Energy[totaEnergyDiffStates];
+      electrostaticEnergies =  new double[totaEnergyDiffStates];
       if(enableOut) {
             for (uint b = 0; b < BOX_TOTAL; ++b) {
                   std::stringstream sstrm;
@@ -71,7 +71,6 @@ void WolfCalibrationOutput::Init(pdb_setup::Atoms const& atoms,
                         name[b] = fileName;
                   #endif
                   outF[b].open(name[b].c_str(), std::ofstream::out);
-                  //energyDiff[b] = new Energy[lambdaSize];
             }
       //WriteHeader();
       }
