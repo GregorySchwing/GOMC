@@ -379,19 +379,15 @@ inline double FFParticle::CalcCoulomb(const double distSq,
                                       const uint kind2,
                                       const double qi_qj_Fact,
                                       const double lambda,
-                                      const uint & b,
-                                      const double & rCutCoulomb,
-                                      const double & rCutCoulombSq,
-                                      const double & wolfFactor1,
-                                      const double & wolfFactor2) const
+                                      const uint b) const
 {
-  if(rCutCoulombSq < distSq)
+  if(forcefield.rCutCoulombSq[b] < distSq)
     return 0.0;
 
 
   if(lambda >= 0.999999) {
     //save computation time
-    return CalcCoulomb(distSq, qi_qj_Fact, rCutCoulomb, rCutCoulombSq, wolfFactor1, wolfFactor2);
+    return CalcCoulomb(distSq, qi_qj_Fact, b);
   }
   double en = 0.0;
   // soft-cre scaling
@@ -403,9 +399,9 @@ inline double FFParticle::CalcCoulomb(const double distSq,
     double lambdaCoef = forcefield.sc_alpha * pow((1.0 - lambda), forcefield.sc_power);
     double softDist6 = lambdaCoef * sigma6 + dist6;
     double softRsq = cbrt(softDist6);
-    en = lambda * CalcCoulomb(softRsq, qi_qj_Fact, rCutCoulomb, rCutCoulombSq, wolfFactor1, wolfFactor2);
+    en = lambda * CalcCoulomb(softRsq, qi_qj_Fact, b);
   } else {
-    en = lambda * CalcCoulomb(distSq, qi_qj_Fact, rCutCoulomb, rCutCoulombSq, wolfFactor1, wolfFactor2);
+    en = lambda * CalcCoulomb(distSq, qi_qj_Fact, b);
   }
   return en;
 }
@@ -414,11 +410,7 @@ inline double FFParticle::CalcCoulomb(const double distSq,
    lambda differently in Wolf electrostatics */
 inline double FFParticle::CalcCoulomb(const double distSq,
                                       const double qi_qj_Fact,
-                                      const uint & b,
-                                      double & rCutCoulomb,
-                                      double & rCutCoulombSq,
-                                      double & wolfFactor1,
-                                      double & wolfFactor2) const
+                                      const uint b) const
 {
   double dist = sqrt(distSq);
   if(forcefield.ewald) {
@@ -440,19 +432,14 @@ inline double FFParticle::CalcCoulomb(const double distSq,
   }
 }
 
-inline double FFParticle::CalcCoulombVir(
-    const double distSq,
+inline double FFParticle::CalcCoulombVir(const double distSq,
     const uint kind1,
     const uint kind2,
     const double qi_qj,
     const double lambda,
-    const uint & b,
-    double & rCutCoulomb,
-    double & rCutCoulombSq,
-    double & wolfFactor1,
-    double & wolfFactor2) const
+    const uint b) const
 {
-  if(rCutCoulombSq < distSq)
+  if(forcefield.rCutCoulombSq[b] < distSq)
     return 0.0;
 
   if(lambda >= 0.999999) {
@@ -478,11 +465,7 @@ inline double FFParticle::CalcCoulombVir(
 }
 
 inline double FFParticle::CalcCoulombVir(const double distSq,
-    const double qi_qj, 
-    double & rCutCoulomb,
-    double & rCutCoulombSq,
-    double & wolfFactor1,
-    double & wolfFactor2) const
+    const double qi_qj, const uint b) const
 {
   double dist = sqrt(distSq);
   if(forcefield.ewald) {

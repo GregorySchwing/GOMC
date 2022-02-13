@@ -75,19 +75,10 @@ public:
   // coulomb interaction functions
   virtual double CalcCoulomb(const double distSq, const uint kind1,
                              const uint kind2, const double qi_qj_Fact,
-                             const double lambda, 
-                             const uint & b,
-                             const double & rCutCoulomb,
-                             const double & rCutCoulombSq,
-                             const double & wolfFactor1,
-                             const double & wolfFactor2) const;
+                             const double lambda, const uint b) const;
   virtual double CalcCoulombVir(const double distSq, const uint kind1,
                                 const uint kind2, const double qi_qj,
-                                const double lambda, const uint & b,
-                                double & rCutCoulomb,
-                                double & rCutCoulombSq,
-                                double & wolfFactor1,
-                                double & wolfFactor2) const;
+                                const double lambda, uint b) const;
   virtual void CalcCoulombAdd_1_4(double& en, const double distSq,
                                   const double qi_qj_Fact, const bool NB, const uint box) const;
 
@@ -124,10 +115,7 @@ protected:
   virtual double CalcEn(const double distSq, const uint index) const;
   virtual double CalcVir(const double distSq, const uint index) const;
   virtual double CalcCoulomb(const double distSq, const double qi_qj_Fact,
-                             const double & rCutCoulomb,
-                             const double & rCutCoulombSq,
-                             const double & wolfFactor1,
-                             const double & wolfFactor2) const;
+                             const uint b) const;
   virtual double CalcCoulombVir(const double distSq, const double qi_qj,
                                 uint b) const;
   //Find the index of the pair kind
