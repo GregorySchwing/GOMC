@@ -380,7 +380,8 @@ inline double FFParticle::CalcCoulomb(const double distSq,
                                       const double qi_qj_Fact,
                                       const double lambda,
                                       const uint b,
-                                      int rCutCoulombIndexForWolfCalibration) const
+                                      int rCutCoulombIndexForWolfCalibration,
+                                      int wolfCalibration) const
 {
   if(forcefield.rCutCoulombSq[b*forcefield.numberOfRCutsForCalibration + rCutCoulombIndexForWolfCalibration] < distSq)
     return 0.0;
@@ -412,7 +413,8 @@ inline double FFParticle::CalcCoulomb(const double distSq,
 inline double FFParticle::CalcCoulomb(const double distSq,
                                       const double qi_qj_Fact,
                                       const uint b,
-                                      int rCutCoulombIndexForWolfCalibration) const
+                                      int rCutCoulombIndexForWolfCalibration,
+                                      int wolfCalibration) const
 {
   double dist = sqrt(distSq);
   if(forcefield.ewald) {
@@ -424,7 +426,7 @@ inline double FFParticle::CalcCoulomb(const double distSq,
     wolf_electrostatic -= forcefield.wolfFactor1[b];
     // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
     if(forcefield.coulKind){
-      double distDiff = dist-forcefield.rCutCoulomb[b];
+      double distDiff = dist-forcefield.rCutCoulomb[b*forcefield.numberOfRCutsForCalibration + rCutCoulombIndexForWolfCalibration];
       wolf_electrostatic += forcefield.wolfFactor2[b]*distDiff;
     } 
     wolf_electrostatic *= qi_qj_Fact;
