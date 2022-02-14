@@ -56,7 +56,7 @@ public:
   double rswitch;                 //Switch distance
   double dielectric;              //dielectric for martini
   double wolfAlpha[BOX_TOTAL], wolfFactor1[BOX_TOTAL], wolfFactor2[BOX_TOTAL], wolfFactor3[BOX_TOTAL]; //alpha term for Wolf Electrostatic and constant factors
-  int numberOfRCutsForCalibration;
+  int numberOfRCuts;
   double scaling_14;              //!<Scaling factor for 1-4 pairs' ewald interactions
   double sc_alpha;                // Free energy parameter
   double sc_sigma, sc_sigma_6;    // Free energy parameter

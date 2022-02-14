@@ -382,7 +382,9 @@ inline double FFParticle::CalcCoulomb(const double distSq,
                                       const uint b,
                                       int indexForWolfCal) const
 {
-  if(!indexForWolfCal && forcefield.rCutCoulombSq[b] < distSq)
+  // This will reduce to the original equation when not calibrating,
+  // since numberOfRCuts is by default 1 and indexForWolfCal is by default 0.
+  if(forcefield.rCutCoulombSq[b*forcefield.numberOfRCuts + indexForWolfCal] < distSq)
     return 0.0;
 
 
@@ -400,9 +402,9 @@ inline double FFParticle::CalcCoulomb(const double distSq,
     double lambdaCoef = forcefield.sc_alpha * pow((1.0 - lambda), forcefield.sc_power);
     double softDist6 = lambdaCoef * sigma6 + dist6;
     double softRsq = cbrt(softDist6);
-    en = lambda * CalcCoulomb(softRsq, qi_qj_Fact, b);
+    en = lambda * CalcCoulomb(softRsq, qi_qj_Fact, b, indexForWolfCal);
   } else {
-    en = lambda * CalcCoulomb(distSq, qi_qj_Fact, b);
+    en = lambda * CalcCoulomb(distSq, qi_qj_Fact, b, indexForWolfCal);
   }
   return en;
 }
@@ -442,12 +444,14 @@ inline double FFParticle::CalcCoulombVir(const double distSq,
     const uint b,
     int indexForWolfCal) const
 {
-  if(!indexForWolfCal && forcefield.rCutCoulombSq[b] < distSq)
+  // This will reduce to the original equation when not calibrating,
+  // since numberOfRCuts is by default 1 and indexForWolfCal is by default 0.
+  if(forcefield.rCutCoulombSq[b*forcefield.numberOfRCuts + indexForWolfCal] < distSq)
     return 0.0;
 
   if(lambda >= 0.999999) {
     //save computation time
-    return CalcCoulombVir(distSq, qi_qj, b);
+    return CalcCoulombVir(distSq, qi_qj, b, indexForWolfCal);
   }
   double vir = 0.0;
   if(forcefield.sc_coul) {
@@ -460,9 +464,9 @@ inline double FFParticle::CalcCoulombVir(const double distSq,
     double softRsq = cbrt(softDist6);
     double correction = distSq / softRsq;
     //We need to fix the return value from calcVir
-    vir = lambda * correction * correction * CalcCoulombVir(softRsq, qi_qj, b);
+    vir = lambda * correction * correction * CalcCoulombVir(softRsq, qi_qj, b, indexForWolfCal);
   } else {
-    vir = lambda * CalcCoulombVir(distSq, qi_qj, b);
+    vir = lambda * CalcCoulombVir(distSq, qi_qj, b, indexForWolfCal);
   }
   return vir;
 }
