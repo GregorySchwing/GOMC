@@ -384,7 +384,7 @@ inline double FFParticle::CalcCoulomb(const double distSq,
 {
   // This will reduce to the original equation when not calibrating,
   // since numberOfRCuts is by default 1 and indexForWolfCal is by default 0.
-  if(forcefield.rCutCoulombSq[b*forcefield.numberOfRCuts + indexForWolfCal] < distSq)
+  if(forcefield.rCutCoulombSq[b*forcefield.numberOfRCuts[0] + indexForWolfCal] < distSq)
     return 0.0;
 
 
@@ -446,7 +446,7 @@ inline double FFParticle::CalcCoulombVir(const double distSq,
 {
   // This will reduce to the original equation when not calibrating,
   // since numberOfRCuts is by default 1 and indexForWolfCal is by default 0.
-  if(forcefield.rCutCoulombSq[b*forcefield.numberOfRCuts + indexForWolfCal] < distSq)
+  if(forcefield.rCutCoulombSq[b*forcefield.numberOfRCuts[0] + indexForWolfCal] < distSq)
     return 0.0;
 
   if(lambda >= 0.999999) {

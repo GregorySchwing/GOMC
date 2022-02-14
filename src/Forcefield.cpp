@@ -21,7 +21,7 @@ Forcefield::Forcefield()
   OneThree = false; //default behavior is to turn off 1-3 interaction
   OneFour = true;   // to turn on 1-4 interaction
   OneN = true;      // and turn on 1-n interaction
-  numberOfRCuts = 1;
+  numberOfRCuts[0] = 1;
 }
 
 Forcefield::~Forcefield()
@@ -153,3 +153,31 @@ void Forcefield::InitBasicVals(config_setup::SystemVals const& val,
   }
 
 }
+
+void Forcefield::InitWolfCalibration(config_setup::WolfCalibration const& wolfCal){
+  int totalRCutStates = 0;
+  int totalAlphaStates= 0;
+  int totaEnergyDiffStates = 0;
+  // Calculate the number of calibration points from the ranges provided
+  // If delta is not a common multiple of the (End - Start) explicitly add the End.
+  for (uint b = 0; b < BOX_TOTAL; ++b) {
+    numberOfRCuts[b] = (int)((wolfCal.wolfCutoffCoulombEnd[b] - wolfCal.wolfCutoffCoulombStart[b]) / wolfCal.wolfCutoffCoulombDelta[b]);
+    numberOfAlphas[b] = (int)((wolfCal.wolfAlphaEnd[b] - wolfCal.wolfAlphaStart[b]) / wolfCal.wolfAlphaDelta[b]);
+    if (abs(wolfCal.wolfAlphaDelta[b] * numberOfAlphas[b] - wolfCal.wolfCutoffCoulombEnd[b]) > 0.01){
+          numberOfAlphas[b]= numberOfAlphas[b] + 1;
+          explicitlyAddEndAlpha[b] = true;
+    } else {
+          explicitlyAddEndAlpha[b] = false;
+    }
+    if (abs(wolfCal.wolfCutoffCoulombDelta[b] * numberOfRCuts[b] - wolfCal.wolfCutoffCoulombEnd[b]) > 1){
+          numberOfRCuts[b]= numberOfRCuts[b] + 1;
+          explicitlyAddEndRCut[b] = true;
+    } else {
+          explicitlyAddEndRCut[b] = false;
+    }
+    totalRCutStates += numberOfRCuts[b];
+    totalAlphaStates += numberOfAlphas[b];
+    totaEnergyDiffStates += numberOfRCuts[b] * numberOfAlphas[b];
+  }
+}
+

@@ -56,7 +56,13 @@ public:
   double rswitch;                 //Switch distance
   double dielectric;              //dielectric for martini
   double wolfAlpha[BOX_TOTAL], wolfFactor1[BOX_TOTAL], wolfFactor2[BOX_TOTAL], wolfFactor3[BOX_TOTAL]; //alpha term for Wolf Electrostatic and constant factors
-  int numberOfRCuts;
+  // Wolf Calibration
+  int numberOfRCuts[BOX_TOTAL];
+  int numberOfAlphas[BOX_TOTAL];
+  bool explicitlyAddEndAlpha[BOX_TOTAL];
+  bool explicitlyAddEndRCut[BOX_TOTAL];
+  // Wolf Calibration
+
   double scaling_14;              //!<Scaling factor for 1-4 pairs' ewald interactions
   double sc_alpha;                // Free energy parameter
   double sc_sigma, sc_sigma_6;    // Free energy parameter
@@ -82,6 +88,7 @@ private:
 
   void InitBasicVals(config_setup::SystemVals const& val,
                      config_setup::FFKind const& ffKind);
+  void InitWolfCalibration(config_setup::WolfCalibration const& wolfCal);
 
 };
 
