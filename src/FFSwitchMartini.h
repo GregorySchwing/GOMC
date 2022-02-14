@@ -425,7 +425,7 @@ inline double FF_SWITCH_MARTINI::CalcCoulomb(const double distSq,
     return qi_qj_Fact * erfc(val) / dist; 
   } else if (forcefield.wolf){
     // V_DSP -- (16) from Gezelter 2006
-    double wolf_electrostatic = erfc(forcefield.wolfAlpha[b] * dist)/dist;
+    double wolf_electrostatic = erfc(forcefield.wolfAlpha[b][indexForAlpha] * dist)/dist;
     wolf_electrostatic -= forcefield.wolfFactor1[b];
     // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
     if(forcefield.coulKind){
@@ -494,8 +494,8 @@ inline double FF_SWITCH_MARTINI::CalcCoulombVir(const double distSq,
     return qi_qj * (temp / dist + constValue * expConstValue) / distSq;
   } else if (forcefield.wolf){
       // F_DSP -- (17) from Gezelter 2006
-      double wolf_electrostatic_force = erfc(forcefield.wolfAlpha[b] * dist)/distSq;
-      wolf_electrostatic_force += forcefield.wolfFactor3[b]*exp(-1.0*pow(forcefield.wolfAlpha[b], 2.0)*distSq)/dist;
+      double wolf_electrostatic_force = erfc(forcefield.wolfAlpha[b][indexForAlpha] * dist)/distSq;
+      wolf_electrostatic_force += forcefield.wolfFactor3[b]*exp(-1.0*pow(forcefield.wolfAlpha[b][indexForAlpha], 2.0)*distSq)/dist;
       // F_DSF -- (19) from Gezelter 2006.  This force is continuous at cutoff
       if(forcefield.coulKind){
         wolf_electrostatic_force -= forcefield.wolfFactor2[b];
