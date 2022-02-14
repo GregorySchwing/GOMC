@@ -380,9 +380,9 @@ inline double FFParticle::CalcCoulomb(const double distSq,
                                       const double qi_qj_Fact,
                                       const double lambda,
                                       const uint b,
-                                      int rCutCoulombIndexForWolfCalibration) const
+                                      int indexForWolfCal) const
 {
-  if(forcefield.rCutCoulombSq[b*forcefield.numberOfRCutsForCalibration + rCutCoulombIndexForWolfCalibration] < distSq)
+  if(!indexForWolfCal && forcefield.rCutCoulombSq[b] < distSq)
     return 0.0;
 
 
@@ -412,7 +412,7 @@ inline double FFParticle::CalcCoulomb(const double distSq,
 inline double FFParticle::CalcCoulomb(const double distSq,
                                       const double qi_qj_Fact,
                                       const uint b,
-                                      int rCutCoulombIndexForWolfCalibration) const
+                                      int indexForWolfCal) const
 {
   double dist = sqrt(distSq);
   if(forcefield.ewald) {
@@ -440,9 +440,9 @@ inline double FFParticle::CalcCoulombVir(const double distSq,
     const double qi_qj,
     const double lambda,
     const uint b,
-    int rCutCoulombIndexForWolfCalibration) const
+    int indexForWolfCal) const
 {
-  if(forcefield.rCutCoulombSq[b] < distSq)
+  if(!indexForWolfCal && forcefield.rCutCoulombSq[b] < distSq)
     return 0.0;
 
   if(lambda >= 0.999999) {
@@ -468,7 +468,8 @@ inline double FFParticle::CalcCoulombVir(const double distSq,
 }
 
 inline double FFParticle::CalcCoulombVir(const double distSq,
-    const double qi_qj, const uint b) const
+    const double qi_qj, const uint b,
+    int indexForWolfCal) const
 {
   double dist = sqrt(distSq);
   if(forcefield.ewald) {
