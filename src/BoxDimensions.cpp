@@ -16,7 +16,7 @@ void BoxDimensions::Init(config_setup::RestartSettings const& restart,
                          Forcefield const &ff)
 {
   for (uint b = 0; b < BOX_TOTAL; b++) {
-    rCut[b] = std::max(ff.rCut, ff.rCutCoulomb[b]);
+    rCut[b] = std::max(ff.rCut, ff.rCutCoulomb[b][0]);
     rCutSq[b] = rCut[b] * rCut[b];
     minVol[b] = 8.0 * rCutSq[b] * rCut[b] + 0.001;
     if(restart.enable && cryst.hasVolume[b]) {

@@ -94,19 +94,19 @@ void Forcefield::InitBasicVals(config_setup::SystemVals const& val,
   sc_sigma_6 = pow(sc_sigma, 6.0);
 
   for(uint b = 0 ; b < BOX_TOTAL; b++) {
-    rCutCoulomb[b] = val.elect.cutoffCoulomb[b];
-    rCutCoulombSq[b] = rCutCoulomb[b] * rCutCoulomb[b];
-    alpha[b] = sqrt(-log(tolerance)) / rCutCoulomb[b];
+    rCutCoulomb[b][0] = val.elect.cutoffCoulomb[b];
+    rCutCoulombSq[b][0] = rCutCoulomb[b][0] * rCutCoulomb[b][0];
+    alpha[b] = sqrt(-log(tolerance)) / rCutCoulomb[b][0];
     alphaSq[b] = alpha[b] * alpha[b];
-    recip_rcut[b] = -2.0 * log(tolerance) / rCutCoulomb[b];
+    recip_rcut[b] = -2.0 * log(tolerance) / rCutCoulomb[b][0];
     recip_rcut_Sq[b] = recip_rcut[b] * recip_rcut[b];
     if (wolf){
       wolfAlpha[b] = val.elect.wolfAlpha[b];
-      wolfFactor1[b] = erfc(wolfAlpha[b]*rCutCoulomb[b])/rCutCoulomb[b];
-      wolfFactor2[b] = wolfFactor1[b]/rCutCoulomb[b];
+      wolfFactor1[b] = erfc(wolfAlpha[b]*rCutCoulomb[b][0])/rCutCoulomb[b][0];
+      wolfFactor2[b] = wolfFactor1[b]/rCutCoulomb[b][0];
       wolfFactor2[b] += wolfAlpha[b] *  M_2_SQRTPI * 
                         exp(-1.0*wolfAlpha[b]*wolfAlpha[b]*rCutCoulombSq[b])
-                        /rCutCoulomb[b];
+                        /rCutCoulomb[b][0];
       wolfFactor3[b] = wolfAlpha[b] *  M_2_SQRTPI;
     }
   }

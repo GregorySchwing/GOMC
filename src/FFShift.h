@@ -52,13 +52,19 @@ public:
   // coulomb interaction functions
   virtual double CalcCoulomb(const double distSq, const uint kind1,
                              const uint kind2, const double qi_qj_Fact,
-                             const double lambda, const uint b) const;
+                             const double lambda, const uint b,
+                             int indexForRCut = 0,
+                             int indexForAlpha = 0) const;
   virtual double CalcCoulombVir(const double distSq, const uint kind1,
                                 const uint kind2, const double qi_qj,
-                                const double lambda, const uint b) const;
+                                const double lambda, const uint b,
+                                int indexForRCut = 0,
+                                int indexForAlpha = 0) const;
   virtual void CalcCoulombAdd_1_4(double& en, const double distSq,
                                   const double qi_qj_Fact,
-                                  const bool NB, const uint box) const;
+                                  const bool NB, const uint box,
+                                  int indexForRCut = 0,
+                                  int indexForAlpha = 0) const;
 
   //!Returns Ezero, no energy correction
   virtual double EnergyLRC(const uint kind1, const uint kind2) const
@@ -84,9 +90,13 @@ protected:
   virtual double CalcEn(const double distSq, const uint index) const;
   virtual double CalcVir(const double distSq, const uint index) const;
   virtual double CalcCoulomb(const double distSq, const double qi_qj_Fact,
-                             const uint b) const;
+                             const uint b,
+                             int indexForRCut,
+                             int indexForAlpha) const;
   virtual double CalcCoulombVir(const double distSq, const double qi_qj,
-                                uint b) const;
+                                uint b,
+                                int indexForRCut,
+                                int indexForAlpha) const;
 
   double *shiftConst, *shiftConst_1_4;
 
@@ -147,7 +157,9 @@ inline void FF_SHIFT::CalcAdd_1_4(double& en, const double distSq,
 
 inline void FF_SHIFT::CalcCoulombAdd_1_4(double& en, const double distSq,
     const double qi_qj_Fact,
-    const bool NB, const uint box) const
+    const bool NB, const uint box,
+    int indexForRCut,
+    int indexForAlpha) const
 {
   if(forcefield.rCutCoulombSq[box] < distSq && !forcefield.isVlugtWolf)
     return;
@@ -233,7 +245,9 @@ inline double FF_SHIFT::CalcCoulomb(const double distSq,
                                     const uint kind2,
                                     const double qi_qj_Fact,
                                     const double lambda,
-                                    const uint b) const
+                                    const uint b,
+                                    int indexForRCut,
+                                    int indexForAlpha) const
 {
   if(forcefield.rCutCoulombSq[b] < distSq)
     return 0.0;
@@ -259,7 +273,9 @@ inline double FF_SHIFT::CalcCoulomb(const double distSq,
 }
 
 inline double FF_SHIFT::CalcCoulomb(const double distSq, const double qi_qj_Fact,
-                             const uint b) const
+                             const uint b,
+                             int indexForRCut,
+                             int indexForAlpha) const
 {
   double dist = sqrt(distSq);
   if(forcefield.ewald) {
@@ -284,7 +300,9 @@ inline double FF_SHIFT::CalcCoulomb(const double distSq, const double qi_qj_Fact
 
 inline double FF_SHIFT::CalcCoulombVir(const double distSq, const uint kind1,
                                        const uint kind2, const double qi_qj,
-                                       const double lambda, const uint b) const
+                                       const double lambda, const uint b,
+                                       int indexForRCut,
+                                       int indexForAlpha) const
 {
   if(forcefield.rCutCoulombSq[b] < distSq)
     return 0.0;
@@ -312,7 +330,9 @@ inline double FF_SHIFT::CalcCoulombVir(const double distSq, const uint kind1,
 }
 
 inline double FF_SHIFT::CalcCoulombVir(const double distSq, const double qi_qj,
-                                       uint b) const
+                                       uint b,
+                                       int indexForRCut,
+                                       int indexForAlpha) const
 {
   double dist = sqrt(distSq);
   if(forcefield.ewald) {

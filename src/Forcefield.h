@@ -47,8 +47,8 @@ public:
   double beta;                    //!<Thermodynamic beta = 1/(T) K^-1)
   double rCut, rCutSq;            //!<Cutoff radius for LJ/Mie potential (angstroms)
   double rCutLow, rCutLowSq;      //!<Cutoff min for Electrostatic (angstroms)
-  double rCutCoulomb[BOX_TOTAL];  //!<Cutoff Coulomb interaction(angstroms)
-  double rCutCoulombSq[BOX_TOTAL]; //!<Cutoff Coulomb interaction(angstroms)
+  double * rCutCoulomb[BOX_TOTAL];  //!<Cutoff Coulomb interaction(angstroms)
+  double * rCutCoulombSq[BOX_TOTAL]; //!<Cutoff Coulomb interaction(angstroms)
   double alpha[BOX_TOTAL];        //Ewald sum terms
   double alphaSq[BOX_TOTAL];      //Ewald sum terms
   double recip_rcut[BOX_TOTAL];   //Ewald sum terms
@@ -56,7 +56,7 @@ public:
   double tolerance;               //Ewald sum terms
   double rswitch;                 //Switch distance
   double dielectric;              //dielectric for martini
-  double wolfAlpha[BOX_TOTAL], wolfFactor1[BOX_TOTAL], wolfFactor2[BOX_TOTAL], wolfFactor3[BOX_TOTAL]; //alpha term for Wolf Electrostatic and constant factors
+  double * wolfAlpha[BOX_TOTAL], * wolfFactor1[BOX_TOTAL], * wolfFactor2[BOX_TOTAL], * wolfFactor3[BOX_TOTAL]; //alpha term for Wolf Electrostatic and constant factors
   // Wolf Calibration
   int numberOfRCuts[BOX_TOTAL];
   int numberOfAlphas[BOX_TOTAL];

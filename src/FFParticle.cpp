@@ -293,9 +293,11 @@ inline void FFParticle::CalcAdd_1_4(double& en, const double distSq,
 
 inline void FFParticle::CalcCoulombAdd_1_4(double& en, const double distSq,
     const double qi_qj_Fact,
-    const bool NB, const uint box) const
+    const bool NB, const uint box,
+    int indexForRCut,
+    int indexForAlpha) const
 {
-  if(forcefield.rCutCoulombSq[box] < distSq && !forcefield.isVlugtWolf)
+  if(forcefield.rCutCoulombSq[box][indexForAlpha] < distSq && !forcefield.isVlugtWolf)
     return;
 
   double dist = sqrt(distSq);
@@ -380,17 +382,18 @@ inline double FFParticle::CalcCoulomb(const double distSq,
                                       const double qi_qj_Fact,
                                       const double lambda,
                                       const uint b,
-                                      int indexForWolfCal) const
+                                      int indexForRCut,
+                                      int indexForAlpha) const
 {
   // This will reduce to the original equation when not calibrating,
-  // since numberOfRCuts is by default 1 and indexForWolfCal is by default 0.
-  if(forcefield.rCutCoulombSq[b*forcefield.numberOfRCuts[0] + indexForWolfCal] < distSq)
+  // since indexForRCut is by default 0.
+  if(forcefield.rCutCoulombSq[b][indexForRCut] < distSq)
     return 0.0;
 
 
   if(lambda >= 0.999999) {
     //save computation time
-    return CalcCoulomb(distSq, qi_qj_Fact, b);
+    return CalcCoulomb(distSq, qi_qj_Fact, b, indexForRCut);
   }
   double en = 0.0;
   // soft-cre scaling
@@ -402,9 +405,9 @@ inline double FFParticle::CalcCoulomb(const double distSq,
     double lambdaCoef = forcefield.sc_alpha * pow((1.0 - lambda), forcefield.sc_power);
     double softDist6 = lambdaCoef * sigma6 + dist6;
     double softRsq = cbrt(softDist6);
-    en = lambda * CalcCoulomb(softRsq, qi_qj_Fact, b, indexForWolfCal);
+    en = lambda * CalcCoulomb(softRsq, qi_qj_Fact, b, indexForRCut);
   } else {
-    en = lambda * CalcCoulomb(distSq, qi_qj_Fact, b, indexForWolfCal);
+    en = lambda * CalcCoulomb(distSq, qi_qj_Fact, b, indexForRCut);
   }
   return en;
 }
@@ -414,7 +417,8 @@ inline double FFParticle::CalcCoulomb(const double distSq,
 inline double FFParticle::CalcCoulomb(const double distSq,
                                       const double qi_qj_Fact,
                                       const uint b,
-                                      int indexForWolfCal) const
+                                      int indexForRCut,
+                                      int indexForAlpha) const
 {
   double dist = sqrt(distSq);
   if(forcefield.ewald) {
@@ -422,11 +426,11 @@ inline double FFParticle::CalcCoulomb(const double distSq,
     return qi_qj_Fact * erfc(val) / dist;
   } else if (forcefield.wolf){
     // V_DSP -- (16) from Gezelter 2006
-    double wolf_electrostatic = erfc(forcefield.wolfAlpha[b] * dist)/dist;
+    double wolf_electrostatic = erfc(forcefield.wolfAlpha[b][indexForAlpha] * dist)/dist;
     wolf_electrostatic -= forcefield.wolfFactor1[b];
     // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
     if(forcefield.coulKind){
-      double distDiff = dist-forcefield.rCutCoulomb[b];
+      double distDiff = dist-forcefield.rCutCoulomb[b][indexForRCut];
       wolf_electrostatic += forcefield.wolfFactor2[b]*distDiff;
     } 
     wolf_electrostatic *= qi_qj_Fact;
@@ -442,16 +446,17 @@ inline double FFParticle::CalcCoulombVir(const double distSq,
     const double qi_qj,
     const double lambda,
     const uint b,
-    int indexForWolfCal) const
+    int indexForRCut,
+    int indexForAlpha) const
 {
   // This will reduce to the original equation when not calibrating,
-  // since numberOfRCuts is by default 1 and indexForWolfCal is by default 0.
-  if(forcefield.rCutCoulombSq[b*forcefield.numberOfRCuts[0] + indexForWolfCal] < distSq)
+  // since numberOfRCuts is by default 1 and indexForRCut is by default 0.
+  if(forcefield.rCutCoulombSq[b][indexForRCut] < distSq)
     return 0.0;
 
   if(lambda >= 0.999999) {
     //save computation time
-    return CalcCoulombVir(distSq, qi_qj, b, indexForWolfCal);
+    return CalcCoulombVir(distSq, qi_qj, b, indexForRCut);
   }
   double vir = 0.0;
   if(forcefield.sc_coul) {
@@ -464,16 +469,17 @@ inline double FFParticle::CalcCoulombVir(const double distSq,
     double softRsq = cbrt(softDist6);
     double correction = distSq / softRsq;
     //We need to fix the return value from calcVir
-    vir = lambda * correction * correction * CalcCoulombVir(softRsq, qi_qj, b, indexForWolfCal);
+    vir = lambda * correction * correction * CalcCoulombVir(softRsq, qi_qj, b, indexForRCut);
   } else {
-    vir = lambda * CalcCoulombVir(distSq, qi_qj, b, indexForWolfCal);
+    vir = lambda * CalcCoulombVir(distSq, qi_qj, b, indexForRCut);
   }
   return vir;
 }
 
 inline double FFParticle::CalcCoulombVir(const double distSq,
     const double qi_qj, const uint b,
-    int indexForWolfCal) const
+    int indexForRCut,
+    int indexForAlpha) const
 {
   double dist = sqrt(distSq);
   if(forcefield.ewald) {
@@ -484,9 +490,9 @@ inline double FFParticle::CalcCoulombVir(const double distSq,
     return qi_qj * (temp / dist + constValue * expConstValue) / distSq;
   } else if (forcefield.wolf){
       // F_DSP -- (17) from Gezelter 2006
-      double wolf_electrostatic_force = erfc(forcefield.wolfAlpha[b] * dist)/distSq;
+      double wolf_electrostatic_force = erfc(forcefield.wolfAlpha[b][indexForAlpha] * dist)/distSq;
       // M_2_SQRTPI is 2/sqrt(PI)
-      wolf_electrostatic_force += forcefield.wolfFactor3[b]*exp(-1.0*pow(forcefield.wolfAlpha[b], 2.0)*distSq)/dist;
+      wolf_electrostatic_force += forcefield.wolfFactor3[b]*exp(-1.0*pow(forcefield.wolfAlpha[b][indexForAlpha], 2.0)*distSq)/dist;
       // F_DSF -- (19) from Gezelter 2006.  This force is continuous at cutoff
       if(forcefield.coulKind){
         wolf_electrostatic_force -= forcefield.wolfFactor2[b];
