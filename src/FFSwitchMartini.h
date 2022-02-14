@@ -85,12 +85,12 @@ public:
                              const uint kind2,
                              const double qi_qj_Fact,
                              const double lambda,
-                             const uint b
+                             const uint b,
                              int indexForRCut = 0,
                              int indexForAlpha = 0) const;
   virtual double CalcCoulombVir(const double distSq, const uint kind1,
                                 const uint kind2, const double qi_qj,
-                                const double lambda, const uint b
+                                const double lambda, const uint b,
                                 int indexForRCut = 0,
                                 int indexForAlpha = 0) const;
   virtual void CalcCoulombAdd_1_4(double& en, const double distSq,
@@ -118,7 +118,7 @@ public:
   //Calculate the dE/dlambda for Coulomb energy
   virtual double CalcCoulombdEndL(const double distSq, const uint kind1,
                                   const uint kind2, const double qi_qj_Fact,
-                                  const double lambda, uint b
+                                  const double lambda, uint b,
                                   int indexForRCut = 0,
                                   int indexForAlpha = 0) const;
 
@@ -386,11 +386,11 @@ inline double FF_SWITCH_MARTINI::CalcCoulomb(const double distSq,
     const uint kind2,
     const double qi_qj_Fact,
     const double lambda,
-    const uint b
+    const uint b,
     int indexForRCut,
     int indexForAlpha) const
 {
-  if(forcefield.rCutCoulombSq[b] < distSq)
+  if(forcefield.rCutCoulombSq[b][indexForRCut] < distSq)
     return 0.0;
 
   if(lambda >= 0.999999) {
@@ -415,7 +415,7 @@ inline double FF_SWITCH_MARTINI::CalcCoulomb(const double distSq,
 
 inline double FF_SWITCH_MARTINI::CalcCoulomb(const double distSq,
     const double qi_qj_Fact,
-    const uint b
+    const uint b,
     int indexForRCut,
     int indexForAlpha) const
 {
@@ -429,7 +429,7 @@ inline double FF_SWITCH_MARTINI::CalcCoulomb(const double distSq,
     wolf_electrostatic -= forcefield.wolfFactor1[b];
     // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
     if(forcefield.coulKind){
-      double distDiff = dist-forcefield.rCutCoulomb[b];
+      double distDiff = dist-forcefield.rCutCoulomb[b][indexForRCut];
       wolf_electrostatic += forcefield.wolfFactor2[b]*distDiff;
     } 
     wolf_electrostatic *= qi_qj_Fact;
@@ -450,11 +450,11 @@ inline double FF_SWITCH_MARTINI::CalcCoulombVir(const double distSq,
     const uint kind2,
     const double qi_qj,
     const double lambda,
-    const uint b
+    const uint b,
     int indexForRCut,
     int indexForAlpha) const
 {
-  if(forcefield.rCutCoulombSq[b] < distSq)
+  if(forcefield.rCutCoulombSq[b][indexForRCut] < distSq)
     return 0.0;
 
   if(lambda >= 0.999999) {
@@ -481,7 +481,7 @@ inline double FF_SWITCH_MARTINI::CalcCoulombVir(const double distSq,
 
 inline double FF_SWITCH_MARTINI::CalcCoulombVir(const double distSq,
     const double qi_qj,
-    const uint b
+    const uint b,
     int indexForRCut,
     int indexForAlpha) const
 {
@@ -544,11 +544,11 @@ inline double FF_SWITCH_MARTINI::CalcCoulombdEndL(const double distSq,
     const uint kind2,
     const double qi_qj_Fact,
     const double lambda,
-    uint b
+    uint b,
     int indexForRCut,
     int indexForAlpha) const
 {
-  if(forcefield.rCutCoulombSq[b] < distSq)
+  if(forcefield.rCutCoulombSq[b][indexForRCut] < distSq)
     return 0.0;
 
   double dhdl = 0.0;

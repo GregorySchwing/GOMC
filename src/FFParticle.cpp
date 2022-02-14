@@ -535,9 +535,11 @@ inline double FFParticle::CalcCoulombdEndL(const double distSq,
     const uint kind1,
     const uint kind2,
     const double qi_qj_Fact,
-    const double lambda, uint b) const
+    const double lambda, uint b,
+    int indexForRCut,
+    int indexForAlpha) const
 {
-  if(forcefield.rCutCoulombSq[b] < distSq)
+  if(forcefield.rCutCoulombSq[b][indexForRCut] < distSq)
     return 0.0;
 
   double dhdl = 0.0;

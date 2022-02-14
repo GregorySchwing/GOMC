@@ -84,7 +84,9 @@ public:
   //Calculate the dE/dlambda for Coulomb energy
   virtual double CalcCoulombdEndL(const double distSq, const uint kind1,
                                   const uint kind2, const double qi_qj_Fact,
-                                  const double lambda, uint b) const;
+                                  const double lambda, uint b,
+                                  int indexForRCut = 0,
+                                  int indexForAlpha = 0) const;
 
 protected:
   virtual double CalcEn(const double distSq, const uint index) const;
@@ -249,7 +251,7 @@ inline double FF_SHIFT::CalcCoulomb(const double distSq,
                                     int indexForRCut,
                                     int indexForAlpha) const
 {
-  if(forcefield.rCutCoulombSq[b] < distSq)
+  if(forcefield.rCutCoulombSq[b][indexForRCut] < distSq)
     return 0.0;
 
   if(lambda >= 0.999999) {
@@ -287,7 +289,7 @@ inline double FF_SHIFT::CalcCoulomb(const double distSq, const double qi_qj_Fact
     wolf_electrostatic -= forcefield.wolfFactor1[b];
     // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
     if(forcefield.coulKind){
-      double distDiff = dist-forcefield.rCutCoulomb[b];
+      double distDiff = dist-forcefield.rCutCoulomb[b][indexForRCut];
       wolf_electrostatic += forcefield.wolfFactor2[b]*distDiff;
     } 
     wolf_electrostatic *= qi_qj_Fact;
@@ -304,7 +306,7 @@ inline double FF_SHIFT::CalcCoulombVir(const double distSq, const uint kind1,
                                        int indexForRCut,
                                        int indexForAlpha) const
 {
-  if(forcefield.rCutCoulombSq[b] < distSq)
+  if(forcefield.rCutCoulombSq[b][indexForRCut] < distSq)
     return 0.0;
 
   if(lambda >= 0.999999) {
@@ -383,9 +385,11 @@ inline double FF_SHIFT::CalcdEndL(const double distSq, const uint kind1,
 inline double FF_SHIFT::CalcCoulombdEndL(const double distSq, const uint kind1,
     const uint kind2,
     const double qi_qj_Fact,
-    const double lambda, uint b) const
+    const double lambda, uint b,
+    int indexForRCut,
+    int indexForAlpha) const
 {
-  if(forcefield.rCutCoulombSq[b] < distSq)
+  if(forcefield.rCutCoulombSq[b][indexForRCut] < distSq)
     return 0.0;
 
   double dhdl = 0.0;
