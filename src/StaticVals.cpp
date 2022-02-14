@@ -15,7 +15,7 @@ void StaticVals::Init(Setup & set, System& sys)
 {
   //Standard inits
   simEventFreq.Init(set.config.sys.step);
-  forcefield.Init(set);
+  forcefield.Init(set, wolfCal);
   mol.Init(set, forcefield, sys);
 #ifndef VARIABLE_PARTICLE_NUMBER
   molLookup.Init(mol, set.pdb.atoms, forcefield, set.config.in.restart.restartFromCheckpoint);

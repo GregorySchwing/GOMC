@@ -33,7 +33,8 @@ public:
   Forcefield();
   ~Forcefield();
   //Initialize contained FFxxxx structs from setup data
-  void Init(const Setup& set);
+  void Init(const Setup& set,
+            config_setup::WolfCalibration const& wolfCal);
 
 
   FFParticle * particles;    //!<For LJ/Mie energy between unbonded atoms

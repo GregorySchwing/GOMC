@@ -33,9 +33,11 @@ Forcefield::~Forcefield()
 
 }
 
-void Forcefield::Init(const Setup& set)
+void Forcefield::Init(const Setup& set,
+                      config_setup::WolfCalibration const& wolfCal)
 {
   InitBasicVals(set.config.sys, set.config.in.ffKind);
+  InitWolfCalibration(wolfCal);
   particles->Init(set.ff.mie, set.ff.nbfix);
   bonds.Init(set.ff.bond);
   angles->Init(set.ff.angle);
