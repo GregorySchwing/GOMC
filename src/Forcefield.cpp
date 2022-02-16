@@ -21,7 +21,11 @@ Forcefield::Forcefield()
   OneThree = false; //default behavior is to turn off 1-3 interaction
   OneFour = true;   // to turn on 1-4 interaction
   OneN = true;      // and turn on 1-n interaction
-  numberOfRCuts[0] = 1;
+  // Default, when not calibrating wolf, these values are 1.
+  for (int box = 0; box < BOX_TOTAL; ++box){
+    numberOfRCuts[box] = 1;
+    numberOfAlphas[box] = 1;
+  }
 }
 
 Forcefield::~Forcefield()
@@ -36,8 +40,8 @@ Forcefield::~Forcefield()
 void Forcefield::Init(const Setup& set,
                       config_setup::WolfCalibration const& wolfCal)
 {
-  InitBasicVals(set.config.sys, set.config.in.ffKind);
   InitWolfCalibration(wolfCal);
+  InitBasicVals(set.config.sys, set.config.in.ffKind);
   particles->Init(set.ff.mie, set.ff.nbfix);
   bonds.Init(set.ff.bond);
   angles->Init(set.ff.angle);
@@ -160,19 +164,30 @@ void Forcefield::InitWolfCalibration(config_setup::WolfCalibration const& wolfCa
   // Calculate the number of calibration points from the ranges provided
   // If delta is not a common multiple of the (End - Start) explicitly add the End.
   for (uint b = 0; b < BOX_TOTAL; ++b) {
-    numberOfRCuts[b] = (int)((wolfCal.wolfCutoffCoulombEnd[b] - wolfCal.wolfCutoffCoulombStart[b]) / wolfCal.wolfCutoffCoulombDelta[b]);
-    numberOfAlphas[b] = (int)((wolfCal.wolfAlphaEnd[b] - wolfCal.wolfAlphaStart[b]) / wolfCal.wolfAlphaDelta[b]);
+    numberOfRCuts[b] += (int)((wolfCal.wolfCutoffCoulombEnd[b] - wolfCal.wolfCutoffCoulombStart[b]) / wolfCal.wolfCutoffCoulombDelta[b]);
+    numberOfAlphas[b] += (int)((wolfCal.wolfAlphaEnd[b] - wolfCal.wolfAlphaStart[b]) / wolfCal.wolfAlphaDelta[b]);
     if (abs(wolfCal.wolfAlphaDelta[b] * numberOfAlphas[b] - wolfCal.wolfCutoffCoulombEnd[b]) > 0.01){
-          numberOfAlphas[b]= numberOfAlphas[b] + 1;
+          numberOfAlphas[b] += 1;
           explicitlyAddEndAlpha[b] = true;
     } else {
           explicitlyAddEndAlpha[b] = false;
     }
     if (abs(wolfCal.wolfCutoffCoulombDelta[b] * numberOfRCuts[b] - wolfCal.wolfCutoffCoulombEnd[b]) > 1){
-          numberOfRCuts[b]= numberOfRCuts[b] + 1;
+          numberOfRCuts[b] += 1;
           explicitlyAddEndRCut[b] = true;
     } else {
           explicitlyAddEndRCut[b] = false;
+    }
+    wolfAlpha[b] = new double[numberOfAlphas[b]];
+    rCutCoulomb[b] = new double[numberOfRCuts[b]];
+    rCutCoulombSq[b] = new double[numberOfRCuts[b]];
+    wolfFactor1[b] = new double*[numberOfRCuts[b]];
+    wolfFactor2[b] = new double*[numberOfRCuts[b]];
+    wolfFactor3[b] = new double*[numberOfRCuts[b]];
+    for (int r = 0; r < numberOfRCuts[b]; ++r){
+      wolfFactor1[b][r] = new double[numberOfAlphas[b]];
+      wolfFactor2[b][r] = new double[numberOfAlphas[b]];
+      wolfFactor3[b][r] = new double[numberOfAlphas[b]];
     }
   }
 }
