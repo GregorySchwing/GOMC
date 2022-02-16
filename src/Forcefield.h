@@ -93,7 +93,8 @@ private:
   void InitBasicVals(config_setup::SystemVals const& val,
                      config_setup::FFKind const& ffKind);
   void InitWolfCalibration(config_setup::WolfCalibration const& wolfCal);
-
+  void AllocMem();
+  void DeallocMem();
 };
 
 #endif /*FORCEFIELD_H*/

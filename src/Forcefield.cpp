@@ -41,6 +41,7 @@ void Forcefield::Init(const Setup& set,
                       config_setup::WolfCalibration const& wolfCal)
 {
   InitWolfCalibration(wolfCal);
+  AllocMem();
   InitBasicVals(set.config.sys, set.config.in.ffKind);
   particles->Init(set.ff.mie, set.ff.nbfix);
   bonds.Init(set.ff.bond);
@@ -53,6 +54,38 @@ void Forcefield::Init(const Setup& set,
     isVlugtWolf = true;
   } else {
     isVlugtWolf = false;
+  }
+}
+
+void Forcefield::AllocMem(){
+  for (uint b = 0; b < BOX_TOTAL; ++b) {
+    wolfAlpha[b] = new double[numberOfAlphas[b]];
+    rCutCoulomb[b] = new double[numberOfRCuts[b]];
+    rCutCoulombSq[b] = new double[numberOfRCuts[b]];
+    wolfFactor1[b] = new double*[numberOfRCuts[b]];
+    wolfFactor2[b] = new double*[numberOfRCuts[b]];
+    wolfFactor3[b] = new double*[numberOfRCuts[b]];
+    for (int r = 0; r < numberOfRCuts[b]; ++r){
+      wolfFactor1[b][r] = new double[numberOfAlphas[b]];
+      wolfFactor2[b][r] = new double[numberOfAlphas[b]];
+      wolfFactor3[b][r] = new double[numberOfAlphas[b]];
+    }
+  }
+}
+
+void Forcefield::DeallocMem(){
+  for (uint b = 0; b < BOX_TOTAL; ++b) {
+    delete[] wolfAlpha[b];
+    delete[] rCutCoulomb[b];
+    delete[] rCutCoulombSq[b];
+    for (int r = 0; r < numberOfRCuts[b]; ++r){
+      delete[] wolfFactor1[b][r];
+      delete[] wolfFactor2[b][r];
+      delete[] wolfFactor3[b][r];
+    }
+    delete[] wolfFactor1[b];
+    delete[] wolfFactor2[b];
+    delete[] wolfFactor3[b];
   }
 }
 
@@ -112,6 +145,9 @@ void Forcefield::InitBasicVals(config_setup::SystemVals const& val,
                         exp(-1.0*wolfAlpha[b][0]*wolfAlpha[b][0]*rCutCoulombSq[b][0])
                         /rCutCoulomb[b][0];
       wolfFactor3[b][0][0] = wolfAlpha[b][0] *  M_2_SQRTPI;
+    }
+    if (wolfCalib){
+      
     }
   }
 
@@ -177,17 +213,6 @@ void Forcefield::InitWolfCalibration(config_setup::WolfCalibration const& wolfCa
           explicitlyAddEndRCut[b] = true;
     } else {
           explicitlyAddEndRCut[b] = false;
-    }
-    wolfAlpha[b] = new double[numberOfAlphas[b]];
-    rCutCoulomb[b] = new double[numberOfRCuts[b]];
-    rCutCoulombSq[b] = new double[numberOfRCuts[b]];
-    wolfFactor1[b] = new double*[numberOfRCuts[b]];
-    wolfFactor2[b] = new double*[numberOfRCuts[b]];
-    wolfFactor3[b] = new double*[numberOfRCuts[b]];
-    for (int r = 0; r < numberOfRCuts[b]; ++r){
-      wolfFactor1[b][r] = new double[numberOfAlphas[b]];
-      wolfFactor2[b][r] = new double[numberOfAlphas[b]];
-      wolfFactor3[b][r] = new double[numberOfAlphas[b]];
     }
   }
 }
