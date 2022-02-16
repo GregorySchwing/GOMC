@@ -34,15 +34,21 @@ Forcefield::~Forcefield()
     delete particles;
   if( angles != NULL)
     delete angles;
-
+  DeallocMem();
 }
 
 void Forcefield::Init(const Setup& set,
                       config_setup::WolfCalibration const& wolfCal)
 {
-  InitWolfCalibration(wolfCal);
+  wolfCalibration = wolfCal.enable;
+  if(wolfCalibration){
+    CalculateWolfCalibrationMemoryUsage(wolfCal);
+  }
   AllocMem();
   InitBasicVals(set.config.sys, set.config.in.ffKind);
+  if(wolfCalibration){
+    InitWolfCalibration(wolfCal);
+  }
   particles->Init(set.ff.mie, set.ff.nbfix);
   bonds.Init(set.ff.bond);
   angles->Init(set.ff.angle);
@@ -146,9 +152,6 @@ void Forcefield::InitBasicVals(config_setup::SystemVals const& val,
                         /rCutCoulomb[b][0];
       wolfFactor3[b][0][0] = wolfAlpha[b][0] *  M_2_SQRTPI;
     }
-    if (wolfCalib){
-      
-    }
   }
 
   vdwGeometricSigma = val.ff.vdwGeometricSigma;
@@ -196,7 +199,7 @@ void Forcefield::InitBasicVals(config_setup::SystemVals const& val,
 
 }
 
-void Forcefield::InitWolfCalibration(config_setup::WolfCalibration const& wolfCal){
+void Forcefield::CalculateWolfCalibrationMemoryUsage(config_setup::WolfCalibration const& wolfCal){
   // Calculate the number of calibration points from the ranges provided
   // If delta is not a common multiple of the (End - Start) explicitly add the End.
   for (uint b = 0; b < BOX_TOTAL; ++b) {
@@ -213,6 +216,30 @@ void Forcefield::InitWolfCalibration(config_setup::WolfCalibration const& wolfCa
           explicitlyAddEndRCut[b] = true;
     } else {
           explicitlyAddEndRCut[b] = false;
+    }
+  }
+}
+
+void Forcefield::InitWolfCalibration(config_setup::WolfCalibration const& wolfCal){
+  for(uint b = 0 ; b < BOX_TOTAL; b++) {
+    // Start at 1, since 0th index is from the config file and initted in InitBasicVals
+    for(uint r = 0; r < numberOfRCuts[b]; r++) {
+      // Start at 1, since 0th index is from the config file and initted in InitBasicVals
+      rCutCoulomb[b][r+1] = wolfCal.wolfCutoffCoulombStart[b] + r*wolfCal.wolfCutoffCoulombDelta[b];
+      rCutCoulombSq[b][r+1] = rCutCoulomb[b][r+1] * rCutCoulomb[b][r+1];
+    }
+    for(uint a = 0 ; a < numberOfAlphas[b]; a++) {
+      wolfAlpha[b][a+1] = wolfCal.wolfAlphaStart[b] + a*wolfCal.wolfAlphaDelta[b];
+    }
+    for(uint r = 1; r < numberOfRCuts[b]; r++) {
+      for(uint a = 1 ; a < numberOfAlphas[b]; a++) {
+        wolfFactor1[b][r][a] = erfc(wolfAlpha[b][a]*rCutCoulomb[b][r])/rCutCoulomb[b][r];
+        wolfFactor2[b][r][a] = wolfFactor1[b][r][a]/rCutCoulomb[b][r];
+        wolfFactor2[b][r][a] += wolfAlpha[b][a] *  M_2_SQRTPI * 
+                          exp(-1.0*wolfAlpha[b][a]*wolfAlpha[b][a]*rCutCoulombSq[b][r])
+                          /rCutCoulomb[b][r];
+        wolfFactor3[b][r][a] = wolfAlpha[b][a] *  M_2_SQRTPI;
+      }
     }
   }
 }

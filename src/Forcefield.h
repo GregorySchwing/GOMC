@@ -55,6 +55,7 @@ public:
   double rswitch;                 //Switch distance
   double dielectric;              //dielectric for martini
   // Wolf Calibration 
+  bool wolfCalibration;
   double * wolfAlpha[BOX_TOTAL]; //alpha term for Wolf Electrostatic and constant factors
   double ** wolfFactor1[BOX_TOTAL]; //alpha term for Wolf Electrostatic and constant factors
   double ** wolfFactor2[BOX_TOTAL];  //alpha term for Wolf Electrostatic and constant factors
@@ -92,6 +93,7 @@ private:
 
   void InitBasicVals(config_setup::SystemVals const& val,
                      config_setup::FFKind const& ffKind);
+  void CalculateWolfCalibrationMemoryUsage(config_setup::WolfCalibration const& wolfCal);
   void InitWolfCalibration(config_setup::WolfCalibration const& wolfCal);
   void AllocMem();
   void DeallocMem();
