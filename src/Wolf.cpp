@@ -31,11 +31,11 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 Wolf::Wolf(StaticVals & stat, System & sys) :
   Ewald(stat, sys) {
     for(uint b = 0 ; b < BOX_TOTAL; b++) {
-        wolfAlpha[b] = ff.wolfAlpha[b];
-        wolfFactor1[b] = ff.wolfFactor1[b];
-        wolfFactor2[b] = ff.wolfFactor2[b];
-        rCutCoulombSq[b] = ff.rCutCoulombSq[b];
-        rCutCoulomb[b] = ff.rCutCoulomb[b];
+        wolfAlpha[b] = ff.wolfAlpha[b][0];
+        wolfFactor1[b] = ff.wolfFactor1[b][0][0];
+        wolfFactor2[b] = ff.wolfFactor2[b][0][0];
+        rCutCoulombSq[b] = ff.rCutCoulombSq[b][0];
+        rCutCoulomb[b] = ff.rCutCoulomb[b][0];
     }
     coulKind = ff.coulKind;
 }
@@ -409,10 +409,10 @@ double Wolf::SwapSelf(const cbmc::TrialMol& trialMol) const
 
   GOMC_EVENT_STOP(1, GomcProfileEvent::SELF_SWAP);
   if (isVlugtWolf || isCassandraWolf){
-    return (en_self *= -1.0 * ((ff.wolfAlpha[box] * M_2_SQRTPI * 0.5) + ff.wolfFactor1[box]) * num::qqFact) ;
+    return (en_self *= -1.0 * ((wolfAlpha[box] * M_2_SQRTPI * 0.5) + wolfFactor1[box]) * num::qqFact) ;
   } else {
     // we eliminate the alpha/root(pi) using Wolf,mod from Gross et al
-    return (en_self *= -1.0 * ff.wolfFactor1[box] * num::qqFact);
+    return (en_self *= -1.0 * wolfFactor1[box] * num::qqFact);
   }
 }
 
@@ -697,10 +697,10 @@ void Wolf::ChangeSelf(Energy *energyDiff, Energy &dUdL_Coul,
     //en_self *= ((ff.wolfAlpha[box] * M_2_SQRTPI * 0.5) +  ff.wolfFactor1[box] );
     // We eliminate the alpha/root(pi) using Wolf,mod
     if (isVlugtWolf || isCassandraWolf){
-      en_self *= -1.0 * ((ff.wolfAlpha[box] * M_2_SQRTPI * 0.5) + ff.wolfFactor1[box]) * num::qqFact;
+      en_self *= -1.0 * ((wolfAlpha[box] * M_2_SQRTPI * 0.5) + wolfFactor1[box]) * num::qqFact;
     } else {
       // we eliminate the alpha/root(pi) using Wolf,mod from Gross et al
-      en_self *= -1.0 * ff.wolfFactor1[box] * num::qqFact;
+      en_self *= -1.0 * wolfFactor1[box] * num::qqFact;
     }
     //Calculate the energy difference for each lambda state
     for (uint s = 0; s < lambdaSize; s++) {
