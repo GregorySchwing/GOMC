@@ -204,6 +204,9 @@ public:
                     const uint iState, const uint molIndex,
                     const uint box) const;
 
+  void WolfCalibrationEnergyChange(const uint box,
+                                  double ** electrostaticEnergies[BOX_TOTAL]) const;
+
   #if GOMC_GTEST || GOMC_GTEST_MPI
   double GetCharge(int atomIndex);
   #endif

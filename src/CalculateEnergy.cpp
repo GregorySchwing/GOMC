@@ -1856,6 +1856,114 @@ void CalculateEnergy::ChangeLRC(Energy *energyDiff, Energy &dUdL_VDW,
   }
 }
 
+//Calculate the change in energy due to lambda
+void CalculateEnergy::WolfCalibrationEnergyChange(
+                                                  const uint box,
+                                                  double ** electrostaticEnergies[BOX_TOTAL]) const
+{
+
+  GOMC_EVENT_START(1, GomcProfileEvent::WolfCalibrationEnergyChange);
+  double tempREn = 0.0, tempLJEn = 0.0;
+
+  std::vector<int> cellVector, cellStartIndex, mapParticleToCell;
+  std::vector< std::vector<int> > neighborList;
+  cellList.GetCellListNeighbor(box, currentCoords.Count(),
+                               cellVector, cellStartIndex, mapParticleToCell);
+  neighborList = cellList.GetNeighborList(box);
+
+#ifdef GOMC_CUDA
+  //update unitcell in GPU
+  UpdateCellBasisCUDA(forcefield.particles->getCUDAVars(), box,
+                      currentAxes.cellBasis[box].x, currentAxes.cellBasis[box].y,
+                      currentAxes.cellBasis[box].z);
+
+  if(!currentAxes.orthogonal[box]) {
+    //In this case, currentAxes is really an object of type BoxDimensionsNonOrth,
+    // so cast and copy the additional data to the GPU
+    const BoxDimensionsNonOrth *NonOrthAxes = static_cast<const BoxDimensionsNonOrth*>(&currentAxes);
+    UpdateInvCellBasisCUDA(forcefield.particles->getCUDAVars(), box,
+                           NonOrthAxes->cellBasis_Inv[box].x,
+                           NonOrthAxes->cellBasis_Inv[box].y,
+                           NonOrthAxes->cellBasis_Inv[box].z);
+  }
+
+  CallBoxInterGPU(forcefield.particles->getCUDAVars(), cellVector, cellStartIndex,
+                  neighborList, coords, currentAxes, electrostatic, particleCharge,
+                  particleKind, particleMol, tempREn, tempLJEn, forcefield.sc_coul,
+                  forcefield.sc_sigma_6, forcefield.sc_alpha, num::qqFact,
+                  forcefield.sc_power, box);
+#else
+for (int r = 1; r < forcefield.numberOfRCuts[box]; ++r){
+  for (int a = 1; a < forcefield.numberOfAlphas[box]; ++a){
+    tempREn = 0.0;
+#ifdef _OPENMP
+#if GCC_VERSION >= 90000
+  #pragma omp parallel for default(none) shared(currentAxes, cellStartIndex, \
+  cellVector, currentCoords, mapParticleToCell, box, neighborList, r, a) \
+reduction(+:tempREn)
+#else
+  #pragma omp parallel for default(none) shared(currentAxes, cellStartIndex, \
+  cellVector, currentCoords, mapParticleToCell, neighborList, r, a) \
+reduction(+:tempREn)
+#endif
+#endif
+    // loop over all atoms
+    for(int currParticleIdx = 0; currParticleIdx < (int) cellVector.size(); currParticleIdx++) {
+      int currParticle = cellVector[currParticleIdx];
+      // find the which cell currParticle belong to
+      int currCell = mapParticleToCell[currParticle];
+      // loop over currCell neighboring cells
+      for(int nCellIndex = 0; nCellIndex < NUMBER_OF_NEIGHBOR_CELL; nCellIndex++) {
+        // find the index of neighboring cell
+        int neighborCell = neighborList[currCell][nCellIndex];
+
+        // find the ending index in neighboring cell
+        int endIndex = cellStartIndex[neighborCell + 1];
+        // loop over atoms inside neighboring cell
+        // cellStartIndex to endIndex -> atom indices
+        for(int nParticleIndex = cellStartIndex[neighborCell];
+            nParticleIndex < endIndex; nParticleIndex++) {
+          int nParticle = cellVector[nParticleIndex];
+
+          // avoid same atoms and duplicate work
+          if(currParticle < nParticle && particleMol[currParticle] != particleMol[nParticle]) {
+            double distSq;
+            XYZ virComponents;
+            if(currentAxes.InRcut(distSq, virComponents, currentCoords, currParticle, nParticle, box)) {
+              if (electrostatic) {
+                double lambdaCoulomb = GetLambdaCoulomb(particleMol[currParticle],
+                                                        particleMol[nParticle], box);
+                double qi_qj_fact = particleCharge[currParticle] *
+                                    particleCharge[nParticle] * num::qqFact;
+                if (qi_qj_fact != 0.0) {
+                  tempREn += forcefield.particles->CalcCoulomb(distSq,
+                            particleKind[currParticle], particleKind[nParticle],
+                            qi_qj_fact, lambdaCoulomb, box,
+                            r,a);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    electrostaticEnergies[box][r][a] = tempREn;
+  }
+}
+#endif
+
+
+  // OpenMP needs vectors for reduction ops :(
+
+  // setting energy and virial of LJ interaction
+  //potential.boxEnergy[box].inter = tempLJEn;
+  // setting energy and virial of coulomb interaction
+  //potential.boxEnergy[box].real = tempREn;
+
+
+  GOMC_EVENT_STOP(1, GomcProfileEvent::WolfCalibrationEnergyChange);
+}
+
   #if GOMC_GTEST || GOMC_GTEST_MPI
   double CalculateEnergy::GetCharge(int atomIndex){
     return particleCharge[atomIndex];

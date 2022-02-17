@@ -11,7 +11,8 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "OutputAbstracts.h"
 #include <iostream>
 #include "GOMC_Config.h"
-
+#include "System.h"
+#include "CalculateEnergy.h"
 
 class WolfCalibrationOutput : public OutputableBase
 {
@@ -20,7 +21,7 @@ public:
 
   ~WolfCalibrationOutput();
 
-  virtual void DoOutput(const ulong step) {}
+  virtual void DoOutput(const ulong step);
   virtual void DoOutputRestart(const ulong step) {}  
   virtual void Init(pdb_setup::Atoms const& atoms,
                     config_setup::Output const& output);
@@ -34,6 +35,7 @@ private:
 
   System & sysRef;
   StaticVals const& statValRef;
+  const CalculateEnergy& calcEn;
   uint stepsPerSample;
 
   double ** electrostaticEnergies[BOX_TOTAL];

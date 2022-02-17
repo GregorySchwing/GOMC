@@ -11,7 +11,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 
 
 WolfCalibrationOutput::WolfCalibrationOutput(System & sys, StaticVals const& statV):
-sysRef(sys), statValRef(statV)
+sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV)
 {
       for(uint b = 0 ; b < BOX_TOTAL; b++) {
             electrostaticEnergies[b] =  new double*[statValRef.forcefield.numberOfRCuts[b]];
@@ -60,40 +60,43 @@ void WolfCalibrationOutput::Init(pdb_setup::Atoms const& atoms,
 
 void WolfCalibrationOutput::WriteHeader(void)
 {
-  for (uint b = 0; b < BOX_TOTAL; ++b) {
-    if (outF[b].is_open()) {
-      std::string firstRow = "";
-      std::string secondRow = "";
-      firstRow += "RCutCoulomb ";
-      for (int r = 0; r < statValRef.forcefield.numberOfRCuts[b]; ++r){
-            firstRow += GetString(statValRef.forcefield.rCutCoulomb[b][r], 4);
-            firstRow += ", ";
+      for (uint b = 0; b < BOX_TOTAL; ++b) {
+            if (outF[b].is_open()) {
+                  std::string firstRow = "";
+                  std::string secondRow = "";
+                  firstRow += "RCutCoulomb ";
+                  for (int r = 0; r < statValRef.forcefield.numberOfRCuts[b]; ++r){
+                        firstRow += GetString(statValRef.forcefield.rCutCoulomb[b][r], 4);
+                        firstRow += ", ";
 
+                  }
+                  secondRow += "Alpha ";
+                  for (int a = 0; a < statValRef.forcefield.numberOfAlphas[b]; ++a){
+                        secondRow += GetString(statValRef.forcefield.wolfAlpha[b][a], 4);
+                        secondRow += ", ";
+                  }
+                  outF[b] << firstRow;
+                  outF[b] << std::endl;
+                  outF[b] << secondRow;
+            } else {
+                  std::cerr << "Unable to write to file \"" <<  name[b] << "\" "
+                              << "(Wolf Calibration file)" << std::endl;
+            }
       }
-
-      secondRow += "Alpha ";
-      for (int a = 0; a < statValRef.forcefield.numberOfAlphas[b]; ++a){
-            secondRow += GetString(statValRef.forcefield.wolfAlpha[b][a], 4);
-            secondRow += ", ";
-      }
-      
-      outF[b] << firstRow;
-      outF[b] << std::endl;
-      outF[b] << secondRow;
-    } else {
-      std::cerr << "Unable to write to file \"" <<  name[b] << "\" "
-                << "(Wolf Calibration file)" << std::endl;
-    }
-  }
 }
+
+void WolfCalibrationOutput::DoOutput(const ulong step) {
+
+}
+
 
 std::string WolfCalibrationOutput::GetString(double a, uint p)
 {
-  std::stringstream sstrm;
-  std::string tempStr;
-  sstrm << std::fixed << std::setprecision(p) << (a);
-  //sstrm.precision(p);
-  //sstrm >> tempStr;
-  tempStr = sstrm.str();
-  return tempStr;
+      std::stringstream sstrm;
+      std::string tempStr;
+      sstrm << std::fixed << std::setprecision(p) << (a);
+      //sstrm.precision(p);
+      //sstrm >> tempStr;
+      tempStr = sstrm.str();
+      return tempStr;
 }
