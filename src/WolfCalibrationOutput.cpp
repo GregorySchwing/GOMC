@@ -46,15 +46,19 @@ void WolfCalibrationOutput::Init(pdb_setup::Atoms const& atoms,
                   fileName += strKind;
                   fileName += "_";
                   fileName += uniqueName;
-                  fileName += ".dat";
                   #if GOMC_LIB_MPI
-                        name[b] = pathToReplicaOutputDirectory + fileName;
+                        name[b] = pathToReplicaOutputDirectory + fileName + ".dat";
+                        namePar[b] = pathToReplicaOutputDirectory + fileName + ".par";
                   #else
-                        name[b] = fileName;
+                        name[b] = fileName + ".dat";
+                        namePar[b] = fileName + ".par";
+
                   #endif
                   outF[b].open(name[b].c_str(), std::ofstream::out);
+                  outFPar[b].open(namePar[b].c_str(), std::ofstream::out);
             }
             WriteHeader();
+            WriteGraceParFile();
       }
 }
 
@@ -63,21 +67,53 @@ void WolfCalibrationOutput::WriteHeader(void)
       for (uint b = 0; b < BOX_TOTAL; ++b) {
             if (outF[b].is_open()) {
                   std::string firstRow = "";
-                  std::string secondRow = "";
-                  firstRow += "RCutCoulomb ";
+                  firstRow += "Step#\t";
                   for (int r = 0; r < statValRef.forcefield.numberOfRCuts[b]; ++r){
-                        firstRow += GetString(statValRef.forcefield.rCutCoulomb[b][r], 4);
-                        firstRow += ", ";
-
-                  }
-                  secondRow += "Alpha ";
-                  for (int a = 0; a < statValRef.forcefield.numberOfAlphas[b]; ++a){
-                        secondRow += GetString(statValRef.forcefield.wolfAlpha[b][a], 4);
-                        secondRow += ", ";
+                        for (int a = 0; a < statValRef.forcefield.numberOfAlphas[b]; ++a){
+                              firstRow += "(";
+                              firstRow += GetString(statValRef.forcefield.rCutCoulomb[b][r], 4);
+                              firstRow += ", ";
+                              firstRow += GetString(statValRef.forcefield.wolfAlpha[b][a], 4);
+                              firstRow += ")\t";
+                              // We only want the reference r cut with reference alpha.
+                              if (r == 0)
+                                    break;
+                        }
                   }
                   outF[b] << firstRow;
                   outF[b] << std::endl;
-                  outF[b] << secondRow;
+            } else {
+                  std::cerr << "Unable to write to file \"" <<  name[b] << "\" "
+                              << "(Wolf Calibration file)" << std::endl;
+            }
+      }
+}
+
+
+void WolfCalibrationOutput::WriteGraceParFile(void)
+{
+      for (uint b = 0; b < BOX_TOTAL; ++b) {
+            if (outFPar[b].is_open()) {
+                  int counter = 0;
+                  std::string firstRow = "";
+                  firstRow += "with g0\n";
+                  for (int r = 0; r < statValRef.forcefield.numberOfRCuts[b]; ++r){
+                        for (int a = 0; a < statValRef.forcefield.numberOfAlphas[b]; ++a){
+                              firstRow += "\ts";
+                              firstRow += GetString(counter);
+                              firstRow += " legend \"(";
+                              firstRow += GetString(statValRef.forcefield.rCutCoulomb[b][r], 4);
+                              firstRow += ", ";
+                              firstRow += GetString(statValRef.forcefield.wolfAlpha[b][a], 4);
+                              firstRow += ")\"\n";
+                              ++counter;
+                              // We only want the reference r cut with reference alpha.
+                              if (r == 0)
+                                    break;
+                        }
+                  }
+                  outFPar[b] << firstRow;
+                  outFPar[b] << std::endl;
             } else {
                   std::cerr << "Unable to write to file \"" <<  name[b] << "\" "
                               << "(Wolf Calibration file)" << std::endl;
@@ -86,6 +122,24 @@ void WolfCalibrationOutput::WriteHeader(void)
 }
 
 void WolfCalibrationOutput::DoOutput(const ulong step) {
+      for (uint box = 0; box < BOX_TOTAL; ++box) {
+            calcEn.WolfCalibrationEnergyChange(box,
+                                          electrostaticEnergies);
+            std::string row = "";
+            row += GetString(step);
+            row += "\t";
+            for (int r = 0; r < statValRef.forcefield.numberOfRCuts[box]; ++r){
+                  for (int a = 0; a < statValRef.forcefield.numberOfAlphas[box]; ++a){
+                        row += GetString(electrostaticEnergies[box][r][a], 4);
+                        row += "\t";
+                        // We only want the reference r cut with reference alpha.
+                        if (r == 0)
+                              break;
+                  }
+            }
+            outF[box] << row;
+            outF[box] << std::endl;
+      }
 
 }
 
@@ -99,4 +153,11 @@ std::string WolfCalibrationOutput::GetString(double a, uint p)
       //sstrm >> tempStr;
       tempStr = sstrm.str();
       return tempStr;
+}
+
+std::string WolfCalibrationOutput::GetString(ulong step)
+{
+      std::stringstream ss;
+      ss << step;
+      return ss.str();
 }

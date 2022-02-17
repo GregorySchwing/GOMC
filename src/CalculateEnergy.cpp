@@ -1863,6 +1863,12 @@ void CalculateEnergy::WolfCalibrationEnergyChange(
 {
 
   GOMC_EVENT_START(1, GomcProfileEvent::WolfCalibrationEnergyChange);
+
+  //Handles reservoir box case, returning zeroed structure if
+  //interactions are off.
+  if (box >= BOXES_WITH_U_NB)
+    return;
+
   double tempREn = 0.0, tempLJEn = 0.0;
 
   std::vector<int> cellVector, cellStartIndex, mapParticleToCell;
@@ -1893,8 +1899,8 @@ void CalculateEnergy::WolfCalibrationEnergyChange(
                   forcefield.sc_sigma_6, forcefield.sc_alpha, num::qqFact,
                   forcefield.sc_power, box);
 #else
-for (int r = 1; r < forcefield.numberOfRCuts[box]; ++r){
-  for (int a = 1; a < forcefield.numberOfAlphas[box]; ++a){
+for (int r = 0; r < forcefield.numberOfRCuts[box]; ++r){
+  for (int a = 0; a < forcefield.numberOfAlphas[box]; ++a){
     tempREn = 0.0;
 #ifdef _OPENMP
 #if GCC_VERSION >= 90000
@@ -1948,6 +1954,9 @@ reduction(+:tempREn)
       }
     }
     electrostaticEnergies[box][r][a] = tempREn;
+    // We only want the reference r cut with reference alpha.
+    if (r == 0)
+      break;
   }
 }
 #endif

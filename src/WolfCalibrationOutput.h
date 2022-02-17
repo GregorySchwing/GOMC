@@ -31,7 +31,10 @@ public:
 private:
 
   void WriteHeader(void);
+  void WriteGraceParFile(void);
+
   std::string GetString(double a, uint p);
+  std::string GetString(ulong step);
 
   System & sysRef;
   StaticVals const& statValRef;
@@ -42,7 +45,9 @@ private:
 
   //const CalculateEnergy& calcEn;
   std::ofstream outF[BOX_TOTAL];
+  std::ofstream outFPar[BOX_TOTAL];
   std::string name[BOX_TOTAL];
+  std::string namePar[BOX_TOTAL];
 };
 
 #endif
