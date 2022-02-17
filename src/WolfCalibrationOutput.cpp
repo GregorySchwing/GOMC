@@ -54,7 +54,7 @@ void WolfCalibrationOutput::Init(pdb_setup::Atoms const& atoms,
                   #endif
                   outF[b].open(name[b].c_str(), std::ofstream::out);
             }
-      //WriteHeader();
+            WriteHeader();
       }
 }
 
