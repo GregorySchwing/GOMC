@@ -395,7 +395,7 @@ inline double FF_SWITCH_MARTINI::CalcCoulomb(const double distSq,
 
   if(lambda >= 0.999999) {
     //save computation time
-    return CalcCoulomb(distSq, qi_qj_Fact, b);
+    return CalcCoulomb(distSq, qi_qj_Fact, b, indexForRCut, indexForAlpha);
   }
   double en = 0.0;
   if(forcefield.sc_coul) {
@@ -406,9 +406,9 @@ inline double FF_SWITCH_MARTINI::CalcCoulomb(const double distSq,
     double lambdaCoef = forcefield.sc_alpha * pow((1.0 - lambda), forcefield.sc_power);
     double softDist6 = lambdaCoef * sigma6 + dist6;
     double softRsq = cbrt(softDist6);
-    en = lambda * CalcCoulomb(softRsq, qi_qj_Fact, b);
+    en = lambda * CalcCoulomb(softRsq, qi_qj_Fact, b, indexForRCut, indexForAlpha);
   } else {
-    en = lambda * CalcCoulomb(distSq, qi_qj_Fact, b);
+    en = lambda * CalcCoulomb(distSq, qi_qj_Fact, b, indexForRCut, indexForAlpha);
   }
   return en;
 }
@@ -459,7 +459,7 @@ inline double FF_SWITCH_MARTINI::CalcCoulombVir(const double distSq,
 
   if(lambda >= 0.999999) {
     //save computation time
-    return CalcCoulombVir(distSq, qi_qj, b);
+    return CalcCoulombVir(distSq, qi_qj, b, indexForRCut, indexForAlpha);
   }
   double vir = 0.0;
   if(forcefield.sc_coul) {
@@ -472,9 +472,9 @@ inline double FF_SWITCH_MARTINI::CalcCoulombVir(const double distSq,
     double softRsq = cbrt(softDist6);
     double correction = distSq / softRsq;
     //We need to fix the return value from calcVir
-    vir = lambda * correction * correction * CalcCoulombVir(softRsq, qi_qj, b);
+    vir = lambda * correction * correction * CalcCoulombVir(softRsq, qi_qj, b, indexForRCut, indexForAlpha);
   } else {
-    vir = lambda * CalcCoulombVir(distSq, qi_qj, b);
+    vir = lambda * CalcCoulombVir(distSq, qi_qj, b, indexForRCut, indexForAlpha);
   }
   return vir;
 }
