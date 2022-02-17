@@ -223,13 +223,20 @@ void Forcefield::CalculateWolfCalibrationMemoryUsage(config_setup::WolfCalibrati
 void Forcefield::InitWolfCalibration(config_setup::WolfCalibration const& wolfCal){
   for(uint b = 0 ; b < BOX_TOTAL; b++) {
     // Start at 1, since 0th index is from the config file and initted in InitBasicVals
-    for(uint r = 0; r < numberOfRCuts[b]; r++) {
+    for(uint r = 0; r < numberOfRCuts[b]-1; r++) {
       // Start at 1, since 0th index is from the config file and initted in InitBasicVals
       rCutCoulomb[b][r+1] = wolfCal.wolfCutoffCoulombStart[b] + r*wolfCal.wolfCutoffCoulombDelta[b];
       rCutCoulombSq[b][r+1] = rCutCoulomb[b][r+1] * rCutCoulomb[b][r+1];
     }
-    for(uint a = 0 ; a < numberOfAlphas[b]; a++) {
+    for(uint a = 0 ; a < numberOfAlphas[b]-1; a++) {
       wolfAlpha[b][a+1] = wolfCal.wolfAlphaStart[b] + a*wolfCal.wolfAlphaDelta[b];
+    }
+    if (explicitlyAddEndRCut[b]){
+      rCutCoulomb[b][numberOfRCuts[b]-1] = wolfCal.wolfCutoffCoulombEnd[b];
+      rCutCoulombSq[b][numberOfRCuts[b]-1] = wolfCal.wolfCutoffCoulombEnd[b] * wolfCal.wolfCutoffCoulombEnd[b];
+    }
+    if (explicitlyAddEndRCut[b]){
+      wolfAlpha[b][numberOfAlphas[b]-1] = wolfCal.wolfAlphaEnd[b];
     }
     for(uint r = 1; r < numberOfRCuts[b]; r++) {
       for(uint a = 1 ; a < numberOfAlphas[b]; a++) {
