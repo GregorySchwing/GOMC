@@ -29,24 +29,14 @@ public:
 
 private:
 
-  //void WriteHeader(void);
+  void WriteHeader(void);
   std::string GetString(double a, uint p);
 
   System & sysRef;
   StaticVals const& statValRef;
   uint stepsPerSample;
-  const config_setup::WolfCalibration&  wolfCal;
 
-  uint numberOfRCutStates[BOX_TOTAL];
-  uint numberOfAlphaStates[BOX_TOTAL];
-
-  double * alphas;
-  double * rcutcoulombs;
-  double * electrostaticEnergies;
-
-
-  bool explicitlyAddEndAlpha[BOX_TOTAL];
-  bool explicitlyAddEndRCut[BOX_TOTAL];
+  double ** electrostaticEnergies[BOX_TOTAL];
 
   //const CalculateEnergy& calcEn;
   std::ofstream outF[BOX_TOTAL];
