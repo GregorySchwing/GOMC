@@ -173,6 +173,9 @@ void System::Init(Setup & set)
   InitLambda();
   calcEnergy.Init(*this);
   calcEwald->Init();
+  if (wolfCalibration){
+    refEwald->Init();
+  }
   potential = calcEnergy.SystemTotal();
   InitMoves(set);
   for(uint m = 0; m < mv::MOVE_KINDS_TOTAL; m++)

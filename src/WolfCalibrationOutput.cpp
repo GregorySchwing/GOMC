@@ -10,7 +10,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "GOMC_Config.h"
 
 
-WolfCalibrationOutput::WolfCalibrationOutput(System & sys, StaticVals const& statV):
+WolfCalibrationOutput::WolfCalibrationOutput(System & sys, StaticVals & statV):
 sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV)
 {
       for(uint b = 0 ; b < BOX_TOTAL; b++) {
@@ -125,6 +125,7 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
       for (uint box = 0; box < BOX_TOTAL; ++box) {
             calcEn.WolfCalibrationEnergyChange(box,
                                           electrostaticEnergies);
+            statValRef.forcefield.ewald = true;
             std::string row = "";
             row += GetString(step);
             row += "\t";

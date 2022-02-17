@@ -17,7 +17,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 class WolfCalibrationOutput : public OutputableBase
 {
 public:
-  WolfCalibrationOutput(System & sys, StaticVals const& statV);
+  WolfCalibrationOutput(System & sys, StaticVals & statV);
 
   ~WolfCalibrationOutput();
 
@@ -37,7 +37,7 @@ private:
   std::string GetString(ulong step);
 
   System & sysRef;
-  StaticVals const& statValRef;
+  StaticVals & statValRef;
   const CalculateEnergy& calcEn;
   uint stepsPerSample;
 
