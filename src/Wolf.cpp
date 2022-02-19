@@ -30,13 +30,6 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 
 Wolf::Wolf(StaticVals & stat, System & sys) :
   Ewald(stat, sys) {
-    for(uint b = 0 ; b < BOX_TOTAL; b++) {
-        wolfAlpha[b] = ff.wolfAlpha[b][0];
-        wolfFactor1[b] = ff.wolfFactor1[b][0][0];
-        wolfFactor2[b] = ff.wolfFactor2[b][0][0];
-        rCutCoulombSq[b] = ff.rCutCoulombSq[b][0];
-        rCutCoulomb[b] = ff.rCutCoulomb[b][0];
-    }
     coulKind = ff.coulKind;
 }
 
@@ -179,7 +172,9 @@ double Wolf::ChangeLambdaRecip(XYZArray const& molCoords, const double lambdaOld
 
 
 //calculate self term for a box
-double Wolf::BoxSelf(uint box) const
+double Wolf::BoxSelf(uint box,
+                      int indexForRCut,
+                      int indexForAlpha) const
 {
     if (box >= BOXES_WITH_U_NB){
         return 0.0;
@@ -212,10 +207,10 @@ double Wolf::BoxSelf(uint box) const
         }
         // M_2_SQRTPI is 2/sqrt(PI), so need to multiply by 0.5 to get sqrt(PI)
         if (isVlugtWolf || isCassandraWolf){
-          self *= ((wolfAlpha[box] * M_2_SQRTPI * 0.5) + wolfFactor1[box] * 0.5);
+          self *= ((ff.wolfAlpha[box][indexForAlpha] * M_2_SQRTPI * 0.5) + ff.wolfFactor1[box][indexForRCut][indexForAlpha] * 0.5);
         } else {
           // we eliminate the alpha/root(pi) using Wolf,mod from Gross et al
-          self *= wolfFactor1[box] * 0.5;
+          self *= ff.wolfFactor1[box][indexForRCut][indexForAlpha] * 0.5;
         }
 
         GOMC_EVENT_STOP(1, GomcProfileEvent::SELF_BOX);
@@ -225,7 +220,9 @@ double Wolf::BoxSelf(uint box) const
 
 
 //calculate correction term for a molecule
-double Wolf::MolCorrection(uint molIndex, uint box) const
+double Wolf::MolCorrection(uint molIndex, uint box,
+                          int indexForRCut,
+                          int indexForAlpha) const
 {
   if (box >= BOXES_WITH_U_NB)
     return 0.0;
@@ -258,21 +255,21 @@ double Wolf::MolCorrection(uint molIndex, uint box) const
           // Need to check for cutoff for all kinds
           if(currentAxes.InRcut(distSq, virComponents, currentCoords,
                             start + i, start + (*partner), box) && 
-            distSq < rCutCoulombSq[box] && i < (*partner)){
+            distSq < ff.rCutCoulombSq[box][indexForRCut] && i < (*partner)){
               dist = sqrt(distSq);
               dampenedCorr = 0.0;
               if (isGrossWolf){
-                dampenedCorr = -1.0*erf(wolfAlpha[box] * dist)/dist;  
+                dampenedCorr = -1.0*erf(ff.wolfAlpha[box][indexForAlpha] * dist)/dist;  
                 dampenedCorr *= scaling_14;
               } else if (isHybridWolf) {
                 // Exclude the entire erfc term, psi is 1
                 dampenedCorr = -scaling_14/dist;
               }
-              dampenedCorr -= wolfFactor1[box];
+              dampenedCorr -= ff.wolfFactor1[box][indexForRCut][indexForAlpha];
               // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
               if(coulKind){
-                double distDiff = dist-rCutCoulomb[box];
-                dampenedCorr += wolfFactor2[box]*distDiff;
+                double distDiff = dist-ff.rCutCoulomb[box][indexForRCut];
+                dampenedCorr += ff.wolfFactor2[box][indexForRCut][indexForAlpha]*distDiff;
               } 
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
 
@@ -288,11 +285,11 @@ double Wolf::MolCorrection(uint molIndex, uint box) const
           // Need to check for cutoff for all kinds
           if(currentAxes.InRcut(distSq, virComponents, currentCoords,
                             start + i, start + (*partner), box) && 
-            distSq < rCutCoulombSq[box] && i < (*partner)){
+            distSq < ff.rCutCoulombSq[box][indexForRCut] && i < (*partner)){
               dist = sqrt(distSq);
               dampenedCorr = 0.0;
               if (isGrossWolf){
-                dampenedCorr = -1.0*erf(wolfAlpha[box] * dist)/dist;  
+                dampenedCorr = -1.0*erf(ff.wolfAlpha[box][indexForAlpha] * dist)/dist;  
                 dampenedCorr *= scaling_14;
               } else if (isHybridWolf) {
                 // Exclude the entire erfc term, psi is 1
@@ -300,10 +297,10 @@ double Wolf::MolCorrection(uint molIndex, uint box) const
               } 
               // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
               if(coulKind){
-                double distDiff = dist-rCutCoulomb[box];
-                dampenedCorr += wolfFactor2[box]*distDiff;
+                double distDiff = dist-ff.rCutCoulomb[box][indexForRCut];
+                dampenedCorr += ff.wolfFactor2[box][indexForRCut][indexForAlpha]*distDiff;
               } 
-              dampenedCorr -= wolfFactor1[box];
+              dampenedCorr -= ff.wolfFactor1[box][indexForRCut][indexForAlpha];
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
           }
           ++partner;
@@ -316,20 +313,20 @@ double Wolf::MolCorrection(uint molIndex, uint box) const
         // Need to check for cutoff for all kinds
         if(currentAxes.InRcut(distSq, virComponents, currentCoords,
                           start + i, start + (*partner), box) && 
-          distSq < rCutCoulombSq[box] && i < (*partner)){
+          distSq < ff.rCutCoulombSq[box][indexForRCut] && i < (*partner)){
             dist = sqrt(distSq);
             dampenedCorr = 0.0;
               if (isGrossWolf){
-                dampenedCorr = -1.0*erf(wolfAlpha[box] * dist)/dist;  
+                dampenedCorr = -1.0*erf(ff.wolfAlpha[box][indexForAlpha] * dist)/dist;  
               } else if (isHybridWolf) {
                 // Exclude the entire erfc term, psi is 1
                 dampenedCorr = -1.0/dist;
               }
-              dampenedCorr -= wolfFactor1[box];
+              dampenedCorr -= ff.wolfFactor1[box][indexForRCut][indexForAlpha];
               // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
               if(coulKind){
-                double distDiff = dist-rCutCoulomb[box];
-                dampenedCorr += wolfFactor2[box]*distDiff;
+                double distDiff = dist-ff.rCutCoulomb[box][indexForRCut];
+                dampenedCorr += ff.wolfFactor2[box][indexForRCut][indexForAlpha]*distDiff;
               } 
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
         }
@@ -339,16 +336,16 @@ double Wolf::MolCorrection(uint molIndex, uint box) const
       for (uint j = i + 1; j < atomSize; j++) {
         if(currentAxes.InRcut(distSq, virComponents, currentCoords,
                           start + i, start + j, box) && 
-          distSq < rCutCoulombSq[box]){
+          distSq < ff.rCutCoulombSq[box][indexForRCut]){
             dampenedCorr = 0.0;
             dist = sqrt(distSq);
-            dampenedCorr = -1.0*erf(wolfAlpha[box] * dist)/dist;   
-            dampenedCorr -= wolfFactor1[box];
+            dampenedCorr = -1.0*erf(ff.wolfAlpha[box][indexForAlpha] * dist)/dist;   
+            dampenedCorr -= ff.wolfFactor1[box][indexForRCut][indexForAlpha];
             // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
             if(coulKind && !isVlugtWolf){
-              double distDiff = dist-rCutCoulomb[box];
+              double distDiff = dist-ff.rCutCoulomb[box][indexForRCut];
               // Subtract because we negate the correction term at the end
-              dampenedCorr += wolfFactor2[box]*distDiff;
+              dampenedCorr += ff.wolfFactor2[box][indexForRCut][indexForAlpha]*distDiff;
             } 
             correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(j) * dampenedCorr;
         } else if (isVlugtWolf) {
@@ -394,7 +391,9 @@ double Wolf::MolExchangeReciprocal(const std::vector<cbmc::TrialMol> &newMol,
 
 
 //calculate self term after swap move
-double Wolf::SwapSelf(const cbmc::TrialMol& trialMol) const
+double Wolf::SwapSelf(const cbmc::TrialMol& trialMol,
+                      int indexForRCut,
+                      int indexForAlpha) const
 {
   uint box = trialMol.GetBox();
   if (box >= BOXES_WITH_U_NB)
@@ -409,15 +408,17 @@ double Wolf::SwapSelf(const cbmc::TrialMol& trialMol) const
 
   GOMC_EVENT_STOP(1, GomcProfileEvent::SELF_SWAP);
   if (isVlugtWolf || isCassandraWolf){
-    return (en_self *= -1.0 * ((wolfAlpha[box] * M_2_SQRTPI * 0.5) + wolfFactor1[box]) * num::qqFact) ;
+    return (en_self *= -1.0 * ((ff.wolfAlpha[box][indexForAlpha] * M_2_SQRTPI * 0.5) + ff.wolfFactor1[box][indexForRCut][indexForAlpha]) * num::qqFact) ;
   } else {
     // we eliminate the alpha/root(pi) using Wolf,mod from Gross et al
-    return (en_self *= -1.0 * wolfFactor1[box] * num::qqFact);
+    return (en_self *= -1.0 * ff.wolfFactor1[box][indexForRCut][indexForAlpha] * num::qqFact);
   }
 }
 
 //calculate correction term after swap move
-double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol) const
+double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
+                            int indexForRCut,
+                            int indexForAlpha) const
 {
   uint box = trialMol.GetBox();
   if (box >= BOXES_WITH_U_NB)
@@ -443,21 +444,21 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol) const
           // Need to check for cutoff for all kinds
           if(currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
                             i, (*partner), box) && 
-            distSq < rCutCoulombSq[box] && i < (*partner)){
+            distSq < ff.rCutCoulombSq[box][indexForRCut] && i < (*partner)){
               dist = sqrt(distSq);
               dampenedCorr = 0.0;
               if (isGrossWolf){
-                dampenedCorr = -1.0*erf(wolfAlpha[box] * dist)/dist;  
+                dampenedCorr = -1.0*erf(ff.wolfAlpha[box][indexForAlpha] * dist)/dist;  
                 dampenedCorr *= scaling_14;
               } else if (isHybridWolf) {
                 // Exclude the entire erfc term, psi is 1
                 dampenedCorr = -scaling_14/dist;
               }
-              dampenedCorr -= wolfFactor1[box];
+              dampenedCorr -= ff.wolfFactor1[box][indexForRCut][indexForAlpha];
               // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
               if(coulKind){
-                double distDiff = dist-rCutCoulomb[box];
-                dampenedCorr += wolfFactor2[box]*distDiff;
+                double distDiff = dist-ff.rCutCoulomb[box][indexForRCut];
+                dampenedCorr += ff.wolfFactor2[box][indexForRCut][indexForAlpha]*distDiff;
               } 
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
 
@@ -473,11 +474,11 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol) const
           // Need to check for cutoff for all kinds
           if(currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
                             i, (*partner), box) && 
-            distSq < rCutCoulombSq[box] && i < (*partner)){
+            distSq < ff.rCutCoulombSq[box][indexForRCut] && i < (*partner)){
               dist = sqrt(distSq);
               dampenedCorr = 0.0;
               if (isGrossWolf){
-                dampenedCorr = -1.0*erf(wolfAlpha[box] * dist)/dist;  
+                dampenedCorr = -1.0*erf(ff.wolfAlpha[box][indexForAlpha] * dist)/dist;  
                 dampenedCorr *= scaling_14;
               } else if (isHybridWolf) {
                 // Exclude the entire erfc term, psi is 1
@@ -485,10 +486,10 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol) const
               } 
               // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
               if(coulKind){
-                double distDiff = dist-rCutCoulomb[box];
-                dampenedCorr += wolfFactor2[box]*distDiff;
+                double distDiff = dist-ff.rCutCoulomb[box][indexForRCut];
+                dampenedCorr += ff.wolfFactor2[box][indexForRCut][indexForAlpha]*distDiff;
               } 
-              dampenedCorr -= wolfFactor1[box];
+              dampenedCorr -= ff.wolfFactor1[box][indexForRCut][indexForAlpha];
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
           }
           ++partner;
@@ -501,20 +502,20 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol) const
         // Need to check for cutoff for all kinds
         if(currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
                           i, (*partner), box) && 
-          distSq < rCutCoulombSq[box] && i < (*partner)){
+          distSq < ff.rCutCoulombSq[box][indexForRCut] && i < (*partner)){
             dist = sqrt(distSq);
             dampenedCorr = 0.0;
               if (isGrossWolf){
-                dampenedCorr = -1.0*erf(wolfAlpha[box] * dist)/dist;  
+                dampenedCorr = -1.0*erf(ff.wolfAlpha[box][indexForAlpha] * dist)/dist;  
               } else if (isHybridWolf) {
                 // Exclude the entire erfc term, psi is 1
                 dampenedCorr = -1.0/dist;
               }
-              dampenedCorr -= wolfFactor1[box];
+              dampenedCorr -= ff.wolfFactor1[box][indexForRCut][indexForAlpha];
               // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
               if(coulKind){
-                double distDiff = dist-rCutCoulomb[box];
-                dampenedCorr += wolfFactor2[box]*distDiff;
+                double distDiff = dist-ff.rCutCoulomb[box][indexForRCut];
+                dampenedCorr += ff.wolfFactor2[box][indexForRCut][indexForAlpha]*distDiff;
               } 
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
         }
@@ -524,16 +525,16 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol) const
       for (uint j = i + 1; j < atomSize; j++) {
         if(currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
                           i, j, box) && 
-          distSq < rCutCoulombSq[box]){
+          distSq < ff.rCutCoulombSq[box][indexForRCut]){
             dampenedCorr = 0.0;
             dist = sqrt(distSq);
-            dampenedCorr = -1.0*erf(wolfAlpha[box] * dist)/dist;   
-            dampenedCorr -= wolfFactor1[box];
+            dampenedCorr = -1.0*erf(ff.wolfAlpha[box][indexForAlpha] * dist)/dist;   
+            dampenedCorr -= ff.wolfFactor1[box][indexForRCut][indexForAlpha];
             // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
             if(coulKind && !isVlugtWolf){
-              double distDiff = dist-rCutCoulomb[box];
+              double distDiff = dist-ff.rCutCoulomb[box][indexForRCut];
               // Subtract because we negate the correction term at the end
-              dampenedCorr += wolfFactor2[box]*distDiff;
+              dampenedCorr += ff.wolfFactor2[box][indexForRCut][indexForAlpha]*distDiff;
             } 
             correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(j) * dampenedCorr;
         } else if (isVlugtWolf) {
@@ -548,7 +549,9 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol) const
 }
 //calculate correction term after swap move
 double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
-                               const uint molIndex) const
+                            const uint molIndex,
+                            int indexForRCut,
+                            int indexForAlpha) const
 {
   uint box = trialMol.GetBox();
   if (box >= BOXES_WITH_U_NB)
@@ -576,21 +579,21 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
           // Need to check for cutoff for all kinds
           if(currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
                             i, (*partner), box) && 
-            distSq < rCutCoulombSq[box] && i < (*partner)){
+            distSq < ff.rCutCoulombSq[box][indexForRCut] && i < (*partner)){
               dist = sqrt(distSq);
               dampenedCorr = 0.0;
               if (isGrossWolf){
-                dampenedCorr = -1.0*erf(wolfAlpha[box] * dist)/dist;  
+                dampenedCorr = -1.0*erf(ff.wolfAlpha[box][indexForAlpha] * dist)/dist;  
                 dampenedCorr *= scaling_14;
               } else if (isHybridWolf) {
                 // Exclude the entire erfc term, psi is 1
                 dampenedCorr = -scaling_14/dist;
               }
-              dampenedCorr -= wolfFactor1[box];
+              dampenedCorr -= ff.wolfFactor1[box][indexForRCut][indexForAlpha];
               // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
               if(coulKind){
-                double distDiff = dist-rCutCoulomb[box];
-                dampenedCorr += wolfFactor2[box]*distDiff;
+                double distDiff = dist-ff.rCutCoulomb[box][indexForRCut];
+                dampenedCorr += ff.wolfFactor2[box][indexForRCut][indexForAlpha]*distDiff;
               } 
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
 
@@ -606,11 +609,11 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
           // Need to check for cutoff for all kinds
           if(currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
                             i, (*partner), box) && 
-            distSq < rCutCoulombSq[box] && i < (*partner)){
+            distSq < ff.rCutCoulombSq[box][indexForRCut] && i < (*partner)){
               dist = sqrt(distSq);
               dampenedCorr = 0.0;
               if (isGrossWolf){
-                dampenedCorr = -1.0*erf(wolfAlpha[box] * dist)/dist;  
+                dampenedCorr = -1.0*erf(ff.wolfAlpha[box][indexForAlpha] * dist)/dist;  
                 dampenedCorr *= scaling_14;
               } else if (isHybridWolf) {
                 // Exclude the entire erfc term, psi is 1
@@ -618,10 +621,10 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
               } 
               // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
               if(coulKind){
-                double distDiff = dist-rCutCoulomb[box];
-                dampenedCorr += wolfFactor2[box]*distDiff;
+                double distDiff = dist-ff.rCutCoulomb[box][indexForRCut];
+                dampenedCorr += ff.wolfFactor2[box][indexForRCut][indexForAlpha]*distDiff;
               } 
-              dampenedCorr -= wolfFactor1[box];
+              dampenedCorr -= ff.wolfFactor1[box][indexForRCut][indexForAlpha];
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
           }
           ++partner;
@@ -634,20 +637,20 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
         // Need to check for cutoff for all kinds
         if(currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
                           i, (*partner), box) && 
-          distSq < rCutCoulombSq[box] && i < (*partner)){
+          distSq < ff.rCutCoulombSq[box][indexForRCut] && i < (*partner)){
             dist = sqrt(distSq);
             dampenedCorr = 0.0;
               if (isGrossWolf){
-                dampenedCorr = -1.0*erf(wolfAlpha[box] * dist)/dist;  
+                dampenedCorr = -1.0*erf(ff.wolfAlpha[box][indexForAlpha] * dist)/dist;  
               } else if (isHybridWolf) {
                 // Exclude the entire erfc term, psi is 1
                 dampenedCorr = -1.0/dist;
               }
-              dampenedCorr -= wolfFactor1[box];
+              dampenedCorr -= ff.wolfFactor1[box][indexForRCut][indexForAlpha];
               // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
               if(coulKind){
-                double distDiff = dist-rCutCoulomb[box];
-                dampenedCorr += wolfFactor2[box]*distDiff;
+                double distDiff = dist-ff.rCutCoulomb[box][indexForRCut];
+                dampenedCorr += ff.wolfFactor2[box][indexForRCut][indexForAlpha]*distDiff;
               } 
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
         }
@@ -657,16 +660,16 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
       for (uint j = i + 1; j < atomSize; j++) {
         if(currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
                           i, j, box) && 
-          distSq < rCutCoulombSq[box]){
+          distSq < ff.rCutCoulombSq[box][indexForRCut]){
             dampenedCorr = 0.0;
             dist = sqrt(distSq);
-            dampenedCorr = -1.0*erf(wolfAlpha[box] * dist)/dist;   
-            dampenedCorr -= wolfFactor1[box];
+            dampenedCorr = -1.0*erf(ff.wolfAlpha[box][indexForAlpha] * dist)/dist;   
+            dampenedCorr -= ff.wolfFactor1[box][indexForRCut][indexForAlpha];
             // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
             if(coulKind && !isVlugtWolf){
-              double distDiff = dist-rCutCoulomb[box];
+              double distDiff = dist-ff.rCutCoulomb[box][indexForRCut];
               // Subtract because we negate the correction term at the end
-              dampenedCorr += wolfFactor2[box]*distDiff;
+              dampenedCorr += ff.wolfFactor2[box][indexForRCut][indexForAlpha]*distDiff;
             } 
             correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(j) * dampenedCorr;
         } else if (isVlugtWolf) {
@@ -685,7 +688,9 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
 void Wolf::ChangeSelf(Energy *energyDiff, Energy &dUdL_Coul,
                          const std::vector<double> &lambda_Coul,
                          const uint iState, const uint molIndex,
-                         const uint box) const
+                         const uint box,
+                          int indexForRCut,
+                          int indexForAlpha) const
 {
     uint lambdaSize = lambda_Coul.size();
     double coefDiff, en_self = 0.0;
@@ -694,13 +699,13 @@ void Wolf::ChangeSelf(Energy *energyDiff, Energy &dUdL_Coul,
     
     // M_2_SQRTPI is 2/sqrt(PI), so need to multiply by 0.5 to get sqrt(PI)
     //Vlugt
-    //en_self *= ((ff.wolfAlpha[box] * M_2_SQRTPI * 0.5) +  ff.wolfFactor1[box] );
+    //en_self *= ((ff.wolfAlpha[box][indexForAlpha] * M_2_SQRTPI * 0.5) +  ff.wolfFactor1[box][indexForRCut][indexForAlpha] );
     // We eliminate the alpha/root(pi) using Wolf,mod
     if (isVlugtWolf || isCassandraWolf){
-      en_self *= -1.0 * ((wolfAlpha[box] * M_2_SQRTPI * 0.5) + wolfFactor1[box]) * num::qqFact;
+      en_self *= -1.0 * ((ff.wolfAlpha[box][indexForAlpha] * M_2_SQRTPI * 0.5) + ff.wolfFactor1[box][indexForRCut][indexForAlpha]) * num::qqFact;
     } else {
       // we eliminate the alpha/root(pi) using Wolf,mod from Gross et al
-      en_self *= -1.0 * wolfFactor1[box] * num::qqFact;
+      en_self *= -1.0 * ff.wolfFactor1[box][indexForRCut][indexForAlpha] * num::qqFact;
     }
     //Calculate the energy difference for each lambda state
     for (uint s = 0; s < lambdaSize; s++) {
@@ -716,7 +721,9 @@ void Wolf::ChangeSelf(Energy *energyDiff, Energy &dUdL_Coul,
 void Wolf::ChangeCorrection(Energy *energyDiff, Energy &dUdL_Coul,
                                const std::vector<double> &lambda_Coul,
                                const uint iState, const uint molIndex,
-                               const uint box) const
+                               const uint box,
+                                int indexForRCut,
+                                int indexForAlpha) const
 {
   uint atomSize = mols.GetKind(molIndex).NumAtoms();
   uint start = mols.MolStart(molIndex);
@@ -740,21 +747,21 @@ void Wolf::ChangeCorrection(Energy *energyDiff, Energy &dUdL_Coul,
           // Need to check for cutoff for all kinds
           if(currentAxes.InRcut(distSq, virComponents, currentCoords,
                             start + i, start + (*partner), box) && 
-            distSq < rCutCoulombSq[box] && i < (*partner)){
+            distSq < ff.rCutCoulombSq[box][indexForRCut] && i < (*partner)){
               dist = sqrt(distSq);
               dampenedCorr = 0.0;
               if (isGrossWolf){
-                dampenedCorr = -1.0*erf(wolfAlpha[box] * dist)/dist;  
+                dampenedCorr = -1.0*erf(ff.wolfAlpha[box][indexForAlpha] * dist)/dist;  
                 dampenedCorr *= scaling_14;
               } else if (isHybridWolf) {
                 // Exclude the entire erfc term, psi is 1
                 dampenedCorr = -scaling_14/dist;
               }
-              dampenedCorr -= wolfFactor1[box];
+              dampenedCorr -= ff.wolfFactor1[box][indexForRCut][indexForAlpha];
               // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
               if(coulKind){
-                double distDiff = dist-rCutCoulomb[box];
-                dampenedCorr += wolfFactor2[box]*distDiff;
+                double distDiff = dist-ff.rCutCoulomb[box][indexForRCut];
+                dampenedCorr += ff.wolfFactor2[box][indexForRCut][indexForAlpha]*distDiff;
               } 
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
 
@@ -770,11 +777,11 @@ void Wolf::ChangeCorrection(Energy *energyDiff, Energy &dUdL_Coul,
           // Need to check for cutoff for all kinds
           if(currentAxes.InRcut(distSq, virComponents, currentCoords,
                             start + i, start + (*partner), box) && 
-            distSq < rCutCoulombSq[box] && i < (*partner)){
+            distSq < ff.rCutCoulombSq[box][indexForRCut] && i < (*partner)){
               dist = sqrt(distSq);
               dampenedCorr = 0.0;
               if (isGrossWolf){
-                dampenedCorr = -1.0*erf(wolfAlpha[box] * dist)/dist;  
+                dampenedCorr = -1.0*erf(ff.wolfAlpha[box][indexForAlpha] * dist)/dist;  
                 dampenedCorr *= scaling_14;
               } else if (isHybridWolf) {
                 // Exclude the entire erfc term, psi is 1
@@ -782,10 +789,10 @@ void Wolf::ChangeCorrection(Energy *energyDiff, Energy &dUdL_Coul,
               } 
               // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
               if(coulKind){
-                double distDiff = dist-rCutCoulomb[box];
-                dampenedCorr += wolfFactor2[box]*distDiff;
+                double distDiff = dist-ff.rCutCoulomb[box][indexForRCut];
+                dampenedCorr += ff.wolfFactor2[box][indexForRCut][indexForAlpha]*distDiff;
               } 
-              dampenedCorr -= wolfFactor1[box];
+              dampenedCorr -= ff.wolfFactor1[box][indexForRCut][indexForAlpha];
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
           }
           ++partner;
@@ -798,20 +805,20 @@ void Wolf::ChangeCorrection(Energy *energyDiff, Energy &dUdL_Coul,
         // Need to check for cutoff for all kinds
         if(currentAxes.InRcut(distSq, virComponents, currentCoords,
                           start + i, start + (*partner), box) && 
-          distSq < rCutCoulombSq[box] && i < (*partner)){
+          distSq < ff.rCutCoulombSq[box][indexForRCut] && i < (*partner)){
             dist = sqrt(distSq);
             dampenedCorr = 0.0;
               if (isGrossWolf){
-                dampenedCorr = -1.0*erf(wolfAlpha[box] * dist)/dist;  
+                dampenedCorr = -1.0*erf(ff.wolfAlpha[box][indexForAlpha] * dist)/dist;  
               } else if (isHybridWolf) {
                 // Exclude the entire erfc term, psi is 1
                 dampenedCorr = -1.0/dist;
               }
-              dampenedCorr -= wolfFactor1[box];
+              dampenedCorr -= ff.wolfFactor1[box][indexForRCut][indexForAlpha];
               // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
               if(coulKind){
-                double distDiff = dist-rCutCoulomb[box];
-                dampenedCorr += wolfFactor2[box]*distDiff;
+                double distDiff = dist-ff.rCutCoulomb[box][indexForRCut];
+                dampenedCorr += ff.wolfFactor2[box][indexForRCut][indexForAlpha]*distDiff;
               } 
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
         }
@@ -821,15 +828,15 @@ void Wolf::ChangeCorrection(Energy *energyDiff, Energy &dUdL_Coul,
       for (uint j = i + 1; j < atomSize; j++) {
         if(currentAxes.InRcut(distSq, virComponents, currentCoords,
                           start + i, start + j, box) && 
-          distSq < rCutCoulombSq[box]){
+          distSq < ff.rCutCoulombSq[box][indexForRCut]){
             dampenedCorr = 0.0;
             dist = sqrt(distSq);
-            dampenedCorr = -1.0*erf(wolfAlpha[box] * dist)/dist;   
-            dampenedCorr -= wolfFactor1[box];
+            dampenedCorr = -1.0*erf(ff.wolfAlpha[box][indexForAlpha] * dist)/dist;   
+            dampenedCorr -= ff.wolfFactor1[box][indexForRCut][indexForAlpha];
             // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
             if(coulKind && !isVlugtWolf){
-              double distDiff = dist-rCutCoulomb[box];
-              dampenedCorr += wolfFactor2[box]*distDiff;
+              double distDiff = dist-ff.rCutCoulomb[box][indexForRCut];
+              dampenedCorr += ff.wolfFactor2[box][indexForRCut][indexForAlpha]*distDiff;
             } 
             correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(j) * dampenedCorr;
         } else if (isVlugtWolf) {
