@@ -204,9 +204,11 @@ public:
                     const uint iState, const uint molIndex,
                     const uint box) const;
 
-  void WolfCalibrationEnergyChange(const uint box,
+  void WolfInterEnergyChange(const uint box,
                                   double ** electrostaticEnergies[BOX_TOTAL]) const;
 
+  void WolfIntraNonBondedEnergyChange(const uint box,
+                                      double ** electrostaticEnergies[BOX_TOTAL]) const;
   #if GOMC_GTEST || GOMC_GTEST_MPI
   double GetCharge(int atomIndex);
   #endif
@@ -305,6 +307,8 @@ private:
   double GetLambdaCoulomb(uint molA, uint molB, uint box) const;
   uint NumberOfParticlesInsideBox(uint box);
   double CalculateWolfCorrection(uint box);
+
+
 
   const Forcefield& forcefield;
   const Molecules& mols;

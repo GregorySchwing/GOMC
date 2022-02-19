@@ -1857,12 +1857,11 @@ void CalculateEnergy::ChangeLRC(Energy *energyDiff, Energy &dUdL_VDW,
 }
 
 //Calculate the change in energy due to lambda
-void CalculateEnergy::WolfCalibrationEnergyChange(
-                                                  const uint box,
-                                                  double ** electrostaticEnergies[BOX_TOTAL]) const
+void CalculateEnergy::WolfInterEnergyChange(const uint box,
+                                            double ** electrostaticEnergies[BOX_TOTAL]) const
 {
 
-  GOMC_EVENT_START(1, GomcProfileEvent::WolfCalibrationEnergyChange);
+  GOMC_EVENT_START(1, GomcProfileEvent::WolfInterEnergyChange);
 
   //Handles reservoir box case, returning zeroed structure if
   //interactions are off.
@@ -1964,13 +1963,49 @@ reduction(+:tempREn)
 
   // OpenMP needs vectors for reduction ops :(
 
-  // setting energy and virial of LJ interaction
-  //potential.boxEnergy[box].inter = tempLJEn;
-  // setting energy and virial of coulomb interaction
-  //potential.boxEnergy[box].real = tempREn;
+  GOMC_EVENT_STOP(1, GomcProfileEvent::WolfInterEnergyChange);
+}
 
+//Calculate the change in energy due to lambda
+void CalculateEnergy::WolfIntraNonBondedEnergyChange(
+                                      const uint box,
+                                      double ** electrostaticEnergies[BOX_TOTAL]) const
+{
+  //system intra
+  for (uint b = 0; b < BOX_TOTAL; ++b) {
+    GOMC_EVENT_START(1, GomcProfileEvent::EN_BOX_INTRA);
+    double selfEnergy[2] = {0};
+    double virialEnergy[2] = {0};
 
-  GOMC_EVENT_STOP(1, GomcProfileEvent::WolfCalibrationEnergyChange);
+    double bondEn = 0.0, nonbondEn = 0.0, correction = 0.0;
+    MoleculeLookup::box_iterator thisMol = molLookup.BoxBegin(b);
+    MoleculeLookup::box_iterator end = molLookup.BoxEnd(b);
+    std::vector<uint> molID;
+
+    while (thisMol != end) {
+      molID.push_back(*thisMol);
+      ++thisMol;
+    }
+    for (int r = 0; r < forcefield.numberOfRCuts[box]; ++r){
+      for (int a = 0; a < forcefield.numberOfAlphas[box]; ++a){
+    #ifdef _OPENMP
+        #pragma omp parallel for default(none) shared(b, molID, r, a) \
+        reduction(+:correction)
+    #endif
+        for (int i = 0; i < (int) molID.size(); i++) {
+          //calculate correction term of electrostatic interaction
+          correction += calcEwald->MolCorrection(molID[i], b, r, a);
+        }
+        electrostaticEnergies[box][r][a] += correction;
+        //calculate self term of electrostatic interaction
+        electrostaticEnergies[box][r][a] += calcEwald->BoxSelf(b, r, a);
+        //Calculate Virial
+        //virialEnergy[b] = VirialCalc(b);
+      }
+    }
+
+    GOMC_EVENT_STOP(1, GomcProfileEvent::EN_BOX_INTRA);
+  }
 }
 
   #if GOMC_GTEST || GOMC_GTEST_MPI

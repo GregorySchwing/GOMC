@@ -1118,6 +1118,13 @@ double Ewald::MolCorrection(uint molIndex, uint box) const
   return -1.0 * num::qqFact * correction * lambdaCoef * lambdaCoef;
 }
 
+// For simple compilation.  Should never be called.
+double Ewald::MolCorrection(uint molIndex, uint box,
+                            int indexForRCut,
+                            int indexForAlpha) const {
+  return 0.0;
+}
+
 //It's called in free energy calculation to calculate the change in
 // correction energy in all lambda states
 void Ewald::ChangeCorrection(Energy *energyDiff, Energy &dUdL_Coul,
@@ -1197,6 +1204,13 @@ double Ewald::BoxSelf(uint box) const
 
   GOMC_EVENT_STOP(1, GomcProfileEvent::SELF_BOX);
   return self;
+}
+
+// For simple compilation.  Should never be called.
+double Ewald::BoxSelf(uint box,
+                      int indexForRCut,
+                      int indexForAlpha) const {
+  return 0.0;
 }
 
 // NOTE: The calculation of W12, W13, W23 is expensive and would not be
