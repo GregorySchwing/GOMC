@@ -156,11 +156,11 @@ public:
                             const double lambdaNew) const;
 
   //! Calculates intramolecular energy of a full molecule
-  void MoleculeIntra(const uint molIndex, const uint box, double *bondEn) const;
+  void MoleculeIntra(const uint molIndex, const uint box, double *bondEn,
+                    int indexForRCut = 0) const;
 
   //used in molecule exchange for calculating bonded and intraNonbonded energy
-  Energy MoleculeIntra(cbmc::TrialMol const &mol,
-                      int indexForRCut = 0) const;
+  Energy MoleculeIntra(cbmc::TrialMol const &mol) const;
 
   //! Calculates Nonbonded 1_3 intramolecule energy of a full molecule
   //for Martini forcefield
@@ -266,7 +266,7 @@ private:
 
   //! Calculates Nonbonded 1_N intramolecule energy of a full molecule
   void MolNonbond(double & energy, MoleculeKind const& molKind,
-                  const uint molIndex, const uint box) const;
+                  const uint molIndex, const uint box, int indexForRCut = 0) const;
 
   //! Calculates Nonbonded 1_N intramolecule energy of a non-complete molecule
   void MolNonbond(double & energy, cbmc::TrialMol const &mol,
@@ -274,7 +274,7 @@ private:
 
   //! Calculates Nonbonded 1_4 intramolecule energy of a full molecule
   void MolNonbond_1_4(double & energy, MoleculeKind const& molKind,
-                      const uint molIndex, const uint box) const;
+                      const uint molIndex, const uint box, int indexForRCut = 0) const;
 
   //! Calculates Nonbonded 1_4 intramolecule energy of a non-complete molecule
   void MolNonbond_1_4(double & energy, cbmc::TrialMol const &mol,
@@ -283,7 +283,7 @@ private:
   //! Calculates Nonbonded 1_3 intramolecule energy of a full molecule
   //for Martini forcefield
   void MolNonbond_1_3(double & energy, MoleculeKind const& molKind,
-                      const uint molIndex, const uint box) const;
+                      const uint molIndex, const uint box, int indexForRCut = 0) const;
 
   //! Calculates Nonbonded 1_3 intramolecule energy of a non-complete molecule
   //for Martini forcefield

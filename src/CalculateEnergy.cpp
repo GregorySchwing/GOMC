@@ -864,7 +864,8 @@ Intermolecular CalculateEnergy::MoleculeTailVirChange(const uint box,
 
 //Calculates intramolecular energy of a full molecule
 void CalculateEnergy::MoleculeIntra(const uint molIndex,
-                                    const uint box, double *bondEn) const
+                                    const uint box, double *bondEn,
+                                    int indexForRCut) const
 {
   GOMC_EVENT_START(1, GomcProfileEvent::EN_MOL_INTRA);
   bondEn[0] = 0.0, bondEn[1] = 0.0;
@@ -877,15 +878,14 @@ void CalculateEnergy::MoleculeIntra(const uint molIndex,
   MolBond(bondEn[0], molKind, bondVec, molIndex, box);
   MolAngle(bondEn[0], molKind, bondVec, box);
   MolDihedral(bondEn[0], molKind, bondVec, box);
-  MolNonbond(bondEn[1], molKind, molIndex, box);
-  MolNonbond_1_4(bondEn[1], molKind, molIndex, box);
-  MolNonbond_1_3(bondEn[1], molKind, molIndex, box);
+  MolNonbond(bondEn[1], molKind, molIndex, box, indexForRCut);
+  MolNonbond_1_4(bondEn[1], molKind, molIndex, box, indexForRCut);
+  MolNonbond_1_3(bondEn[1], molKind, molIndex, box, indexForRCut);
   GOMC_EVENT_STOP(1, GomcProfileEvent::EN_MOL_INTRA);
 }
 
 //used in molecule exchange for calculating bonded and intraNonbonded energy
-Energy CalculateEnergy::MoleculeIntra(cbmc::TrialMol const &mol,
-                                      int indexForRCut) const
+Energy CalculateEnergy::MoleculeIntra(cbmc::TrialMol const &mol) const
 {
   GOMC_EVENT_START(1, GomcProfileEvent::EN_MOL_INTRA);
   double bondEn = 0.0, intraNonbondEn = 0.0;
@@ -1065,7 +1065,8 @@ void CalculateEnergy::MolDihedral(double & energy,
 void CalculateEnergy::MolNonbond(double & energy,
                                  MoleculeKind const& molKind,
                                  const uint molIndex,
-                                 const uint box) const
+                                 const uint box,
+                                 int indexForRCut) const
 {
   if (box >= BOXES_WITH_U_B)
     return;
@@ -1088,7 +1089,7 @@ void CalculateEnergy::MolNonbond(double & energy,
 
         if (qi_qj_fact != 0.0) {
           forcefield.particles->CalcCoulombAdd_1_4(energy, distSq,
-            qi_qj_fact, true, box);
+            qi_qj_fact, true, box, indexForRCut);
         }
       }
     }
@@ -1133,7 +1134,8 @@ void CalculateEnergy::MolNonbond(double & energy, cbmc::TrialMol const &mol,
 void CalculateEnergy::MolNonbond_1_4(double & energy,
                                      MoleculeKind const& molKind,
                                      const uint molIndex,
-                                     const uint box) const
+                                     const uint box,
+                                     int indexForRCut) const
 {
   if (box >= BOXES_WITH_U_B)
     return;
@@ -1157,7 +1159,7 @@ void CalculateEnergy::MolNonbond_1_4(double & energy,
 
         if (qi_qj_fact != 0.0) {
           forcefield.particles->CalcCoulombAdd_1_4(energy, distSq,
-            qi_qj_fact, false, box);
+            qi_qj_fact, false, box, indexForRCut);
         }
       }
     }
@@ -1202,7 +1204,8 @@ void CalculateEnergy::MolNonbond_1_4(double & energy,
 void CalculateEnergy::MolNonbond_1_3(double & energy,
                                      MoleculeKind const& molKind,
                                      const uint molIndex,
-                                     const uint box) const
+                                     const uint box,
+                                     int indexForRCut) const
 {
   if (box >= BOXES_WITH_U_B)
     return;
@@ -1226,7 +1229,7 @@ void CalculateEnergy::MolNonbond_1_3(double & energy,
 
         if (qi_qj_fact != 0.0) {
           forcefield.particles->CalcCoulombAdd_1_4(energy, distSq,
-              qi_qj_fact, false, box);
+              qi_qj_fact, false, box, indexForRCut);
         }
       }
     }
