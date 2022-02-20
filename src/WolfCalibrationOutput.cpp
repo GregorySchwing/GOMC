@@ -126,7 +126,7 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
             calcEn.WolfInterEnergyChange(box,
                                           electrostaticEnergies);
             calcEn.WolfIntraNonBondedEnergyChange(box,
-                              electrostaticEnergies);
+                                                electrostaticEnergies);
             // Eventually use this to calc refernce
             //statValRef.forcefield.ewald = true;
             std::string row = "";

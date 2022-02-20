@@ -159,8 +159,8 @@ public:
   void MoleculeIntra(const uint molIndex, const uint box, double *bondEn) const;
 
   //used in molecule exchange for calculating bonded and intraNonbonded energy
-  Energy MoleculeIntra(cbmc::TrialMol const &mol) const;
-
+  Energy MoleculeIntra(cbmc::TrialMol const &mol,
+                      int indexForRCut = 0) const;
 
   //! Calculates Nonbonded 1_3 intramolecule energy of a full molecule
   //for Martini forcefield
@@ -209,6 +209,9 @@ public:
 
   void WolfIntraNonBondedEnergyChange(const uint box,
                                       double ** electrostaticEnergies[BOX_TOTAL]) const;
+
+  void WolfVirialEnergyChange(const uint box,
+                              double ** electrostaticEnergies[BOX_TOTAL]) const;
   #if GOMC_GTEST || GOMC_GTEST_MPI
   double GetCharge(int atomIndex);
   #endif
