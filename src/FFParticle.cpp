@@ -294,8 +294,7 @@ inline void FFParticle::CalcAdd_1_4(double& en, const double distSq,
 inline void FFParticle::CalcCoulombAdd_1_4(double& en, const double distSq,
     const double qi_qj_Fact,
     const bool NB, const uint box,
-    int indexForRCut,
-    int indexForAlpha) const
+    int indexForRCut) const
 {
   if(forcefield.rCutCoulombSq[box][indexForRCut] < distSq && !forcefield.isVlugtWolf)
     return;
