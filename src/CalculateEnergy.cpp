@@ -144,7 +144,6 @@ SystemPotential CalculateEnergy::SystemTotal()
   return pot;
 }
 
-
 SystemPotential CalculateEnergy::SystemInter(SystemPotential potential,
     XYZArray const& coords,
     BoxDimensions const& boxAxes)
@@ -904,7 +903,7 @@ Energy CalculateEnergy::MoleculeIntra(cbmc::TrialMol const &mol,
   MolNonbond_1_4(intraNonbondEn, mol, molKind);
   MolNonbond_1_3(intraNonbondEn, mol, molKind);
   GOMC_EVENT_STOP(1, GomcProfileEvent::EN_MOL_INTRA);
-  return Energy(bondEn, intraNonbondEn, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+  return Energy(bondEn, intraNonbondEn, 0.0, 0.0, 0.0, 0.0, 0.0);
 }
 
 void CalculateEnergy::BondVectors(XYZArray & vecs,

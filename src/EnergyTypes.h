@@ -86,12 +86,13 @@ struct Intermolecular {
 class Energy
 {
 public:
-  Energy() : intraBond(0.0), intraNonbond(0.0), intraNonbondReal(0.0), inter(0.0),
+  Energy() : intraBond(0.0), intraNonbond(0.0), intraNonbondReal(0.0),
+    intraNonbondVDW(0.0), inter(0.0),
     tc(0.0), total(0.0), real(0.0), recip(0.0), self(0.0),
     correction(0.0), totalElect(0.0) {}
-  Energy(double bond, double nonbond, double nonbondReal, double inter, double real,
+  Energy(double bond, double nonbond, double inter, double real,
          double recip, double self, double correc) :
-    intraBond(bond), intraNonbond(nonbond), intraNonbondReal(nonbondReal), inter(inter),
+    intraBond(bond), intraNonbond(nonbond), inter(inter),
     tc(0.0), total(0.0), real(real), recip(recip), self(self),
     correction(correc), totalElect(0.0) {}
 
@@ -114,6 +115,7 @@ public:
     intraBond = 0.0;
     intraNonbond = 0.0;
     intraNonbondReal = 0.0;
+    intraNonbondVDW = 0.0;
     inter = 0.0;
     tc = 0.0;
     real = 0.0;
@@ -141,7 +143,7 @@ public:
 
 //private:
   //MEMBERS
-  double intraBond, intraNonbond, intraNonbondReal, inter, tc, total, real, recip, self,
+  double intraBond, intraNonbond, intraNonbondReal, intraNonbondVDW, inter, tc, total, real, recip, self,
          correction, totalElect;
 };
 
