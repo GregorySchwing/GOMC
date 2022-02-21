@@ -38,7 +38,7 @@ private:
 
   System & sysRef;
   StaticVals & statValRef;
-  const CalculateEnergy& calcEn;
+  CalculateEnergy & calcEn;
   uint stepsPerSample;
 
   double ** electrostaticEnergies[BOX_TOTAL];

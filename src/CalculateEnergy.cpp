@@ -1863,13 +1863,10 @@ void CalculateEnergy::ChangeLRC(Energy *energyDiff, Energy &dUdL_VDW,
   }
 }
 
-void CalculateEnergy::WolfCalibrationEnergy(SystemPotential potential,
-                                              XYZArray const& coords,
-                                              BoxDimensions const& boxAxes,
-                                              double ** electrostaticEnergies[BOX_TOTAL]){
+void CalculateEnergy::WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_TOTAL]){
 
   GOMC_EVENT_START(1, GomcProfileEvent::WOLF_CALIBRATION);
-
+    SystemPotential potential = SystemPotential();
     for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
       double bondEnergy[2] = {0};
       double bondEn = 0.0, nonbondEn = 0.0, correction = 0.0;
@@ -1901,8 +1898,11 @@ void CalculateEnergy::WolfCalibrationEnergy(SystemPotential potential,
         potential.boxEnergy[b].intraNonbond = nonbondEn;
         // Pairwise Inter, Correction, Self, and Virial depend on RCut and Alpha.
         for (int indexForAlpha = 0; indexForAlpha < forcefield.numberOfAlphas[b]; ++indexForAlpha){
+          potential.Zero();
+          potential.boxEnergy[b].intraBond = bondEn;
+          potential.boxEnergy[b].intraNonbond = nonbondEn;
           //calculate LJ interaction and real term of electrostatic interaction
-          potential = BoxInter(potential, coords, boxAxes, b, indexForRcut, indexForAlpha);
+          potential = BoxInter(potential, currentCoords, currentAxes, b, indexForRcut, indexForAlpha);
           //calculate reciprocal term of electrostatic interaction
           potential.boxEnergy[b].recip = calcEwald->BoxReciprocal(b, false);
           
@@ -1920,6 +1920,8 @@ void CalculateEnergy::WolfCalibrationEnergy(SystemPotential potential,
           potential.boxVirial[b] = VirialCalc(b, indexForRcut, indexForAlpha);
           //calculate self term of electrostatic interaction
           potential.boxEnergy[b].self = calcEwald->BoxSelf(b, indexForRcut, indexForAlpha);
+          potential.Total();
+          electrostaticEnergies[b][indexForRcut][indexForAlpha] = potential.boxEnergy[b].total;
           // We only want the reference r cut with reference alpha.
           if (indexForRcut == 0)
             break;

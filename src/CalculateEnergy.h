@@ -212,6 +212,8 @@ public:
   #if GOMC_GTEST || GOMC_GTEST_MPI
   double GetCharge(int atomIndex);
   #endif
+  void WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_TOTAL]);
+
 private:
 
   //! Calculates full TC energy for one box in current system
@@ -306,10 +308,6 @@ private:
   double GetLambdaVDW(uint molA, uint molB, uint box) const;
   double GetLambdaCoulomb(uint molA, uint molB, uint box) const;
   uint NumberOfParticlesInsideBox(uint box);
-  void WolfCalibrationEnergy(SystemPotential potential,
-                                XYZArray const& coords,
-                                BoxDimensions const& boxAxes,
-                                double ** electrostaticEnergies[BOX_TOTAL]);
 
 
   const Forcefield& forcefield;
