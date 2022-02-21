@@ -123,12 +123,7 @@ void WolfCalibrationOutput::WriteGraceParFile(void)
 
 void WolfCalibrationOutput::DoOutput(const ulong step) {
       for (uint box = 0; box < BOX_TOTAL; ++box) {
-            // Pairwise inter
-            calcEn.WolfInterEnergyChange(box,
-                                          electrostaticEnergies);
-            // Pairwise intra correction & self term
-            calcEn.WolfIntraNonBondedEnergyChange(box,
-                                                electrostaticEnergies);
+
             
             // Eventually use this to calc refernce
             //statValRef.forcefield.ewald = true;

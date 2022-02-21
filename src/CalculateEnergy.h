@@ -61,7 +61,9 @@ public:
   SystemPotential BoxInter(SystemPotential potential,
                            XYZArray const& coords,
                            BoxDimensions const& boxAxes,
-                           const uint box);
+                           const uint box,
+                           int indexForRcut = 0,
+                           int indexForAlpha = 0);
 
   //! Calculates force of a single box in the system
   SystemPotential BoxForce(SystemPotential potential,
@@ -72,7 +74,9 @@ public:
                            const uint box);
 
   //! Calculate force and virial for the box
-  Virial VirialCalc(const uint box);
+  Virial VirialCalc(const uint box,
+                    int indexForRcut = 0,
+                    int indexForAlpha = 0);
 
   //! Set the force for atom and mol to zero for box
   void ResetForce(XYZArray& atomForce, XYZArray& molForce, uint box);
@@ -204,14 +208,7 @@ public:
                     const uint iState, const uint molIndex,
                     const uint box) const;
 
-  void WolfInterEnergyChange(const uint box,
-                                  double ** electrostaticEnergies[BOX_TOTAL]) const;
 
-  void WolfIntraNonBondedEnergyChange(const uint box,
-                                      double ** electrostaticEnergies[BOX_TOTAL]) const;
-
-  void WolfVirialEnergyChange(const uint box,
-                              double ** electrostaticEnergies[BOX_TOTAL]) const;
   #if GOMC_GTEST || GOMC_GTEST_MPI
   double GetCharge(int atomIndex);
   #endif
@@ -309,8 +306,10 @@ private:
   double GetLambdaVDW(uint molA, uint molB, uint box) const;
   double GetLambdaCoulomb(uint molA, uint molB, uint box) const;
   uint NumberOfParticlesInsideBox(uint box);
-  double CalculateWolfCorrection(uint box);
-
+  void WolfCalibrationEnergy(SystemPotential potential,
+                                XYZArray const& coords,
+                                BoxDimensions const& boxAxes,
+                                double ** electrostaticEnergies[BOX_TOTAL]);
 
 
   const Forcefield& forcefield;
