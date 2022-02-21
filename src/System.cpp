@@ -385,3 +385,7 @@ void System::PrintTime()
 #endif
   std::cout << std::endl;
 }
+
+void System::SwapWolfAndEwaldPointers(){
+  std::swap(calcEwald, refEwald);
+}

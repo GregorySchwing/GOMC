@@ -122,25 +122,29 @@ void WolfCalibrationOutput::WriteGraceParFile(void)
 }
 
 void WolfCalibrationOutput::DoOutput(const ulong step) {
-      for (uint box = 0; box < BOX_TOTAL; ++box) {
-
             calcEn.WolfCalibrationEnergy(electrostaticEnergies);
             // Eventually use this to calc refernce
-            //statValRef.forcefield.ewald = true;
+            statValRef.forcefield.ewald = true;
+            sysRef.SwapWolfAndEwaldPointers();
+            SystemPotential ewaldRef = calcEn.SystemTotal();
+            statValRef.forcefield.ewald = false;
+            sysRef.SwapWolfAndEwaldPointers();
             std::string row = "";
             row += GetString(step);
             row += "\t";
-            for (int r = 0; r < statValRef.forcefield.numberOfRCuts[box]; ++r){
-                  for (int a = 0; a < statValRef.forcefield.numberOfAlphas[box]; ++a){
-                        row += GetString(electrostaticEnergies[box][r][a], 4);
-                        row += "\t";
-                        // We only want the reference r cut with reference alpha.
-                        if (r == 0)
-                              break;
+            for (uint box = 0; box < BOX_TOTAL; ++box) {
+                  for (int r = 0; r < statValRef.forcefield.numberOfRCuts[box]; ++r){
+                        for (int a = 0; a < statValRef.forcefield.numberOfAlphas[box]; ++a){
+                              row += GetString((abs(ewaldRef.boxEnergy[box].total) -  abs(electrostaticEnergies[box][r][a]))/ abs(ewaldRef.boxEnergy[box].total), 4);
+                              row += "\t";
+                              // We only want the reference r cut with reference alpha.
+                              if (r == 0)
+                                    break;
+                        }
                   }
+                  outF[box] << row;
+                  outF[box] << std::endl;
             }
-            outF[box] << row;
-            outF[box] << std::endl;
       }
 
 }
