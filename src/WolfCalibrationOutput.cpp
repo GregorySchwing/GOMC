@@ -14,9 +14,13 @@ WolfCalibrationOutput::WolfCalibrationOutput(System & sys, StaticVals & statV):
 sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV)
 {
       for(uint b = 0 ; b < BOX_TOTAL; b++) {
-            electrostaticEnergies[b] =  new double*[statValRef.forcefield.numberOfRCuts[b]];
-            for (int r = 0; r < statValRef.forcefield.numberOfRCuts[b]; ++r){
-                  electrostaticEnergies[b][r] =  new double[statValRef.forcefield.numberOfAlphas[b]];
+            for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
+                  for (uint coulKind = 0; wolfKind < COUL_TOTAL_KINDS; ++wolfKind){
+                        electrostaticEnergies[b][wolfKind][coulKind] =  new double*[statValRef.forcefield.numberOfRCuts[b]];
+                        for (int r = 0; r < statValRef.forcefield.numberOfRCuts[b]; ++r){
+                              electrostaticEnergies[b][wolfKind][coulKind][r] =  new double[statValRef.forcefield.numberOfAlphas[b]];
+                        }
+                  }
             }
       }
 }
@@ -24,10 +28,14 @@ sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV)
   WolfCalibrationOutput::~WolfCalibrationOutput()
   {
       for(uint b = 0 ; b < BOX_TOTAL; b++) {
-            for (int r = 0; r < statValRef.forcefield.numberOfRCuts[b]; ++r){
-                  delete[] electrostaticEnergies[b][r];
+            for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
+                  for (uint coulKind = 0; wolfKind < COUL_TOTAL_KINDS; ++wolfKind){
+                        for (int r = 0; r < statValRef.forcefield.numberOfRCuts[b]; ++r){
+                              delete[] electrostaticEnergies[b][wolfKind][coulKind][r];
+                        }
+                        delete[] electrostaticEnergies[b][wolfKind][coulKind];
+                  }
             }
-            delete[] electrostaticEnergies[b];
       }
   }
 
@@ -37,9 +45,9 @@ void WolfCalibrationOutput::Init(pdb_setup::Atoms const& atoms,
       stepsPerOut = output.wolfCalibration.settings.frequency;
       enableOut = output.wolfCalibration.settings.enable;
       if(enableOut) {
-            for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
-                  for (uint coulKind = 0; wolfKind < COUL_TOTAL_KINDS; ++wolfKind){
-                        for (uint b = 0; b < BOX_TOTAL; ++b) {
+            for (uint b = 0; b < BOX_TOTAL; ++b) {
+                  for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
+                        for (uint coulKind = 0; wolfKind < COUL_TOTAL_KINDS; ++wolfKind){
                               std::stringstream sstrm;
                               std::string strKind, fileName;
                               sstrm << (b);
@@ -128,7 +136,11 @@ void WolfCalibrationOutput::WriteGraceParFile(uint b, uint wolfKind, uint coulKi
 }
 
 void WolfCalibrationOutput::DoOutput(const ulong step) {
+      uint wolfKindOrig = sysRef.calcEwald->GetWolfKind();
+      uint coulKindOrig = sysRef.calcEwald->GetCoulKind();
       calcEn.WolfCalibrationEnergy(electrostaticEnergies);
+      sysRef.calcEwald->SetWolfKind(wolfKindOrig);
+      sysRef.calcEwald->SetCoulKind(coulKindOrig);
       // Eventually use this to calc refernce
       statValRef.forcefield.ewald = true;
       sysRef.SwapWolfAndEwaldPointers();
@@ -138,6 +150,7 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
       std::string row = "";
       row += GetString(step);
       row += "\t";
+
       for (uint box = 0; box < BOX_TOTAL; ++box) {       
             for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
                   for (uint coulKind = 0; wolfKind < COUL_TOTAL_KINDS; ++wolfKind){           
@@ -146,7 +159,7 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
                         // So there are no duplicate columns.
                         for (int r = 1; r < statValRef.forcefield.numberOfRCuts[box]; ++r){
                               for (int a = 1; a < statValRef.forcefield.numberOfAlphas[box]; ++a){
-                                    row += GetString((abs(ewaldRef.boxEnergy[box].total) -  abs(electrostaticEnergies[box][r][a]))/ abs(ewaldRef.boxEnergy[box].total), 4);
+                                    row += GetString((abs(ewaldRef.boxEnergy[box].total) -  abs(electrostaticEnergies[box][wolfKind][coulKind][r][a]))/ abs(ewaldRef.boxEnergy[box].total), 4);
                                     row += "\t";
                               }
                         }

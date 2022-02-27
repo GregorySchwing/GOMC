@@ -212,7 +212,7 @@ public:
   #if GOMC_GTEST || GOMC_GTEST_MPI
   double GetCharge(int atomIndex);
   #endif
-  void WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_TOTAL]);
+  void WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS]);
 
 private:
 
@@ -314,8 +314,8 @@ private:
   const Molecules& mols;
   const Coordinates& currentCoords;
   const COM& currentCOM;
-  const Ewald *calcEwald;
   const Lambda& lambdaRef;
+  Ewald *calcEwald;
   XYZArray& atomForceRef;
   XYZArray& molForceRef;
   bool multiParticleEnabled;

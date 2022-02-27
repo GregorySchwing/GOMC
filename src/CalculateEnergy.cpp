@@ -1863,69 +1863,75 @@ void CalculateEnergy::ChangeLRC(Energy *energyDiff, Energy &dUdL_VDW,
   }
 }
 
-void CalculateEnergy::WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_TOTAL]){
+void CalculateEnergy::WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS]){
 
   GOMC_EVENT_START(1, GomcProfileEvent::WOLF_CALIBRATION);
     SystemPotential potential = SystemPotential();
     for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
-      double bondEnergy[2] = {0};
-      double bondEn = 0.0, nonbondEn = 0.0, correction = 0.0;
-      MoleculeLookup::box_iterator thisMol = molLookup.BoxBegin(b);
-      MoleculeLookup::box_iterator end = molLookup.BoxEnd(b);
-      std::vector<uint> molID;
+      for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
+        calcEwald->SetWolfKind(wolfKind);
+        for (uint coulKind = 0; wolfKind < COUL_TOTAL_KINDS; ++wolfKind){    
+          calcEwald->SetCoulKind(wolfKind);
+          double bondEnergy[2] = {0};
+          double bondEn = 0.0, nonbondEn = 0.0, correction = 0.0;
+          MoleculeLookup::box_iterator thisMol = molLookup.BoxBegin(b);
+          MoleculeLookup::box_iterator end = molLookup.BoxEnd(b);
+          std::vector<uint> molID;
 
-      while (thisMol != end) {
-        molID.push_back(*thisMol);
-        ++thisMol;
-      }
-      for (int indexForRcut = 0; indexForRcut < forcefield.numberOfRCuts[b]; ++indexForRcut){
-        // Intra only depends on RCut.
-        bondEnergy[0] = 0.0;
-        bondEnergy[1] = 0.0;
-        bondEn = 0.0;
-        nonbondEn = 0.0;
-        #ifdef _OPENMP
-        #pragma omp parallel for default(none) private(bondEnergy) shared(b, molID, indexForRcut) \
-            reduction(+:bondEn, nonbondEn)
-        #endif
-        for (int i = 0; i < (int) molID.size(); i++) {
-          //calculate nonbonded energy
-          MoleculeIntra(molID[i], b, bondEnergy);
-          bondEn += bondEnergy[0];
-          nonbondEn += bondEnergy[1];
-        }
-        potential.boxEnergy[b].intraBond = bondEn;
-        potential.boxEnergy[b].intraNonbond = nonbondEn;
-        // Pairwise Inter, Correction, Self, and Virial depend on RCut and Alpha.
-        for (int indexForAlpha = 0; indexForAlpha < forcefield.numberOfAlphas[b]; ++indexForAlpha){
-          potential.Zero();
-          potential.boxEnergy[b].intraBond = bondEn;
-          potential.boxEnergy[b].intraNonbond = nonbondEn;
-          //calculate LJ interaction and real term of electrostatic interaction
-          potential = BoxInter(potential, currentCoords, currentAxes, b, indexForRcut, indexForAlpha);
-          //calculate reciprocal term of electrostatic interaction
-          potential.boxEnergy[b].recip = calcEwald->BoxReciprocal(b, false);
-          
-          correction = 0.0;
-          #ifdef _OPENMP
-          #pragma omp parallel for default(none) private(bondEnergy) shared(b, molID, indexForRcut, indexForAlpha) \
-            reduction(+:correction)
-          #endif
-          for (int i = 0; i < (int) molID.size(); i++) {
-            //calculate correction term of electrostatic interaction
-            correction += calcEwald->MolCorrection(molID[i], b, indexForRcut, indexForAlpha);
+          while (thisMol != end) {
+            molID.push_back(*thisMol);
+            ++thisMol;
           }
-          potential.boxEnergy[b].correction = correction;
-          //Calculate Virial
-          potential.boxVirial[b] = VirialCalc(b, indexForRcut, indexForAlpha);
-          //calculate self term of electrostatic interaction
-          potential.boxEnergy[b].self = calcEwald->BoxSelf(b, indexForRcut, indexForAlpha);
-          potential.Total();
-          electrostaticEnergies[b][indexForRcut][indexForAlpha] = potential.boxEnergy[b].total;
-          // We only want the reference r cut with reference alpha.
-          if (indexForRcut == 0)
-            break;
-        }
+          for (int indexForRcut = 0; indexForRcut < forcefield.numberOfRCuts[b]; ++indexForRcut){
+            // Intra only depends on RCut.
+            bondEnergy[0] = 0.0;
+            bondEnergy[1] = 0.0;
+            bondEn = 0.0;
+            nonbondEn = 0.0;
+            #ifdef _OPENMP
+            #pragma omp parallel for default(none) private(bondEnergy) shared(b, molID, indexForRcut) \
+                reduction(+:bondEn, nonbondEn)
+            #endif
+            for (int i = 0; i < (int) molID.size(); i++) {
+              //calculate nonbonded energy
+              MoleculeIntra(molID[i], b, bondEnergy);
+              bondEn += bondEnergy[0];
+              nonbondEn += bondEnergy[1];
+            }
+            potential.boxEnergy[b].intraBond = bondEn;
+            potential.boxEnergy[b].intraNonbond = nonbondEn;
+            // Pairwise Inter, Correction, Self, and Virial depend on RCut and Alpha.
+            for (int indexForAlpha = 0; indexForAlpha < forcefield.numberOfAlphas[b]; ++indexForAlpha){
+              potential.Zero();
+              potential.boxEnergy[b].intraBond = bondEn;
+              potential.boxEnergy[b].intraNonbond = nonbondEn;
+              //calculate LJ interaction and real term of electrostatic interaction
+              potential = BoxInter(potential, currentCoords, currentAxes, b, indexForRcut, indexForAlpha);
+              //calculate reciprocal term of electrostatic interaction
+              potential.boxEnergy[b].recip = calcEwald->BoxReciprocal(b, false);
+              
+              correction = 0.0;
+              #ifdef _OPENMP
+              #pragma omp parallel for default(none) private(bondEnergy) shared(b, molID, indexForRcut, indexForAlpha) \
+                reduction(+:correction)
+              #endif
+              for (int i = 0; i < (int) molID.size(); i++) {
+                //calculate correction term of electrostatic interaction
+                correction += calcEwald->MolCorrection(molID[i], b, indexForRcut, indexForAlpha);
+              }
+              potential.boxEnergy[b].correction = correction;
+              //Calculate Virial
+              potential.boxVirial[b] = VirialCalc(b, indexForRcut, indexForAlpha);
+              //calculate self term of electrostatic interaction
+              potential.boxEnergy[b].self = calcEwald->BoxSelf(b, indexForRcut, indexForAlpha);
+              potential.Total();
+              electrostaticEnergies[b][wolfKind][coulKind][indexForRcut][indexForAlpha] = potential.boxEnergy[b].total;
+              // We only want the reference r cut with reference alpha.
+              if (indexForRcut == 0)
+                break;
+            }
+          }
+        } 
       }
     }
   GOMC_EVENT_STOP(1, GomcProfileEvent::WOLF_CALIBRATION);

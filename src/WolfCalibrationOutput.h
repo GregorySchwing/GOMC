@@ -41,7 +41,7 @@ private:
   CalculateEnergy & calcEn;
   uint stepsPerSample;
 
-  double ** electrostaticEnergies[BOX_TOTAL];
+  double ** electrostaticEnergies[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS];
 
   //const CalculateEnergy& calcEn;
   std::ofstream outF[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS];
