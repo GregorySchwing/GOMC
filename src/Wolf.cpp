@@ -80,6 +80,7 @@ void Wolf::Init() {
 }
 
 void Wolf::SetWolfKind(uint wolfKindArg){
+    wolfKind = wolfKindArg;
     switch(wolfKindArg) {
       //WOLF_HYBRID_KIND
       case 0:
@@ -122,6 +123,15 @@ void Wolf::SetCoulKind(uint coulKindArg){
     coulKind = coulKindArg;
   }
 }
+
+uint Wolf::GetWolfKind(void){
+  return wolfKind;
+}
+
+uint Wolf::GetCoulKind(void){
+  return coulKind;
+}
+
 
 
 void Wolf::AllocMem()

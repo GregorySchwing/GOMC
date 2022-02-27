@@ -25,7 +25,8 @@ public:
 
   void SetWolfKind(uint wolfKindArg);
   void SetCoulKind(uint coulKindArg); 
-
+  uint GetWolfKind(void);
+  uint GetCoulKind(void); 
   //initialize term used for ewald calculation
   virtual void RecipInit(uint box, BoxDimensions const& boxAxes);
 
@@ -147,7 +148,7 @@ public:
 
   private: 
     //double wolfAlpha[BOX_TOTAL], wolfFactor1[BOX_TOTAL], wolfFactor2[BOX_TOTAL], rCutCoulomb[BOX_TOTAL], rCutCoulombSq[BOX_TOTAL]; //alpha term for Wolf Electrostatic and constant factors
-    uint coulKind;
+    uint coulKind, wolfKind;
     //Molecule self energies
     std::vector<double> molSelfEnergies; 
     bool oneThree, oneFour, isVlugtWolf, isGrossWolf, isHybridWolf, isCassandraWolf;

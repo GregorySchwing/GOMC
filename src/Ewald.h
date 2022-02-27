@@ -55,6 +55,11 @@ public:
 
   virtual void AllocMem();
 
+  void SetWolfKind(uint wolfKindArg) {}
+  void SetCoulKind(uint coulKindArg) {}
+  uint GetWolfKind(void) {return 0;}
+  uint GetCoulKind(void) {return 0;}
+
   //initialize term used for ewald calculation
   virtual void RecipInit(uint box, BoxDimensions const& boxAxes);
 
