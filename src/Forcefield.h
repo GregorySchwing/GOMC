@@ -66,6 +66,8 @@ public:
   int numberOfAlphas[BOX_TOTAL];
   bool explicitlyAddEndAlpha[BOX_TOTAL];
   bool explicitlyAddEndRCut[BOX_TOTAL];
+  std::string wolfKindStrings[4] = {"HYBRID", "VLUGT", "GROSS", "CASSANDRA"};
+  std::string coulKindStrings[2] = {"COUL_DSP", "COUL_DSF"};
   // Wolf Calibration
 
   double scaling_14;              //!<Scaling factor for 1-4 pairs' ewald interactions
@@ -81,7 +83,6 @@ public:
   bool multiparticleEnabled;      // If true, Linear Electrostatic Calculation will use potential with force continuous at cutoff
   uint vdwKind;                   //To define VdW type, standard, shift or switch
   uint coulKind, wolfKind;        //To define Coul type (if Wolf), dampened shift potential or dampened shift force
-
   uint exckind;                   //To define  exclude kind, 1-2, 1-3, 1-4
   uint sc_power;                  // Free energy parameter
 #if ENSEMBLE == GCMC

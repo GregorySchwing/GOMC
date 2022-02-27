@@ -2609,6 +2609,7 @@ const std::string config_setup::FFValues::COUL_DSF = "COUL_DSF";
 const std::string config_setup::FFValues::WOLF_HYBRID = "HYBRID";
 const std::string config_setup::FFValues::WOLF_VLUGT = "VLUGT";
 const std::string config_setup::FFValues::WOLF_GROSS = "GROSS";
+const std::string config_setup::FFValues::WOLF_CASSANDRA = "CASSANDRA";
 const std::string config_setup::Exclude::EXC_ONETWO = "1-2";
 const std::string config_setup::Exclude::EXC_ONETHREE = "1-3";
 const std::string config_setup::Exclude::EXC_ONEFOUR = "1-4";

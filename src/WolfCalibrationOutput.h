@@ -30,8 +30,8 @@ public:
 
 private:
 
-  void WriteHeader(void);
-  void WriteGraceParFile(void);
+  void WriteHeader(uint b, uint wolfKind, uint coulKind);
+  void WriteGraceParFile(uint b, uint wolfKind, uint coulKind);
 
   std::string GetString(double a, uint p);
   std::string GetString(ulong step);
@@ -44,10 +44,10 @@ private:
   double ** electrostaticEnergies[BOX_TOTAL];
 
   //const CalculateEnergy& calcEn;
-  std::ofstream outF[BOX_TOTAL];
-  std::ofstream outFPar[BOX_TOTAL];
-  std::string name[BOX_TOTAL];
-  std::string namePar[BOX_TOTAL];
+  std::ofstream outF[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS];
+  std::ofstream outFPar[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS];
+  std::string name[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS];
+  std::string namePar[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS];
 };
 
 #endif

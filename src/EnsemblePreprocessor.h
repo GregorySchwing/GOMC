@@ -42,6 +42,9 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #define BOX_TOTAL 1
 #endif
 
+#define WOLF_TOTAL_KINDS 4
+#define COUL_TOTAL_KINDS 2
+
 // Get GCC version
 // 9.3.0 will become 90300 here
 #define GCC_VERSION (__GNUC__ * 10000 \

@@ -23,6 +23,9 @@ public:
 
   virtual void AllocMem();
 
+  void SetWolfKind(uint wolfKindArg);
+  void SetCoulKind(uint coulKindArg); 
+
   //initialize term used for ewald calculation
   virtual void RecipInit(uint box, BoxDimensions const& boxAxes);
 

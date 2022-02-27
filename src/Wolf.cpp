@@ -30,7 +30,6 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 
 Wolf::Wolf(StaticVals & stat, System & sys) :
   Ewald(stat, sys) {
-    coulKind = ff.coulKind;
 }
 
 void Wolf::Init() {
@@ -76,8 +75,12 @@ void Wolf::Init() {
     oneThree = ff.OneThree;
     oneFour = ff.OneFour;
     scaling_14 = ff.scaling_14;
+    SetCoulKind(ff.coulKind);
+    SetWolfKind(ff.wolfKind);
+}
 
-    switch(ff.wolfKind) {
+void Wolf::SetWolfKind(uint wolfKindArg){
+    switch(wolfKindArg) {
       //WOLF_HYBRID_KIND
       case 0:
         isVlugtWolf = false;
@@ -110,6 +113,16 @@ void Wolf::Init() {
         exit(1);
     }
 }
+
+void Wolf::SetCoulKind(uint coulKindArg){
+  if (coulKindArg > COUL_TOTAL_KINDS){
+    std::cout << "Error ff.coulKind has invalid value!  Check coulKind in Config File!" << std::endl;
+    exit(1);
+  } else{
+    coulKind = coulKindArg;
+  }
+}
+
 
 void Wolf::AllocMem()
 {

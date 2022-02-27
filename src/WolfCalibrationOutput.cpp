@@ -37,63 +37,69 @@ void WolfCalibrationOutput::Init(pdb_setup::Atoms const& atoms,
       stepsPerOut = output.wolfCalibration.settings.frequency;
       enableOut = output.wolfCalibration.settings.enable;
       if(enableOut) {
-            for (uint b = 0; b < BOX_TOTAL; ++b) {
-                  std::stringstream sstrm;
-                  std::string strKind, fileName;
-                  sstrm << (b);
-                  sstrm >> strKind;
-                  fileName = "Wolf_Calibration_BOX_";
-                  fileName += strKind;
-                  fileName += "_";
-                  fileName += uniqueName;
-                  #if GOMC_LIB_MPI
-                        name[b] = pathToReplicaOutputDirectory + fileName + ".dat";
-                        namePar[b] = pathToReplicaOutputDirectory + fileName + ".par";
-                  #else
-                        name[b] = fileName + ".dat";
-                        namePar[b] = fileName + ".par";
+            for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
+                  for (uint coulKind = 0; wolfKind < COUL_TOTAL_KINDS; ++wolfKind){
+                        for (uint b = 0; b < BOX_TOTAL; ++b) {
+                              std::stringstream sstrm;
+                              std::string strKind, fileName;
+                              sstrm << (b);
+                              sstrm >> strKind;
+                              fileName = "Wolf_Calibration_";
+                              fileName += statValRef.forcefield.wolfKindStrings[wolfKind];
+                              fileName += "_";
+                              fileName += statValRef.forcefield.coulKindStrings[coulKind];
+                              fileName += "_BOX_";
+                              fileName += strKind;
+                              fileName += "_";
+                              fileName += uniqueName;
+                              #if GOMC_LIB_MPI
+                                    name[b][wolfKind][coulKind] = pathToReplicaOutputDirectory + fileName + ".dat";
+                                    namePar[b][wolfKind][coulKind] = pathToReplicaOutputDirectory + fileName + ".par";
+                              #else
+                                    name[b][wolfKind][coulKind] = fileName + ".dat";
+                                    namePar[b][wolfKind][coulKind] = fileName + ".par";
 
-                  #endif
-                  outF[b].open(name[b].c_str(), std::ofstream::out);
-                  outFPar[b].open(namePar[b].c_str(), std::ofstream::out);
-            }
-            WriteHeader();
-            WriteGraceParFile();
-      }
-}
-
-void WolfCalibrationOutput::WriteHeader(void)
-{
-      for (uint b = 0; b < BOX_TOTAL; ++b) {
-            if (outF[b].is_open()) {
-                  std::string firstRow = "";
-                  firstRow += "Step#\t";
-                  // We skip the reference r cut with reference alpha.
-                  // r = 0, a = 0
-                  // So there are no duplicate columns.
-                  for (int r = 1; r < statValRef.forcefield.numberOfRCuts[b]; ++r){
-                        for (int a = 1; a < statValRef.forcefield.numberOfAlphas[b]; ++a){
-                              firstRow += "(";
-                              firstRow += GetString(statValRef.forcefield.rCutCoulomb[b][r], 4);
-                              firstRow += ", ";
-                              firstRow += GetString(statValRef.forcefield.wolfAlpha[b][a], 4);
-                              firstRow += ")\t";
+                              #endif
+                              outF[b][wolfKind][coulKind].open(name[b][wolfKind][coulKind].c_str(), std::ofstream::out);
+                              outFPar[b][wolfKind][coulKind].open(namePar[b][wolfKind][coulKind].c_str(), std::ofstream::out);
+                              WriteHeader(b, wolfKind, coulKind);
+                              WriteGraceParFile(b, wolfKind, coulKind);
                         }
                   }
-                  outF[b] << firstRow;
-                  outF[b] << std::endl;
-            } else {
-                  std::cerr << "Unable to write to file \"" <<  name[b] << "\" "
-                              << "(Wolf Calibration file)" << std::endl;
             }
       }
 }
 
+void WolfCalibrationOutput::WriteHeader(uint b, uint wolfKind, uint coulKind)
+{
+      if (outF[b][wolfKind][coulKind].is_open()) {
+            std::string firstRow = "";
+            firstRow += "Step#\t";
+            // We skip the reference r cut with reference alpha.
+            // r = 0, a = 0
+            // So there are no duplicate columns.
+            for (int r = 1; r < statValRef.forcefield.numberOfRCuts[b]; ++r){
+                  for (int a = 1; a < statValRef.forcefield.numberOfAlphas[b]; ++a){
+                        firstRow += "(";
+                        firstRow += GetString(statValRef.forcefield.rCutCoulomb[b][r], 4);
+                        firstRow += ", ";
+                        firstRow += GetString(statValRef.forcefield.wolfAlpha[b][a], 4);
+                        firstRow += ")\t";
+                  }
+            }
+            outF[b][wolfKind][coulKind] << firstRow;
+            outF[b][wolfKind][coulKind] << std::endl;
+      } else {
+            std::cerr << "Unable to write to file \"" <<  name[b][wolfKind][coulKind] << "\" "
+                        << "(Wolf Calibration file)" << std::endl;
+      }
+}
 
-void WolfCalibrationOutput::WriteGraceParFile(void)
+
+void WolfCalibrationOutput::WriteGraceParFile(uint b, uint wolfKind, uint coulKind)
 {
       for (uint b = 0; b < BOX_TOTAL; ++b) {
-            if (outFPar[b].is_open()) {
+            if (outFPar[b][wolfKind][coulKind].is_open()) {
                   int counter = 0;
                   std::string firstRow = "";
                   firstRow += "with g0\n";
@@ -112,8 +118,8 @@ void WolfCalibrationOutput::WriteGraceParFile(void)
                               ++counter;
                         }
                   }
-                  outFPar[b] << firstRow;
-                  outFPar[b] << std::endl;
+                  outFPar[b][wolfKind][coulKind] << firstRow;
+                  outFPar[b][wolfKind][coulKind] << std::endl;
             } else {
                   std::cerr << "Unable to write to file \"" <<  name[b] << "\" "
                               << "(Wolf Calibration file)" << std::endl;
@@ -132,18 +138,22 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
       std::string row = "";
       row += GetString(step);
       row += "\t";
-      for (uint box = 0; box < BOX_TOTAL; ++box) {                  
-            // We skip the reference r cut with reference alpha.
-            // r = 0, a = 0
-            // So there are no duplicate columns.
-            for (int r = 1; r < statValRef.forcefield.numberOfRCuts[box]; ++r){
-                  for (int a = 1; a < statValRef.forcefield.numberOfAlphas[box]; ++a){
-                        row += GetString((abs(ewaldRef.boxEnergy[box].total) -  abs(electrostaticEnergies[box][r][a]))/ abs(ewaldRef.boxEnergy[box].total), 4);
-                        row += "\t";
+      for (uint box = 0; box < BOX_TOTAL; ++box) {       
+            for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
+                  for (uint coulKind = 0; wolfKind < COUL_TOTAL_KINDS; ++wolfKind){           
+                        // We skip the reference r cut with reference alpha.
+                        // r = 0, a = 0
+                        // So there are no duplicate columns.
+                        for (int r = 1; r < statValRef.forcefield.numberOfRCuts[box]; ++r){
+                              for (int a = 1; a < statValRef.forcefield.numberOfAlphas[box]; ++a){
+                                    row += GetString((abs(ewaldRef.boxEnergy[box].total) -  abs(electrostaticEnergies[box][r][a]))/ abs(ewaldRef.boxEnergy[box].total), 4);
+                                    row += "\t";
+                              }
+                        }
+                        outF[box][wolfKind][coulKind] << row;
+                        outF[box][wolfKind][coulKind] << std::endl;
                   }
             }
-            outF[box] << row;
-            outF[box] << std::endl;
       }
 }
 
