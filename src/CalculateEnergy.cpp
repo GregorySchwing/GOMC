@@ -1870,7 +1870,7 @@ void CalculateEnergy::WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_
     for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
       for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
         calcEwald->SetWolfKind(wolfKind);
-        for (uint coulKind = 0; wolfKind < COUL_TOTAL_KINDS; ++wolfKind){    
+        for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){    
           calcEwald->SetCoulKind(wolfKind);
           double bondEnergy[2] = {0};
           double bondEn = 0.0, nonbondEn = 0.0, correction = 0.0;

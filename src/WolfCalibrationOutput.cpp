@@ -15,7 +15,7 @@ sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV)
 {
       for(uint b = 0 ; b < BOX_TOTAL; b++) {
             for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
-                  for (uint coulKind = 0; wolfKind < COUL_TOTAL_KINDS; ++wolfKind){
+                  for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){
                         electrostaticEnergies[b][wolfKind][coulKind] =  new double*[statValRef.forcefield.numberOfRCuts[b]];
                         for (int r = 0; r < statValRef.forcefield.numberOfRCuts[b]; ++r){
                               electrostaticEnergies[b][wolfKind][coulKind][r] =  new double[statValRef.forcefield.numberOfAlphas[b]];
@@ -29,7 +29,7 @@ sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV)
   {
       for(uint b = 0 ; b < BOX_TOTAL; b++) {
             for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
-                  for (uint coulKind = 0; wolfKind < COUL_TOTAL_KINDS; ++wolfKind){
+                  for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){
                         for (int r = 0; r < statValRef.forcefield.numberOfRCuts[b]; ++r){
                               delete[] electrostaticEnergies[b][wolfKind][coulKind][r];
                         }
@@ -47,7 +47,7 @@ void WolfCalibrationOutput::Init(pdb_setup::Atoms const& atoms,
       if(enableOut) {
             for (uint b = 0; b < BOX_TOTAL; ++b) {
                   for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
-                        for (uint coulKind = 0; wolfKind < COUL_TOTAL_KINDS; ++wolfKind){
+                        for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){
                               std::stringstream sstrm;
                               std::string strKind, fileName;
                               sstrm << (b);
@@ -153,7 +153,7 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
 
       for (uint box = 0; box < BOX_TOTAL; ++box) {       
             for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
-                  for (uint coulKind = 0; wolfKind < COUL_TOTAL_KINDS; ++wolfKind){           
+                  for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){           
                         // We skip the reference r cut with reference alpha.
                         // r = 0, a = 0
                         // So there are no duplicate columns.
