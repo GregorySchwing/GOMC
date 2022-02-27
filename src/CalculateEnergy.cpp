@@ -1882,7 +1882,7 @@ void CalculateEnergy::WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_
             molID.push_back(*thisMol);
             ++thisMol;
           }
-          for (int indexForRcut = 0; indexForRcut < forcefield.numberOfRCuts[b]; ++indexForRcut){
+          for (int indexForRcut = 1; indexForRcut < forcefield.numberOfRCuts[b]; ++indexForRcut){
             // Intra only depends on RCut.
             bondEnergy[0] = 0.0;
             bondEnergy[1] = 0.0;
@@ -1901,7 +1901,7 @@ void CalculateEnergy::WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_
             potential.boxEnergy[b].intraBond = bondEn;
             potential.boxEnergy[b].intraNonbond = nonbondEn;
             // Pairwise Inter, Correction, Self, and Virial depend on RCut and Alpha.
-            for (int indexForAlpha = 0; indexForAlpha < forcefield.numberOfAlphas[b]; ++indexForAlpha){
+            for (int indexForAlpha = 1; indexForAlpha < forcefield.numberOfAlphas[b]; ++indexForAlpha){
               potential.Zero();
               potential.boxEnergy[b].intraBond = bondEn;
               potential.boxEnergy[b].intraNonbond = nonbondEn;
@@ -1926,9 +1926,6 @@ void CalculateEnergy::WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_
               potential.boxEnergy[b].self = calcEwald->BoxSelf(b, indexForRcut, indexForAlpha);
               potential.Total();
               electrostaticEnergies[b][wolfKind][coulKind][indexForRcut][indexForAlpha] = potential.boxEnergy[b].total;
-              // We only want the reference r cut with reference alpha.
-              if (indexForRcut == 0)
-                break;
             }
           }
         } 
