@@ -68,16 +68,16 @@ void WolfCalibrationOutput::WriteHeader(void)
             if (outF[b].is_open()) {
                   std::string firstRow = "";
                   firstRow += "Step#\t";
-                  for (int r = 0; r < statValRef.forcefield.numberOfRCuts[b]; ++r){
-                        for (int a = 0; a < statValRef.forcefield.numberOfAlphas[b]; ++a){
+                  // We skip the reference r cut with reference alpha.
+                  // r = 0, a = 0
+                  // So there are no duplicate columns.
+                  for (int r = 1; r < statValRef.forcefield.numberOfRCuts[b]; ++r){
+                        for (int a = 1; a < statValRef.forcefield.numberOfAlphas[b]; ++a){
                               firstRow += "(";
                               firstRow += GetString(statValRef.forcefield.rCutCoulomb[b][r], 4);
                               firstRow += ", ";
                               firstRow += GetString(statValRef.forcefield.wolfAlpha[b][a], 4);
                               firstRow += ")\t";
-                              // We only want the reference r cut with reference alpha.
-                              if (r == 0)
-                                    break;
                         }
                   }
                   outF[b] << firstRow;
@@ -97,8 +97,11 @@ void WolfCalibrationOutput::WriteGraceParFile(void)
                   int counter = 0;
                   std::string firstRow = "";
                   firstRow += "with g0\n";
-                  for (int r = 0; r < statValRef.forcefield.numberOfRCuts[b]; ++r){
-                        for (int a = 0; a < statValRef.forcefield.numberOfAlphas[b]; ++a){
+                  // We skip the reference r cut with reference alpha.
+                  // r = 0, a = 0
+                  // So there are no duplicate columns.
+                  for (int r = 1; r < statValRef.forcefield.numberOfRCuts[b]; ++r){
+                        for (int a = 1; a < statValRef.forcefield.numberOfAlphas[b]; ++a){
                               firstRow += "\ts";
                               firstRow += GetString(counter);
                               firstRow += " legend \"(";
@@ -107,9 +110,6 @@ void WolfCalibrationOutput::WriteGraceParFile(void)
                               firstRow += GetString(statValRef.forcefield.wolfAlpha[b][a], 4);
                               firstRow += ")\"\n";
                               ++counter;
-                              // We only want the reference r cut with reference alpha.
-                              if (r == 0)
-                                    break;
                         }
                   }
                   outFPar[b] << firstRow;
@@ -132,14 +132,14 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
       std::string row = "";
       row += GetString(step);
       row += "\t";
-      for (uint box = 0; box < BOX_TOTAL; ++box) {
-            for (int r = 0; r < statValRef.forcefield.numberOfRCuts[box]; ++r){
-                  for (int a = 0; a < statValRef.forcefield.numberOfAlphas[box]; ++a){
+      for (uint box = 0; box < BOX_TOTAL; ++box) {                  
+            // We skip the reference r cut with reference alpha.
+            // r = 0, a = 0
+            // So there are no duplicate columns.
+            for (int r = 1; r < statValRef.forcefield.numberOfRCuts[box]; ++r){
+                  for (int a = 1; a < statValRef.forcefield.numberOfAlphas[box]; ++a){
                         row += GetString((abs(ewaldRef.boxEnergy[box].total) -  abs(electrostaticEnergies[box][r][a]))/ abs(ewaldRef.boxEnergy[box].total), 4);
                         row += "\t";
-                        // We only want the reference r cut with reference alpha.
-                        if (r == 0)
-                              break;
                   }
             }
             outF[box] << row;
