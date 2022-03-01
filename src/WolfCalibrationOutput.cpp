@@ -106,32 +106,30 @@ void WolfCalibrationOutput::WriteHeader(uint b, uint wolfKind, uint coulKind)
 
 void WolfCalibrationOutput::WriteGraceParFile(uint b, uint wolfKind, uint coulKind)
 {
-      for (uint b = 0; b < BOX_TOTAL; ++b) {
-            if (outFPar[b][wolfKind][coulKind].is_open()) {
-                  int counter = 0;
-                  std::string firstRow = "";
-                  firstRow += "with g0\n";
-                  // We skip the reference r cut with reference alpha.
-                  // r = 0, a = 0
-                  // So there are no duplicate columns.
-                  for (int r = 1; r < statValRef.forcefield.numberOfRCuts[b]; ++r){
-                        for (int a = 1; a < statValRef.forcefield.numberOfAlphas[b]; ++a){
-                              firstRow += "\ts";
-                              firstRow += GetString(counter);
-                              firstRow += " legend \"(";
-                              firstRow += GetString(statValRef.forcefield.rCutCoulomb[b][r], 4);
-                              firstRow += ", ";
-                              firstRow += GetString(statValRef.forcefield.wolfAlpha[b][a], 4);
-                              firstRow += ")\"\n";
-                              ++counter;
-                        }
-                        outFPar[b][wolfKind][coulKind] << firstRow;
-                        outFPar[b][wolfKind][coulKind] << std::endl;
+      if (outFPar[b][wolfKind][coulKind].is_open()) {
+            int counter = 0;
+            std::string firstRow = "";
+            firstRow += "with g0\n";
+            // We skip the reference r cut with reference alpha.
+            // r = 0, a = 0
+            // So there are no duplicate columns.
+            for (int r = 1; r < statValRef.forcefield.numberOfRCuts[b]; ++r){
+                  for (int a = 1; a < statValRef.forcefield.numberOfAlphas[b]; ++a){
+                        firstRow += "\ts";
+                        firstRow += GetString(counter);
+                        firstRow += " legend \"(";
+                        firstRow += GetString(statValRef.forcefield.rCutCoulomb[b][r], 4);
+                        firstRow += ", ";
+                        firstRow += GetString(statValRef.forcefield.wolfAlpha[b][a], 4);
+                        firstRow += ")\"\n";
+                        ++counter;
                   }
-            } else {
-                  std::cerr << "Unable to write to file \"" <<  name[b] << "\" "
-                              << "(Wolf Calibration file)" << std::endl;
+                  outFPar[b][wolfKind][coulKind] << firstRow;
+                  outFPar[b][wolfKind][coulKind] << std::endl;
             }
+      } else {
+            std::cerr << "Unable to write to file \"" <<  name[b] << "\" "
+                        << "(Wolf Calibration file)" << std::endl;
       }
 }
 
