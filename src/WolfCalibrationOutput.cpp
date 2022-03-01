@@ -94,9 +94,9 @@ void WolfCalibrationOutput::WriteHeader(uint b, uint wolfKind, uint coulKind)
                         firstRow += GetString(statValRef.forcefield.wolfAlpha[b][a], 4);
                         firstRow += ")\t";
                   }
-                  outF[b][wolfKind][coulKind] << firstRow;
-                  outF[b][wolfKind][coulKind] << std::endl;
             }
+            outF[b][wolfKind][coulKind] << firstRow;
+            outF[b][wolfKind][coulKind] << std::endl;
       } else {
             std::cerr << "Unable to write to file \"" <<  name[b][wolfKind][coulKind] << "\" "
                         << "(Wolf Calibration file)" << std::endl;
@@ -124,9 +124,9 @@ void WolfCalibrationOutput::WriteGraceParFile(uint b, uint wolfKind, uint coulKi
                         firstRow += ")\"\n";
                         ++counter;
                   }
-                  outFPar[b][wolfKind][coulKind] << firstRow;
-                  outFPar[b][wolfKind][coulKind] << std::endl;
             }
+            outFPar[b][wolfKind][coulKind] << firstRow;
+            outFPar[b][wolfKind][coulKind] << std::endl;
       } else {
             std::cerr << "Unable to write to file \"" <<  name[b] << "\" "
                         << "(Wolf Calibration file)" << std::endl;
@@ -151,7 +151,10 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
 
       for (uint box = 0; box < BOX_TOTAL; ++box) {       
             for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
-                  for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){           
+                  for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){  
+                        std::string row = "";
+                        row += GetString(step);
+                        row += "\t";
                         // We skip the reference r cut with reference alpha.
                         // r = 0, a = 0
                         // So there are no duplicate columns.
@@ -160,9 +163,9 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
                                     row += GetString((abs(ewaldRef.boxEnergy[box].total) -  abs(electrostaticEnergies[box][wolfKind][coulKind][r][a]))/ abs(ewaldRef.boxEnergy[box].total), 4);
                                     row += "\t";
                               }
-                              outF[box][wolfKind][coulKind] << row;
-                              outF[box][wolfKind][coulKind] << std::endl;
                         }
+                        outF[box][wolfKind][coulKind] << row;
+                        outF[box][wolfKind][coulKind] << std::endl;
                   }
             }
       }
