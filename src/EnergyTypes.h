@@ -86,33 +86,34 @@ struct Intermolecular {
 class Energy
 {
 public:
-  Energy() : intraBond(0.0), intraNonbond(0.0), inter(0.0),
+  Energy() : intraBond(0.0), intraNonbondVDW(0.0), intraNonbondReal(0.0), inter(0.0),
     tc(0.0), total(0.0), real(0.0), recip(0.0), self(0.0),
     correction(0.0), totalElect(0.0) {}
-  Energy(double bond, double nonbond, double inter, double real,
+  Energy(double bond, double nonbondVDW, double nonbondReal, double inter, double real,
          double recip, double self, double correc) :
-    intraBond(bond), intraNonbond(nonbond), inter(inter),
+    intraBond(bond),  intraNonbondVDW(nonbondVDW), intraNonbondReal(nonbondReal), inter(inter),
     tc(0.0), total(0.0), real(real), recip(recip), self(self),
     correction(correc), totalElect(0.0) {}
 
   //VALUE SETTERS
   double Total()
   {
-    total = intraBond + intraNonbond + inter + tc + real + recip + self +
+    total = intraBond + intraNonbondVDW + intraNonbondReal + inter + tc + real + recip + self +
             correction;
     return total;
   }
 
   double TotalElect()
   {
-    totalElect = real + recip + self + correction;
+    totalElect = real + recip + self + correction + intraNonbondReal;
     return totalElect;
   }
 
   void Zero()
   {
     intraBond = 0.0;
-    intraNonbond = 0.0;
+    intraNonbondVDW = 0.0;
+    intraNonbondReal = 0.0;
     inter = 0.0;
     tc = 0.0;
     real = 0.0;
@@ -140,7 +141,7 @@ public:
 
 //private:
   //MEMBERS
-  double intraBond, intraNonbond, intraNonbondReal, intraNonbondVDW, inter, tc, total, real, recip, self,
+  double intraBond, intraNonbondReal, intraNonbondVDW, inter, tc, total, real, recip, self,
          correction, totalElect;
 };
 
@@ -148,7 +149,8 @@ inline Energy& Energy::operator-=(Energy const& rhs)
 {
   inter -= rhs.inter;
   intraBond -= rhs.intraBond;
-  intraNonbond -= rhs.intraNonbond;
+  intraNonbondReal -= rhs.intraNonbondReal;
+  intraNonbondVDW -= rhs.intraNonbondVDW;
   tc -= rhs.tc;
   real -= rhs.real;
   recip -= rhs.recip;
@@ -164,7 +166,8 @@ inline Energy& Energy::operator+=(Energy const& rhs)
 {
   inter += rhs.inter;
   intraBond += rhs.intraBond;
-  intraNonbond += rhs.intraNonbond;
+  intraNonbondReal += rhs.intraNonbondReal;
+  intraNonbondVDW += rhs.intraNonbondVDW;
   tc += rhs.tc;
   real += rhs.real;
   recip += rhs.recip;
@@ -180,7 +183,8 @@ inline Energy& Energy::operator*=(double const& rhs)
 {
   inter *= rhs;
   intraBond *= rhs;
-  intraNonbond *= rhs;
+  intraNonbondReal *= rhs;
+  intraNonbondVDW *= rhs;
   tc *= rhs;
   real *= rhs;
   recip *= rhs;
@@ -452,9 +456,14 @@ inline bool SystemPotential::ComparePotentials(SystemPotential & other)
     std::cout << "difference : " << totalEnergy.intraBond - other.totalEnergy.intraBond << std::endl;
     returnVal = false;
   }
-  if(totalEnergy.intraNonbond != other.totalEnergy.intraNonbond) {
-    std::cout << "my intraNonbond : " << totalEnergy.intraNonbond << "other intraNonbond : " << other.totalEnergy.intraNonbond << std::endl;
-    std::cout << "difference : " << totalEnergy.intraNonbond - other.totalEnergy.intraNonbond << std::endl;
+  if(totalEnergy.intraNonbondVDW != other.totalEnergy.intraNonbondVDW) {
+    std::cout << "my intraNonbondVDW : " << totalEnergy.intraNonbondVDW << "other intraNonbondVDW : " << other.totalEnergy.intraNonbondVDW << std::endl;
+    std::cout << "difference : " << totalEnergy.intraNonbondVDW - other.totalEnergy.intraNonbondVDW << std::endl;
+    returnVal = false;
+  }
+  if(totalEnergy.intraNonbondReal != other.totalEnergy.intraNonbondReal) {
+    std::cout << "my intraNonbondReal : " << totalEnergy.intraNonbondReal << "other intraNonbondReal : " << other.totalEnergy.intraNonbondReal << std::endl;
+    std::cout << "difference : " << totalEnergy.intraNonbondReal - other.totalEnergy.intraNonbondReal << std::endl;
     returnVal = false;
   }
   if(totalEnergy.tc != other.totalEnergy.tc) {
@@ -500,8 +509,9 @@ inline bool SystemPotential::ComparePotentials(SystemPotential & other)
 inline std::ostream& operator << (std::ostream& out, const Energy& en)
 {
   out << "Total: " << en.total << "   Inter: " << en.inter
-      << "   IntraB: " << en.intraBond << "   IntraNB: "
-      << en.intraNonbond << '\n';
+      << "   IntraB: " << en.intraBond << "   IntraNBVDW: "
+      << en.intraNonbondVDW << "   IntraNBReal: "
+      << en.intraNonbondReal '\n';
   return out;
 }
 #endif

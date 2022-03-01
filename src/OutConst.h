@@ -22,40 +22,42 @@ extern const std::string ENERGY_TC;
 static const uint ENERGY_TC_IDX = 2;
 extern const std::string ENERGY_INTRA_B;
 static const uint ENERGY_INTRA_B_IDX = 3;
-extern const std::string ENERGY_INTRA_NB;
-static const uint ENERGY_INTRA_NB_IDX = 4;
+extern const std::string ENERGY_INTRA_NB_VDW;
+static const uint ENERGY_INTRA_NB_VDW_IDX = 4;
+extern const std::string ENERGY_INTRA_NB_REAL;
+static const uint ENERGY_INTRA_NB_REAL_IDX = 5;
 extern const std::string ENERGY_ELECT;
-static const uint ENERGY_ELECT_IDX = 5;
+static const uint ENERGY_ELECT_IDX = 6;
 extern const std::string ENERGY_REAL;
-static const uint ENERGY_REAL_IDX = 6;
+static const uint ENERGY_REAL_IDX = 7;
 extern const std::string ENERGY_RECIP;
-static const uint ENERGY_RECIP_IDX = 7;
+static const uint ENERGY_RECIP_IDX = 8;
 extern const std::string VIRIAL_TOTAL;
-static const uint VIRIAL_TOTAL_IDX = 8;
+static const uint VIRIAL_TOTAL_IDX = 9;
 extern const std::string PRESSURE;
-static const uint PRESSURE_IDX = 9;
+static const uint PRESSURE_IDX = 10;
 extern const std::string MOL_NUM;
-static const uint MOL_NUM_IDX = 10;
+static const uint MOL_NUM_IDX = 11;
 extern const std::string DENSITY;
-static const uint DENSITY_IDX = 11;
+static const uint DENSITY_IDX = 12;
 extern const std::string COMPRESSIBILITY;
-static const uint COMPRESSIBILITY_IDX = 12;
+static const uint COMPRESSIBILITY_IDX = 13;
 extern const std::string SURF_TENSION;
-static const uint SURF_TENSION_IDX = 13;
-static const uint ENTHALPY_IDX = 14;
+static const uint SURF_TENSION_IDX = 14;
+static const uint ENTHALPY_IDX = 15;
 extern const std::string ENTHALPY;
 #if ENSEMBLE == NVT || ENSEMBLE == GCMC
-static const uint TOTAL_SINGLE = 18;
+static const uint TOTAL_SINGLE = 16;
 #elif ENSEMBLE == NPT
 extern const std::string VOLUME;
-static const uint VOLUME_IDX = 15;
-static const uint TOTAL_SINGLE = 16;
+static const uint VOLUME_IDX = 16;
+static const uint TOTAL_SINGLE = 17;
 #else
 extern const std::string VOLUME;
 extern const std::string HEAT_OF_VAP;
-static const uint VOLUME_IDX = 15;
-static const uint HEAT_OF_VAP_IDX = 16;
-static const uint TOTAL_SINGLE = 17;
+static const uint VOLUME_IDX = 16;
+static const uint HEAT_OF_VAP_IDX = 17;
+static const uint TOTAL_SINGLE = 18;
 #endif
 
 //MULTI

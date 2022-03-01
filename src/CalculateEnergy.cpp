@@ -95,8 +95,8 @@ SystemPotential CalculateEnergy::SystemTotal()
   //system intra
   for (uint b = 0; b < BOX_TOTAL; ++b) {
     GOMC_EVENT_START(1, GomcProfileEvent::EN_BOX_INTRA);
-    double bondEnergy[2] = {0};
-    double bondEn = 0.0, nonbondEn = 0.0, correction = 0.0;
+    double bondEnergy[3] = {0};
+    double bondEn = 0.0, nonbondEnVDW = 0.0, nonbondEnReal = 0.0, correction = 0.0;
     MoleculeLookup::box_iterator thisMol = molLookup.BoxBegin(b);
     MoleculeLookup::box_iterator end = molLookup.BoxEnd(b);
     std::vector<uint> molID;
@@ -108,19 +108,21 @@ SystemPotential CalculateEnergy::SystemTotal()
 
 #ifdef _OPENMP
     #pragma omp parallel for default(none) private(bondEnergy) shared(b, molID) \
-    reduction(+:bondEn, nonbondEn, correction)
+    reduction(+:bondEn, nonbondEnVDW, nonbondEnReal, correction)
 #endif
     for (int i = 0; i < (int) molID.size(); i++) {
       //calculate nonbonded energy
       MoleculeIntra(molID[i], b, bondEnergy);
       bondEn += bondEnergy[0];
-      nonbondEn += bondEnergy[1];
+      nonbondEnVDW += bondEnergy[1];
+      nonbondEnReal += bondEnergy[2];
       //calculate correction term of electrostatic interaction
       correction += calcEwald->MolCorrection(molID[i], b);
     }
 
     pot.boxEnergy[b].intraBond = bondEn;
-    pot.boxEnergy[b].intraNonbond = nonbondEn;
+    pot.boxEnergy[b].intraNonbondVDW = nonbondEnVDW;
+    pot.boxEnergy[b].intraNonbondReal = nonbondEnReal;
     //calculate self term of electrostatic interaction
     pot.boxEnergy[b].self = calcEwald->BoxSelf(b);
     pot.boxEnergy[b].correction = correction;
@@ -872,7 +874,7 @@ void CalculateEnergy::MoleculeIntra(const uint molIndex,
                                     int indexForRCut) const
 {
   GOMC_EVENT_START(1, GomcProfileEvent::EN_MOL_INTRA);
-  bondEn[0] = 0.0, bondEn[1] = 0.0;
+  bondEn[0] = 0.0, bondEn[1] = 0.0, bondEn[2] = 0.0;
 
   MoleculeKind& molKind = mols.kinds[mols.kIndex[molIndex]];
   // *2 because we'll be storing inverse bond vectors
@@ -882,9 +884,9 @@ void CalculateEnergy::MoleculeIntra(const uint molIndex,
   MolBond(bondEn[0], molKind, bondVec, molIndex, box);
   MolAngle(bondEn[0], molKind, bondVec, box);
   MolDihedral(bondEn[0], molKind, bondVec, box);
-  MolNonbond(bondEn[1], molKind, molIndex, box, indexForRCut);
-  MolNonbond_1_4(bondEn[1], molKind, molIndex, box, indexForRCut);
-  MolNonbond_1_3(bondEn[1], molKind, molIndex, box, indexForRCut);
+  MolNonbond(bondEn, molKind, molIndex, box, indexForRCut);
+  MolNonbond_1_4(bondEn, molKind, molIndex, box, indexForRCut);
+  MolNonbond_1_3(bondEn, molKind, molIndex, box, indexForRCut);
   GOMC_EVENT_STOP(1, GomcProfileEvent::EN_MOL_INTRA);
 }
 
@@ -907,7 +909,7 @@ Energy CalculateEnergy::MoleculeIntra(cbmc::TrialMol const &mol) const
   MolNonbond_1_4(intraNonbondEn, mol, molKind);
   MolNonbond_1_3(intraNonbondEn, mol, molKind);
   GOMC_EVENT_STOP(1, GomcProfileEvent::EN_MOL_INTRA);
-  return Energy(bondEn, intraNonbondEn, 0.0, 0.0, 0.0, 0.0, 0.0);
+  return Energy(bondEn, intraNonbondEn, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 }
 
 void CalculateEnergy::BondVectors(XYZArray & vecs,
@@ -1066,7 +1068,7 @@ void CalculateEnergy::MolDihedral(double & energy,
 }
 
 // Calculate 1-N nonbonded intra energy
-void CalculateEnergy::MolNonbond(double & energy,
+void CalculateEnergy::MolNonbond(double * energy,
                                  MoleculeKind const& molKind,
                                  const uint molIndex,
                                  const uint box,
@@ -1082,7 +1084,7 @@ void CalculateEnergy::MolNonbond(double & energy,
     uint p1 = mols.start[molIndex] + molKind.nonBonded.part1[i];
     uint p2 = mols.start[molIndex] + molKind.nonBonded.part2[i];
     if (currentAxes.InRcut(distSq, currentCoords, p1, p2, box)) {
-      energy += forcefield.particles->CalcEn(distSq, molKind.AtomKind
+      energy[1] += forcefield.particles->CalcEn(distSq, molKind.AtomKind
                                              (molKind.nonBonded.part1[i]),
                                              molKind.AtomKind
                                              (molKind.nonBonded.part2[i]), 1.0);
@@ -1092,7 +1094,7 @@ void CalculateEnergy::MolNonbond(double & energy,
                      molKind.AtomCharge(molKind.nonBonded.part2[i]);
 
         if (qi_qj_fact != 0.0) {
-          forcefield.particles->CalcCoulombAdd_1_4(energy, distSq,
+          forcefield.particles->CalcCoulombAdd_1_4(energy[2], distSq,
             qi_qj_fact, true, box, indexForRCut);
         }
       }
@@ -1135,7 +1137,7 @@ void CalculateEnergy::MolNonbond(double & energy, cbmc::TrialMol const &mol,
 }
 
 // Calculate 1-4 nonbonded intra energy
-void CalculateEnergy::MolNonbond_1_4(double & energy,
+void CalculateEnergy::MolNonbond_1_4(double * energy,
                                      MoleculeKind const& molKind,
                                      const uint molIndex,
                                      const uint box,
@@ -1151,7 +1153,7 @@ void CalculateEnergy::MolNonbond_1_4(double & energy,
     uint p1 = mols.start[molIndex] + molKind.nonBonded_1_4.part1[i];
     uint p2 = mols.start[molIndex] + molKind.nonBonded_1_4.part2[i];
     if (currentAxes.InRcut(distSq, currentCoords, p1, p2, box)) {
-      forcefield.particles->CalcAdd_1_4(energy, distSq,
+      forcefield.particles->CalcAdd_1_4(energy[1], distSq,
                                         molKind.AtomKind
                                         (molKind.nonBonded_1_4.part1[i]),
                                         molKind.AtomKind
@@ -1162,7 +1164,7 @@ void CalculateEnergy::MolNonbond_1_4(double & energy,
                      molKind.AtomCharge(molKind.nonBonded_1_4.part2[i]);
 
         if (qi_qj_fact != 0.0) {
-          forcefield.particles->CalcCoulombAdd_1_4(energy, distSq,
+          forcefield.particles->CalcCoulombAdd_1_4(energy[2], distSq,
             qi_qj_fact, false, box, indexForRCut);
         }
       }
@@ -1205,7 +1207,7 @@ void CalculateEnergy::MolNonbond_1_4(double & energy,
 }
 
 // Calculate 1-3 nonbonded intra energy
-void CalculateEnergy::MolNonbond_1_3(double & energy,
+void CalculateEnergy::MolNonbond_1_3(double * energy,
                                      MoleculeKind const& molKind,
                                      const uint molIndex,
                                      const uint box,
@@ -1221,7 +1223,7 @@ void CalculateEnergy::MolNonbond_1_3(double & energy,
     uint p1 = mols.start[molIndex] + molKind.nonBonded_1_3.part1[i];
     uint p2 = mols.start[molIndex] + molKind.nonBonded_1_3.part2[i];
     if (currentAxes.InRcut(distSq, currentCoords, p1, p2, box)) {
-      forcefield.particles->CalcAdd_1_4(energy, distSq,
+      forcefield.particles->CalcAdd_1_4(energy[1], distSq,
                                         molKind.AtomKind
                                         (molKind.nonBonded_1_3.part1[i]),
                                         molKind.AtomKind
@@ -1232,7 +1234,7 @@ void CalculateEnergy::MolNonbond_1_3(double & energy,
                      molKind.AtomCharge(molKind.nonBonded_1_3.part2[i]);
 
         if (qi_qj_fact != 0.0) {
-          forcefield.particles->CalcCoulombAdd_1_4(energy, distSq,
+          forcefield.particles->CalcCoulombAdd_1_4(energy[2], distSq,
               qi_qj_fact, false, box, indexForRCut);
         }
       }
@@ -1872,8 +1874,8 @@ void CalculateEnergy::WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_
         calcEwald->SetWolfKind(wolfKind);
         for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){    
           calcEwald->SetCoulKind(wolfKind);
-          double bondEnergy[2] = {0};
-          double bondEn = 0.0, nonbondEn = 0.0, correction = 0.0;
+          double bondEnergy[3] = {0};
+          double bondEn = 0.0, nonbondEnVDW = 0.0, nonbondEnReal = 0.0, correction = 0.0;
           MoleculeLookup::box_iterator thisMol = molLookup.BoxBegin(b);
           MoleculeLookup::box_iterator end = molLookup.BoxEnd(b);
           std::vector<uint> molID;
@@ -1886,25 +1888,30 @@ void CalculateEnergy::WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_
             // Intra only depends on RCut.
             bondEnergy[0] = 0.0;
             bondEnergy[1] = 0.0;
+            bondEnergy[2] = 0.0;
             bondEn = 0.0;
-            nonbondEn = 0.0;
+            nonbondEnVDW = 0.0;
+            nonbondEnReal = 0.0;
             #ifdef _OPENMP
             #pragma omp parallel for default(none) private(bondEnergy) shared(b, molID, indexForRcut) \
-                reduction(+:bondEn, nonbondEn)
+              reduction(+:bondEn, nonbondEnVDW, nonbondEnReal)
             #endif
             for (int i = 0; i < (int) molID.size(); i++) {
               //calculate nonbonded energy
               MoleculeIntra(molID[i], b, bondEnergy);
               bondEn += bondEnergy[0];
-              nonbondEn += bondEnergy[1];
+              nonbondEnVDW += bondEnergy[1];
+              nonbondEnReal += bondEnergy[2];
             }
             potential.boxEnergy[b].intraBond = bondEn;
-            potential.boxEnergy[b].intraNonbond = nonbondEn;
+            potential.boxEnergy[b].intraNonbondVDW = nonbondEnVDW;
+            potential.boxEnergy[b].intraNonbondReal = nonbondEnReal;
             // Pairwise Inter, Correction, Self, and Virial depend on RCut and Alpha.
             for (int indexForAlpha = 1; indexForAlpha < forcefield.numberOfAlphas[b]; ++indexForAlpha){
               potential.Zero();
               potential.boxEnergy[b].intraBond = bondEn;
-              potential.boxEnergy[b].intraNonbond = nonbondEn;
+              potential.boxEnergy[b].intraNonbondVDW = nonbondEnVDW;
+              potential.boxEnergy[b].intraNonbondReal = nonbondEnReal;
               //calculate LJ interaction and real term of electrostatic interaction
               potential = BoxInter(potential, currentCoords, currentAxes, b, indexForRcut, indexForAlpha);
               //calculate reciprocal term of electrostatic interaction

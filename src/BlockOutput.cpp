@@ -184,7 +184,8 @@ void BlockAverages::InitWatchSingle(config_setup::TrackedVars const& tracked)
   blocks[out::ENERGY_INTER_IDX].Init(&outBlock0, &outBlock1, tracked.energy.block, invSteps, firstInvSteps, firstPrint, out::ENERGY_INTER, BOXES_WITH_U_NB);
   blocks[out::ENERGY_TC_IDX].Init(&outBlock0, &outBlock1, tracked.energy.block, invSteps, firstInvSteps, firstPrint, out::ENERGY_TC, BOXES_WITH_U_NB);
   blocks[out::ENERGY_INTRA_B_IDX].Init(&outBlock0, &outBlock1, tracked.energy.block, invSteps, firstInvSteps, firstPrint, out::ENERGY_INTRA_B, BOXES_WITH_U_NB);
-  blocks[out::ENERGY_INTRA_NB_IDX].Init(&outBlock0, &outBlock1, tracked.energy.block, invSteps, firstInvSteps, firstPrint, out::ENERGY_INTRA_NB, BOXES_WITH_U_NB);
+  blocks[out::ENERGY_INTRA_NB_VDW_IDX].Init(&outBlock0, &outBlock1, tracked.energy.block, invSteps, firstInvSteps, firstPrint, out::ENERGY_INTRA_NB_VDW, BOXES_WITH_U_NB);
+  blocks[out::ENERGY_INTRA_NB_REAL_IDX].Init(&outBlock0, &outBlock1, tracked.energy.block, invSteps, firstInvSteps, firstPrint, out::ENERGY_INTRA_NB_REAL, BOXES_WITH_U_NB);
   blocks[out::ENERGY_ELECT_IDX].Init(&outBlock0, &outBlock1, tracked.energy.block, invSteps, firstInvSteps, firstPrint, out::ENERGY_ELECT, BOXES_WITH_U_NB);
   blocks[out::ENERGY_REAL_IDX].Init(&outBlock0, &outBlock1, tracked.energy.block, invSteps, firstInvSteps, firstPrint, out::ENERGY_REAL, BOXES_WITH_U_NB);
   blocks[out::ENERGY_RECIP_IDX].Init(&outBlock0, &outBlock1, tracked.energy.block, invSteps, firstInvSteps, firstPrint, out::ENERGY_RECIP, BOXES_WITH_U_NB);
@@ -209,7 +210,8 @@ void BlockAverages::InitWatchSingle(config_setup::TrackedVars const& tracked)
     blocks[out::ENERGY_INTRA_B_IDX].SetRef(&var->energyRef[b].intraBond, b);
     blocks[out::ENERGY_INTER_IDX].SetRef(&var->energyRef[b].inter, b);
     blocks[out::ENERGY_TC_IDX].SetRef(&var->energyRef[b].tc, b);
-    blocks[out::ENERGY_INTRA_NB_IDX].SetRef(&var->energyRef[b].intraNonbond, b);
+    blocks[out::ENERGY_INTRA_NB_VDW_IDX].SetRef(&var->energyRef[b].intraNonbondVDW, b);
+    blocks[out::ENERGY_INTRA_NB_REAL_IDX].SetRef(&var->energyRef[b].intraNonbondReal, b);
     blocks[out::ENERGY_ELECT_IDX].SetRef(&var->energyRef[b].totalElect, b);
     blocks[out::ENERGY_REAL_IDX].SetRef(&var->energyRef[b].real, b);
     blocks[out::ENERGY_RECIP_IDX].SetRef(&var->energyRef[b].recip, b);

@@ -145,7 +145,8 @@ bool Simulation::RecalculateAndCheck(void)
 
   bool compare = true;
   compare &= num::approximatelyEqual(system->potential.totalEnergy.intraBond, pot.totalEnergy.intraBond, EPSILON);
-  compare &= num::approximatelyEqual(system->potential.totalEnergy.intraNonbond, pot.totalEnergy.intraNonbond, EPSILON);
+  compare &= num::approximatelyEqual(system->potential.totalEnergy.intraNonbondVDW, pot.totalEnergy.intraNonbondVDW, EPSILON);
+  compare &= num::approximatelyEqual(system->potential.totalEnergy.intraNonbondReal, pot.totalEnergy.intraNonbondReal, EPSILON);
   compare &= num::approximatelyEqual(system->potential.totalEnergy.inter, pot.totalEnergy.inter, EPSILON);
   compare &= num::approximatelyEqual(system->potential.totalEnergy.tc, pot.totalEnergy.tc, EPSILON);
   compare &= num::approximatelyEqual(system->potential.totalEnergy.real, pot.totalEnergy.real, EPSILON);
@@ -156,11 +157,12 @@ bool Simulation::RecalculateAndCheck(void)
   if(!compare) {
     std::cout
         << "=================================================================\n"
-        << "Energy       INTRA B |     INTRA NB |        INTER |           TC |         REAL |         SELF |   CORRECTION |        RECIP"
+        << "Energy       INTRA B |     INTRA NB VDW |     INTRA NB REAL |        INTER |           TC |         REAL |         SELF |   CORRECTION |        RECIP"
         << std::endl
         << "System: "
         << std::setw(12) << system->potential.totalEnergy.intraBond << " | "
-        << std::setw(12) << system->potential.totalEnergy.intraNonbond << " | "
+        << std::setw(12) << system->potential.totalEnergy.intraNonbondVDW << " | "
+        << std::setw(12) << system->potential.totalEnergy.intraNonbondReal << " | "
         << std::setw(12) << system->potential.totalEnergy.inter << " | "
         << std::setw(12) << system->potential.totalEnergy.tc << " | "
         << std::setw(12) << system->potential.totalEnergy.real << " | "
@@ -169,8 +171,8 @@ bool Simulation::RecalculateAndCheck(void)
         << std::setw(12) << system->potential.totalEnergy.recip << std::endl
         << "Recalc: "
         << std::setw(12) << pot.totalEnergy.intraBond << " | "
-        << std::setw(12) << pot.totalEnergy.intraNonbond << " | "
-        << std::setw(12) << pot.totalEnergy.inter << " | "
+        << std::setw(12) << system->potential.totalEnergy.intraNonbondVDW << " | "
+        << std::setw(12) << system->potential.totalEnergy.intraNonbondReal << " | "        << std::setw(12) << pot.totalEnergy.inter << " | "
         << std::setw(12) << pot.totalEnergy.tc << " | "
         << std::setw(12) << pot.totalEnergy.real << " | "
         << std::setw(12) << pot.totalEnergy.self << " | "

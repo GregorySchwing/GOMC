@@ -291,7 +291,8 @@ void ConsoleOutput::PrintEnergy(const uint box, Energy const& en,
 
   printElement(en.total, elementWidth);
   printElement(en.intraBond, elementWidth);
-  printElement(en.intraNonbond, elementWidth);
+  printElement(en.intraNonbondVDW, elementWidth);
+  printElement(en.intraNonbondReal, elementWidth);
   printElement(en.inter, elementWidth);
   printElement(en.tc, elementWidth);
   printElement(en.totalElect, elementWidth);

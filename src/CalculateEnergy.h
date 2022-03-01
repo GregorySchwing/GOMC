@@ -264,7 +264,7 @@ private:
                    MoleculeKind const& molKind) const;
 
   //! Calculates Nonbonded 1_N intramolecule energy of a full molecule
-  void MolNonbond(double & energy, MoleculeKind const& molKind,
+  void MolNonbond(double * energy, MoleculeKind const& molKind,
                   const uint molIndex, const uint box, int indexForRCut = 0) const;
 
   //! Calculates Nonbonded 1_N intramolecule energy of a non-complete molecule
@@ -272,7 +272,7 @@ private:
                   MoleculeKind const& molKind) const;
 
   //! Calculates Nonbonded 1_4 intramolecule energy of a full molecule
-  void MolNonbond_1_4(double & energy, MoleculeKind const& molKind,
+  void MolNonbond_1_4(double * energy, MoleculeKind const& molKind,
                       const uint molIndex, const uint box, int indexForRCut = 0) const;
 
   //! Calculates Nonbonded 1_4 intramolecule energy of a non-complete molecule
@@ -281,7 +281,7 @@ private:
 
   //! Calculates Nonbonded 1_3 intramolecule energy of a full molecule
   //for Martini forcefield
-  void MolNonbond_1_3(double & energy, MoleculeKind const& molKind,
+  void MolNonbond_1_3(double * energy, MoleculeKind const& molKind,
                       const uint molIndex, const uint box, int indexForRCut = 0) const;
 
   //! Calculates Nonbonded 1_3 intramolecule energy of a non-complete molecule
