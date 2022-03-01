@@ -1925,7 +1925,7 @@ void CalculateEnergy::WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_
               //calculate self term of electrostatic interaction
               potential.boxEnergy[b].self = calcEwald->BoxSelf(b, indexForRcut, indexForAlpha);
               potential.Total();
-              electrostaticEnergies[b][wolfKind][coulKind][indexForRcut][indexForAlpha] = potential.boxEnergy[b].total;
+              electrostaticEnergies[b][wolfKind][coulKind][indexForRcut][indexForAlpha] = potential.boxEnergy[b].totalElect;
             }
           }
         } 
