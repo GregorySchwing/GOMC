@@ -139,7 +139,8 @@ void DCLinkedHedron::BuildNew(TrialMol& newMol, uint molIndex)
   double* ljWeights = data->ljWeights;
   double* bondedEn = data->bonded;
   double* inter = data->inter;
-  double* nonbonded = data->nonbonded;
+  double* nonbonded_VDW = data->nonbonded_VDW;
+  double* nonbonded_Real = data->nonbonded_Real;
   double* nonbonded_1_4 = data->nonbonded_1_4;
   double* real = data->real;
   double* oneFour = data->oneFour;
@@ -222,7 +223,8 @@ void DCLinkedHedron::BuildOld(TrialMol& oldMol, uint molIndex)
   double* ljWeights = data->ljWeights;
   double* bondedEn = data->bonded;
   double* inter = data->inter;
-  double* nonbonded = data->nonbonded;
+  double* nonbonded_VDW = data->nonbonded_VDW;
+  double* nonbonded_Real = data->nonbonded_Real;
   double* nonbonded_1_4 = data->nonbonded_1_4;
   double* real = data->real;
   double* oneFour = data->oneFour;
@@ -333,7 +335,8 @@ double DCLinkedHedron::EvalLJ(TrialMol& mol, uint molIndex)
 {
   uint nLJTrials = data->nLJTrialsNth;
   double* inter = data->inter;
-  double* nonbonded = data->nonbonded;
+  double* nonbonded_VDW = data->nonbonded_VDW;
+  double* nonbonded_Real = data->nonbonded_Real;
   double* real = data->real;
   bool* overlap = data->overlap;
   XYZArray* positions = data->multiPositions;
