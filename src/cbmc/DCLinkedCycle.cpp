@@ -180,8 +180,7 @@ void DCLinkedCycle::BuildNew(TrialMol& newMol, uint molIndex)
   double* ljWeights = data->ljWeights;
   double* bondedEn = data->bonded;
   double* inter = data->inter;
-  double* nonbonded_VDW = data->nonbonded_VDW;
-  double* nonbonded_Real = data->nonbonded_Real;
+  double* nonbonded = data->nonbonded;
   double* nonbonded_1_4 = data->nonbonded_1_4;
   double* real = data->real;
   double* oneFour = data->oneFour;
@@ -289,8 +288,7 @@ void DCLinkedCycle::BuildOld(TrialMol& oldMol, uint molIndex)
   double* ljWeights = data->ljWeights;
   double* bondedEn = data->bonded;
   double* inter = data->inter;
-  double* nonbonded_VDW = data->nonbonded_VDW;
-  double* nonbonded_Real = data->nonbonded_Real;
+  double* nonbonded = data->nonbonded;
   double* nonbonded_1_4 = data->nonbonded_1_4;
   double* real = data->real;
   double* oneFour = data->oneFour;
@@ -432,8 +430,7 @@ void DCLinkedCycle::BuildOld(TrialMol& oldMol, uint molIndex)
 double DCLinkedCycle::EvalLJ(TrialMol& mol, uint molIndex)
 {
   double* inter = data->inter;
-  double* nonbonded_VDW = data->nonbonded_VDW;
-  double* nonbonded_Real = data->nonbonded_Real;
+  double* nonbonded = data->nonbonded;
   double* real = data->real;
   bool* overlap = data->overlap;
   XYZArray* positions = data->multiPositions;

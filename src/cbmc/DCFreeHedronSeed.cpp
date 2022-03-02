@@ -162,8 +162,7 @@ void DCFreeHedronSeed::BuildNew(TrialMol& newMol, uint molIndex)
   newMol.AddAtom(hed.Prev(), positions[hed.NumBond()][winner]);
   newMol.AddBonds(hed.Prev(), hed.Focus());
   newMol.UpdateOverlap(overlap[winner]);
-  newMol.AddEnergy(Energy(hed.GetEnergy() + bondEnergy, hed.GetNonBondedVDWEn(),
-                          hed.GetNonBondedRealEn(),
+  newMol.AddEnergy(Energy(hed.GetEnergy() + bondEnergy, hed.GetNonBondedEn(),
                           inter[winner], real[winner],
                           0.0, 0.0, 0.0));
   newMol.MultWeight(hed.GetWeight());
@@ -244,8 +243,7 @@ void DCFreeHedronSeed::BuildOld(TrialMol& oldMol, uint molIndex)
   oldMol.ConfirmOldAtom(hed.Prev());
   oldMol.AddBonds(hed.Prev(), hed.Focus());
   oldMol.UpdateOverlap(overlap[0]);
-  oldMol.AddEnergy(Energy(hed.GetEnergy() + bondEnergy, hed.GetNonBondedVDWEn(),
-                          hed.GetNonBondedRealEn(),
+  oldMol.AddEnergy(Energy(hed.GetEnergy() + bondEnergy, hed.GetNonBondedEn(),
                           inter[0], real[0], 0.0, 0.0, 0.0));
   oldMol.MultWeight(hed.GetWeight());
   oldMol.MultWeight(stepWeight / nLJTrials);

@@ -159,8 +159,7 @@ void DCCrankShaftDih::BuildOld(TrialMol& oldMol, uint molIndex)
   double* torWeights = data->angleWeights;
   double* torEnergy = data->angleEnergy;
   double* bondedEn = data->bonded;
-  double* nonbonded_VDW = data->nonbonded_VDW;
-  double* nonbonded_Real = data->nonbonded_Real;
+  double* nonbonded = data->nonbonded;
   double* ljWeights = data->ljWeights;
   double* inter = data->inter;
   double* real = data->real;
@@ -170,8 +169,7 @@ void DCCrankShaftDih::BuildOld(TrialMol& oldMol, uint molIndex)
   std::fill_n(inter, nLJTrials, 0.0);
   std::fill_n(real, nLJTrials, 0.0);
   std::fill_n(ljWeights, nLJTrials, 0.0);
-  std::fill_n(nonbonded_VDW, nLJTrials, 0.0);
-  std::fill_n(nonbonded_Real, nLJTrials, 0.0);
+  std::fill_n(nonbonded, nLJTrials, 0.0);
   std::fill_n(overlap, nLJTrials, false);
 
   //Set up rotation matrix using a0-a3 axis.
@@ -240,8 +238,7 @@ void DCCrankShaftDih::BuildNew(TrialMol& newMol, uint molIndex)
   double* torWeights = data->angleWeights;
   double* torEnergy = data->angleEnergy;
   double* bondedEn = data->bonded;
-  double* nonbonded_VDW = data->nonbonded_VDW;
-  double* nonbonded_Real = data->nonbonded_Real;
+  double* nonbonded = data->nonbonded;
   double* ljWeights = data->ljWeights;
   double* inter = data->inter;
   double* real = data->real;
@@ -251,8 +248,7 @@ void DCCrankShaftDih::BuildNew(TrialMol& newMol, uint molIndex)
   std::fill_n(inter, nLJTrials, 0.0);
   std::fill_n(real, nLJTrials, 0.0);
   std::fill_n(ljWeights, nLJTrials, 0.0);
-  std::fill_n(nonbonded_VDW, nLJTrials, 0.0);
-  std::fill_n(nonbonded_Real, nLJTrials, 0.0);
+  std::fill_n(nonbonded, nLJTrials, 0.0);
   std::fill_n(overlap, nLJTrials, false);
 
   //Set up rotation matrix using a0-a3 axis.
@@ -292,14 +288,13 @@ void DCCrankShaftDih::BuildNew(TrialMol& newMol, uint molIndex)
 
   for (uint trial = 0; trial < nLJTrials; trial++) {
     ljWeights[trial] *= exp(-1 * data->ff.beta *
-                            (inter[trial] + real[trial] + 
-                            nonbonded_VDW[trial] + nonbonded_Real[trial]));
+                            (inter[trial] + real[trial] + nonbonded[trial]));
     stepWeight += ljWeights[trial];
   }
   uint winner = prng.PickWeighted(ljWeights, nLJTrials, stepWeight);
   newMol.UpdateOverlap(overlap[winner]);
   newMol.MultWeight(stepWeight / nLJTrials);
-  newMol.AddEnergy(Energy(bondedEn[winner], nonbonded_VDW[winner], nonbonded_Real[winner],
+  newMol.AddEnergy(Energy(bondedEn[winner], nonbonded[winner],
                           inter[winner], real[winner],
                           0.0, 0.0, 0.0));
 
@@ -398,8 +393,7 @@ void DCCrankShaftDih::ParticleNonbonded1_N(cbmc::TrialMol const& mol,
     const uint partIndex,
     const uint trials)
 {
-  double* nonbonded_VDW = data->nonbonded_VDW;
-  double* nonbonded_Real = data->nonbonded_Real;
+  double* nonbonded = data->nonbonded;
   uint box = mol.GetBox();
   const MoleculeKind& kind = mol.GetKind();
   //loop over all partners of the trial particle
@@ -411,13 +405,13 @@ void DCCrankShaftDih::ParticleNonbonded1_N(cbmc::TrialMol const& mol,
       for (uint t = 0; t < trials; ++t) {
         double distSq;
         if(data->axes.InRcut(distSq, trialPos, t, mol.GetCoords(), *partner, box)) {
-          nonbonded_VDW[t] += data->ff.particles->CalcEn(distSq,
+          nonbonded[t] += data->ff.particles->CalcEn(distSq,
                           kind.AtomKind(partIndex),
                           kind.AtomKind(*partner), 1.0);
           if(data->ff.electrostatic) {
             double qi_qj_Fact = kind.AtomCharge(partIndex) *
                                 kind.AtomCharge(*partner) * num::qqFact;
-            data->ff.particles->CalcCoulombAdd_1_4(nonbonded_Real[t], distSq,
+            data->ff.particles->CalcCoulombAdd_1_4(nonbonded[t], distSq,
                                                    qi_qj_Fact, true, box);
           }
         }
@@ -435,8 +429,7 @@ void DCCrankShaftDih::ParticleNonbonded1_4(cbmc::TrialMol const& mol,
   if(!data->ff.OneFour)
     return;
 
-  double* nonbonded_VDW = data->nonbonded_VDW;
-  double* nonbonded_Real = data->nonbonded_Real;
+  double* nonbonded = data->nonbonded;
   uint box = mol.GetBox();
   const MoleculeKind& kind = mol.GetKind();
   //loop over all partners of the trial particle
@@ -448,13 +441,13 @@ void DCCrankShaftDih::ParticleNonbonded1_4(cbmc::TrialMol const& mol,
       for (uint t = 0; t < trials; ++t) {
         double distSq;
         if(data->axes.InRcut(distSq, trialPos, t, mol.GetCoords(), *partner, box)) {
-          data->ff.particles->CalcAdd_1_4(nonbonded_VDW[t], distSq,
+          data->ff.particles->CalcAdd_1_4(nonbonded[t], distSq,
                                           kind.AtomKind(partIndex),
                                           kind.AtomKind(*partner));
           if(data->ff.electrostatic) {
             double qi_qj_Fact = kind.AtomCharge(partIndex) *
                                 kind.AtomCharge(*partner) * num::qqFact;
-            data->ff.particles->CalcCoulombAdd_1_4(nonbonded_Real[t], distSq,
+            data->ff.particles->CalcCoulombAdd_1_4(nonbonded[t], distSq,
                                                    qi_qj_Fact, false, box);
           }
         }
@@ -472,8 +465,7 @@ void DCCrankShaftDih::ParticleNonbonded1_3(cbmc::TrialMol const& mol,
   if(!data->ff.OneThree)
     return;
 
-  double* nonbonded_VDW = data->nonbonded_VDW;
-  double* nonbonded_Real = data->nonbonded_Real;
+  double* nonbonded = data->nonbonded;
   uint box = mol.GetBox();
   const MoleculeKind& kind = mol.GetKind();
   //loop over all partners of the trial particle
@@ -485,13 +477,13 @@ void DCCrankShaftDih::ParticleNonbonded1_3(cbmc::TrialMol const& mol,
       for (uint t = 0; t < trials; ++t) {
         double distSq;
         if(data->axes.InRcut(distSq, trialPos, t, mol.GetCoords(), *partner, box)) {
-          data->ff.particles->CalcAdd_1_4(nonbonded_VDW[t], distSq,
+          data->ff.particles->CalcAdd_1_4(nonbonded[t], distSq,
                                           kind.AtomKind(partIndex),
                                           kind.AtomKind(*partner));
           if(data->ff.electrostatic) {
             double qi_qj_Fact = kind.AtomCharge(partIndex) *
                                 kind.AtomCharge(*partner) * num::qqFact;
-            data->ff.particles->CalcCoulombAdd_1_4(nonbonded_Real[t], distSq,
+            data->ff.particles->CalcCoulombAdd_1_4(nonbonded[t], distSq,
                                                    qi_qj_Fact, false, box);
           }
         }

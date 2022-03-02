@@ -141,7 +141,7 @@ public:
 
 //private:
   //MEMBERS
-  double intraBond, intraNonbond, intraNonbondReal, intraNonbondVDW, inter, tc, total, real, recip, self,
+  double intraBond, intraNonbondReal, intraNonbondVDW, inter, tc, total, real, recip, self,
          correction, totalElect;
 };
 

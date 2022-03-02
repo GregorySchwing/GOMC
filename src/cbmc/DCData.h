@@ -53,12 +53,9 @@ public:
   double* ljWeights;
   double* bonded;
   double* oneFour;
-  double* nonbonded_VDW;      //calculated nonbonded 1_N LJ energies
-  double* nonbonded_1_4_VDW;  //calculated nonbonded 1_4 LJ energies
-  double* nonbonded_1_3_VDW;  //calculated nonbonded 1_3 LJ energies
-  double* nonbonded_Real;      //calculated nonbonded 1_N coulomb energies
-  double* nonbonded_1_4_Real;  //calculated nonbonded 1_4 coulomb energies
-  double* nonbonded_1_3_Real;  //calculated nonbonded 1_3 coulomb energies
+  double* nonbonded;      //calculated nonbonded 1_N LJ and coulomb energies
+  double* nonbonded_1_4;  //calculated nonbonded 1_4 LJ and coulomb energies
+  double* nonbonded_1_3;  //calculated nonbonded 1_3 LJ and coulomb energies
 
   double* interT;     //For DCRotateCOM, we have combined first and Nth trial
   double* realT;      //For DCRotateCOM, we have combined first and Nth trial
@@ -95,8 +92,7 @@ inline DCData::DCData(System& sys, const Forcefield& forcefield, const Setup& se
   real = new double[maxLJTrials];
   bonded = new double[maxLJTrials];
   oneFour = new double[maxLJTrials];
-  nonbonded_VDW = new double[maxLJTrials];
-  nonbonded_Real = new double[maxLJTrials];
+  nonbonded = new double[maxLJTrials];
   ljWeights = new double[maxLJTrials];
   overlap = new bool[maxLJTrials];
 
@@ -109,10 +105,8 @@ inline DCData::DCData(System& sys, const Forcefield& forcefield, const Setup& se
   angleEnergy = new double[trialMax];
   angleWeights = new double[trialMax];
   angles = new double[trialMax];
-  nonbonded_1_3_VDW = new double[trialMax];
-  nonbonded_1_4_VDW = new double[trialMax];
-  nonbonded_1_3_Real = new double[trialMax];
-  nonbonded_1_4_Real = new double[trialMax];
+  nonbonded_1_3 = new double[trialMax];
+  nonbonded_1_4 = new double[trialMax];
 }
 
 inline DCData::~DCData()
@@ -121,12 +115,9 @@ inline DCData::~DCData()
   delete[] real;
   delete[] bonded;
   delete[] oneFour;
-  delete[] nonbonded_VDW;
-  delete[] nonbonded_1_4_VDW;
-  delete[] nonbonded_1_3_VDW;
-  delete[] nonbonded_Real;
-  delete[] nonbonded_1_4_Real;
-  delete[] nonbonded_1_3_Real;
+  delete[] nonbonded;
+  delete[] nonbonded_1_4;
+  delete[] nonbonded_1_3;
   delete[] ljWeights;
   delete[] angles;
   delete[] angleWeights;
