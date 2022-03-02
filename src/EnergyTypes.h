@@ -86,19 +86,22 @@ struct Intermolecular {
 class Energy
 {
 public:
-  Energy() : intraBond(0.0), intraNonbondVDW(0.0), intraNonbondReal(0.0), inter(0.0),
+  Energy() : intraBond(0.0), intraNonbondTotal(0.0), intraNonbondVDW(0.0), intraNonbondReal(0.0), inter(0.0),
     tc(0.0), total(0.0), real(0.0), recip(0.0), self(0.0),
     correction(0.0), totalElect(0.0) {}
-  Energy(double bond, double nonbondVDW, double nonbondReal, double inter, double real,
+
+  // This constructor is used exclusively in CBMC or one place in MolExchange.
+  // We don't need to separate VDW and Real of Intra for these cases.
+  Energy(double bond, double intraNonbondTotal, double inter, double real,
          double recip, double self, double correc) :
-    intraBond(bond),  intraNonbondVDW(nonbondVDW), intraNonbondReal(nonbondReal), inter(inter),
+    intraBond(bond),  intraNonbondTotal(intraNonbondTotal), inter(inter),
     tc(0.0), total(0.0), real(real), recip(recip), self(self),
     correction(correc), totalElect(0.0) {}
 
   //VALUE SETTERS
   double Total()
   {
-    total = intraBond + intraNonbondVDW + intraNonbondReal + inter + tc + real + recip + self +
+    total = intraBond + intraNonbondTotal + inter + tc + real + recip + self +
             correction;
     return total;
   }
@@ -112,6 +115,7 @@ public:
   void Zero()
   {
     intraBond = 0.0;
+    intraNonbondTotal = 0.0;
     intraNonbondVDW = 0.0;
     intraNonbondReal = 0.0;
     inter = 0.0;
@@ -141,7 +145,7 @@ public:
 
 //private:
   //MEMBERS
-  double intraBond, intraNonbondReal, intraNonbondVDW, inter, tc, total, real, recip, self,
+  double intraBond, intraNonbondTotal, intraNonbondReal, intraNonbondVDW, inter, tc, total, real, recip, self,
          correction, totalElect;
 };
 
@@ -149,8 +153,7 @@ inline Energy& Energy::operator-=(Energy const& rhs)
 {
   inter -= rhs.inter;
   intraBond -= rhs.intraBond;
-  intraNonbondReal -= rhs.intraNonbondReal;
-  intraNonbondVDW -= rhs.intraNonbondVDW;
+  intraNonbondTotal -= rhs.intraNonbondTotal;
   tc -= rhs.tc;
   real -= rhs.real;
   recip -= rhs.recip;
@@ -166,8 +169,7 @@ inline Energy& Energy::operator+=(Energy const& rhs)
 {
   inter += rhs.inter;
   intraBond += rhs.intraBond;
-  intraNonbondReal += rhs.intraNonbondReal;
-  intraNonbondVDW += rhs.intraNonbondVDW;
+  intraNonbondTotal += rhs.intraNonbondTotal;
   tc += rhs.tc;
   real += rhs.real;
   recip += rhs.recip;
@@ -183,8 +185,7 @@ inline Energy& Energy::operator*=(double const& rhs)
 {
   inter *= rhs;
   intraBond *= rhs;
-  intraNonbondReal *= rhs;
-  intraNonbondVDW *= rhs;
+  intraNonbondTotal *= rhs;
   tc *= rhs;
   real *= rhs;
   recip *= rhs;
@@ -511,7 +512,7 @@ inline std::ostream& operator << (std::ostream& out, const Energy& en)
   out << "Total: " << en.total << "   Inter: " << en.inter
       << "   IntraB: " << en.intraBond << "   IntraNBVDW: "
       << en.intraNonbondVDW << "   IntraNBReal: "
-      << en.intraNonbondReal '\n';
+      << en.intraNonbondReal << '\n';
   return out;
 }
 #endif
