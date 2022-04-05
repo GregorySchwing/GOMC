@@ -151,7 +151,7 @@ public:
     uint coulKind, wolfKind;
     //Molecule self energies
     std::vector<double> molSelfEnergies; 
-    bool oneThree, oneFour, isVlugtWolf, isGrossWolf, isHybridWolf, isCassandraWolf;
+    bool oneThree, oneFour, isVlugtWolf, isGrossWolf, isHybridWolf, isVlugtWithIntraCutoffWolf;
 ;
     double scaling_14;
 };

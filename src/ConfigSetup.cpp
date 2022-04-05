@@ -677,9 +677,9 @@ void ConfigSetup::Init(const char *fileName, MultiSim const*const& multisim)
               sys.ff.WOLF_KIND = sys.ff.WOLF_VLUGT_KIND;
               printf("%-40s %-s \n", "Info: Wolf Vlugt Implementation", "Active");
               sys.elect.readWolfKind = true;
-            } else if (CheckString(line[1], "Cassandra")) {
-              sys.ff.WOLF_KIND = sys.ff.WOLF_CASSANDRA_KIND;
-              printf("%-40s %-s \n", "Info: Wolf Cassandra Implementation", "Active");
+            } else if (CheckString(line[1], "VlugtWIntraCutoff")) {
+              sys.ff.WOLF_KIND = sys.ff.WOLF_VLUGTWINTRACUTOFF_KIND;
+              printf("%-40s %-s \n", "Info: Wolf Vlugt With Intramolecular Coulombic Cutoff Implementation", "Active");
               sys.elect.readWolfKind = true;
             } else {
               std::cout <<  "Error: Wolf Kind incorrectly specified!" << std::endl <<
@@ -2604,12 +2604,12 @@ const std::string config_setup::FFValues::VDW = "VDW";
 const std::string config_setup::FFValues::VDW_SHIFT = "VDW_SHIFT";
 const std::string config_setup::FFValues::VDW_EXP6 = "VDW_EXP6";
 const std::string config_setup::FFValues::VDW_SWITCH = "VDW_SWITCH";
-const std::string config_setup::FFValues::COUL_DSP = "COUL_DSP";
-const std::string config_setup::FFValues::COUL_DSF = "COUL_DSF";
+const std::string config_setup::FFValues::COUL_DSP = "DSP";
+const std::string config_setup::FFValues::COUL_DSF = "DSF";
 const std::string config_setup::FFValues::WOLF_HYBRID = "HYBRID";
 const std::string config_setup::FFValues::WOLF_VLUGT = "VLUGT";
 const std::string config_setup::FFValues::WOLF_GROSS = "GROSS";
-const std::string config_setup::FFValues::WOLF_CASSANDRA = "CASSANDRA";
+const std::string config_setup::FFValues::WOLF_VLUGTWINTRACUTOFF = "VLUGTWINTRACUTOFF";
 const std::string config_setup::Exclude::EXC_ONETWO = "1-2";
 const std::string config_setup::Exclude::EXC_ONETHREE = "1-3";
 const std::string config_setup::Exclude::EXC_ONEFOUR = "1-4";
@@ -2625,7 +2625,7 @@ const uint config_setup::FFValues::COUL_DSF_KIND = 1;
 const uint config_setup::FFValues::WOLF_HYBRID_KIND = 0;
 const uint config_setup::FFValues::WOLF_VLUGT_KIND = 1;
 const uint config_setup::FFValues::WOLF_GROSS_KIND = 2;
-const uint config_setup::FFValues::WOLF_CASSANDRA_KIND = 3;
+const uint config_setup::FFValues::WOLF_VLUGTWINTRACUTOFF_KIND = 3;
 const uint config_setup::Exclude::EXC_ONETWO_KIND = 0;
 const uint config_setup::Exclude::EXC_ONETHREE_KIND = 1;
 const uint config_setup::Exclude::EXC_ONEFOUR_KIND = 2;

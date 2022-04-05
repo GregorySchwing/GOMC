@@ -87,27 +87,27 @@ void Wolf::SetWolfKind(uint wolfKindArg){
         isVlugtWolf = false;
         isGrossWolf = false;
         isHybridWolf = true;
-        isCassandraWolf = false;
+        isVlugtWithIntraCutoffWolf = false;
         break;
       // WOLF_VLUGT_KIND
       case 1:
         isVlugtWolf = true;
         isGrossWolf = false;
         isHybridWolf = false;
-        isCassandraWolf = false;
+        isVlugtWithIntraCutoffWolf = false;
         break;
       // WOLF_GROSS_KIND
       case 2:
         isVlugtWolf = false;
         isGrossWolf = true;
         isHybridWolf = false;
-        isCassandraWolf = false;
+        isVlugtWithIntraCutoffWolf = false;
         break;
       case 3:
         isVlugtWolf = false;
         isGrossWolf = false;
         isHybridWolf = false;
-        isCassandraWolf = true;
+        isVlugtWithIntraCutoffWolf = true;
         break;
       default:
         std::cout << "Error ff.WolfKind has invalid value!  Check WolfKind in Config File!" << std::endl;
@@ -229,7 +229,7 @@ double Wolf::BoxSelf(uint box,
           }
         }
         // M_2_SQRTPI is 2/sqrt(PI), so need to multiply by 0.5 to get sqrt(PI)
-        if (isVlugtWolf || isCassandraWolf){
+        if (isVlugtWolf || isVlugtWithIntraCutoffWolf){
           self *= ((ff.wolfAlpha[box][indexForAlpha] * M_2_SQRTPI * 0.5) + ff.wolfFactor1[box][indexForRCut][indexForAlpha] * 0.5);
         } else {
           // we eliminate the alpha/root(pi) using Wolf,mod from Gross et al
@@ -355,7 +355,7 @@ double Wolf::MolCorrection(uint molIndex, uint box,
         }
         ++partner;
       }      
-    } else if (isVlugtWolf || isCassandraWolf) {
+    } else if (isVlugtWolf || isVlugtWithIntraCutoffWolf) {
       for (uint j = i + 1; j < atomSize; j++) {
         if(currentAxes.InRcut(distSq, virComponents, currentCoords,
                           start + i, start + j, box) && 
@@ -430,7 +430,7 @@ double Wolf::SwapSelf(const cbmc::TrialMol& trialMol,
   en_self = molSelfEnergies[thisKind.kindIndex];
 
   GOMC_EVENT_STOP(1, GomcProfileEvent::SELF_SWAP);
-  if (isVlugtWolf || isCassandraWolf){
+  if (isVlugtWolf || isVlugtWithIntraCutoffWolf){
     return (en_self *= -1.0 * ((ff.wolfAlpha[box][indexForAlpha] * M_2_SQRTPI * 0.5) + ff.wolfFactor1[box][indexForRCut][indexForAlpha]) * num::qqFact) ;
   } else {
     // we eliminate the alpha/root(pi) using Wolf,mod from Gross et al
@@ -544,7 +544,7 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
         }
         ++partner;
       }      
-    } else if (isVlugtWolf || isCassandraWolf) {
+    } else if (isVlugtWolf || isVlugtWithIntraCutoffWolf) {
       for (uint j = i + 1; j < atomSize; j++) {
         if(currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
                           i, j, box) && 
@@ -679,7 +679,7 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
         }
         ++partner;
       }      
-    } else if (isVlugtWolf || isCassandraWolf) {
+    } else if (isVlugtWolf || isVlugtWithIntraCutoffWolf) {
       for (uint j = i + 1; j < atomSize; j++) {
         if(currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
                           i, j, box) && 
@@ -724,7 +724,7 @@ void Wolf::ChangeSelf(Energy *energyDiff, Energy &dUdL_Coul,
     //Vlugt
     //en_self *= ((ff.wolfAlpha[box][indexForAlpha] * M_2_SQRTPI * 0.5) +  ff.wolfFactor1[box][indexForRCut][indexForAlpha] );
     // We eliminate the alpha/root(pi) using Wolf,mod
-    if (isVlugtWolf || isCassandraWolf){
+    if (isVlugtWolf || isVlugtWithIntraCutoffWolf){
       en_self *= -1.0 * ((ff.wolfAlpha[box][indexForAlpha] * M_2_SQRTPI * 0.5) + ff.wolfFactor1[box][indexForRCut][indexForAlpha]) * num::qqFact;
     } else {
       // we eliminate the alpha/root(pi) using Wolf,mod from Gross et al
@@ -847,7 +847,7 @@ void Wolf::ChangeCorrection(Energy *energyDiff, Energy &dUdL_Coul,
         }
         ++partner;
       }      
-    } else if (isVlugtWolf || isCassandraWolf) {
+    } else if (isVlugtWolf || isVlugtWithIntraCutoffWolf) {
       for (uint j = i + 1; j < atomSize; j++) {
         if(currentAxes.InRcut(distSq, virComponents, currentCoords,
                           start + i, start + j, box) && 

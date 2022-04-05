@@ -66,8 +66,8 @@ public:
   int numberOfAlphas[BOX_TOTAL];
   bool explicitlyAddEndAlpha[BOX_TOTAL];
   bool explicitlyAddEndRCut[BOX_TOTAL];
-  std::string wolfKindStrings[4] = {"HYBRID", "VLUGT", "GROSS", "CASSANDRA"};
-  std::string coulKindStrings[2] = {"COUL_DSP", "COUL_DSF"};
+  std::string wolfKindStrings[4] = {"HYBRID", "VLUGT", "GROSS", "VLUGTWINTRACUTOFF"};
+  std::string coulKindStrings[2] = {"DSP", "DSF"};
   // Wolf Calibration
 
   double scaling_14;              //!<Scaling factor for 1-4 pairs' ewald interactions
@@ -75,7 +75,7 @@ public:
   double sc_sigma, sc_sigma_6;    // Free energy parameter
 
   bool OneThree, OneFour, OneN;   //To include 1-3, 1-4 and more interaction
-  bool electrostatic, ewald, wolf, isVlugtWolf, makeVlugtConsistentWithCassandra, useDSFIntra;    //To consider columb interaction
+  bool electrostatic, ewald, wolf, isVlugtWolf;    //To consider columb interaction
   bool vdwGeometricSigma;         //For sigma combining rule
   bool isMartini;
   bool exp6;
