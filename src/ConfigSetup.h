@@ -210,7 +210,6 @@ struct ElectroStatic {
   bool enable;
   bool ewald;
   bool wolf;
-  bool wolfCalibration;
   bool cache;
   bool cutoffCoulombRead[BOX_TOTAL];
   double tolerance;

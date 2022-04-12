@@ -34,7 +34,6 @@ ConfigSetup::ConfigSetup(void)
   sys.elect.ewald = false;
   sys.elect.enable = false;
   sys.elect.wolf = false;
-  sys.elect.wolfCalibration = false;
   sys.ff.WOLF_KIND = UINT_MAX;
   sys.ff.COUL_KIND = UINT_MAX;
   sys.elect.cache = false;
@@ -724,8 +723,6 @@ void ConfigSetup::Init(const char *fileName, MultiSim const*const& multisim)
           std::cout <<  "Error: WolfAlphaRange requires 4 arguments!" << std::endl <<
           "Usage: WolfAlphaRange\tBOX\tSTART\tEND\tDELTA" << std::endl;
         }
-    } else if(CheckString(line[0], "WolfCalibration")){
-        sys.wolfCal.enable = checkBool(line[1]);
     } else if(CheckString(line[0], "Tolerance")) {
       sys.elect.tolerance = stringtod(line[1]);
       printf("%-40s %-1.3E \n", "Info: Ewald Summation Tolerance",

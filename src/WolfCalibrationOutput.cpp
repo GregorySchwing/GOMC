@@ -160,7 +160,7 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
                         // So there are no duplicate columns.
                         for (int r = 1; r < statValRef.forcefield.numberOfRCuts[box]; ++r){
                               for (int a = 1; a < statValRef.forcefield.numberOfAlphas[box]; ++a){
-                                    row += GetString((abs(ewaldRef.boxEnergy[box].total) -  abs(electrostaticEnergies[box][wolfKind][coulKind][r][a]))/ abs(ewaldRef.boxEnergy[box].total), 4);
+                                    row += GetString((abs(ewaldRef.boxEnergy[box].total) -  abs(electrostaticEnergies[box][wolfKind][coulKind][r][a]))/ abs(ewaldRef.boxEnergy[box].total), 8);
                                     row += "\t";
                               }
                         }
