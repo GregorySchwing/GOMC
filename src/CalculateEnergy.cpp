@@ -1871,7 +1871,7 @@ void CalculateEnergy::WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_
       for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
         calcEwald->SetWolfKind(wolfKind);
         for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){    
-          calcEwald->SetCoulKind(wolfKind);
+          calcEwald->SetCoulKind(coulKind);
           double bondEnergy[2] = {0};
           double bondEn = 0.0, nonbondEn = 0.0, correction = 0.0;
           MoleculeLookup::box_iterator thisMol = molLookup.BoxBegin(b);
