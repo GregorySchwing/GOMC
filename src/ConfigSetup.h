@@ -821,7 +821,7 @@ struct WolfCalibration {
   double wolfCutoffCoulombDelta[BOX_TOTAL];
   WolfCalibration(void)
   {
-
+    enable = false;
     for (uint b = 0; b < BOX_TOTAL; ++b) {
       wolfAlphaRangeRead[b] = false;
       wolfCutoffCoulombRangeRead[b] = false;
