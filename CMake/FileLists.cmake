@@ -116,6 +116,7 @@ set(headers
    src/HistOutput.h
    src/InputAbstracts.h
    src/InputFileReader.h
+   src/MemoryTracker.h
    src/MersenneTwister.h
    src/MoleculeKind.h
    src/MoleculeLookup.h

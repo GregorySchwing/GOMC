@@ -47,6 +47,9 @@ Simulation::Simulation(char const*const configFileName, MultiSim const*const& mu
   PTUtils = set.config.sys.step.parallelTemp ? new ParallelTemperingUtilities(ms, *system, *staticValues, set.config.sys.step.parallelTempFreq, set.config.sys.step.parallelTemperingAttemptsPerExchange) : NULL;
   exchangeResults.resize(ms->worldSize, false);
 #endif
+  double vm, rss;
+  MemoryTracker::mem_usage(vm, rss);
+  std::cout << "Virtual Memory: " << vm << " KB\nResident set size: " << rss << std::endl;
   GOMC_EVENT_STOP(1, GomcProfileEvent::INITIALIZE);
 }
 
