@@ -1333,6 +1333,7 @@ void ConfigSetup::Init(const char *fileName, MultiSim const*const& multisim)
         printf("%-40s %-s \n", "Info: Average output", "Inactive");
     } else if(CheckString(line[0], "WolfCalibrationFreq")) {
       if(line.size() == 3){
+        sys.wolfCal.enable = checkBool(line[1]);
         out.wolfCalibration.settings.enable = checkBool(line[1]);
         out.wolfCalibration.settings.frequency = stringtoi(line[2]);
       }
