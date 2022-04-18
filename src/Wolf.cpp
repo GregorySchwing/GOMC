@@ -357,9 +357,9 @@ double Wolf::MolCorrection(uint molIndex, uint box,
       }      
     } else if (isVlugtWolf || isVlugtWithIntraCutoffWolf) {
       for (uint j = i + 1; j < atomSize; j++) {
-        if(currentAxes.InRcut(distSq, virComponents, currentCoords,
-                          start + i, start + j, box) && 
-          distSq < ff.rCutCoulombSq[box][indexForRCut]){
+        currentAxes.InRcut(distSq, virComponents, currentCoords,
+                          start + i, start + j, box);
+        if(distSq < ff.rCutCoulombSq[box][indexForRCut]){
             dampenedCorr = 0.0;
             dist = sqrt(distSq);
             dampenedCorr = -1.0*erf(ff.wolfAlpha[box][indexForAlpha] * dist)/dist;   
