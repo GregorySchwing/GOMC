@@ -1333,7 +1333,6 @@ void ConfigSetup::Init(const char *fileName, MultiSim const*const& multisim)
         printf("%-40s %-s \n", "Info: Average output", "Inactive");
     } else if(CheckString(line[0], "WolfCalibrationFreq")) {
       if(line.size() == 3){
-        sys.wolfCal.enable = checkBool(line[1]);
         out.wolfCalibration.settings.enable = checkBool(line[1]);
         out.wolfCalibration.settings.frequency = stringtoi(line[2]);
       }
@@ -1811,7 +1810,7 @@ void ConfigSetup::verifyInputs(void)
     //exit(EXIT_FAILURE);
   }
 
-  if(sys.wolfCal.enable){
+  if(out.wolfCalibration.settings.enable){
     bool readAllRequired = true;
     for(i = 0 ; i < BOX_TOTAL ; i++) {
       readAllRequired &= sys.wolfCal.wolfAlphaRangeRead[i];

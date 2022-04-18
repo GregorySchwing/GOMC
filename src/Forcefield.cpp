@@ -40,7 +40,7 @@ Forcefield::~Forcefield()
 void Forcefield::Init(const Setup& set,
                       config_setup::WolfCalibration const& wolfCal)
 {
-  wolfCalibration = wolfCal.enable;
+  wolfCalibration = set.config.out.wolfCalibration.settings.enable;
   if(wolfCalibration){
     CalculateWolfCalibrationMemoryUsage(wolfCal);
   }
