@@ -55,8 +55,7 @@ CalculateEnergy::CalculateEnergy(StaticVals & stat, System & sys) :
   molLookup(stat.molLookup),
 #endif
   currentAxes(sys.boxDimRef),
-  cellList(sys.cellList),
-  wolf(forcefield.wolf)
+  cellList(sys.cellList)
 {
 
 }
@@ -67,7 +66,6 @@ void CalculateEnergy::Init(System & sys)
   uint maxAtomInMol = 0;
   calcEwald = sys.GetEwald();
   electrostatic = forcefield.electrostatic;
-  ewald = forcefield.ewald;
   multiParticleEnabled = sys.statV.multiParticleEnabled;
   for(uint m = 0; m < mols.count; ++m) {
     const MoleculeKind& molKind = mols.GetKind(m);

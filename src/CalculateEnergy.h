@@ -320,7 +320,7 @@ private:
   XYZArray& atomForceRef;
   XYZArray& molForceRef;
   bool multiParticleEnabled;
-  bool electrostatic, ewald, wolf;
+  bool electrostatic;
   std::vector<int> particleKind;
   // stores molIndex for each global atom idx
   std::vector<int> particleMol;
