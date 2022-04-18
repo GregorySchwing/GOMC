@@ -228,9 +228,8 @@ double Wolf::BoxSelf(uint box,
               self += (molSelfEnergy * lambdaCoef);
           }
         }
-        // M_2_SQRTPI is 2/sqrt(PI), so need to multiply by 0.5 to get sqrt(PI)
         if (isVlugtWolf || isVlugtWithIntraCutoffWolf){
-          self *= ((ff.wolfAlpha[box][indexForAlpha] * M_2_SQRTPI * 0.5) + ff.wolfFactor1[box][indexForRCut][indexForAlpha] * 0.5);
+          self *= ((ff.wolfAlpha[box][indexForAlpha] * M_2_SQRTPI) + ff.wolfFactor1[box][indexForRCut][indexForAlpha] * 0.5);
         } else {
           // we eliminate the alpha/root(pi) using Wolf,mod from Gross et al
           self *= ff.wolfFactor1[box][indexForRCut][indexForAlpha] * 0.5;
@@ -407,10 +406,10 @@ double Wolf::SwapSelf(const cbmc::TrialMol& trialMol,
 
   GOMC_EVENT_STOP(1, GomcProfileEvent::SELF_SWAP);
   if (isVlugtWolf || isVlugtWithIntraCutoffWolf){
-    return (en_self *= -1.0 * ((ff.wolfAlpha[box][indexForAlpha] * M_2_SQRTPI * 0.5) + ff.wolfFactor1[box][indexForRCut][indexForAlpha]) * num::qqFact) ;
+    return (en_self *= -0.5 * ((ff.wolfAlpha[box][indexForAlpha] * M_2_SQRTPI) + ff.wolfFactor1[box][indexForRCut][indexForAlpha]) * num::qqFact) ;
   } else {
     // we eliminate the alpha/root(pi) using Wolf,mod from Gross et al
-    return (en_self *= -1.0 * ff.wolfFactor1[box][indexForRCut][indexForAlpha] * num::qqFact);
+    return (en_self *= -0.5 * ff.wolfFactor1[box][indexForRCut][indexForAlpha] * num::qqFact);
   }
 }
 
@@ -648,15 +647,14 @@ void Wolf::ChangeSelf(Energy *energyDiff, Energy &dUdL_Coul,
     //Load the self energy with lambda = 1
     en_self = molSelfEnergies[molIndex];
     
-    // M_2_SQRTPI is 2/sqrt(PI), so need to multiply by 0.5 to get sqrt(PI)
     //Vlugt
-    //en_self *= ((ff.wolfAlpha[box][indexForAlpha] * M_2_SQRTPI * 0.5) +  ff.wolfFactor1[box][indexForRCut][indexForAlpha] );
+    //en_self *= ((ff.wolfAlpha[box][indexForAlpha] * M_2_SQRTPI) +  ff.wolfFactor1[box][indexForRCut][indexForAlpha] );
     // We eliminate the alpha/root(pi) using Wolf,mod
     if (isVlugtWolf || isVlugtWithIntraCutoffWolf){
-      en_self *= -1.0 * ((ff.wolfAlpha[box][indexForAlpha] * M_2_SQRTPI * 0.5) + ff.wolfFactor1[box][indexForRCut][indexForAlpha]) * num::qqFact;
+      en_self *= -0.5 * ((ff.wolfAlpha[box][indexForAlpha] * M_2_SQRTPI) + ff.wolfFactor1[box][indexForRCut][indexForAlpha]) * num::qqFact;
     } else {
       // we eliminate the alpha/root(pi) using Wolf,mod from Gross et al
-      en_self *= -1.0 * ff.wolfFactor1[box][indexForRCut][indexForAlpha] * num::qqFact;
+      en_self *= -0.5 * ff.wolfFactor1[box][indexForRCut][indexForAlpha] * num::qqFact;
     }
     //Calculate the energy difference for each lambda state
     for (uint s = 0; s < lambdaSize; s++) {
