@@ -251,3 +251,43 @@ void Forcefield::InitWolfCalibration(config_setup::WolfCalibration const& wolfCa
   }
 }
 
+void Forcefield::SetWolfKind(uint wolfKindArg){
+    wolfKind = wolfKindArg;
+    switch(wolfKindArg) {
+      //WOLF_HYBRID_KIND
+      case 0:
+        isVlugtWolf = false;
+        break;
+      // WOLF_VLUGT_KIND
+      case 1:
+        isVlugtWolf = true;
+        break;
+      // WOLF_GROSS_KIND
+      case 2:
+        isVlugtWolf = false;
+        break;
+      case 3:
+        isVlugtWolf = false;
+        break;
+      default:
+        std::cout << "Error ff.WolfKind has invalid value!  Check WolfKind in Config File!" << std::endl;
+        exit(1);
+    }
+}
+
+void Forcefield::SetCoulKind(uint coulKindArg){
+  if (coulKindArg > COUL_TOTAL_KINDS){
+    std::cout << "Error ff.coulKind has invalid value!  Check coulKind in Config File!" << std::endl;
+    exit(1);
+  } else{
+    coulKind = coulKindArg;
+  }
+}
+
+uint Forcefield::GetWolfKind(void){
+  return wolfKind;
+}
+
+uint Forcefield::GetCoulKind(void){
+  return coulKind;
+}

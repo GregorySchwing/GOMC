@@ -1898,6 +1898,7 @@ void CalculateEnergy::WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_
         // Pairwise Inter and Virial depend on Rcut, alpha, and Coul Kind
         for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){    
           calcEwald->SetCoulKind(coulKind);
+          forcefield.SetCoulKind(coulKind);
           for (int indexForAlpha = 1; indexForAlpha < forcefield.numberOfAlphas[b]; ++indexForAlpha){
             //calculate LJ interaction and real term of electrostatic interaction
             storagePotential.Zero();
@@ -1905,6 +1906,7 @@ void CalculateEnergy::WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_
             storagePotential.boxVirial[b] = VirialCalc(b, indexForRcut, indexForAlpha);
             for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
               calcEwald->SetWolfKind(wolfKind);
+              forcefield.SetWolfKind(coulKind);
               summationPotential.Zero();
               summationPotential += storagePotential;
               summationPotential.boxEnergy[b].intraBond = bondEn;

@@ -310,11 +310,12 @@ private:
   uint NumberOfParticlesInsideBox(uint box);
 
 
-  const Forcefield& forcefield;
   const Molecules& mols;
   const Coordinates& currentCoords;
   const COM& currentCOM;
   const Lambda& lambdaRef;
+  // Need to remove const so wolf kind and coul kind can vary during Calibration    
+  Forcefield & forcefield;
   Ewald *calcEwald;
   XYZArray& atomForceRef;
   XYZArray& molForceRef;

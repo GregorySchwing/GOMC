@@ -35,7 +35,11 @@ public:
   //Initialize contained FFxxxx structs from setup data
   void Init(const Setup& set,
             config_setup::WolfCalibration const& wolfCal);
-
+  
+  void SetWolfKind(uint wolfKindArg);
+  void SetCoulKind(uint coulKindArg); 
+  uint GetWolfKind(void);
+  uint GetCoulKind(void); 
 
   FFParticle * particles;    //!<For LJ/Mie energy between unbonded atoms
   // for LJ, shift and switch type
