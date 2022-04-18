@@ -137,16 +137,30 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
       uint wolfKindOrig = sysRef.calcEwald->GetWolfKind();
       uint coulKindOrig = sysRef.calcEwald->GetCoulKind();
       calcEn.WolfCalibrationEnergy(electrostaticEnergies);
-      sysRef.calcEwald->SetWolfKind(wolfKindOrig);
-      sysRef.calcEwald->SetCoulKind(coulKindOrig);
-      // Eventually use this to calc refernce
+
+      // Calc reference epot
+      sysRef.SwapWolfAndEwaldPointers();
+      
       statValRef.forcefield.ewald = true;
       statValRef.forcefield.wolf = false;
-      sysRef.SwapWolfAndEwaldPointers();
+      // Set isVlugtWolf == false
+      // Since ewald and wolf share a ff object
+      statValRef.forcefield.SetWolfKind(0);
       SystemPotential ewaldRef = calcEn.SystemTotal();
+
       sysRef.SwapWolfAndEwaldPointers();
+
+      // Restore original wolf settings
       statValRef.forcefield.ewald = false;
       statValRef.forcefield.wolf = true;
+      
+      // Restore inter wolf settings
+      statValRef.forcefield.SetWolfKind(wolfKindOrig);
+      statValRef.forcefield.SetCoulKind(coulKindOrig);
+
+      // Restore intra wolf settings
+      sysRef.calcEwald->SetWolfKind(wolfKindOrig);
+      sysRef.calcEwald->SetCoulKind(coulKindOrig);
       std::string row = "";
       row += GetString(step);
       row += "\t";
