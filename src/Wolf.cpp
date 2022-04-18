@@ -371,9 +371,6 @@ double Wolf::MolCorrection(uint molIndex, uint box,
               dampenedCorr += ff.wolfFactor2[box][indexForRCut][indexForAlpha]*distDiff;
             } 
             correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(j) * dampenedCorr;
-        } else if (isVlugtWolf) {
-          dist = sqrt(distSq);
-          correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(j) / dist;
         }
       }
     }
