@@ -229,7 +229,7 @@ double Wolf::BoxSelf(uint box,
           }
         }
         if (isVlugtWolf || isVlugtWithIntraCutoffWolf){
-          self *= ((ff.wolfAlpha[box][indexForAlpha] * M_2_SQRTPI) + ff.wolfFactor1[box][indexForRCut][indexForAlpha] * 0.5);
+          self *= ((ff.wolfAlpha[box][indexForAlpha] * M_2_SQRTPI) + ff.wolfFactor1[box][indexForRCut][indexForAlpha]) * 0.5;
         } else {
           // we eliminate the alpha/root(pi) using Wolf,mod from Gross et al
           self *= ff.wolfFactor1[box][indexForRCut][indexForAlpha] * 0.5;

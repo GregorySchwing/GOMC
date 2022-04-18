@@ -136,8 +136,6 @@ void WolfCalibrationOutput::WriteGraceParFile(uint b, uint wolfKind, uint coulKi
 void WolfCalibrationOutput::DoOutput(const ulong step) {
       uint wolfKindOrig = sysRef.calcEwald->GetWolfKind();
       uint coulKindOrig = sysRef.calcEwald->GetCoulKind();
-      statValRef.forcefield.ewald = false;
-      statValRef.forcefield.wolf = true;
       calcEn.WolfCalibrationEnergy(electrostaticEnergies);
       sysRef.calcEwald->SetWolfKind(wolfKindOrig);
       sysRef.calcEwald->SetCoulKind(coulKindOrig);
@@ -146,8 +144,9 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
       statValRef.forcefield.wolf = false;
       sysRef.SwapWolfAndEwaldPointers();
       SystemPotential ewaldRef = calcEn.SystemTotal();
-      statValRef.forcefield.ewald = false;
       sysRef.SwapWolfAndEwaldPointers();
+      statValRef.forcefield.ewald = false;
+      statValRef.forcefield.wolf = true;
       std::string row = "";
       row += GetString(step);
       row += "\t";
