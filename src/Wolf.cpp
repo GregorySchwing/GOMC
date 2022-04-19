@@ -193,6 +193,11 @@ double Wolf::ChangeLambdaRecip(XYZArray const& molCoords, const double lambdaOld
   return 0.0;
 }
 
+//calculate self term for a box
+double Wolf::BoxSelf(uint box) const
+{
+  return BoxSelf(box, 0, 0);
+}
 
 //calculate self term for a box
 double Wolf::BoxSelf(uint box,
@@ -240,6 +245,11 @@ double Wolf::BoxSelf(uint box,
     }
 }
 
+//calculate self term for a box
+double Wolf::MolCorrection(uint molIndex, uint box) const
+{
+  return MolCorrection(molIndex, box, 0, 0);
+}
 
 //calculate correction term for a molecule
 double Wolf::MolCorrection(uint molIndex, uint box,
@@ -348,6 +358,10 @@ double Wolf::MolCorrection(uint molIndex, uint box,
             dist = sqrt(distSq);
             dampenedCorr = -1.0*erf(ff.wolfAlpha[box][indexForAlpha] * dist)/dist;   
             dampenedCorr -= ff.wolfFactor1[box][indexForRCut][indexForAlpha];
+            if(ff.coulKind && isVlugtWithIntraCutoffWolf){
+              double distDiff = dist-ff.rCutCoulomb[box][indexForRCut];
+              dampenedCorr += ff.wolfFactor2[box][indexForRCut][indexForAlpha]*distDiff;
+            } 
             correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(j) * dampenedCorr;
         }
       }

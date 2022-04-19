@@ -31,9 +31,12 @@ public:
   virtual void RecipInit(uint box, BoxDimensions const& boxAxes);
 
   //calculate self term for a box
-  virtual double BoxSelf(uint box,
-                        int indexForRCut = 0,
-                        int indexForAlpha = 0) const;
+  virtual double BoxSelf(uint box) const;
+
+  //calculate self term for a box
+  double BoxSelf(uint box,
+                int indexForRCut = 0,
+                int indexForAlpha = 0) const;
 
   //compute reciprocal term for a box with a new volume
   virtual void BoxReciprocalSetup(uint box, XYZArray const& molCoords);
@@ -51,6 +54,9 @@ public:
 
   //calculate reciprocal force term for a box
   virtual Virial VirialReciprocal(Virial& virial, uint box) const;
+
+  //calculate correction term for a molecule
+  virtual double MolCorrection(uint molIndex, uint box)const;
 
   //calculate correction term for a molecule
   virtual double MolCorrection(uint molIndex, uint box,
