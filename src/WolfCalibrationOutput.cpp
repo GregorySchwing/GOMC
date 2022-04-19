@@ -176,11 +176,11 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
                         // So there are no duplicate columns.
                         for (int r = 1; r < statValRef.forcefield.numberOfRCuts[box]; ++r){
                               for (int a = 1; a < statValRef.forcefield.numberOfAlphas[box]; ++a){
-                                    std::cout << "abs(ewaldRef.boxEnergy[box].total) " << abs(ewaldRef.boxEnergy[box].total) << std::endl;
-                                    std::cout << "abs(electrostaticEnergies[box][wolfKind][coulKind][r][a]) " << abs(electrostaticEnergies[box][wolfKind][coulKind][r][a])<< std::endl;
-                                    std::cout << "(abs(ewaldRef.boxEnergy[box].total) -  abs(electrostaticEnergies[box][wolfKind][coulKind][r][a]))/ abs(ewaldRef.boxEnergy[box].total) " << (abs(ewaldRef.boxEnergy[box].total) -  abs(electrostaticEnergies[box][wolfKind][coulKind][r][a]))/ abs(ewaldRef.boxEnergy[box].total)<< std::endl;
-                                    std::cout << "GetString((abs(ewaldRef.boxEnergy[box].total) -  abs(electrostaticEnergies[box][wolfKind][coulKind][r][a]))/ abs(ewaldRef.boxEnergy[box].total), 8) "<< GetString((abs(ewaldRef.boxEnergy[box].total) -  abs(electrostaticEnergies[box][wolfKind][coulKind][r][a]))/ abs(ewaldRef.boxEnergy[box].total), 8) << std::endl;
-                                    row += GetString((abs(ewaldRef.boxEnergy[box].total) -  abs(electrostaticEnergies[box][wolfKind][coulKind][r][a]))/ abs(ewaldRef.boxEnergy[box].total), 8);
+                                    std::cout << "std::abs(ewaldRef.boxEnergy[box].total) " << std::abs(ewaldRef.boxEnergy[box].total) << std::endl;
+                                    std::cout << "std::abs(electrostaticEnergies[box][wolfKind][coulKind][r][a]) " << std::abs(electrostaticEnergies[box][wolfKind][coulKind][r][a])<< std::endl;
+                                    std::cout << "(std::abs(ewaldRef.boxEnergy[box].total) -  std::abs(electrostaticEnergies[box][wolfKind][coulKind][r][a]))/ std::abs(ewaldRef.boxEnergy[box].total) " << (std::abs(ewaldRef.boxEnergy[box].total) -  std::abs(electrostaticEnergies[box][wolfKind][coulKind][r][a]))/ std::abs(ewaldRef.boxEnergy[box].total)<< std::endl;
+                                    std::cout << "GetString((std::abs(ewaldRef.boxEnergy[box].total) -  std::abs(electrostaticEnergies[box][wolfKind][coulKind][r][a]))/ std::abs(ewaldRef.boxEnergy[box].total), 8) "<< GetString((std::abs(ewaldRef.boxEnergy[box].total) -  std::abs(electrostaticEnergies[box][wolfKind][coulKind][r][a]))/ std::abs(ewaldRef.boxEnergy[box].total), 8) << std::endl;
+                                    row += GetString((std::abs(ewaldRef.boxEnergy[box].total) -  std::abs(electrostaticEnergies[box][wolfKind][coulKind][r][a]))/ std::abs(ewaldRef.boxEnergy[box].total), 8);
                                     row += "\t";
                               }
                         }
