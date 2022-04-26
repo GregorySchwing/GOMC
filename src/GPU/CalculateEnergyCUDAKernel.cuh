@@ -83,9 +83,9 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                             int box,
                             int *gpu_wolf,
                             int *coulKind,
-                            double * wolfAlpha,
-                            double * wolfFactor1,
-                            double * wolfFactor2);
+                            double *wolfAlpha,
+                            double **wolfFactor1,
+                            double **wolfFactor2);
 
 
 __device__ double CalcCoulombGPU(double distSq, 

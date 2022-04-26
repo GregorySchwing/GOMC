@@ -63,8 +63,6 @@ public:
     gpu_rCutLow = NULL;
     gpu_rOn = NULL;
     gpu_alpha = NULL;
-    gpu_rCutCoulomb = NULL;
-    gpu_rCutCoulombSq = NULL;
     gpu_ewald = NULL;
     gpu_diElectric_1 = NULL;
     gpu_aForcex = NULL;
@@ -84,10 +82,16 @@ public:
     // set wolf variables to null
     gpu_wolf = NULL;
     gpu_coulKind = NULL;
-    gpu_wolfAlpha = NULL;
-    gpu_wolfFactor1 = NULL;
-    gpu_wolfFactor2 = NULL;
-    gpu_wolfFactor3 = NULL;
+    for (int b = 0; b < BOX_TOTAL; ++b){
+      gpu_rCutCoulomb[b] = NULL;
+      gpu_rCutCoulombSq[b] = NULL;
+      /*
+      gpu_wolfAlpha = NULL;
+      gpu_wolfFactor1 = NULL;
+      gpu_wolfFactor2 = NULL;
+      gpu_wolfFactor3 = NULL;
+      */
+    }
   }
   double *gpu_sigmaSq;
   double *gpu_epsilon_Cn;
@@ -97,8 +101,8 @@ public:
   int *gpu_count;
   int *gpu_startAtomIdx; //start atom index of the molecule
   double *gpu_rCut;
-  double *gpu_rCutCoulomb;
-  double *gpu_rCutCoulombSq;
+  double *gpu_rCutCoulomb[BOX_TOTAL];  //!<Cutoff Coulomb interaction(angstroms)
+  double *gpu_rCutCoulombSq[BOX_TOTAL]; //!<Cutoff Coulomb interaction(angstroms)
   double *gpu_rCutLow;
   double *gpu_rOn;
   double *gpu_alpha;
@@ -141,9 +145,9 @@ public:
   // Wolf Variables
   int *gpu_wolf;
   int *gpu_coulKind;
-  double * gpu_wolfAlpha;
-  double * gpu_wolfFactor1;
-  double * gpu_wolfFactor2;
-  double * gpu_wolfFactor3;
+  double *gpu_wolfAlpha[BOX_TOTAL]; //alpha term for Wolf Electrostatic and constant factors
+  double ** gpu_wolfFactor1[BOX_TOTAL]; //alpha term for Wolf Electrostatic and constant factors
+  double ** gpu_wolfFactor2[BOX_TOTAL];  //alpha term for Wolf Electrostatic and constant factors
+  double ** gpu_wolfFactor3[BOX_TOTAL]; //alpha term for Wolf Electrostatic and constant factors
 };
 #endif
