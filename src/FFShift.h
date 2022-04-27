@@ -68,7 +68,7 @@ public:
   virtual void CalcCoulombAdd_1_4(double& en, const double distSq,
                                   const double qi_qj_Fact,
                                   const bool NB, const uint box,
-                                  double rCutCoulomb) const;
+                                  double rCutCoulombSq) const;
 
   //!Returns Ezero, no energy correction
   virtual double EnergyLRC(const uint kind1, const uint kind2) const
@@ -169,9 +169,9 @@ inline void FF_SHIFT::CalcAdd_1_4(double& en, const double distSq,
 inline void FF_SHIFT::CalcCoulombAdd_1_4(double& en, const double distSq,
     const double qi_qj_Fact,
     const bool NB, const uint box,
-    double rCutCoulomb) const
+    double rCutCoulombSq) const
 {
-  if(forcefield.rCutCoulombSq[forcefield.startOfNumRCuts[box]+indexForRCut] < distSq && !forcefield.isVlugtWolf)
+  if(rCutCoulombSq < distSq && !forcefield.isVlugtWolf)
     return;
 
   double dist = sqrt(distSq);

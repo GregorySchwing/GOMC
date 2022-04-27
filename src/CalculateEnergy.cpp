@@ -148,7 +148,8 @@ SystemPotential CalculateEnergy::SystemInter(SystemPotential potential,
 {
   for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
     //calculate LJ interaction and real term of electrostatic interaction
-    potential = BoxInter(potential, coords, boxAxes, b);
+    potential = BoxInter(potential, coords, boxAxes, b, forcefield.rCutCoulomb[b],
+                                          forcefield.wolfAlpha[b]);
     //calculate reciprocal term of electrostatic interaction
     potential.boxEnergy[b].recip = calcEwald->BoxReciprocal(b, false);
   }
@@ -246,9 +247,13 @@ reduction(+:tempREn, tempLJEn)
               double qi_qj_fact = particleCharge[currParticle] *
                                   particleCharge[nParticle] * num::qqFact;
               if (qi_qj_fact != 0.0) {
-                tempREn += forcefield.particles->CalcCoulomb(distSq,
-                           particleKind[currParticle], particleKind[nParticle],
-                           qi_qj_fact, lambdaCoulomb, box, rCutCoulomb, wolfAlpha);
+                tempREn += forcefield.particles->CalcCoulomb(distSq, particleKind[currParticle],
+                           particleKind[nParticle], qi_qj_fact, lambdaCoulomb, box, 
+                            forcefield.rCutCoulomb[box],
+                            forcefield.rCutCoulombSq[box], 
+                            forcefield.wolfFactor2[box],
+                            forcefield.wolfFactor3[box],
+                            forcefield.wolfAlpha[box]);
               }
             }
             tempLJEn += forcefield.particles->CalcEn(distSq,
@@ -372,10 +377,17 @@ reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
                                   num::qqFact;
               if (qi_qj_fact != 0.0) {
                 tempREn += forcefield.particles->CalcCoulomb(distSq, particleKind[currParticle],
-                           particleKind[nParticle], qi_qj_fact, lambdaCoulomb, box);
+                           particleKind[nParticle], qi_qj_fact, lambdaCoulomb, box, 
+                            forcefield.rCutCoulomb[box],
+                            forcefield.rCutCoulombSq[box], 
+                            forcefield.wolfFactor2[box],
+                            forcefield.wolfFactor3[box],
+                            forcefield.wolfAlpha[box]);
                 // Calculating the force
                 forceReal = virComponents * forcefield.particles->CalcCoulombVir(distSq,
-                            particleKind[currParticle], particleKind[nParticle], qi_qj_fact, lambdaCoulomb, box);
+                            particleKind[currParticle], particleKind[nParticle], qi_qj_fact, lambdaCoulomb, box, 
+                            forcefield.rCutCoulombSq[box], forcefield.wolfFactor2[box],forcefield.wolfFactor3[box],
+                            forcefield.wolfAlpha[box]);
               }
             }
             tempLJEn += forcefield.particles->CalcEn(distSq, particleKind[currParticle],
@@ -509,7 +521,11 @@ reduction(+:vT11, vT12, vT13, vT22, vT23, vT33, rT11, rT12, rT13, rT22, rT23, rT
               //skip particle pairs with no charge
               if (qi_qj != 0.0) {
                 double pRF = forcefield.particles->CalcCoulombVir(distSq, particleKind[currParticle],
-                             particleKind[nParticle], qi_qj, lambdaCoulomb, box, rCutCoulomb, wolfAlpha);
+                             particleKind[nParticle], qi_qj, lambdaCoulomb, box, 
+                             forcefield.rCutCoulombSq[box], 
+                             forcefield.wolfFactor2[box],
+                             forcefield.wolfFactor3[box],
+                             forcefield.wolfAlpha[box]);
                 //calculate the top diagonal of pressure tensor
                 rT11 += pRF * (virC.x * comC.x);
                 //rT12 += pRF * (0.5 * (virC.x * comC.y + virC.y * comC.x));
@@ -638,7 +654,12 @@ bool CalculateEnergy::MoleculeInter(Intermolecular &inter_LJ,
 
             if (qi_qj_fact != 0.0) {
               tempREn += -forcefield.particles->CalcCoulomb(distSq, particleKind[atom],
-                         particleKind[nIndex[i]], qi_qj_fact, lambdaCoulomb, box);
+                           particleKind[nIndex[i]], qi_qj_fact, lambdaCoulomb, box, 
+                            forcefield.rCutCoulomb[box],
+                            forcefield.rCutCoulombSq[box], 
+                            forcefield.wolfFactor2[box],
+                            forcefield.wolfFactor3[box],
+                            forcefield.wolfAlpha[box]);
             }
           }
 
@@ -683,9 +704,13 @@ bool CalculateEnergy::MoleculeInter(Intermolecular &inter_LJ,
                                 particleCharge[nIndex[i]] * num::qqFact;
 
             if (qi_qj_fact != 0.0) {
-              tempREn += forcefield.particles->CalcCoulomb(distSq,
-                         particleKind[atom], particleKind[nIndex[i]],
-                         qi_qj_fact, lambdaCoulomb, box);
+              tempREn += forcefield.particles->CalcCoulomb(distSq, particleKind[atom],
+                           particleKind[nIndex[i]], qi_qj_fact, lambdaCoulomb, box, 
+                            forcefield.rCutCoulomb[box],
+                            forcefield.rCutCoulombSq[box], 
+                            forcefield.wolfFactor2[box],
+                            forcefield.wolfFactor3[box],
+                            forcefield.wolfAlpha[box]);
             }
           }
 
@@ -801,7 +826,12 @@ reduction(+:tempLJ, tempReal)
  
           if (qi_qj_fact != 0.0) {
             tempReal += forcefield.particles->CalcCoulomb(distSq, kindI,
-                        particleKind[nIndex[i]], qi_qj_fact, lambdaCoulomb, box);
+                           particleKind[nIndex[i]], qi_qj_fact, lambdaCoulomb, box, 
+                            forcefield.rCutCoulomb[box],
+                            forcefield.rCutCoulombSq[box], 
+                            forcefield.wolfFactor2[box],
+                            forcefield.wolfFactor3[box],
+                            forcefield.wolfAlpha[box]);
           }
         }
       }
@@ -1645,9 +1675,19 @@ reduction(+:tempREnOld, tempLJEnOld, tempREnNew, tempLJEnNew)
                                 num::qqFact;
             if (qi_qj_fact != 0.0) {
               tempREnNew += forcefield.particles->CalcCoulomb(distSq, particleKind[atom],
-                            particleKind[nIndex[i]], qi_qj_fact, lambdaNewCoulomb, box);
+                           particleKind[nIndex[i]], qi_qj_fact, lambdaNewCoulomb, box, 
+                            forcefield.rCutCoulomb[box],
+                            forcefield.rCutCoulombSq[box], 
+                            forcefield.wolfFactor2[box],
+                            forcefield.wolfFactor3[box],
+                            forcefield.wolfAlpha[box]);
               tempREnOld += forcefield.particles->CalcCoulomb(distSq, particleKind[atom],
-                            particleKind[nIndex[i]], qi_qj_fact, lambdaOldCoulomb, box);
+                           particleKind[nIndex[i]], qi_qj_fact, lambdaOldCoulomb, box, 
+                            forcefield.rCutCoulomb[box],
+                            forcefield.rCutCoulombSq[box], 
+                            forcefield.wolfFactor2[box],
+                            forcefield.wolfFactor3[box],
+                            forcefield.wolfAlpha[box]);
             }
           }
 
@@ -1776,8 +1816,12 @@ reduction(+:dudl_VDW, dudl_Coul, tempREnDiff[:lambdaSize], tempLJEnDiff[:lambdaS
                        num::qqFact;
           if (qi_qj_fact != 0.0) {
             energyOldCoul = forcefield.particles->CalcCoulomb(distSq, particleKind[atom],
-                            particleKind[nIndex[i]], qi_qj_fact,
-                            lambda_Coul[iState], box);
+                           particleKind[nIndex[i]], qi_qj_fact, lambda_Coul[iState], box, 
+                            forcefield.rCutCoulomb[box],
+                            forcefield.rCutCoulombSq[box], 
+                            forcefield.wolfFactor2[box],
+                            forcefield.wolfFactor3[box],
+                            forcefield.wolfAlpha[box]);
             dudl_Coul += forcefield.particles->CalcCoulombdEndL(distSq, particleKind[atom],
                          particleKind[nIndex[i]], qi_qj_fact,
                          lambda_Coul[iState], box);
@@ -1791,7 +1835,12 @@ reduction(+:dudl_VDW, dudl_Coul, tempREnDiff[:lambdaSize], tempLJEnDiff[:lambdaS
           tempLJEnDiff[s] += -energyOldVDW;
           if(electrostatic && qi_qj_fact != 0.0) {
             tempREnDiff[s] += forcefield.particles->CalcCoulomb(distSq, particleKind[atom],
-                              particleKind[nIndex[i]], qi_qj_fact, lambda_Coul[s], box);
+                           particleKind[nIndex[i]], qi_qj_fact, lambda_Coul[s], box, 
+                            forcefield.rCutCoulomb[box],
+                            forcefield.rCutCoulombSq[box], 
+                            forcefield.wolfFactor2[box],
+                            forcefield.wolfFactor3[box],
+                            forcefield.wolfAlpha[box]);
             tempREnDiff[s] += -energyOldCoul;
           }
         }

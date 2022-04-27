@@ -98,7 +98,7 @@ public:
   virtual void CalcCoulombAdd_1_4(double& en, const double distSq,
                                   const double qi_qj_Fact,
                                   const bool NB, const uint box,
-                                  double rCutCoulomb) const;
+                                  double rCutCoulombSq) const;
 
 
   //!Returns Ezero, no energy correction
@@ -272,9 +272,9 @@ inline void FF_SWITCH_MARTINI::CalcCoulombAdd_1_4(double& en,
     const double distSq,
     const double qi_qj_Fact,
     const bool NB, const uint box,
-    double rCutCoulomb) const
+    double rCutCoulombSq) const
 {
-  if(forcefield.rCutCoulombSq[forcefield.startOfNumRCuts[box]+indexForRCut] < distSq && !forcefield.isVlugtWolf)
+  if(rCutCoulombSq < distSq && !forcefield.isVlugtWolf)
     return;
 
   double dist = sqrt(distSq);
