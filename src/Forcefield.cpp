@@ -86,17 +86,12 @@ void Forcefield::AllocMem(){
 
 void Forcefield::DeallocMem(){
   for (uint b = 0; b < BOX_TOTAL; ++b) {
-    delete[] wolfAlpha[b];
-    delete[] rCutCoulomb[b];
-    delete[] rCutCoulombSq[b];
-    for (int r = 0; r < numberOfRCuts[b]; ++r){
-      delete[] wolfFactor1[b][r];
-      delete[] wolfFactor2[b][r];
-      delete[] wolfFactor3[b][r];
-    }
-    delete[] wolfFactor1[b];
-    delete[] wolfFactor2[b];
-    delete[] wolfFactor3[b];
+    delete[] wolfAlpha;
+    delete[] rCutCoulomb;
+    delete[] rCutCoulombSq;
+    delete[] wolfFactor1;
+    delete[] wolfFactor2;
+    delete[] wolfFactor3;
   }
 }
 
@@ -245,12 +240,12 @@ void Forcefield::InitWolfCalibration(config_setup::WolfCalibration const& wolfCa
     }
     for(uint r = 1; r < numberOfRCuts[b]; r++) {
       for(uint a = 1 ; a < numberOfAlphas[b]; a++) {
-        wolfFactor1[startOfWolfFactor[b] + numberOfRCuts[b]*r + a] = erfc(wolfAlpha[b][a]*rCutCoulomb[b][r])/rCutCoulomb[b][r];
-        wolfFactor2[startOfWolfFactor[b] + numberOfRCuts[b]*r + a] = wolfFactor1[startOfWolfFactor[b] + numberOfRCuts[b]*r + a]/rCutCoulomb[b][r];
-        wolfFactor2[startOfWolfFactor[b] + numberOfRCuts[b]*r + a] += wolfAlpha[b][a] *  M_2_SQRTPI * 
-                          exp(-1.0*wolfAlpha[b][a]*wolfAlpha[b][a]*rCutCoulombSq[b][r])
-                          /rCutCoulomb[b][r];
-        wolfFactor3[startOfWolfFactor[b] + numberOfRCuts[b]*r + a] = wolfAlpha[b][a] *  M_2_SQRTPI;
+        wolfFactor1[startOfWolfFactor[b] + numberOfRCuts[b]*r + a] = erfc(wolfAlpha[startOfNumAlphas[b]+a]*rCutCoulomb[startOfNumRCuts[b]+r])/rCutCoulomb[startOfNumRCuts[b]+r];
+        wolfFactor2[startOfWolfFactor[b] + numberOfRCuts[b]*r + a] = wolfFactor1[startOfWolfFactor[b] + numberOfRCuts[b]*r + a]/rCutCoulomb[startOfNumRCuts[b]+r];
+        wolfFactor2[startOfWolfFactor[b] + numberOfRCuts[b]*r + a] += wolfAlpha[startOfNumAlphas[b]+a] *  M_2_SQRTPI * 
+                          exp(-1.0*wolfAlpha[startOfNumAlphas[b]+a]*wolfAlpha[startOfNumAlphas[b]+a]*rCutCoulombSq[startOfNumRCuts[b]+r])
+                          /rCutCoulomb[startOfNumRCuts[b]+r];
+        wolfFactor3[startOfWolfFactor[b] + numberOfRCuts[b]*r + a] = wolfAlpha[startOfNumAlphas[b]+a] *  M_2_SQRTPI;
       }
     }
   }

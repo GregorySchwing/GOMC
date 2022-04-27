@@ -89,9 +89,9 @@ void WolfCalibrationOutput::WriteHeader(uint b, uint wolfKind, uint coulKind)
             for (int r = 1; r < statValRef.forcefield.numberOfRCuts[b]; ++r){
                   for (int a = 1; a < statValRef.forcefield.numberOfAlphas[b]; ++a){
                         firstRow += "(";
-                        firstRow += GetString(statValRef.forcefield.rCutCoulomb[b][r], 4);
+                        firstRow += GetString(statValRef.forcefield.rCutCoulomb[statValRef.forcefield.startOfNumRCuts[b]+r], 4);
                         firstRow += ", ";
-                        firstRow += GetString(statValRef.forcefield.wolfAlpha[b][a], 4);
+                        firstRow += GetString(statValRef.forcefield.wolfAlpha[statValRef.forcefield.startOfNumAlphas[b]+a], 4);
                         firstRow += ")\t";
                   }
             }
@@ -118,9 +118,9 @@ void WolfCalibrationOutput::WriteGraceParFile(uint b, uint wolfKind, uint coulKi
                         firstRow += "\ts";
                         firstRow += GetString(counter);
                         firstRow += " legend \"(";
-                        firstRow += GetString(statValRef.forcefield.rCutCoulomb[b][r], 4);
+                        firstRow += GetString(statValRef.forcefield.rCutCoulomb[statValRef.forcefield.startOfNumRCuts[b]+r], 4);
                         firstRow += ", ";
-                        firstRow += GetString(statValRef.forcefield.wolfAlpha[b][a], 4);
+                        firstRow += GetString(statValRef.forcefield.wolfAlpha[statValRef.forcefield.startOfNumAlphas[b]+a], 4);
                         firstRow += ")\"\n";
                         ++counter;
                   }
