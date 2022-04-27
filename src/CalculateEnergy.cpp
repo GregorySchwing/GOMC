@@ -758,7 +758,7 @@ void CalculateEnergy::ParticleNonbonded(double* inter,
 
             if (qi_qj_fact != 0.0) {
               forcefield.particles->CalcCoulombAdd_1_4(inter[t], distSq,
-                                                       qi_qj_fact, true, box);
+                                                       qi_qj_fact, true, box, forcefield.rCutCoulombSq[box]);
             }
           }
         }
@@ -1121,7 +1121,7 @@ void CalculateEnergy::MolNonbond(double & energy,
 
         if (qi_qj_fact != 0.0) {
           forcefield.particles->CalcCoulombAdd_1_4(energy, distSq,
-            qi_qj_fact, true, box, indexForRCut);
+            qi_qj_fact, true, box, forcefield.rCutCoulombSq[box]);
         }
       }
     }
@@ -1153,7 +1153,7 @@ void CalculateEnergy::MolNonbond(double & energy, cbmc::TrialMol const &mol,
 
           if (qi_qj_fact != 0.0) {
             forcefield.particles->CalcCoulombAdd_1_4(energy, distSq,
-              qi_qj_fact, true, mol.GetBox());
+              qi_qj_fact, true, mol.GetBox(), forcefield.rCutCoulombSq[box]);
            }
         }
       }
@@ -1191,7 +1191,7 @@ void CalculateEnergy::MolNonbond_1_4(double & energy,
 
         if (qi_qj_fact != 0.0) {
           forcefield.particles->CalcCoulombAdd_1_4(energy, distSq,
-            qi_qj_fact, false, box, indexForRCut);
+            qi_qj_fact, false, box, forcefield.rCutCoulombSq[box]);
         }
       }
     }
@@ -1224,7 +1224,7 @@ void CalculateEnergy::MolNonbond_1_4(double & energy,
 
           if (qi_qj_fact != 0.0) {
             forcefield.particles->CalcCoulombAdd_1_4(energy, distSq,
-                qi_qj_fact, false, mol.GetBox());
+                qi_qj_fact, false, mol.GetBox(), forcefield.rCutCoulombSq[box]);
           }
         }
       }
@@ -1261,7 +1261,7 @@ void CalculateEnergy::MolNonbond_1_3(double & energy,
 
         if (qi_qj_fact != 0.0) {
           forcefield.particles->CalcCoulombAdd_1_4(energy, distSq,
-              qi_qj_fact, false, box, indexForRCut);
+              qi_qj_fact, false, box, forcefield.rCutCoulombSq[box]);
         }
       }
     }
@@ -1294,7 +1294,7 @@ void CalculateEnergy::MolNonbond_1_3(double & energy,
 
           if (qi_qj_fact != 0.0) {
             forcefield.particles->CalcCoulombAdd_1_4(energy, distSq,
-              qi_qj_fact, false, mol.GetBox());
+              qi_qj_fact, false, mol.GetBox(), forcefield.rCutCoulombSq[box]);
           }
         }
       }
@@ -1327,7 +1327,7 @@ double CalculateEnergy::IntraEnergy_1_3(const double distSq, const uint atom1,
       } else {
         box = 1;
       }
-      forcefield.particles->CalcCoulombAdd_1_4(eng, distSq, qi_qj_fact, false, box);
+      forcefield.particles->CalcCoulombAdd_1_4(eng, distSq, qi_qj_fact, false, box, forcefield.rCutCoulombSq[box]););
     }
   }
   forcefield.particles->CalcAdd_1_4(eng, distSq, kind1, kind2);
@@ -1365,7 +1365,7 @@ double CalculateEnergy::IntraEnergy_1_4(const double distSq, const uint atom1,
       } else {
         box = 1;
       }
-      forcefield.particles->CalcCoulombAdd_1_4(eng, distSq, qi_qj_fact, false, box);
+      forcefield.particles->CalcCoulombAdd_1_4(eng, distSq, qi_qj_fact, false, box, forcefield.rCutCoulombSq[box]););
     }
   }
   forcefield.particles->CalcAdd_1_4(eng, distSq, kind1, kind2);
