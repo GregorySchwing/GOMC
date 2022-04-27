@@ -110,7 +110,7 @@ SystemPotential CalculateEnergy::SystemTotal()
 #endif
     for (int i = 0; i < (int) molID.size(); i++) {
       //calculate nonbonded energy
-      MoleculeIntra(molID[i], b, bondEnergy);
+      MoleculeIntra(molID[i], b, bondEnergy, forcefield.rCutCoulombSq[b]);
       bondEn += bondEnergy[0];
       nonbondEn += bondEnergy[1];
       //calculate correction term of electrostatic interaction
@@ -125,7 +125,7 @@ SystemPotential CalculateEnergy::SystemTotal()
 
     GOMC_EVENT_STOP(1, GomcProfileEvent::EN_BOX_INTRA);
     //Calculate Virial
-    pot.boxVirial[b] = VirialCalc(b);
+    pot.boxVirial[b] = VirialCalc(b, forcefield.rCutCoulombSq[b], forcefield.wolfAlpha[b]);
   }
 
   pot.Total();
@@ -1860,7 +1860,7 @@ void CalculateEnergy::ChangeLRC(Energy *energyDiff, Energy &dUdL_VDW,
     }
   }
 }
-
+/*
 void CalculateEnergy::WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS]){
 
   GOMC_EVENT_START(1, GomcProfileEvent::WOLF_CALIBRATION);
@@ -1932,7 +1932,7 @@ void CalculateEnergy::WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_
     }
   GOMC_EVENT_STOP(1, GomcProfileEvent::WOLF_CALIBRATION);
 }
-
+*/
 #if GOMC_GTEST || GOMC_GTEST_MPI
 double CalculateEnergy::GetCharge(int atomIndex){
   return particleCharge[atomIndex];

@@ -81,7 +81,9 @@ public:
   virtual double CalcCoulombVir(const double distSq, const uint kind1,
                                 const uint kind2, const double qi_qj,
                                 const double lambda, uint b, 
-                                double rCutCoulomb,
+                                double rCutCoulombSq,
+                                double wolfFactor2,
+                                double wolfFactor3,
                                 double wolfAlpha) const;
   virtual void CalcCoulombAdd_1_4(double& en, const double distSq,
                                   const double qi_qj_Fact, const bool NB, const uint box,
@@ -121,13 +123,21 @@ public:
 protected:
   virtual double CalcEn(const double distSq, const uint index) const;
   virtual double CalcVir(const double distSq, const uint index) const;
-  virtual double CalcCoulomb(const double distSq, const double qi_qj_Fact,
-                             const uint b,
+  // coulomb interaction functions
+  virtual double CalcCoulomb(const double distSq, const uint kind1,
+                             const uint kind2, const double qi_qj_Fact,
+                             const double lambda, const uint b,
                              double rCutCoulomb,
+                             double rCutCoulombSq,
+                             double wolfFactor1, 
+                             double wolfFactor2,
                              double wolfAlpha) const;
-  virtual double CalcCoulombVir(const double distSq, const double qi_qj,
-                                uint b,
-                                double rCutCoulomb,
+  virtual double CalcCoulombVir(const double distSq, const uint kind1,
+                                const uint kind2, const double qi_qj,
+                                const double lambda, const uint b,
+                                double rCutCoulombSq,
+                                double wolfFactor2,
+                                double wolfFactor3,
                                 double wolfAlpha) const;
   //Find the index of the pair kind
   uint FlatIndex(const uint i, const uint j) const

@@ -161,7 +161,7 @@ public:
 
   //! Calculates intramolecular energy of a full molecule
   void MoleculeIntra(const uint molIndex, const uint box, double *bondEn,
-                    double rCutCoulomb) const;
+                    double rCutCoulombSq) const;
 
   //used in molecule exchange for calculating bonded and intraNonbonded energy
   Energy MoleculeIntra(cbmc::TrialMol const &mol) const;
