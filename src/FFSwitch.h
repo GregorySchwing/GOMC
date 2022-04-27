@@ -101,18 +101,14 @@ protected:
   virtual double CalcEn(const double distSq, const uint index) const;
   virtual double CalcVir(const double distSq, const uint index) const;
   // coulomb interaction functions
-  virtual double CalcCoulomb(const double distSq, const uint kind1,
-                             const uint kind2, const double qi_qj_Fact,
-                             const double lambda, const uint b,
+  virtual double CalcCoulomb(const double distSq, const double qi_qj_Fact,
+                             const uint b,
                              double rCutCoulomb,
-                             double rCutCoulombSq,
                              double wolfFactor1, 
                              double wolfFactor2,
                              double wolfAlpha) const;
-  virtual double CalcCoulombVir(const double distSq, const uint kind1,
-                                const uint kind2, const double qi_qj,
-                                const double lambda, const uint b,
-                                double rCutCoulombSq,
+  virtual double CalcCoulombVir(const double distSq, const double qi_qj,
+                                uint b,
                                 double wolfFactor2,
                                 double wolfFactor3,
                                 double wolfAlpha) const;
@@ -288,7 +284,7 @@ inline double FF_SWITCH::CalcCoulomb(const double distSq,
     double lambdaCoef = forcefield.sc_alpha * pow((1.0 - lambda), forcefield.sc_power);
     double softDist6 = lambdaCoef * sigma6 + dist6;
     double softRsq = cbrt(softDist6);
-    en = lambda * CalcCoulomb(softRsq, qi_qj_Fact, b, rCutCoulomb, wolfAlpha);
+    en = lambda * CalcCoulomb(softRsq, qi_qj_Fact, b, rCutCoulomb, wolfFactor1, wolfFactor2, wolfAlpha);
   } else {
     en = lambda * CalcCoulomb(distSq, qi_qj_Fact, b, rCutCoulomb, wolfFactor1, wolfFactor2, wolfAlpha);
   }
@@ -435,10 +431,10 @@ inline double FF_SWITCH::CalcCoulombdEndL(const double distSq,
     double softRsq = cbrt(softDist6);
     double fCoef = lambda * forcefield.sc_alpha * forcefield.sc_power / 6.0;
     fCoef *= pow(1.0 - lambda, forcefield.sc_power - 1.0) * sigma6 / (softRsq * softRsq);
-    dhdl = CalcCoulomb(softRsq, qi_qj_Fact, b) +
+    dhdl = CalcCoulomb(softRsq, qi_qj_Fact, b, wolfFactor2, wolfFactor3, wolfAlpha); +
            fCoef * CalcCoulombVir(softRsq, qi_qj_Fact, b);
   } else {
-    dhdl = CalcCoulomb(distSq, qi_qj_Fact, b);
+    dhdl = CalcCoulomb(distSq, qi_qj_Fact, b, wolfFactor2, wolfFactor3, wolfAlpha);;
   }
   return dhdl;
 }

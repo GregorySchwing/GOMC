@@ -407,7 +407,7 @@ inline double FFParticle::CalcCoulomb(const double distSq,
     double lambdaCoef = forcefield.sc_alpha * pow((1.0 - lambda), forcefield.sc_power);
     double softDist6 = lambdaCoef * sigma6 + dist6;
     double softRsq = cbrt(softDist6);
-    en = lambda * CalcCoulomb(softRsq, qi_qj_Fact, b, rCutCoulomb, wolfAlpha);
+    en = lambda * CalcCoulomb(softRsq, qi_qj_Fact, b, rCutCoulomb, wolfFactor1, wolfFactor2, wolfAlpha);
   } else {
     en = lambda * CalcCoulomb(distSq, qi_qj_Fact, b, rCutCoulomb, wolfFactor1, wolfFactor2, wolfAlpha);
   }
@@ -559,10 +559,10 @@ inline double FFParticle::CalcCoulombdEndL(const double distSq,
     double softRsq = cbrt(softDist6);
     double fCoef = lambda * forcefield.sc_alpha * forcefield.sc_power / 6.0;
     fCoef *= pow(1.0 - lambda, forcefield.sc_power - 1.0) * sigma6 / (softRsq * softRsq);
-    dhdl = CalcCoulomb(softRsq, qi_qj_Fact, b) +
+    dhdl = CalcCoulomb(softRsq, qi_qj_Fact, b, wolfFactor2, wolfFactor3, wolfAlpha); +
            fCoef * CalcCoulombVir(softRsq, qi_qj_Fact, b);
   } else {
-    dhdl = CalcCoulomb(distSq, qi_qj_Fact, b);
+    dhdl = CalcCoulomb(distSq, qi_qj_Fact, b, wolfFactor2, wolfFactor3, wolfAlpha);;
   }
   return dhdl;
 }
