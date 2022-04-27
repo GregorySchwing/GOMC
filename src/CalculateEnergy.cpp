@@ -910,9 +910,9 @@ void CalculateEnergy::MoleculeIntra(const uint molIndex,
   MolBond(bondEn[0], molKind, bondVec, molIndex, box);
   MolAngle(bondEn[0], molKind, bondVec, box);
   MolDihedral(bondEn[0], molKind, bondVec, box);
-  MolNonbond(bondEn[1], molKind, molIndex, box, indexForRCut);
-  MolNonbond_1_4(bondEn[1], molKind, molIndex, box, indexForRCut);
-  MolNonbond_1_3(bondEn[1], molKind, molIndex, box, indexForRCut);
+  MolNonbond(bondEn[1], molKind, molIndex, box, forcefield.rCutCoulombSq[box]);
+  MolNonbond_1_4(bondEn[1], molKind, molIndex, box, forcefield.rCutCoulombSq[box]);
+  MolNonbond_1_3(bondEn[1], molKind, molIndex, box, forcefield.rCutCoulombSq[box]);
   GOMC_EVENT_STOP(1, GomcProfileEvent::EN_MOL_INTRA);
 }
 
@@ -1098,7 +1098,7 @@ void CalculateEnergy::MolNonbond(double & energy,
                                  MoleculeKind const& molKind,
                                  const uint molIndex,
                                  const uint box,
-                                 double rCutCoulomb) const
+                                 double rCutCoulombSq) const
 {
   if (box >= BOXES_WITH_U_B)
     return;
@@ -1121,7 +1121,7 @@ void CalculateEnergy::MolNonbond(double & energy,
 
         if (qi_qj_fact != 0.0) {
           forcefield.particles->CalcCoulombAdd_1_4(energy, distSq,
-            qi_qj_fact, true, box, forcefield.rCutCoulombSq[box]);
+            qi_qj_fact, true, box, rCutCoulombSq);
         }
       }
     }
@@ -1153,7 +1153,7 @@ void CalculateEnergy::MolNonbond(double & energy, cbmc::TrialMol const &mol,
 
           if (qi_qj_fact != 0.0) {
             forcefield.particles->CalcCoulombAdd_1_4(energy, distSq,
-              qi_qj_fact, true, mol.GetBox(), forcefield.rCutCoulombSq[box]);
+              qi_qj_fact, true, mol.GetBox(), forcefield.rCutCoulombSq[mol.GetBox()]);
            }
         }
       }
@@ -1167,7 +1167,7 @@ void CalculateEnergy::MolNonbond_1_4(double & energy,
                                      MoleculeKind const& molKind,
                                      const uint molIndex,
                                      const uint box,
-                                     double rCutCoulomb) const
+                                     double rCutCoulombSq) const
 {
   if (box >= BOXES_WITH_U_B)
     return;
@@ -1224,7 +1224,7 @@ void CalculateEnergy::MolNonbond_1_4(double & energy,
 
           if (qi_qj_fact != 0.0) {
             forcefield.particles->CalcCoulombAdd_1_4(energy, distSq,
-                qi_qj_fact, false, mol.GetBox(), forcefield.rCutCoulombSq[box]);
+                qi_qj_fact, false, mol.GetBox(), forcefield.rCutCoulombSq[mol.GetBox()]);
           }
         }
       }
@@ -1237,7 +1237,7 @@ void CalculateEnergy::MolNonbond_1_3(double & energy,
                                      MoleculeKind const& molKind,
                                      const uint molIndex,
                                      const uint box,
-                                     double rCutCoulomb) const
+                                     double rCutCoulombSq) const
 {
   if (box >= BOXES_WITH_U_B)
     return;
@@ -1261,7 +1261,7 @@ void CalculateEnergy::MolNonbond_1_3(double & energy,
 
         if (qi_qj_fact != 0.0) {
           forcefield.particles->CalcCoulombAdd_1_4(energy, distSq,
-              qi_qj_fact, false, box, forcefield.rCutCoulombSq[box]);
+              qi_qj_fact, false, box, rCutCoulombSq);
         }
       }
     }
@@ -1294,7 +1294,7 @@ void CalculateEnergy::MolNonbond_1_3(double & energy,
 
           if (qi_qj_fact != 0.0) {
             forcefield.particles->CalcCoulombAdd_1_4(energy, distSq,
-              qi_qj_fact, false, mol.GetBox(), forcefield.rCutCoulombSq[box]);
+              qi_qj_fact, false, mol.GetBox(), forcefield.rCutCoulombSq[mol.GetBox()]);
           }
         }
       }
