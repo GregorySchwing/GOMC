@@ -25,16 +25,16 @@ void UpdateGPULambda(VariablesCUDA *vars, int *molIndex, double *lambdaVDW,
 void InitGPUForceField(VariablesCUDA &vars, double const *sigmaSq,
                        double const *epsilon_Cn, double const *n,
                        int VDW_Kind, int isMartini, int count,
-                       double Rcut, double * const rCutCoulomb[BOX_TOTAL],
-                       double * const rCutCoulombSq[BOX_TOTAL],
+                       double Rcut, double const *rCutCoulomb,
+                       double const *rCutCoulombSq,
                        double RcutLow, double Ron, double const *alpha,
                        int ewald, double diElectric_1,
                        int wolf, 
                        int coulKind,
-                       double * const wolfAlpha[BOX_TOTAL],
-                       double ** const wolfFactor1[BOX_TOTAL], 
-                       double ** const wolfFactor2[BOX_TOTAL], 
-                       double ** const wolfFactor3[BOX_TOTAL]);
+                       double const * wolfAlpha,
+                       double const * wolfFactor1, 
+                       double const * wolfFactor2, 
+                       double const * wolfFactor3);
 void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
                          uint maxAtomsInMol, uint maxMolNumber);
 void InitEwaldVariablesCUDA(VariablesCUDA *vars, uint imageTotal);

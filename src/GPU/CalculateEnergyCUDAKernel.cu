@@ -114,8 +114,8 @@ void CallBoxInterGPU(VariablesCUDA *vars,
       vars->gpu_isMartini,
       vars->gpu_count,
       vars->gpu_rCut,
-      vars->gpu_rCutCoulomb[box],
-      vars->gpu_rCutCoulombSq[box],
+      vars->gpu_rCutCoulomb,
+      vars->gpu_rCutCoulombSq,
       vars->gpu_rCutLow,
       vars->gpu_rOn,
       vars->gpu_alpha,
@@ -143,9 +143,9 @@ void CallBoxInterGPU(VariablesCUDA *vars,
       box,
       vars->gpu_wolf,
       vars->gpu_coulKind,
-      vars->gpu_wolfAlpha[box],
-      vars->gpu_wolfFactor1[box],
-      vars->gpu_wolfFactor2[box]);
+      vars->gpu_wolfAlpha,
+      vars->gpu_wolfFactor1,
+      vars->gpu_wolfFactor2);
   cudaDeviceSynchronize();
   checkLastErrorCUDA(__FILE__, __LINE__);
 
@@ -237,9 +237,9 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                             int box,
                             int *gpu_wolf,
                             int *gpu_coulKind,
-                            double *gpu_wolfAlpha,
-                            double **gpu_wolfFactor1,
-                            double **gpu_wolfFactor2)
+                            double * gpu_wolfAlpha,
+                            double * gpu_wolfFactor1,
+                            double * gpu_wolfFactor2)
 {
   int threadID = blockIdx.x * blockDim.x + threadIdx.x;
   double REn = 0.0, LJEn = 0.0;
@@ -308,8 +308,8 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                                   gpu_wolf[0],
                                   gpu_coulKind[0],
                                   gpu_wolfAlpha[box],
-                                  gpu_wolfFactor1[box][0],
-                                  gpu_wolfFactor2[box][0]);
+                                  gpu_wolfFactor1[box],
+                                  gpu_wolfFactor2[box]);
           }
         }
       }
