@@ -66,6 +66,10 @@ public:
   double * wolfFactor3; //alpha term for Wolf Electrostatic and constant factors
   double * rCutCoulomb;  //!<Cutoff Coulomb interaction(angstroms)
   double * rCutCoulombSq; //!<Cutoff Coulomb interaction(angstroms)
+  int totalNumAlphas;
+  int totalNumRCuts;
+  int totalNumWolfFactors;
+  int startOfWolfFactor[BOX_TOTAL];
   int numberOfRCuts[BOX_TOTAL];
   int numberOfAlphas[BOX_TOTAL];
   bool explicitlyAddEndAlpha[BOX_TOTAL];

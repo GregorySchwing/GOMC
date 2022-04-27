@@ -64,22 +64,14 @@ void Forcefield::Init(const Setup& set,
 }
 
 void Forcefield::AllocMem(){
-  int totalNumAlphas;
-  int totalNumRCuts;
-  int totalNumWolfFactors;
-  if(wolfCalibration){
-    totalNumAlphas = 0;
-    totalNumRCuts = 0;
-    totalNumWolfFactors = 0;
-    for (uint b = 0; b < BOX_TOTAL; ++b) {
-      totalNumAlphas += numberOfAlphas[b];
-      totalNumRCuts += numberOfRCuts[b];
-      totalNumWolfFactors +=  numberOfAlphas[b] * numberOfRCuts[b];
-    }
-  } else {
-    totalNumAlphas = BOX_TOTAL;
-    totalNumRCuts = BOX_TOTAL;
-    totalNumWolfFactors = BOX_TOTAL;
+  totalNumAlphas = 0;
+  totalNumRCuts = 0;
+  totalNumWolfFactors = 0;
+  for (uint b = 0; b < BOX_TOTAL; ++b) {
+    startOfWolfFactor[b] += totalNumWolfFactors;
+    totalNumAlphas += numberOfAlphas[b];
+    totalNumRCuts += numberOfRCuts[b];
+    totalNumWolfFactors +=  numberOfAlphas[b] * numberOfRCuts[b];
   }
 
   wolfAlpha = new double[totalNumAlphas];
