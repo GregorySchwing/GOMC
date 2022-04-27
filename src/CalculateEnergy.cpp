@@ -1327,7 +1327,7 @@ double CalculateEnergy::IntraEnergy_1_3(const double distSq, const uint atom1,
       } else {
         box = 1;
       }
-      forcefield.particles->CalcCoulombAdd_1_4(eng, distSq, qi_qj_fact, false, box, forcefield.rCutCoulombSq[box]););
+      forcefield.particles->CalcCoulombAdd_1_4(eng, distSq, qi_qj_fact, false, box, forcefield.rCutCoulombSq[box]);
     }
   }
   forcefield.particles->CalcAdd_1_4(eng, distSq, kind1, kind2);
@@ -1365,7 +1365,7 @@ double CalculateEnergy::IntraEnergy_1_4(const double distSq, const uint atom1,
       } else {
         box = 1;
       }
-      forcefield.particles->CalcCoulombAdd_1_4(eng, distSq, qi_qj_fact, false, box, forcefield.rCutCoulombSq[box]););
+      forcefield.particles->CalcCoulombAdd_1_4(eng, distSq, qi_qj_fact, false, box, forcefield.rCutCoulombSq[box]);
     }
   }
   forcefield.particles->CalcAdd_1_4(eng, distSq, kind1, kind2);

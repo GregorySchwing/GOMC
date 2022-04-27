@@ -570,10 +570,10 @@ inline double FF_SWITCH_MARTINI::CalcCoulombdEndL(const double distSq,
     double softRsq = cbrt(softDist6);
     double fCoef = lambda * forcefield.sc_alpha * forcefield.sc_power / 6.0;
     fCoef *= pow(1.0 - lambda, forcefield.sc_power - 1.0) * sigma6 / (softRsq * softRsq);
-    dhdl = CalcCoulomb(softRsq, qi_qj_Fact, b, wolfFactor2, wolfFactor3, wolfAlpha); +
-           fCoef * CalcCoulombVir(softRsq, qi_qj_Fact, b);
+    dhdl = CalcCoulomb(softRsq, qi_qj_Fact, b, rCutCoulomb, wolfFactor1, wolfFactor2, wolfAlpha); +
+           fCoef * CalcCoulombVir(softRsq, qi_qj, b, wolfFactor2, wolfFactor3, wolfAlpha);
   } else {
-    dhdl = CalcCoulomb(distSq, qi_qj_Fact, b, wolfFactor2, wolfFactor3, wolfAlpha);;
+    dhdl = CalcCoulomb(distSq, qi_qj_Fact, b, rCutCoulomb, wolfFactor1, wolfFactor2, wolfAlpha);;
   }
   return dhdl;
 }

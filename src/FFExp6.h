@@ -91,11 +91,17 @@ public:
                            const uint kind2, const
                            double lambda) const;
   //Calculate the dE/dlambda for Coulomb energy
-  virtual double CalcCoulombdEndL(const double distSq, const uint kind1,
-                                  const uint kind2, const double qi_qj_Fact,
-                                  const double lambda, uint b,
-                                  double rCutCoulomb,
-                                  double wolfAlpha) const;
+virtual double CalcCoulombdEndL(const double distSq,
+                                const uint kind1,
+                                const uint kind2,
+                                const double qi_qj_Fact,
+                                const double lambda, uint b,
+                                double rCutCoulomb,
+                                double rCutCoulombSq,    
+                                double wolfFactor1,
+                                double wolfFactor2,
+                                double wolfFactor3,
+                                double wolfAlpha) const;
 
   double *expConst, *expConst_1_4, *rMin, *rMin_1_4, *rMaxSq, *rMaxSq_1_4;
 
@@ -511,10 +517,10 @@ inline double FF_EXP6::CalcCoulombdEndL(const double distSq,
     double softRsq = cbrt(softDist6);
     double fCoef = lambda * forcefield.sc_alpha * forcefield.sc_power / 6.0;
     fCoef *= pow(1.0 - lambda, forcefield.sc_power - 1) * sigma6 / (softRsq * softRsq);
-    dhdl = CalcCoulomb(softRsq, qi_qj_Fact, b, wolfFactor2, wolfFactor3, wolfAlpha); +
-           fCoef * CalcCoulombVir(softRsq, qi_qj_Fact, b);
+    dhdl = CalcCoulomb(softRsq, qi_qj_Fact, b, rCutCoulomb, wolfFactor1, wolfFactor2, wolfAlpha); +
+           fCoef * CalcCoulombVir(softRsq, qi_qj, b, wolfFactor2, wolfFactor3, wolfAlpha);
   } else {
-    dhdl = CalcCoulomb(distSq, qi_qj_Fact, b, wolfFactor2, wolfFactor3, wolfAlpha);;
+    dhdl = CalcCoulomb(distSq, qi_qj_Fact, b, rCutCoulomb, wolfFactor1, wolfFactor2, wolfAlpha);;
   }
   return dhdl;
 }

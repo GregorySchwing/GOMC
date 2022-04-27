@@ -106,6 +106,17 @@ public:
                                   const double lambda, uint b,
                                   double rCutCoulomb,
                                   double wolfAlpha) const;
+virtual double CalcCoulombdEndL(const double distSq,
+                                const uint kind1,
+                                const uint kind2,
+                                const double qi_qj_Fact,
+                                const double lambda, uint b,
+                                double rCutCoulomb,
+                                double rCutCoulombSq,    
+                                double wolfFactor1,
+                                double wolfFactor2,
+                                double wolfFactor3,
+                                double wolfAlpha) const;
 
   uint NumKinds() const
   {
