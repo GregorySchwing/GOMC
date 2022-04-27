@@ -86,13 +86,17 @@ public:
                            const uint kind2, const
                            double lambda) const;
   //Calculate the dE/dlambda for Coulomb energy
-  virtual double CalcCoulombdEndL(const double distSq, const uint kind1,
-                                  const uint kind2, const double qi_qj_Fact,
-                                  const double lambda, uint b,
-                                  double rCutCoulombSq,
-                                  double wolfFactor2,
-                                  double wolfFactor3,
-                                  double wolfAlpha) const;
+virtual double CalcCoulombdEndL(const double distSq,
+                                const uint kind1,
+                                const uint kind2,
+                                const double qi_qj_Fact,
+                                const double lambda, uint b,
+                                double rCutCoulomb,
+                                double rCutCoulombSq,    
+                                double wolfFactor1,
+                                double wolfFactor2,
+                                double wolfFactor3,
+                                double wolfAlpha) const;
 
 protected:
   virtual double CalcEn(const double distSq, const uint index) const;
@@ -398,15 +402,17 @@ inline double FF_SHIFT::CalcdEndL(const double distSq, const uint kind1,
 }
 
 //Calculate the dE/dlambda for Coulomb energy
-inline double FF_SHIFT::CalcCoulombdEndL(const double distSq, const uint kind1,
-    const uint kind2,
-    const double qi_qj_Fact,
-    const double lambda, uint b,
-    double rCutCoulomb,
-    double rCutCoulombSq,
-    double wolfFactor2,
-    double wolfFactor3,
-    double wolfAlpha) const
+inline double FF_SHIFT::CalcCoulombdEndL(const double distSq,
+                                      const uint kind1,
+                                      const uint kind2,
+                                      const double qi_qj_Fact,
+                                      const double lambda, uint b,
+                                      double rCutCoulomb,
+                                      double rCutCoulombSq,    
+                                      double wolfFactor1,
+                                      double wolfFactor2,
+                                      double wolfFactor3,
+                                      double wolfAlpha) const
 {
   if(rCutCoulombSq < distSq)
     return 0.0;

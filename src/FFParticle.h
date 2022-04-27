@@ -101,11 +101,6 @@ public:
   virtual double CalcdEndL(const double distSq, const uint kind1,
                            const uint kind2, const double lambda) const;
   //Calculate the dE/dlambda for Coulomb energy
-  virtual double CalcCoulombdEndL(const double distSq, const uint kind1,
-                                  const uint kind2, const double qi_qj_Fact,
-                                  const double lambda, uint b,
-                                  double rCutCoulomb,
-                                  double wolfAlpha) const;
 virtual double CalcCoulombdEndL(const double distSq,
                                 const uint kind1,
                                 const uint kind2,
