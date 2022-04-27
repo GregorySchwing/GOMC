@@ -69,6 +69,8 @@ public:
   int totalNumAlphas;
   int totalNumRCuts;
   int totalNumWolfFactors;
+  int startOfNumRCuts[BOX_TOTAL];
+  int startOfNumAlphas[BOX_TOTAL];
   int startOfWolfFactor[BOX_TOTAL];
   int numberOfRCuts[BOX_TOTAL];
   int numberOfAlphas[BOX_TOTAL];
