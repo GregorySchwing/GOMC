@@ -296,7 +296,7 @@ inline void FFParticle::CalcCoulombAdd_1_4(double& en, const double distSq,
     const bool NB, const uint box,
     int indexForRCut) const
 {
-  if(forcefield.rCutCoulombSq[box][indexForRCut] < distSq && !forcefield.isVlugtWolf)
+  if(forcefield.rCutCoulombSq[forcefield.numberOfRCuts[box]+indexForRCut] < distSq && !forcefield.isVlugtWolf)
     return;
 
   double dist = sqrt(distSq);
@@ -386,7 +386,7 @@ inline double FFParticle::CalcCoulomb(const double distSq,
 {
   // This will reduce to the original equation when not calibrating,
   // since indexForRCut is by default 0.
-  if(forcefield.rCutCoulombSq[b][indexForRCut] < distSq)
+  if(forcefield.rCutCoulombSq[forcefield.numberOfRCuts[b]+indexForRCut] < distSq)
     return 0.0;
 
 
@@ -450,7 +450,7 @@ inline double FFParticle::CalcCoulombVir(const double distSq,
 {
   // This will reduce to the original equation when not calibrating,
   // since numberOfRCuts is by default 1 and indexForRCut is by default 0.
-  if(forcefield.rCutCoulombSq[b][indexForRCut] < distSq)
+  if(forcefield.rCutCoulombSq[forcefield.numberOfRCuts[b]+indexForRCut] < distSq)
     return 0.0;
 
   if(lambda >= 0.999999) {
@@ -538,7 +538,7 @@ inline double FFParticle::CalcCoulombdEndL(const double distSq,
     int indexForRCut,
     int indexForAlpha) const
 {
-  if(forcefield.rCutCoulombSq[b][indexForRCut] < distSq)
+  if(forcefield.rCutCoulombSq[forcefield.numberOfRCuts[b]+indexForRCut] < distSq)
     return 0.0;
 
   double dhdl = 0.0;

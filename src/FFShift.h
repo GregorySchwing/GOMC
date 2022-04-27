@@ -161,7 +161,7 @@ inline void FF_SHIFT::CalcCoulombAdd_1_4(double& en, const double distSq,
     const bool NB, const uint box,
     int indexForRCut) const
 {
-  if(forcefield.rCutCoulombSq[box][indexForRCut] < distSq && !forcefield.isVlugtWolf)
+  if(forcefield.rCutCoulombSq[forcefield.numberOfRCuts[box]+indexForRCut] < distSq && !forcefield.isVlugtWolf)
     return;
 
   double dist = sqrt(distSq);
@@ -249,7 +249,7 @@ inline double FF_SHIFT::CalcCoulomb(const double distSq,
                                     int indexForRCut,
                                     int indexForAlpha) const
 {
-  if(forcefield.rCutCoulombSq[b][indexForRCut] < distSq)
+  if(forcefield.rCutCoulombSq[forcefield.numberOfRCuts[b]+indexForRCut] < distSq)
     return 0.0;
 
   if(lambda >= 0.999999) {
@@ -304,7 +304,7 @@ inline double FF_SHIFT::CalcCoulombVir(const double distSq, const uint kind1,
                                        int indexForRCut,
                                        int indexForAlpha) const
 {
-  if(forcefield.rCutCoulombSq[b][indexForRCut] < distSq)
+  if(forcefield.rCutCoulombSq[forcefield.numberOfRCuts[b]+indexForRCut] < distSq)
     return 0.0;
 
   if(lambda >= 0.999999) {
@@ -387,7 +387,7 @@ inline double FF_SHIFT::CalcCoulombdEndL(const double distSq, const uint kind1,
     int indexForRCut,
     int indexForAlpha) const
 {
-  if(forcefield.rCutCoulombSq[b][indexForRCut] < distSq)
+  if(forcefield.rCutCoulombSq[forcefield.numberOfRCuts[b]+indexForRCut] < distSq)
     return 0.0;
 
   double dhdl = 0.0;
