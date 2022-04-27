@@ -105,7 +105,7 @@ private:
   void InitBasicVals(config_setup::SystemVals const& val,
                      config_setup::FFKind const& ffKind);
   void CalculateWolfCalibrationMemoryUsage(config_setup::WolfCalibration const& wolfCal);
-  void InitWolfCalibration(config_setup::WolfCalibration const& wolfCal);
+  //void InitWolfCalibration(config_setup::WolfCalibration const& wolfCal);
   void AllocMem();
   void DeallocMem();
 };

@@ -29,7 +29,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 
 
 Wolf::Wolf(StaticVals & stat, System & sys) :
-  Ewald(stat, sys) {
+  Ewald(stat, sys), ffRef(stat.forcefield) {
 }
 
 void Wolf::Init() {
@@ -196,7 +196,7 @@ double Wolf::ChangeLambdaRecip(XYZArray const& molCoords, const double lambdaOld
 //calculate self term for a box
 double Wolf::BoxSelf(uint box) const
 {
-  return BoxSelf(box, 0, 0);
+  return BoxSelf(box, ffRef.wolfFactor1[box], ffRef.wolfAlpha[box]);
 }
 
 //calculate self term for a box
@@ -248,7 +248,10 @@ double Wolf::BoxSelf(uint box,
 //calculate self term for a box
 double Wolf::MolCorrection(uint molIndex, uint box) const
 {
-  return MolCorrection(molIndex, box, 0, 0);
+  return MolCorrection(molIndex, box, ffRef.rCutCoulomb[box], ffRef.rCutCoulombSq[box],
+                                      ffRef.wolfFactor1[box], 
+                                      ffRef.wolfFactor2[box], 
+                                      ffRef.wolfAlpha[box]);
 }
 
 //calculate correction term for a molecule
@@ -256,6 +259,7 @@ double Wolf::MolCorrection(uint molIndex, uint box,
                           double rCutCoulomb,
                           double rCutCoulombSq,
                           double wolfFactor1,
+                          double wolfFactor2,
                           double wolfAlpha) const
 {
   if (box >= BOXES_WITH_U_NB)
@@ -361,8 +365,8 @@ double Wolf::MolCorrection(uint molIndex, uint box,
             dampenedCorr = -1.0*erf(wolfAlpha * dist)/dist;   
             dampenedCorr -= wolfFactor1;
             if(ff.coulKind && isVlugtWithIntraCutoffWolf){
-              double distDiff = dist-ff.rCutCoulomb[ff.startOfNumRCuts[box]+indexForRCut];
-              dampenedCorr += ff.wolfFactor2[ff.startOfWolfFactor[box] + ff.numberOfRCuts[box]*indexForRCut + indexForAlpha]*distDiff;
+              double distDiff = dist-rCutCoulomb;
+              dampenedCorr += wolfFactor2*distDiff;
             } 
             correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(j) * dampenedCorr;
         }
@@ -406,7 +410,7 @@ double Wolf::MolExchangeReciprocal(const std::vector<cbmc::TrialMol> &newMol,
 
 //calculate self term after swap move
 double Wolf::SwapSelf(const cbmc::TrialMol& trialMol,
-                      double rCutCoulomb,
+                      double wolfFactor1,
                       double wolfAlpha) const
 {
   uint box = trialMol.GetBox();
@@ -431,7 +435,8 @@ double Wolf::SwapSelf(const cbmc::TrialMol& trialMol,
 
 //calculate correction term after swap move
 double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
-                            double rCutCoulomb,
+                            double rCutCoulombSq,
+                            double wolfFactor1,
                             double wolfAlpha) const
 {
   uint box = trialMol.GetBox();
@@ -540,7 +545,8 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
 //calculate correction term after swap move
 double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
                             const uint molIndex,
-                            double rCutCoulomb,
+                            double rCutCoulombSq,
+                            double wolfFactor1,
                             double wolfAlpha) const
 {
   uint box = trialMol.GetBox();
@@ -655,7 +661,7 @@ void Wolf::ChangeSelf(Energy *energyDiff, Energy &dUdL_Coul,
                          const std::vector<double> &lambda_Coul,
                          const uint iState, const uint molIndex,
                          const uint box,
-                          double rCutCoulomb,
+                          double wolfFactor1,
                           double wolfAlpha) const
 {
     uint lambdaSize = lambda_Coul.size();
@@ -688,6 +694,8 @@ void Wolf::ChangeCorrection(Energy *energyDiff, Energy &dUdL_Coul,
                                const uint iState, const uint molIndex,
                                const uint box,
                                 double rCutCoulomb,
+                                double rCutCoulombSq,
+                                double wolfFactor1,
                                 double wolfAlpha) const
 {
   uint atomSize = mols.GetKind(molIndex).NumAtoms();

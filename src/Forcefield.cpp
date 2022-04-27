@@ -47,7 +47,7 @@ void Forcefield::Init(const Setup& set,
   AllocMem();
   InitBasicVals(set.config.sys, set.config.in.ffKind);
   if(wolfCalibration){
-    InitWolfCalibration(wolfCal);
+    //InitWolfCalibration(wolfCal);
   }
   particles->Init(set.ff.mie, set.ff.nbfix);
   bonds.Init(set.ff.bond);

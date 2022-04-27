@@ -136,7 +136,7 @@ void WolfCalibrationOutput::WriteGraceParFile(uint b, uint wolfKind, uint coulKi
 void WolfCalibrationOutput::DoOutput(const ulong step) {
       uint wolfKindOrig = sysRef.calcEwald->GetWolfKind();
       uint coulKindOrig = sysRef.calcEwald->GetCoulKind();
-      calcEn.WolfCalibrationEnergy(electrostaticEnergies);
+      //calcEn.WolfCalibrationEnergy(electrostaticEnergies);
 
       // Calc reference epot
       sysRef.SwapWolfAndEwaldPointers();
