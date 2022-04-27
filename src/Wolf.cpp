@@ -201,7 +201,7 @@ double Wolf::BoxSelf(uint box) const
 
 //calculate self term for a box
 double Wolf::BoxSelf(uint box,
-                      double rCutCoulomb,
+                      double wolfFactor1,
                       double wolfAlpha) const
 {
     if (box >= BOXES_WITH_U_NB){
@@ -234,10 +234,10 @@ double Wolf::BoxSelf(uint box,
           }
         }
         if (isVlugtWolf || isVlugtWithIntraCutoffWolf){
-          self *= ((ff.wolfAlpha[ff.startOfNumAlphas[box]+indexForAlpha] * M_2_SQRTPI) + ff.wolfFactor1[ff.startOfWolfFactor[box] + ff.numberOfRCuts[box]*indexForRCut + indexForAlpha]) * 0.5;
+          self *= ((wolfAlpha * M_2_SQRTPI) + wolfFactor1) * 0.5;
         } else {
           // we eliminate the alpha/root(pi) using Wolf,mod from Gross et al
-          self *= ff.wolfFactor1[ff.startOfWolfFactor[box] + ff.numberOfRCuts[box]*indexForRCut + indexForAlpha] * 0.5;
+          self *= wolfFactor1 * 0.5;
         }
 
         GOMC_EVENT_STOP(1, GomcProfileEvent::SELF_BOX);
@@ -254,6 +254,8 @@ double Wolf::MolCorrection(uint molIndex, uint box) const
 //calculate correction term for a molecule
 double Wolf::MolCorrection(uint molIndex, uint box,
                           double rCutCoulomb,
+                          double rCutCoulombSq,
+                          double wolfFactor1,
                           double wolfAlpha) const
 {
   if (box >= BOXES_WITH_U_NB)
@@ -287,17 +289,17 @@ double Wolf::MolCorrection(uint molIndex, uint box,
           // Need to check for cutoff for all kinds
           if(currentAxes.InRcut(distSq, virComponents, currentCoords,
                             start + i, start + (*partner), box) && 
-            distSq < ff.rCutCoulombSq[ff.startOfNumRCuts[box]+indexForRCut] && i < (*partner)){
+            distSq < rCutCoulombSq && i < (*partner)){
               dist = sqrt(distSq);
               dampenedCorr = 0.0;
               if (isGrossWolf){
-                dampenedCorr = -1.0*erf(ff.wolfAlpha[ff.startOfNumAlphas[box]+indexForAlpha] * dist)/dist;  
+                dampenedCorr = -1.0*erf(wolfAlpha * dist)/dist;  
                 dampenedCorr *= scaling_14;
               } else if (isHybridWolf) {
                 // Exclude the entire erfc term, psi is 1
                 dampenedCorr = -scaling_14/dist;
               }
-              dampenedCorr -= ff.wolfFactor1[ff.startOfWolfFactor[box] + ff.numberOfRCuts[box]*indexForRCut + indexForAlpha];
+              dampenedCorr -= wolfFactor1;
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
 
           }
@@ -312,17 +314,17 @@ double Wolf::MolCorrection(uint molIndex, uint box,
           // Need to check for cutoff for all kinds
           if(currentAxes.InRcut(distSq, virComponents, currentCoords,
                             start + i, start + (*partner), box) && 
-            distSq < ff.rCutCoulombSq[ff.startOfNumRCuts[box]+indexForRCut] && i < (*partner)){
+            distSq < rCutCoulombSq && i < (*partner)){
               dist = sqrt(distSq);
               dampenedCorr = 0.0;
               if (isGrossWolf){
-                dampenedCorr = -1.0*erf(ff.wolfAlpha[ff.startOfNumAlphas[box]+indexForAlpha] * dist)/dist;  
+                dampenedCorr = -1.0*erf(wolfAlpha * dist)/dist;  
                 dampenedCorr *= scaling_14;
               } else if (isHybridWolf) {
                 // Exclude the entire erfc term, psi is 1
                 dampenedCorr = -scaling_14/dist;
               } 
-              dampenedCorr -= ff.wolfFactor1[ff.startOfWolfFactor[box] + ff.numberOfRCuts[box]*indexForRCut + indexForAlpha];
+              dampenedCorr -= wolfFactor1;
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
           }
           ++partner;
@@ -335,16 +337,16 @@ double Wolf::MolCorrection(uint molIndex, uint box,
         // Need to check for cutoff for all kinds
         if(currentAxes.InRcut(distSq, virComponents, currentCoords,
                           start + i, start + (*partner), box) && 
-          distSq < ff.rCutCoulombSq[ff.startOfNumRCuts[box]+indexForRCut] && i < (*partner)){
+          distSq < rCutCoulombSq && i < (*partner)){
               dist = sqrt(distSq);
               dampenedCorr = 0.0;
               if (isGrossWolf){
-                dampenedCorr = -1.0*erf(ff.wolfAlpha[ff.startOfNumAlphas[box]+indexForAlpha] * dist)/dist;  
+                dampenedCorr = -1.0*erf(wolfAlpha * dist)/dist;  
               } else if (isHybridWolf) {
                 // Exclude the entire erfc term, psi is 1
                 dampenedCorr = -1.0/dist;
               }
-              dampenedCorr -= ff.wolfFactor1[ff.startOfWolfFactor[box] + ff.numberOfRCuts[box]*indexForRCut + indexForAlpha];
+              dampenedCorr -= wolfFactor1;
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
         }
         ++partner;
@@ -353,11 +355,11 @@ double Wolf::MolCorrection(uint molIndex, uint box,
       for (uint j = i + 1; j < atomSize; j++) {
         currentAxes.InRcut(distSq, virComponents, currentCoords,
                           start + i, start + j, box);
-        if(distSq < ff.rCutCoulombSq[ff.startOfNumRCuts[box]+indexForRCut]){
+        if(distSq < rCutCoulombSq){
             dampenedCorr = 0.0;
             dist = sqrt(distSq);
-            dampenedCorr = -1.0*erf(ff.wolfAlpha[ff.startOfNumAlphas[box]+indexForAlpha] * dist)/dist;   
-            dampenedCorr -= ff.wolfFactor1[ff.startOfWolfFactor[box] + ff.numberOfRCuts[box]*indexForRCut + indexForAlpha];
+            dampenedCorr = -1.0*erf(wolfAlpha * dist)/dist;   
+            dampenedCorr -= wolfFactor1;
             if(ff.coulKind && isVlugtWithIntraCutoffWolf){
               double distDiff = dist-ff.rCutCoulomb[ff.startOfNumRCuts[box]+indexForRCut];
               dampenedCorr += ff.wolfFactor2[ff.startOfWolfFactor[box] + ff.numberOfRCuts[box]*indexForRCut + indexForAlpha]*distDiff;
@@ -420,10 +422,10 @@ double Wolf::SwapSelf(const cbmc::TrialMol& trialMol,
 
   GOMC_EVENT_STOP(1, GomcProfileEvent::SELF_SWAP);
   if (isVlugtWolf || isVlugtWithIntraCutoffWolf){
-    return (en_self *= -0.5 * ((ff.wolfAlpha[ff.startOfNumAlphas[box]+indexForAlpha] * M_2_SQRTPI) + ff.wolfFactor1[ff.startOfWolfFactor[box] + ff.numberOfRCuts[box]*indexForRCut + indexForAlpha]) * num::qqFact) ;
+    return (en_self *= -0.5 * ((wolfAlpha * M_2_SQRTPI) + wolfFactor1) * num::qqFact) ;
   } else {
     // we eliminate the alpha/root(pi) using Wolf,mod from Gross et al
-    return (en_self *= -0.5 * ff.wolfFactor1[ff.startOfWolfFactor[box] + ff.numberOfRCuts[box]*indexForRCut + indexForAlpha] * num::qqFact);
+    return (en_self *= -0.5 * wolfFactor1 * num::qqFact);
   }
 }
 
@@ -456,17 +458,17 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
           // Need to check for cutoff for all kinds
           if(currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
                             i, (*partner), box) && 
-            distSq < ff.rCutCoulombSq[ff.startOfNumRCuts[box]+indexForRCut] && i < (*partner)){
+            distSq < rCutCoulombSq && i < (*partner)){
               dist = sqrt(distSq);
               dampenedCorr = 0.0;
               if (isGrossWolf){
-                dampenedCorr = -1.0*erf(ff.wolfAlpha[ff.startOfNumAlphas[box]+indexForAlpha] * dist)/dist;  
+                dampenedCorr = -1.0*erf(wolfAlpha * dist)/dist;  
                 dampenedCorr *= scaling_14;
               } else if (isHybridWolf) {
                 // Exclude the entire erfc term, psi is 1
                 dampenedCorr = -scaling_14/dist;
               }
-              dampenedCorr -= ff.wolfFactor1[ff.startOfWolfFactor[box] + ff.numberOfRCuts[box]*indexForRCut + indexForAlpha];
+              dampenedCorr -= wolfFactor1;
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
 
           }
@@ -481,17 +483,17 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
           // Need to check for cutoff for all kinds
           if(currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
                             i, (*partner), box) && 
-            distSq < ff.rCutCoulombSq[ff.startOfNumRCuts[box]+indexForRCut] && i < (*partner)){
+            distSq < rCutCoulombSq && i < (*partner)){
               dist = sqrt(distSq);
               dampenedCorr = 0.0;
               if (isGrossWolf){
-                dampenedCorr = -1.0*erf(ff.wolfAlpha[ff.startOfNumAlphas[box]+indexForAlpha] * dist)/dist;  
+                dampenedCorr = -1.0*erf(wolfAlpha * dist)/dist;  
                 dampenedCorr *= scaling_14;
               } else if (isHybridWolf) {
                 // Exclude the entire erfc term, psi is 1
                 dampenedCorr = -scaling_14/dist;
               } 
-              dampenedCorr -= ff.wolfFactor1[ff.startOfWolfFactor[box] + ff.numberOfRCuts[box]*indexForRCut + indexForAlpha];
+              dampenedCorr -= wolfFactor1;
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
           }
           ++partner;
@@ -504,16 +506,16 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
         // Need to check for cutoff for all kinds
         if(currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
                           i, (*partner), box) && 
-          distSq < ff.rCutCoulombSq[ff.startOfNumRCuts[box]+indexForRCut] && i < (*partner)){
+          distSq < rCutCoulombSq && i < (*partner)){
             dist = sqrt(distSq);
             dampenedCorr = 0.0;
               if (isGrossWolf){
-                dampenedCorr = -1.0*erf(ff.wolfAlpha[ff.startOfNumAlphas[box]+indexForAlpha] * dist)/dist;  
+                dampenedCorr = -1.0*erf(wolfAlpha * dist)/dist;  
               } else if (isHybridWolf) {
                 // Exclude the entire erfc term, psi is 1
                 dampenedCorr = -1.0/dist;
               }
-              dampenedCorr -= ff.wolfFactor1[ff.startOfWolfFactor[box] + ff.numberOfRCuts[box]*indexForRCut + indexForAlpha];
+              dampenedCorr -= wolfFactor1;
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
         }
         ++partner;
@@ -522,11 +524,11 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
       for (uint j = i + 1; j < atomSize; j++) {
         if(currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
                           i, j, box) && 
-          distSq < ff.rCutCoulombSq[ff.startOfNumRCuts[box]+indexForRCut]){
+          distSq < rCutCoulombSq){
             dampenedCorr = 0.0;
             dist = sqrt(distSq);
-            dampenedCorr = -1.0*erf(ff.wolfAlpha[ff.startOfNumAlphas[box]+indexForAlpha] * dist)/dist;   
-            dampenedCorr -= ff.wolfFactor1[ff.startOfWolfFactor[box] + ff.numberOfRCuts[box]*indexForRCut + indexForAlpha];
+            dampenedCorr = -1.0*erf(wolfAlpha * dist)/dist;   
+            dampenedCorr -= wolfFactor1;
             correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(j) * dampenedCorr;
         }
       }
@@ -567,17 +569,17 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
           // Need to check for cutoff for all kinds
           if(currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
                             i, (*partner), box) && 
-            distSq < ff.rCutCoulombSq[ff.startOfNumRCuts[box]+indexForRCut] && i < (*partner)){
+            distSq < rCutCoulombSq && i < (*partner)){
               dist = sqrt(distSq);
               dampenedCorr = 0.0;
               if (isGrossWolf){
-                dampenedCorr = -1.0*erf(ff.wolfAlpha[ff.startOfNumAlphas[box]+indexForAlpha] * dist)/dist;  
+                dampenedCorr = -1.0*erf(wolfAlpha * dist)/dist;  
                 dampenedCorr *= scaling_14;
               } else if (isHybridWolf) {
                 // Exclude the entire erfc term, psi is 1
                 dampenedCorr = -scaling_14/dist;
               }
-              dampenedCorr -= ff.wolfFactor1[ff.startOfWolfFactor[box] + ff.numberOfRCuts[box]*indexForRCut + indexForAlpha];
+              dampenedCorr -= wolfFactor1;
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
 
           }
@@ -592,17 +594,17 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
           // Need to check for cutoff for all kinds
           if(currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
                             i, (*partner), box) && 
-            distSq < ff.rCutCoulombSq[ff.startOfNumRCuts[box]+indexForRCut] && i < (*partner)){
+            distSq < rCutCoulombSq && i < (*partner)){
               dist = sqrt(distSq);
               dampenedCorr = 0.0;
               if (isGrossWolf){
-                dampenedCorr = -1.0*erf(ff.wolfAlpha[ff.startOfNumAlphas[box]+indexForAlpha] * dist)/dist;  
+                dampenedCorr = -1.0*erf(wolfAlpha * dist)/dist;  
                 dampenedCorr *= scaling_14;
               } else if (isHybridWolf) {
                 // Exclude the entire erfc term, psi is 1
                 dampenedCorr = -scaling_14/dist;
               } 
-              dampenedCorr -= ff.wolfFactor1[ff.startOfWolfFactor[box] + ff.numberOfRCuts[box]*indexForRCut + indexForAlpha];
+              dampenedCorr -= wolfFactor1;
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
           }
           ++partner;
@@ -615,16 +617,16 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
         // Need to check for cutoff for all kinds
         if(currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
                           i, (*partner), box) && 
-          distSq < ff.rCutCoulombSq[ff.startOfNumRCuts[box]+indexForRCut] && i < (*partner)){
+          distSq < rCutCoulombSq && i < (*partner)){
             dist = sqrt(distSq);
             dampenedCorr = 0.0;
               if (isGrossWolf){
-                dampenedCorr = -1.0*erf(ff.wolfAlpha[ff.startOfNumAlphas[box]+indexForAlpha] * dist)/dist;  
+                dampenedCorr = -1.0*erf(wolfAlpha * dist)/dist;  
               } else if (isHybridWolf) {
                 // Exclude the entire erfc term, psi is 1
                 dampenedCorr = -1.0/dist;
               }
-              dampenedCorr -= ff.wolfFactor1[ff.startOfWolfFactor[box] + ff.numberOfRCuts[box]*indexForRCut + indexForAlpha];
+              dampenedCorr -= wolfFactor1;
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
         }
         ++partner;
@@ -633,11 +635,11 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
       for (uint j = i + 1; j < atomSize; j++) {
         if(currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
                           i, j, box) && 
-          distSq < ff.rCutCoulombSq[ff.startOfNumRCuts[box]+indexForRCut]){
+          distSq < rCutCoulombSq){
             dampenedCorr = 0.0;
             dist = sqrt(distSq);
-            dampenedCorr = -1.0*erf(ff.wolfAlpha[ff.startOfNumAlphas[box]+indexForAlpha] * dist)/dist;   
-            dampenedCorr -= ff.wolfFactor1[ff.startOfWolfFactor[box] + ff.numberOfRCuts[box]*indexForRCut + indexForAlpha];
+            dampenedCorr = -1.0*erf(wolfAlpha * dist)/dist;   
+            dampenedCorr -= wolfFactor1;
             correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(j) * dampenedCorr;
         }
       }
@@ -662,13 +664,13 @@ void Wolf::ChangeSelf(Energy *energyDiff, Energy &dUdL_Coul,
     en_self = molSelfEnergies[molIndex];
     
     //Vlugt
-    //en_self *= ((ff.wolfAlpha[ff.startOfNumAlphas[box]+indexForAlpha] * M_2_SQRTPI) +  ff.wolfFactor1[ff.startOfWolfFactor[box] + ff.numberOfRCuts[box]*indexForRCut + indexForAlpha] );
+    //en_self *= ((wolfAlpha * M_2_SQRTPI) +  wolfFactor1 );
     // We eliminate the alpha/root(pi) using Wolf,mod
     if (isVlugtWolf || isVlugtWithIntraCutoffWolf){
-      en_self *= -0.5 * ((ff.wolfAlpha[ff.startOfNumAlphas[box]+indexForAlpha] * M_2_SQRTPI) + ff.wolfFactor1[ff.startOfWolfFactor[box] + ff.numberOfRCuts[box]*indexForRCut + indexForAlpha]) * num::qqFact;
+      en_self *= -0.5 * ((wolfAlpha * M_2_SQRTPI) + wolfFactor1) * num::qqFact;
     } else {
       // we eliminate the alpha/root(pi) using Wolf,mod from Gross et al
-      en_self *= -0.5 * ff.wolfFactor1[ff.startOfWolfFactor[box] + ff.numberOfRCuts[box]*indexForRCut + indexForAlpha] * num::qqFact;
+      en_self *= -0.5 * wolfFactor1 * num::qqFact;
     }
     //Calculate the energy difference for each lambda state
     for (uint s = 0; s < lambdaSize; s++) {
@@ -710,17 +712,17 @@ void Wolf::ChangeCorrection(Energy *energyDiff, Energy &dUdL_Coul,
           // Need to check for cutoff for all kinds
           if(currentAxes.InRcut(distSq, virComponents, currentCoords,
                             start + i, start + (*partner), box) && 
-            distSq < ff.rCutCoulombSq[ff.startOfNumRCuts[box]+indexForRCut] && i < (*partner)){
+            distSq < rCutCoulombSq && i < (*partner)){
               dist = sqrt(distSq);
               dampenedCorr = 0.0;
               if (isGrossWolf){
-                dampenedCorr = -1.0*erf(ff.wolfAlpha[ff.startOfNumAlphas[box]+indexForAlpha] * dist)/dist;  
+                dampenedCorr = -1.0*erf(wolfAlpha * dist)/dist;  
                 dampenedCorr *= scaling_14;
               } else if (isHybridWolf) {
                 // Exclude the entire erfc term, psi is 1
                 dampenedCorr = -scaling_14/dist;
               }
-              dampenedCorr -= ff.wolfFactor1[ff.startOfWolfFactor[box] + ff.numberOfRCuts[box]*indexForRCut + indexForAlpha];
+              dampenedCorr -= wolfFactor1;
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
 
           }
@@ -735,17 +737,17 @@ void Wolf::ChangeCorrection(Energy *energyDiff, Energy &dUdL_Coul,
           // Need to check for cutoff for all kinds
           if(currentAxes.InRcut(distSq, virComponents, currentCoords,
                             start + i, start + (*partner), box) && 
-            distSq < ff.rCutCoulombSq[ff.startOfNumRCuts[box]+indexForRCut] && i < (*partner)){
+            distSq < rCutCoulombSq && i < (*partner)){
               dist = sqrt(distSq);
               dampenedCorr = 0.0;
               if (isGrossWolf){
-                dampenedCorr = -1.0*erf(ff.wolfAlpha[ff.startOfNumAlphas[box]+indexForAlpha] * dist)/dist;  
+                dampenedCorr = -1.0*erf(wolfAlpha * dist)/dist;  
                 dampenedCorr *= scaling_14;
               } else if (isHybridWolf) {
                 // Exclude the entire erfc term, psi is 1
                 dampenedCorr = -scaling_14/dist;
               } 
-              dampenedCorr -= ff.wolfFactor1[ff.startOfWolfFactor[box] + ff.numberOfRCuts[box]*indexForRCut + indexForAlpha];
+              dampenedCorr -= wolfFactor1;
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
           }
           ++partner;
@@ -758,16 +760,16 @@ void Wolf::ChangeCorrection(Energy *energyDiff, Energy &dUdL_Coul,
         // Need to check for cutoff for all kinds
         if(currentAxes.InRcut(distSq, virComponents, currentCoords,
                           start + i, start + (*partner), box) && 
-          distSq < ff.rCutCoulombSq[ff.startOfNumRCuts[box]+indexForRCut] && i < (*partner)){
+          distSq < rCutCoulombSq && i < (*partner)){
             dist = sqrt(distSq);
             dampenedCorr = 0.0;
               if (isGrossWolf){
-                dampenedCorr = -1.0*erf(ff.wolfAlpha[ff.startOfNumAlphas[box]+indexForAlpha] * dist)/dist;  
+                dampenedCorr = -1.0*erf(wolfAlpha * dist)/dist;  
               } else if (isHybridWolf) {
                 // Exclude the entire erfc term, psi is 1
                 dampenedCorr = -1.0/dist;
               }
-              dampenedCorr -= ff.wolfFactor1[ff.startOfWolfFactor[box] + ff.numberOfRCuts[box]*indexForRCut + indexForAlpha];
+              dampenedCorr -= wolfFactor1;
               correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
         }
         ++partner;
@@ -776,11 +778,11 @@ void Wolf::ChangeCorrection(Energy *energyDiff, Energy &dUdL_Coul,
       for (uint j = i + 1; j < atomSize; j++) {
         if(currentAxes.InRcut(distSq, virComponents, currentCoords,
                           start + i, start + j, box) && 
-          distSq < ff.rCutCoulombSq[ff.startOfNumRCuts[box]+indexForRCut]){
+          distSq < rCutCoulombSq){
             dampenedCorr = 0.0;
             dist = sqrt(distSq);
-            dampenedCorr = -1.0*erf(ff.wolfAlpha[ff.startOfNumAlphas[box]+indexForAlpha] * dist)/dist;   
-            dampenedCorr -= ff.wolfFactor1[ff.startOfWolfFactor[box] + ff.numberOfRCuts[box]*indexForRCut + indexForAlpha];
+            dampenedCorr = -1.0*erf(wolfAlpha * dist)/dist;   
+            dampenedCorr -= wolfFactor1;
             correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(j) * dampenedCorr;
         }
       }

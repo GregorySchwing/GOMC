@@ -35,7 +35,7 @@ public:
 
   //calculate self term for a box
   double BoxSelf(uint box,
-                double rCutCoulomb,
+                double wolfFactor1,
                 double wolfAlpha) const;
 
   //compute reciprocal term for a box with a new volume
@@ -61,7 +61,9 @@ public:
   //calculate correction term for a molecule
   virtual double MolCorrection(uint molIndex, uint box,
                               double rCutCoulomb,
-                              double wolfAlpha)const;
+                              double rCutCoulombSq,
+                              double wolfFactor1,
+                              double wolfAlpha) const;
 
   //calculate reciprocal term for displacement and rotation move
   virtual double MolReciprocal(XYZArray const& molCoords, const uint molIndex,
