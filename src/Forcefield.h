@@ -60,12 +60,12 @@ public:
   double dielectric;              //dielectric for martini
   // Wolf Calibration 
   bool wolfCalibration;
-  double * wolfAlpha[BOX_TOTAL]; //alpha term for Wolf Electrostatic and constant factors
-  double ** wolfFactor1[BOX_TOTAL]; //alpha term for Wolf Electrostatic and constant factors
-  double ** wolfFactor2[BOX_TOTAL];  //alpha term for Wolf Electrostatic and constant factors
-  double ** wolfFactor3[BOX_TOTAL]; //alpha term for Wolf Electrostatic and constant factors
-  double * rCutCoulomb[BOX_TOTAL];  //!<Cutoff Coulomb interaction(angstroms)
-  double * rCutCoulombSq[BOX_TOTAL]; //!<Cutoff Coulomb interaction(angstroms)
+  double * wolfAlpha; //alpha term for Wolf Electrostatic and constant factors
+  double * wolfFactor1; //alpha term for Wolf Electrostatic and constant factors
+  double * wolfFactor2;  //alpha term for Wolf Electrostatic and constant factors
+  double * wolfFactor3; //alpha term for Wolf Electrostatic and constant factors
+  double * rCutCoulomb;  //!<Cutoff Coulomb interaction(angstroms)
+  double * rCutCoulombSq; //!<Cutoff Coulomb interaction(angstroms)
   int numberOfRCuts[BOX_TOTAL];
   int numberOfAlphas[BOX_TOTAL];
   bool explicitlyAddEndAlpha[BOX_TOTAL];

@@ -1106,7 +1106,7 @@ double Ewald::MolCorrection(uint molIndex, uint box) const
     }
     for (uint j = i + 1; j < atomSize; j++) {
       if(currentAxes.InRcut(distSq, virComponents, currentCoords,
-                         start + i, start + j, box)&& distSq<ff.rCutCoulombSq[box][0]){
+                         start + i, start + j, box)&& distSq<ff.rCutCoulombSq[box]){
         dist = sqrt(distSq);
         correction += (thisKind.AtomCharge(i) * thisKind.AtomCharge(j) *
                       erf(ff.alpha[box] * dist) / dist);
@@ -1147,7 +1147,7 @@ void Ewald::ChangeCorrection(Energy *energyDiff, Energy &dUdL_Coul,
     for (uint j = i + 1; j < atomSize; j++) {
       distSq = 0.0;
       if(currentAxes.InRcut(distSq, virComponents, currentCoords,
-                         start + i, start + j, box)&& distSq<ff.rCutCoulombSq[box][0]){
+                         start + i, start + j, box)&& distSq<ff.rCutCoulombSq[box]){
         dist = sqrt(distSq);
         correction += (particleCharge[i + start] * particleCharge[j + start] *
                       erf(ff.alpha[box] * dist) / dist);
@@ -1374,7 +1374,7 @@ double Ewald::SwapCorrection(const cbmc::TrialMol& trialMol) const
   for (uint i = 0; i < atomSize; i++) {
     for (uint j = i + 1; j < atomSize; j++) {
       if(currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
-                         i, j, box)&& distSq<ff.rCutCoulombSq[box][0]){
+                         i, j, box)&& distSq<ff.rCutCoulombSq[box]){
         dist = sqrt(distSq);
         correction -= (thisKind.AtomCharge(i) * thisKind.AtomCharge(j) *
                       erf(ff.alpha[box] * dist) / dist);
@@ -1409,7 +1409,7 @@ double Ewald::SwapCorrection(const cbmc::TrialMol& trialMol,
     }
     for (uint j = i + 1; j < atomSize; j++) {
       if(currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
-                         i, j, box) && distSq<ff.rCutCoulombSq[box][0]){
+                         i, j, box) && distSq<ff.rCutCoulombSq[box]){
         dist = sqrt(distSq);
         correction -= (thisKind.AtomCharge(i) * thisKind.AtomCharge(j) *
                       erf(ff.alpha[box] * dist) / dist);

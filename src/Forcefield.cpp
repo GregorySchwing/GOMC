@@ -64,19 +64,30 @@ void Forcefield::Init(const Setup& set,
 }
 
 void Forcefield::AllocMem(){
-  for (uint b = 0; b < BOX_TOTAL; ++b) {
-    wolfAlpha[b] = new double[numberOfAlphas[b]];
-    rCutCoulomb[b] = new double[numberOfRCuts[b]];
-    rCutCoulombSq[b] = new double[numberOfRCuts[b]];
-    wolfFactor1[b] = new double*[numberOfRCuts[b]];
-    wolfFactor2[b] = new double*[numberOfRCuts[b]];
-    wolfFactor3[b] = new double*[numberOfRCuts[b]];
-    for (int r = 0; r < numberOfRCuts[b]; ++r){
-      wolfFactor1[b][r] = new double[numberOfAlphas[b]];
-      wolfFactor2[b][r] = new double[numberOfAlphas[b]];
-      wolfFactor3[b][r] = new double[numberOfAlphas[b]];
+  int totalNumAlphas;
+  int totalNumRCuts;
+  int totalNumWolfFactors;
+  if(wolfCalibration){
+    totalNumAlphas = 0;
+    totalNumRCuts = 0;
+    totalNumWolfFactors = 0;
+    for (uint b = 0; b < BOX_TOTAL; ++b) {
+      totalNumAlphas += numberOfAlphas[b];
+      totalNumRCuts += numberOfRCuts[b];
+      totalNumWolfFactors +=  numberOfAlphas[b] * numberOfRCuts[b];
     }
+  } else {
+    totalNumAlphas = BOX_TOTAL;
+    totalNumRCuts = BOX_TOTAL;
+    totalNumWolfFactors = BOX_TOTAL;
   }
+
+  wolfAlpha = new double[totalNumAlphas];
+  rCutCoulomb = new double[totalNumRCuts];
+  rCutCoulombSq = new double[totalNumRCuts];
+  wolfFactor1 = new double[totalNumWolfFactors];
+  wolfFactor2 = new double[totalNumWolfFactors];
+  wolfFactor3 = new double[totalNumWolfFactors];
 }
 
 void Forcefield::DeallocMem(){
