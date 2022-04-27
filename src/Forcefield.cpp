@@ -219,7 +219,7 @@ void Forcefield::CalculateWolfCalibrationMemoryUsage(config_setup::WolfCalibrati
     }
   }
 }
-
+/*
 void Forcefield::InitWolfCalibration(config_setup::WolfCalibration const& wolfCal){
   for(uint b = 0 ; b < BOX_TOTAL; b++) {
     // Start at 1, since 0th index is from the config file and initted in InitBasicVals
@@ -250,7 +250,7 @@ void Forcefield::InitWolfCalibration(config_setup::WolfCalibration const& wolfCa
     }
   }
 }
-
+*/
 void Forcefield::SetWolfKind(uint wolfKindArg){
     wolfKind = wolfKindArg;
     switch(wolfKindArg) {

@@ -15,7 +15,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #endif
 
 OutputVars::OutputVars(System & sys, StaticVals const& statV, const std::vector<std::string> & molKindNames) :
-  T_in_K(statV.forcefield.T_in_K), calc(sys.calcEnergy), molKindNames(molKindNames)
+  T_in_K(statV.forcefield.T_in_K), calc(sys.calcEnergy), molKindNames(molKindNames), ffRef(statV.forcefield)
 {
   InitRef(sys, statV);
 }
@@ -33,6 +33,7 @@ void OutputVars::InitRef(System & sys, StaticVals const& statV)
   molLookupRef = & sys.molLookupRef;
   moveSetRef = & sys.moveSettings;
   movePercRef = statV.movePerc;
+
   pCalcFreq = statV.simEventFreq.pCalcFreq;
   pressureCalc = statV.simEventFreq.pressureCalc;
 
@@ -117,7 +118,7 @@ void OutputVars::CalcAndConvert(ulong step)
     if (pressureCalc) {
       if((step + 1) % pCalcFreq == 0 || step == 0) {
         if(step != 0) {
-          virialRef[b] = calc.VirialCalc(b);
+          virialRef[b] = calc.VirialCalc(b, ffRef.rCutCoulombSq[b], ffRef.wolfAlpha[b]);
           *virialTotRef += virialRef[b];
         }
         //calculate surface tension in mN/M
