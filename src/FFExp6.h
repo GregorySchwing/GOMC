@@ -359,15 +359,17 @@ inline double FF_EXP6::CalcCoulombVir(const double distSq,
                                       const double qi_qj,
                                       const double lambda,
                                       const uint b,
-                                      double rCutCoulomb,
+                                      double rCutCoulombSq,
+                                      double wolfFactor2,
+                                      double wolfFactor3,
                                       double wolfAlpha) const
-{
+  {
   if(rCutCoulombSq < distSq)
     return 0.0;
 
   if(lambda >= 0.999999) {
     //save computation time
-    return CalcCoulombVir(distSq, qi_qj, b, rCutCoulomb, wolfAlpha);
+    return CalcCoulombVir(distSq, qi_qj, b, wolfFactor2, wolfFactor3, wolfAlpha);
   }
   double vir = 0.0;
   if(forcefield.sc_coul) {
@@ -380,16 +382,17 @@ inline double FF_EXP6::CalcCoulombVir(const double distSq,
     double softRsq = cbrt(softDist6);
     double correction = distSq / softRsq;
     //We need to fix the return value from calcVir
-    vir = lambda * correction * correction * CalcCoulombVir(softRsq, qi_qj, b, rCutCoulomb, wolfAlpha);
+    vir = lambda * correction * correction * CalcCoulombVir(softRsq, qi_qj, b, wolfFactor2, wolfFactor3, wolfAlpha);
   } else {
-    vir = lambda * CalcCoulombVir(distSq, qi_qj, b, rCutCoulomb, wolfAlpha);
+    vir = lambda * CalcCoulombVir(distSq, qi_qj, b, wolfFactor2, wolfFactor3, wolfAlpha);
   }
   return vir;
 }
 
 inline double FF_EXP6::CalcCoulombVir(const double distSq, const double qi_qj,
-                                      const uint b,
-                                      double rCutCoulomb,
+                                       uint b,
+                                       double wolfFactor2,
+                                      double wolfFactor3,
                                       double wolfAlpha) const
 {
   double dist = sqrt(distSq);
@@ -521,10 +524,10 @@ inline double FF_EXP6::CalcCoulombdEndL(const double distSq,
     double softRsq = cbrt(softDist6);
     double fCoef = lambda * forcefield.sc_alpha * forcefield.sc_power / 6.0;
     fCoef *= pow(1.0 - lambda, forcefield.sc_power - 1) * sigma6 / (softRsq * softRsq);
-    dhdl = CalcCoulomb(softRsq, qi_qj_Fact, b, rCutCoulomb, wolfFactor1, wolfFactor2, wolfAlpha); +
-           fCoef * CalcCoulombVir(softRsq, qi_qj, b, wolfFactor2, wolfFactor3, wolfAlpha);
+    dhdl = CalcCoulomb(softRsq, qi_qj_Fact, b, rCutCoulomb, wolfFactor1, wolfFactor2, wolfAlpha) +
+           fCoef * CalcCoulombVir(softRsq, qi_qj_Fact, b, wolfFactor2, wolfFactor3, wolfAlpha);
   } else {
-    dhdl = CalcCoulomb(distSq, qi_qj_Fact, b, rCutCoulomb, wolfFactor1, wolfFactor2, wolfAlpha);;
+    dhdl = CalcCoulomb(distSq, qi_qj_Fact, b, rCutCoulomb, wolfFactor1, wolfFactor2, wolfAlpha);
   }
   return dhdl;
 }

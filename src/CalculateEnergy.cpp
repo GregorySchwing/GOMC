@@ -1824,7 +1824,13 @@ reduction(+:dudl_VDW, dudl_Coul, tempREnDiff[:lambdaSize], tempLJEnDiff[:lambdaS
                             forcefield.wolfAlpha[box]);
             dudl_Coul += forcefield.particles->CalcCoulombdEndL(distSq, particleKind[atom],
                          particleKind[nIndex[i]], qi_qj_fact,
-                         lambda_Coul[iState], box);
+                         lambda_Coul[iState], box,
+                          forcefield.rCutCoulomb[box],
+                          forcefield.rCutCoulombSq[box],
+                          forcefield.wolfFactor1[box], 
+                          forcefield.wolfFactor2[box],
+                          forcefield.wolfFactor3[box],
+                          forcefield.wolfAlpha[box]);
           }
         }
 
