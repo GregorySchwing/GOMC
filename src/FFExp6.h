@@ -281,20 +281,23 @@ inline double FF_EXP6::CalcVir(const double distSq, const uint idx) const
 }
 
 inline double FF_EXP6::CalcCoulomb(const double distSq,
-                                   const uint kind1,
-                                   const uint kind2,
-                                   const double qi_qj_Fact,
-                                   const double lambda,
-                                   const uint b,
-                                   double rCutCoulomb,
-                                   double wolfAlpha) const
+                                    const uint kind1,
+                                    const uint kind2,
+                                    const double qi_qj_Fact,
+                                    const double lambda,
+                                    const uint b,
+                                    double rCutCoulomb,
+                                    double rCutCoulombSq,
+                                    double wolfFactor1, 
+                                    double wolfFactor2,
+                                    double wolfAlpha) const
 {
   if(rCutCoulombSq < distSq)
     return 0.0;
 
   if(lambda >= 0.999999) {
     //save computation time
-    return CalcCoulomb(distSq, qi_qj_Fact, b, rCutCoulomb, wolfAlpha);
+    return CalcCoulomb(distSq, qi_qj_Fact, b, rCutCoulomb, wolfFactor1, wolfFactor2, wolfAlpha);
   }
   double en = 0.0;
   if(forcefield.sc_coul) {
@@ -307,16 +310,17 @@ inline double FF_EXP6::CalcCoulomb(const double distSq,
     double softRsq = cbrt(softDist6);
     en = lambda * CalcCoulomb(softRsq, qi_qj_Fact, b, rCutCoulomb, wolfAlpha);
   } else {
-    en = lambda * CalcCoulomb(distSq, qi_qj_Fact, b, rCutCoulomb, wolfAlpha);
+    en = lambda * CalcCoulomb(distSq, qi_qj_Fact, b, rCutCoulomb, wolfFactor1, wolfFactor2, wolfAlpha);
   }
   return en;
 }
 
-inline double FF_EXP6::CalcCoulomb(const double distSq,
-                                   const double qi_qj_Fact,
-                                   const uint b,
-                                   double rCutCoulomb,
-                                   double wolfAlpha) const
+inline double FF_EXP6::CalcCoulomb(const double distSq, const double qi_qj_Fact,
+                             const uint b,
+                             double rCutCoulomb,
+                             double wolfFactor1, 
+                             double wolfFactor2,
+                             double wolfAlpha) const
 {
   double dist = sqrt(distSq);
   if(forcefield.ewald) {
