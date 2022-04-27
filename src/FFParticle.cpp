@@ -294,7 +294,7 @@ inline void FFParticle::CalcAdd_1_4(double& en, const double distSq,
 inline void FFParticle::CalcCoulombAdd_1_4(double& en, const double distSq,
     const double qi_qj_Fact,
     const bool NB, const uint box,
-    int indexForRCut) const
+    double rCutCoulomb) const
 {
   if(forcefield.rCutCoulombSq[forcefield.startOfNumRCuts[box]+indexForRCut] < distSq && !forcefield.isVlugtWolf)
     return;
@@ -381,8 +381,8 @@ inline double FFParticle::CalcCoulomb(const double distSq,
                                       const double qi_qj_Fact,
                                       const double lambda,
                                       const uint b,
-                                      int indexForRCut,
-                                      int indexForAlpha) const
+                                      double rCutCoulomb,
+                                      double wolfAlpha) const
 {
   // This will reduce to the original equation when not calibrating,
   // since indexForRCut is by default 0.
@@ -416,8 +416,8 @@ inline double FFParticle::CalcCoulomb(const double distSq,
 inline double FFParticle::CalcCoulomb(const double distSq,
                                       const double qi_qj_Fact,
                                       const uint b,
-                                      int indexForRCut,
-                                      int indexForAlpha) const
+                                      double rCutCoulomb,
+                                      double wolfAlpha) const
 {
   double dist = sqrt(distSq);
   if(forcefield.ewald) {
@@ -445,8 +445,8 @@ inline double FFParticle::CalcCoulombVir(const double distSq,
     const double qi_qj,
     const double lambda,
     const uint b,
-    int indexForRCut,
-    int indexForAlpha) const
+    double rCutCoulomb,
+    double wolfAlpha) const
 {
   // This will reduce to the original equation when not calibrating,
   // since numberOfRCuts is by default 1 and indexForRCut is by default 0.
@@ -477,8 +477,8 @@ inline double FFParticle::CalcCoulombVir(const double distSq,
 
 inline double FFParticle::CalcCoulombVir(const double distSq,
     const double qi_qj, const uint b,
-    int indexForRCut,
-    int indexForAlpha) const
+    double rCutCoulomb,
+    double wolfAlpha) const
 {
   double dist = sqrt(distSq);
   if(forcefield.ewald) {
@@ -535,8 +535,8 @@ inline double FFParticle::CalcCoulombdEndL(const double distSq,
     const uint kind2,
     const double qi_qj_Fact,
     const double lambda, uint b,
-    int indexForRCut,
-    int indexForAlpha) const
+    double rCutCoulomb,
+    double wolfAlpha) const
 {
   if(forcefield.rCutCoulombSq[forcefield.startOfNumRCuts[b]+indexForRCut] < distSq)
     return 0.0;

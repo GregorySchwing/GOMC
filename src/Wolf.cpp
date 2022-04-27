@@ -201,8 +201,8 @@ double Wolf::BoxSelf(uint box) const
 
 //calculate self term for a box
 double Wolf::BoxSelf(uint box,
-                      int indexForRCut,
-                      int indexForAlpha) const
+                      double rCutCoulomb,
+                      double wolfAlpha) const
 {
     if (box >= BOXES_WITH_U_NB){
         return 0.0;
@@ -253,8 +253,8 @@ double Wolf::MolCorrection(uint molIndex, uint box) const
 
 //calculate correction term for a molecule
 double Wolf::MolCorrection(uint molIndex, uint box,
-                          int indexForRCut,
-                          int indexForAlpha) const
+                          double rCutCoulomb,
+                          double wolfAlpha) const
 {
   if (box >= BOXES_WITH_U_NB)
     return 0.0;
@@ -404,8 +404,8 @@ double Wolf::MolExchangeReciprocal(const std::vector<cbmc::TrialMol> &newMol,
 
 //calculate self term after swap move
 double Wolf::SwapSelf(const cbmc::TrialMol& trialMol,
-                      int indexForRCut,
-                      int indexForAlpha) const
+                      double rCutCoulomb,
+                      double wolfAlpha) const
 {
   uint box = trialMol.GetBox();
   if (box >= BOXES_WITH_U_NB)
@@ -429,8 +429,8 @@ double Wolf::SwapSelf(const cbmc::TrialMol& trialMol,
 
 //calculate correction term after swap move
 double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
-                            int indexForRCut,
-                            int indexForAlpha) const
+                            double rCutCoulomb,
+                            double wolfAlpha) const
 {
   uint box = trialMol.GetBox();
   if (box >= BOXES_WITH_U_NB)
@@ -538,8 +538,8 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
 //calculate correction term after swap move
 double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
                             const uint molIndex,
-                            int indexForRCut,
-                            int indexForAlpha) const
+                            double rCutCoulomb,
+                            double wolfAlpha) const
 {
   uint box = trialMol.GetBox();
   if (box >= BOXES_WITH_U_NB)
@@ -653,8 +653,8 @@ void Wolf::ChangeSelf(Energy *energyDiff, Energy &dUdL_Coul,
                          const std::vector<double> &lambda_Coul,
                          const uint iState, const uint molIndex,
                          const uint box,
-                          int indexForRCut,
-                          int indexForAlpha) const
+                          double rCutCoulomb,
+                          double wolfAlpha) const
 {
     uint lambdaSize = lambda_Coul.size();
     double coefDiff, en_self = 0.0;
@@ -685,8 +685,8 @@ void Wolf::ChangeCorrection(Energy *energyDiff, Energy &dUdL_Coul,
                                const std::vector<double> &lambda_Coul,
                                const uint iState, const uint molIndex,
                                const uint box,
-                                int indexForRCut,
-                                int indexForAlpha) const
+                                double rCutCoulomb,
+                                double wolfAlpha) const
 {
   uint atomSize = mols.GetKind(molIndex).NumAtoms();
   uint start = mols.MolStart(molIndex);

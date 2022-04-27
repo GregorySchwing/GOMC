@@ -1120,8 +1120,8 @@ double Ewald::MolCorrection(uint molIndex, uint box) const
 
 // For simple compilation.  Should never be called.
 double Ewald::MolCorrection(uint molIndex, uint box,
-                            int indexForRCut,
-                            int indexForAlpha) const {
+                            double rCutCoulomb,
+                            double wolfAlpha) const {
   return 0.0;
 }
 
@@ -1208,8 +1208,8 @@ double Ewald::BoxSelf(uint box) const
 
 // For simple compilation.  Should never be called.
 double Ewald::BoxSelf(uint box,
-                      int indexForRCut,
-                      int indexForAlpha) const {
+                      double rCutCoulomb,
+                      double wolfAlpha) const {
   return 0.0;
 }
 

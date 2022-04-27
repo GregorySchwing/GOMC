@@ -166,8 +166,8 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
                                           XYZArray const& coords,
                                           BoxDimensions const& boxAxes,
                                           const uint box,
-                                          int indexForRcut,
-                                          int indexForAlpha)
+                                          double rCutCoulomb,
+                                          double wolfAlpha)
 {
   //Handles reservoir box case, returning zeroed structure if
   //interactions are off.
@@ -415,8 +415,8 @@ reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
 // required for pressure and surface tension calculation. So, they have been
 // commented out. If you need to calculate them, uncomment them.
 Virial CalculateEnergy::VirialCalc(const uint box,
-                                  int indexForRcut,
-                                  int indexForAlpha)
+                                  double rCutCoulomb,
+                                  double wolfAlpha)
 {
   //store virial and energy of reference and modify the virial
   Virial tempVir;
@@ -867,7 +867,7 @@ Intermolecular CalculateEnergy::MoleculeTailVirChange(const uint box,
 //Calculates intramolecular energy of a full molecule
 void CalculateEnergy::MoleculeIntra(const uint molIndex,
                                     const uint box, double *bondEn,
-                                    int indexForRCut) const
+                                    double rCutCoulomb) const
 {
   GOMC_EVENT_START(1, GomcProfileEvent::EN_MOL_INTRA);
   bondEn[0] = 0.0, bondEn[1] = 0.0;
@@ -1068,7 +1068,7 @@ void CalculateEnergy::MolNonbond(double & energy,
                                  MoleculeKind const& molKind,
                                  const uint molIndex,
                                  const uint box,
-                                 int indexForRCut) const
+                                 double rCutCoulomb) const
 {
   if (box >= BOXES_WITH_U_B)
     return;
@@ -1137,7 +1137,7 @@ void CalculateEnergy::MolNonbond_1_4(double & energy,
                                      MoleculeKind const& molKind,
                                      const uint molIndex,
                                      const uint box,
-                                     int indexForRCut) const
+                                     double rCutCoulomb) const
 {
   if (box >= BOXES_WITH_U_B)
     return;
@@ -1207,7 +1207,7 @@ void CalculateEnergy::MolNonbond_1_3(double & energy,
                                      MoleculeKind const& molKind,
                                      const uint molIndex,
                                      const uint box,
-                                     int indexForRCut) const
+                                     double rCutCoulomb) const
 {
   if (box >= BOXES_WITH_U_B)
     return;
@@ -1876,7 +1876,7 @@ void CalculateEnergy::WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_
         molID.push_back(*thisMol);
         ++thisMol;
       }
-      for (int indexForRcut = 1; indexForRcut < forcefield.numberOfRCuts[b]; ++indexForRcut){
+      for (double rCutCoulomb = 1; indexForRcut < forcefield.numberOfRCuts[b]; ++indexForRcut){
         double bondEnergy[2] = {0};
         double bondEn = 0.0, nonbondEn = 0.0, correction = 0.0;
         bondEnergy[0] = 0.0;
@@ -1897,7 +1897,7 @@ void CalculateEnergy::WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_
         for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){    
           calcEwald->SetCoulKind(coulKind);
           forcefield.SetCoulKind(coulKind);
-          for (int indexForAlpha = 1; indexForAlpha < forcefield.numberOfAlphas[b]; ++indexForAlpha){
+          for (double wolfAlpha = 1; indexForAlpha < forcefield.numberOfAlphas[b]; ++indexForAlpha){
             //calculate LJ interaction and real term of electrostatic interaction
             storagePotential.Zero();
             storagePotential = BoxInter(storagePotential, currentCoords, currentAxes, b, indexForRcut, indexForAlpha);

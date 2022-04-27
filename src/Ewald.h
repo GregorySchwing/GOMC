@@ -85,8 +85,8 @@ public:
   virtual double BoxSelf(uint box) const;
 
   virtual double BoxSelf(uint box,
-                          int indexForRCut,
-                          int indexForAlpha) const;
+                          double rCutCoulomb,
+                          double wolfAlpha) const;
 
   //calculate reciprocal force term for a box
   virtual Virial VirialReciprocal(Virial& virial, uint box) const;
@@ -103,8 +103,8 @@ public:
   //calculate correction term for a molecule
   virtual double MolCorrection(uint molIndex, uint box)const;
   virtual double MolCorrection(uint molIndex, uint box,
-                              int indexForRCut,
-                              int indexForAlpha) const;
+                              double rCutCoulomb,
+                              double wolfAlpha) const;
 
 
   //calculate reciprocal term in destination box for swap move

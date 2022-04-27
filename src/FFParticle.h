@@ -76,16 +76,16 @@ public:
   virtual double CalcCoulomb(const double distSq, const uint kind1,
                              const uint kind2, const double qi_qj_Fact,
                              const double lambda, const uint b, 
-                             int indexForRCut = 0,
-                             int indexForAlpha = 0) const;
+                             double rCutCoulomb,
+                             double wolfAlpha) const;
   virtual double CalcCoulombVir(const double distSq, const uint kind1,
                                 const uint kind2, const double qi_qj,
                                 const double lambda, uint b, 
-                                int indexForRCut = 0,
-                                int indexForAlpha = 0) const;
+                                double rCutCoulomb,
+                                double wolfAlpha) const;
   virtual void CalcCoulombAdd_1_4(double& en, const double distSq,
                                   const double qi_qj_Fact, const bool NB, const uint box,
-                                  int indexForRCut = 0) const;
+                                  double rCutCoulomb) const;
 
   //!Returns Energy long-range correction term for a kind pair
   virtual double EnergyLRC(const uint kind1, const uint kind2) const;
@@ -99,8 +99,8 @@ public:
   virtual double CalcCoulombdEndL(const double distSq, const uint kind1,
                                   const uint kind2, const double qi_qj_Fact,
                                   const double lambda, uint b,
-                                  int indexForRCut = 0,
-                                  int indexForAlpha = 0) const;
+                                  double rCutCoulomb,
+                                  double wolfAlpha) const;
 
   uint NumKinds() const
   {
@@ -123,12 +123,12 @@ protected:
   virtual double CalcVir(const double distSq, const uint index) const;
   virtual double CalcCoulomb(const double distSq, const double qi_qj_Fact,
                              const uint b,
-                             int indexForRCut = 0,
-                             int indexForAlpha = 0) const;
+                             double rCutCoulomb,
+                             double wolfAlpha) const;
   virtual double CalcCoulombVir(const double distSq, const double qi_qj,
                                 uint b,
-                                int indexForRCut = 0,
-                                int indexForAlpha = 0) const;
+                                double rCutCoulomb,
+                                double wolfAlpha) const;
   //Find the index of the pair kind
   uint FlatIndex(const uint i, const uint j) const
   {

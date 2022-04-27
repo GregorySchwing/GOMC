@@ -35,8 +35,8 @@ public:
 
   //calculate self term for a box
   double BoxSelf(uint box,
-                int indexForRCut = 0,
-                int indexForAlpha = 0) const;
+                double rCutCoulomb,
+                double wolfAlpha) const;
 
   //compute reciprocal term for a box with a new volume
   virtual void BoxReciprocalSetup(uint box, XYZArray const& molCoords);
@@ -60,8 +60,8 @@ public:
 
   //calculate correction term for a molecule
   virtual double MolCorrection(uint molIndex, uint box,
-                              int indexForRCut = 0,
-                              int indexForAlpha = 0)const;
+                              double rCutCoulomb,
+                              double wolfAlpha)const;
 
   //calculate reciprocal term for displacement and rotation move
   virtual double MolReciprocal(XYZArray const& molCoords, const uint molIndex,
@@ -74,19 +74,19 @@ public:
 
   //calculate self term after swap move
   virtual double SwapSelf(const cbmc::TrialMol& trialMol,
-                                int indexForRCut = 0,
-                                int indexForAlpha = 0) const;
+                                double rCutCoulomb,
+                                double wolfAlpha) const;
 
   //calculate correction term after swap move with lambda = 1
   virtual double SwapCorrection(const cbmc::TrialMol& trialMol,
-                                int indexForRCut = 0,
-                                int indexForAlpha = 0) const;
+                                double rCutCoulomb,
+                                double wolfAlpha) const;
 
   //calculate correction term after swap move, with system lambda
   virtual double SwapCorrection(const cbmc::TrialMol& trialMol,
                                 const uint molIndex,
-                                int indexForRCut = 0,
-                                int indexForAlpha = 0) const;
+                                double rCutCoulomb,
+                                double wolfAlpha) const;
 
   //calculate reciprocal term in destination box for swap move
   virtual double SwapDestRecip(const cbmc::TrialMol &newMol, const uint box,
@@ -113,8 +113,8 @@ public:
                           const std::vector<double> &lambda_Coul,
                           const uint iState, const uint molIndex,
                           const uint box,
-                          int indexForRCut = 0,
-                          int indexForAlpha = 0) const;
+                          double rCutCoulomb,
+                          double wolfAlpha) const;
 
   //It's called in free energy calculation to calculate the change in
   // correction energy in all lambda states
@@ -122,8 +122,8 @@ public:
                                 const std::vector<double> &lambda_Coul,
                                 const uint iState, const uint molIndex,
                                 const uint box,
-                                int indexForRCut = 0,
-                                int indexForAlpha = 0) const;
+                                double rCutCoulomb,
+                                double wolfAlpha) const;
 
   //It's called in free energy calculation to calculate the change in
   // reciprocal energy in all lambda states

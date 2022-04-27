@@ -86,17 +86,17 @@ public:
                              const double qi_qj_Fact,
                              const double lambda,
                              const uint b,
-                             int indexForRCut = 0,
-                             int indexForAlpha = 0) const;
+                             double rCutCoulomb,
+                             double wolfAlpha) const;
   virtual double CalcCoulombVir(const double distSq, const uint kind1,
                                 const uint kind2, const double qi_qj,
                                 const double lambda, const uint b,
-                                int indexForRCut = 0,
-                                int indexForAlpha = 0) const;
+                                double rCutCoulomb,
+                                double wolfAlpha) const;
   virtual void CalcCoulombAdd_1_4(double& en, const double distSq,
                                   const double qi_qj_Fact,
                                   const bool NB, const uint box,
-                                  int indexForRCut = 0) const;
+                                  double rCutCoulomb) const;
 
 
   //!Returns Ezero, no energy correction
@@ -118,20 +118,20 @@ public:
   virtual double CalcCoulombdEndL(const double distSq, const uint kind1,
                                   const uint kind2, const double qi_qj_Fact,
                                   const double lambda, uint b,
-                                  int indexForRCut = 0,
-                                  int indexForAlpha = 0) const;
+                                  double rCutCoulomb,
+                                  double wolfAlpha) const;
 
 protected:
   virtual double CalcEn(const double distSq, const uint index) const;
   virtual double CalcVir(const double distSq, const uint index) const;
   virtual double CalcCoulomb(const double distSq, const double qi_qj_Fact,
                              const uint b,
-                             int indexForRCut = 0,
-                             int indexForAlpha = 0) const;
+                             double rCutCoulomb,
+                             double wolfAlpha) const;
   virtual double CalcCoulombVir(const double distSq, const double qi_qj,
                                 uint b,
-                                int indexForRCut = 0,
-                                int indexForAlpha = 0) const;
+                                double rCutCoulomb,
+                                double wolfAlpha) const;
 
   double *An, *Bn, *Cn, *An_1_4, *Bn_1_4, *Cn_1_4;
   double *sig6, *sign, *sig6_1_4, *sign_1_4;
@@ -266,7 +266,7 @@ inline void FF_SWITCH_MARTINI::CalcCoulombAdd_1_4(double& en,
     const double distSq,
     const double qi_qj_Fact,
     const bool NB, const uint box,
-    int indexForRCut) const
+    double rCutCoulomb) const
 {
   if(forcefield.rCutCoulombSq[forcefield.startOfNumRCuts[box]+indexForRCut] < distSq && !forcefield.isVlugtWolf)
     return;
@@ -385,8 +385,8 @@ inline double FF_SWITCH_MARTINI::CalcCoulomb(const double distSq,
     const double qi_qj_Fact,
     const double lambda,
     const uint b,
-    int indexForRCut,
-    int indexForAlpha) const
+    double rCutCoulomb,
+    double wolfAlpha) const
 {
   if(forcefield.rCutCoulombSq[forcefield.startOfNumRCuts[b]+indexForRCut] < distSq)
     return 0.0;
@@ -414,8 +414,8 @@ inline double FF_SWITCH_MARTINI::CalcCoulomb(const double distSq,
 inline double FF_SWITCH_MARTINI::CalcCoulomb(const double distSq,
     const double qi_qj_Fact,
     const uint b,
-    int indexForRCut,
-    int indexForAlpha) const
+    double rCutCoulomb,
+    double wolfAlpha) const
 {
   double dist = sqrt(distSq);
   if(forcefield.ewald) {
@@ -449,8 +449,8 @@ inline double FF_SWITCH_MARTINI::CalcCoulombVir(const double distSq,
     const double qi_qj,
     const double lambda,
     const uint b,
-    int indexForRCut,
-    int indexForAlpha) const
+    double rCutCoulomb,
+    double wolfAlpha) const
 {
   if(forcefield.rCutCoulombSq[forcefield.startOfNumRCuts[b]+indexForRCut] < distSq)
     return 0.0;
@@ -480,8 +480,8 @@ inline double FF_SWITCH_MARTINI::CalcCoulombVir(const double distSq,
 inline double FF_SWITCH_MARTINI::CalcCoulombVir(const double distSq,
     const double qi_qj,
     const uint b,
-    int indexForRCut,
-    int indexForAlpha) const
+    double rCutCoulomb,
+    double wolfAlpha) const
 {
   double dist = sqrt(distSq);
   if(forcefield.ewald) {
@@ -543,8 +543,8 @@ inline double FF_SWITCH_MARTINI::CalcCoulombdEndL(const double distSq,
     const double qi_qj_Fact,
     const double lambda,
     uint b,
-    int indexForRCut,
-    int indexForAlpha) const
+    double rCutCoulomb,
+    double wolfAlpha) const
 {
   if(forcefield.rCutCoulombSq[forcefield.startOfNumRCuts[b]+indexForRCut] < distSq)
     return 0.0;
