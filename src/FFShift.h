@@ -287,7 +287,7 @@ inline double FF_SHIFT::CalcCoulomb(const double distSq, const double qi_qj_Fact
     wolf_electrostatic -= forcefield.wolfFactor1[b][indexForRCut][indexForAlpha];
     // V_DSF -- (18) from Gezelter 2006.  This potential has a force derivative continuous at cutoff
     if(forcefield.coulKind){
-      double distDiff = dist-forcefield.rCutCoulomb[b][indexForRCut];
+      double distDiff = dist-forcefield.rCutCoulomb[forcefield.numberOfRCuts[b]+indexForRCut];
       wolf_electrostatic += forcefield.wolfFactor2[b][indexForRCut][indexForAlpha]*distDiff;
     } 
     wolf_electrostatic *= qi_qj_Fact;
