@@ -208,11 +208,11 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
 #ifdef _OPENMP
 #if GCC_VERSION >= 90000
   #pragma omp parallel for default(none) shared(boxAxes, cellStartIndex, \
-  cellVector, coords, mapParticleToCell, box, neighborList, indexForRcut, indexForAlpha) \
+  cellVector, coords, mapParticleToCell, box, neighborList, rCutCoulomb, wolfAlpha) \
 reduction(+:tempREn, tempLJEn)
 #else
   #pragma omp parallel for default(none) shared(boxAxes, cellStartIndex, \
-  cellVector, coords, mapParticleToCell, neighborList, indexForRcut, indexForAlpha) \
+  cellVector, coords, mapParticleToCell, neighborList, rCutCoulomb, wolfAlpha) \
 reduction(+:tempREn, tempLJEn)
 #endif
 #endif
@@ -248,7 +248,7 @@ reduction(+:tempREn, tempLJEn)
               if (qi_qj_fact != 0.0) {
                 tempREn += forcefield.particles->CalcCoulomb(distSq,
                            particleKind[currParticle], particleKind[nParticle],
-                           qi_qj_fact, lambdaCoulomb, box, indexForRcut, indexForAlpha);
+                           qi_qj_fact, lambdaCoulomb, box, rCutCoulomb, wolfAlpha);
               }
             }
             tempLJEn += forcefield.particles->CalcEn(distSq,
@@ -468,11 +468,11 @@ Virial CalculateEnergy::VirialCalc(const uint box,
 #ifdef _OPENMP
 #if GCC_VERSION >= 90000
   #pragma omp parallel for default(none) shared(cellStartIndex, cellVector, \
-  mapParticleToCell, neighborList, box, indexForRcut, indexForAlpha) \
+  mapParticleToCell, neighborList, box, rCutCoulomb, wolfAlpha) \
 reduction(+:vT11, vT12, vT13, vT22, vT23, vT33, rT11, rT12, rT13, rT22, rT23, rT33)
 #else
   #pragma omp parallel for default(none) shared(cellStartIndex, cellVector, \
-  mapParticleToCell, neighborList, indexForRcut, indexForAlpha) \
+  mapParticleToCell, neighborList, rCutCoulomb, wolfAlpha) \
 reduction(+:vT11, vT12, vT13, vT22, vT23, vT33, rT11, rT12, rT13, rT22, rT23, rT33)
 #endif
 #endif
@@ -509,7 +509,7 @@ reduction(+:vT11, vT12, vT13, vT22, vT23, vT33, rT11, rT12, rT13, rT22, rT23, rT
               //skip particle pairs with no charge
               if (qi_qj != 0.0) {
                 double pRF = forcefield.particles->CalcCoulombVir(distSq, particleKind[currParticle],
-                             particleKind[nParticle], qi_qj, lambdaCoulomb, box, indexForRcut, indexForAlpha);
+                             particleKind[nParticle], qi_qj, lambdaCoulomb, box, rCutCoulomb, wolfAlpha);
                 //calculate the top diagonal of pressure tensor
                 rT11 += pRF * (virC.x * comC.x);
                 //rT12 += pRF * (0.5 * (virC.x * comC.y + virC.y * comC.x));
@@ -1900,8 +1900,8 @@ void CalculateEnergy::WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_
           for (double wolfAlpha = 1; indexForAlpha < forcefield.numberOfAlphas[b]; ++indexForAlpha){
             //calculate LJ interaction and real term of electrostatic interaction
             storagePotential.Zero();
-            storagePotential = BoxInter(storagePotential, currentCoords, currentAxes, b, indexForRcut, indexForAlpha);
-            storagePotential.boxVirial[b] = VirialCalc(b, indexForRcut, indexForAlpha);
+            storagePotential = BoxInter(storagePotential, currentCoords, currentAxes, b, rCutCoulomb, wolfAlpha);
+            storagePotential.boxVirial[b] = VirialCalc(b, rCutCoulomb, wolfAlpha);
             for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
               calcEwald->SetWolfKind(wolfKind);
               forcefield.SetWolfKind(coulKind);
@@ -1913,16 +1913,16 @@ void CalculateEnergy::WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_
               correction = 0.0;
               // Correction depends on RCut, Alpha, Wolf Kind, and Coul Kind.
               #ifdef _OPENMP
-              #pragma omp parallel for default(none) private(bondEnergy) shared(b, molID, indexForRcut, indexForAlpha) \
+              #pragma omp parallel for default(none) private(bondEnergy) shared(b, molID, rCutCoulomb, wolfAlpha) \
                 reduction(+:correction)
               #endif
               for (int i = 0; i < (int) molID.size(); i++) {
                 //calculate correction term of electrostatic interaction
-                correction += calcEwald->MolCorrection(molID[i], b, indexForRcut, indexForAlpha);
+                correction += calcEwald->MolCorrection(molID[i], b, rCutCoulomb, wolfAlpha);
               }
               summationPotential.boxEnergy[b].correction = correction;
               // Self depends on Rcut, alpha, and Wolf Kind
-              summationPotential.boxEnergy[b].self = calcEwald->BoxSelf(b, indexForRcut, indexForAlpha);
+              summationPotential.boxEnergy[b].self = calcEwald->BoxSelf(b, rCutCoulomb, wolfAlpha);
               summationPotential.Total();
               electrostaticEnergies[b][wolfKind][coulKind][indexForRcut][indexForAlpha] = summationPotential.boxEnergy[b].total;
             }

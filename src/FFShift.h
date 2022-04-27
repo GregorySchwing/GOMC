@@ -254,7 +254,7 @@ inline double FF_SHIFT::CalcCoulomb(const double distSq,
 
   if(lambda >= 0.999999) {
     //save computation time
-    return CalcCoulomb(distSq, qi_qj_Fact, b, indexForRCut, indexForAlpha);
+    return CalcCoulomb(distSq, qi_qj_Fact, b, rCutCoulomb, wolfAlpha);
   }
   double en = 0.0;
   if(forcefield.sc_coul) {
@@ -265,9 +265,9 @@ inline double FF_SHIFT::CalcCoulomb(const double distSq,
     double lambdaCoef = forcefield.sc_alpha * pow((1.0 - lambda), forcefield.sc_power);
     double softDist6 = lambdaCoef * sigma6 + dist6;
     double softRsq = cbrt(softDist6);
-    en = lambda * CalcCoulomb(softRsq, qi_qj_Fact, b, indexForRCut, indexForAlpha);
+    en = lambda * CalcCoulomb(softRsq, qi_qj_Fact, b, rCutCoulomb, wolfAlpha);
   } else {
-    en = lambda * CalcCoulomb(distSq, qi_qj_Fact, b, indexForRCut, indexForAlpha);
+    en = lambda * CalcCoulomb(distSq, qi_qj_Fact, b, rCutCoulomb, wolfAlpha);
   }
   return en;
 }
@@ -309,7 +309,7 @@ inline double FF_SHIFT::CalcCoulombVir(const double distSq, const uint kind1,
 
   if(lambda >= 0.999999) {
     //save computation time
-    return CalcCoulombVir(distSq, qi_qj, b, indexForRCut, indexForAlpha);
+    return CalcCoulombVir(distSq, qi_qj, b, rCutCoulomb, wolfAlpha);
   }
   double vir = 0.0;
   if(forcefield.sc_coul) {
@@ -322,9 +322,9 @@ inline double FF_SHIFT::CalcCoulombVir(const double distSq, const uint kind1,
     double softRsq = cbrt(softDist6);
     double correction = distSq / softRsq;
     //We need to fix the return value from calcVir
-    vir = lambda * correction * correction * CalcCoulombVir(softRsq, qi_qj, b, indexForRCut, indexForAlpha);
+    vir = lambda * correction * correction * CalcCoulombVir(softRsq, qi_qj, b, rCutCoulomb, wolfAlpha);
   } else {
-    vir = lambda * CalcCoulombVir(distSq, qi_qj, b, indexForRCut, indexForAlpha);
+    vir = lambda * CalcCoulombVir(distSq, qi_qj, b, rCutCoulomb, wolfAlpha);
   }
   return vir;
 }
