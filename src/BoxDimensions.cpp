@@ -20,7 +20,7 @@ void BoxDimensions::Init(config_setup::RestartSettings const& restart,
       double * largestCalibrationRCutCoul = std::max_element(ff.rCutCoulomb[b], ff.rCutCoulomb[b] + ff.numberOfRCuts[b]);
       rCut[b] = std::max(ff.rCut, *largestCalibrationRCutCoul);
     } else {
-      rCut[b] = std::max(ff.rCut, ff.rCutCoulomb[b][0]);
+      rCut[b] = std::max(ff.rCut, ff.rCutCoulomb[b]);
     }
     rCutSq[b] = rCut[b] * rCut[b];
     minVol[b] = 8.0 * rCutSq[b] * rCut[b] + 0.001;
