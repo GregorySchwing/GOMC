@@ -5,6 +5,7 @@
 class WolfCalibration{
 public:
 WolfCalibration(config_setup::WolfCalibration const& wolfCal);
+~WolfCalibration();
 double GetAlpha(int box, int indexForAlpha);
 double GetRCut(int box, int indexForRCut);
 double GetRCutSq(int box, int indexForRCut);
@@ -13,9 +14,11 @@ double GetWolfFactor2(int box, int indexForRCut, int indexForAlpha);
 double GetWolfFactor3(int box, int indexForRCut, int indexForAlpha);
 double GetNumberOfRCuts(int box);
 double GetNumberOfAlphas(int box);
+int GetStartOfWolfFactors(int box);
+int GetTotalNumWolfFactors();
+
 private:
   friend class WolfCalibrationOutput;
-  ~WolfCalibration();
   void InitWolfCalibration(config_setup::WolfCalibration const& wolfCal);
   void CalculateWolfCalibrationMemoryUsage(config_setup::WolfCalibration const& wolfCal);
   void AllocMem();
@@ -35,8 +38,6 @@ private:
   int startOfWolfFactor[BOX_TOTAL];
   int numberOfRCuts[BOX_TOTAL];
   int numberOfAlphas[BOX_TOTAL];
-  bool explicitlyAddEndAlpha[BOX_TOTAL];
-  bool explicitlyAddEndRCut[BOX_TOTAL];
   std::string wolfKindStrings[4] = {"HYBRID", "VLUGT", "GROSS", "VLUGTWINTRACUTOFF"};
   std::string coulKindStrings[2] = {"DSP", "DSF"};
   // Wolf Calibration

@@ -26,6 +26,7 @@ public:
   virtual void Init(pdb_setup::Atoms const& atoms,
                     config_setup::Output const& output);
   virtual void Sample(const ulong step) {}
+  int GetIndex(int box, int wolfKind, int coulKind, int r, int a);
 
 
 private:
@@ -42,8 +43,12 @@ private:
   uint stepsPerSample;
   WolfCalibration * wolfCal;
 
-  double ** electrostaticEnergies[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS];
-  //std::vector<double> electrostaticEnergies;
+
+  int numberOfRCuts[BOX_TOTAL];
+  int numberOfAlphas[BOX_TOTAL];
+  int startOfWolfFactor[BOX_TOTAL];
+  //double ** electrostaticEnergies[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS];
+  std::vector<double> electrostaticEnergies;
   //const CalculateEnergy& calcEn;
   std::ofstream outF[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS];
   std::ofstream outFPar[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS];

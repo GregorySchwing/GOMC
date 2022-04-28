@@ -167,6 +167,7 @@ SystemPotential CalculateEnergy::SystemInter(SystemPotential potential,
 // Calculate the inter energy for Box. 
 // Fractional molecule are not allowed in this function. - FUNCTIONALITY ADDED
 // Need to implement the GPU function - DONE
+// Wolf defining parameters passed as arguments to allow for calibration 
 SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
                                           XYZArray const& coords,
                                           BoxDimensions const& boxAxes,

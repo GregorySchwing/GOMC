@@ -29,16 +29,18 @@ Forcefield::~Forcefield()
     delete particles;
   if( angles != NULL)
     delete angles;
+  if(wolfCalibration != NULL)
+    wolfCal->~WolfCalibration();
 }
 
 void Forcefield::Init(const Setup& set,
-                      config_setup::WolfCalibration const& wolfCal)
+                      config_setup::WolfCalibration const& wolfCalData)
 {
   wolfCalibration = set.config.out.wolfCalibration.settings.enable;
 
   InitBasicVals(set.config.sys, set.config.in.ffKind);
   if(wolfCalibration){
-    //CalculateWolfCalibrationMemoryUsage(wolfCal);
+    wolfCal = new WolfCalibration(wolfCalData);
   }
   particles->Init(set.ff.mie, set.ff.nbfix);
   bonds.Init(set.ff.bond);

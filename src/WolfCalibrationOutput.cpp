@@ -13,7 +13,11 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 WolfCalibrationOutput::WolfCalibrationOutput(System & sys, StaticVals & statV):
 sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV), wolfCal(statV.forcefield.wolfCal)
 {
-
+      for (int b = 0; b < BOX_TOTAL; ++b){
+            numberOfRCuts[b] = wolfCal->GetNumberOfRCuts(b);
+            numberOfAlphas[b] = wolfCal->GetNumberOfAlphas(b);
+            startOfWolfFactor[b] = wolfCal->GetStartOfWolfFactors(b);
+      }
 }
 
   WolfCalibrationOutput::~WolfCalibrationOutput()
@@ -26,16 +30,8 @@ void WolfCalibrationOutput::Init(pdb_setup::Atoms const& atoms,
       stepsPerSample = output.wolfCalibration.settings.frequency;
       stepsPerOut = output.wolfCalibration.settings.frequency;
       enableOut = output.wolfCalibration.settings.enable;
-      for(uint b = 0 ; b < BOX_TOTAL; b++) {
-            for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
-                  for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){
-                        electrostaticEnergies[b][wolfKind][coulKind] =  new double*[wolfCal->numberOfRCuts[b]];
-                        for (int r = 0; r < wolfCal->numberOfRCuts[b]; ++r){
-                              electrostaticEnergies[b][wolfKind][coulKind][r] =  new double[wolfCal->numberOfAlphas[b]];
-                        }
-                  }
-            }
-      }
+      electrostaticEnergies.resize(wolfCal->GetTotalNumWolfFactors());
+      electrostaticEnergies.assign(wolfCal->GetTotalNumWolfFactors(), 0.0);
       if(enableOut) {
             for (uint b = 0; b < BOX_TOTAL; ++b) {
                   for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
@@ -78,8 +74,8 @@ void WolfCalibrationOutput::WriteHeader(uint b, uint wolfKind, uint coulKind)
             // We skip the reference r cut with reference alpha.
             // r = 0, a = 0
             // So there are no duplicate columns.
-            for (int r = 1; r < wolfCal->numberOfRCuts[b]; ++r){
-                  for (int a = 1; a < wolfCal->numberOfAlphas[b]; ++a){
+            for (int r = 0; r < wolfCal->numberOfRCuts[b]; ++r){
+                  for (int a = 0; a < wolfCal->numberOfAlphas[b]; ++a){
                         firstRow += "(";
                         firstRow += GetString(wolfCal->rCutCoulomb[wolfCal->startOfNumRCuts[b]+r], 4);
                         firstRow += ", ";
@@ -105,8 +101,8 @@ void WolfCalibrationOutput::WriteGraceParFile(uint b, uint wolfKind, uint coulKi
             // We skip the reference r cut with reference alpha.
             // r = 0, a = 0
             // So there are no duplicate columns.
-            for (int r = 1; r < wolfCal->numberOfRCuts[b]; ++r){
-                  for (int a = 1; a < wolfCal->numberOfAlphas[b]; ++a){
+            for (int r = 0; r < wolfCal->numberOfRCuts[b]; ++r){
+                  for (int a = 0; a < wolfCal->numberOfAlphas[b]; ++a){
                         firstRow += "\ts";
                         firstRow += GetString(counter);
                         firstRow += " legend \"(";
@@ -126,6 +122,7 @@ void WolfCalibrationOutput::WriteGraceParFile(uint b, uint wolfKind, uint coulKi
 }
 
 void WolfCalibrationOutput::DoOutput(const ulong step) {
+      /*
       uint wolfKindOrig = sysRef.calcEwald->GetWolfKind();
       uint coulKindOrig = sysRef.calcEwald->GetCoulKind();
       //calcEn.WolfCalibrationEnergy(electrostaticEnergies);
@@ -156,7 +153,7 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
       std::string row = "";
       row += GetString(step);
       row += "\t";
-
+      */
       for (uint box = 0; box < BOX_TOTAL; ++box) {       
             for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
                   for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){  
@@ -166,11 +163,12 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
                         // We skip the reference r cut with reference alpha.
                         // r = 0, a = 0
                         // So there are no duplicate columns.
-                        for (int r = 1; r < wolfCal->numberOfRCuts[box]; ++r){
-                              for (int a = 1; a < wolfCal->numberOfAlphas[box]; ++a){
+                        for (int r = 0; r < wolfCal->numberOfRCuts[box]; ++r){
+                              for (int a = 0; a < wolfCal->numberOfAlphas[box]; ++a){
                                     // If you dont use std::abs, double is converted to int 
-                                    row += GetString((std::abs(ewaldRef.boxEnergy[box].total) -  std::abs(electrostaticEnergies[box][wolfKind][coulKind][r][a]))/ std::abs(ewaldRef.boxEnergy[box].total), 8);
-                                    row += "\t";
+                                    std::cout << GetIndex(box, wolfKind, coulKind, r, a) << std::endl;
+                                    //row += GetString((std::abs(ewaldRef.boxEnergy[box].total) -  std::abs(electrostaticEnergies[box][wolfKind][coulKind][r][a]))/ std::abs(ewaldRef.boxEnergy[box].total), 8);
+                                    //row += "\t";
                               }
                         }
                         outF[box][wolfKind][coulKind] << row;
@@ -180,6 +178,18 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
       }
 }
 
+int WolfCalibrationOutput::GetIndex(int box, int wolfKind, int coulKind, int r, int a){
+                  // Points to start of array if box 0
+                  // Skips box 0 entries if box 1, 
+      int index = WOLF_TOTAL_KINDS*COUL_TOTAL_KINDS*startOfWolfFactor[box]
+                  // Skip wolf kind entries
+                  + wolfKind*COUL_TOTAL_KINDS*numberOfRCuts[box]*numberOfAlphas[box]
+                  // skip coul kind entries
+                  + coulKind*numberOfRCuts[box]*numberOfAlphas[box]
+                  // Within a file (WOLFKIND_COULKIND_BOX)
+                  + startOfWolfFactor[box] + r*numberOfAlphas[box] + a;
+      return index;
+}
 
 std::string WolfCalibrationOutput::GetString(double a, uint p)
 {
