@@ -5,6 +5,14 @@
 class WolfCalibration{
 public:
 WolfCalibration(config_setup::WolfCalibration const& wolfCal);
+double GetAlpha(int box, int indexForAlpha);
+double GetRCut(int box, int indexForRCut);
+double GetRCutSq(int box, int indexForRCut);
+double GetWolfFactor1(int box, int indexForRCut, int indexForAlpha);
+double GetWolfFactor2(int box, int indexForRCut, int indexForAlpha);
+double GetWolfFactor3(int box, int indexForRCut, int indexForAlpha);
+double GetNumberOfRCuts(int box);
+double GetNumberOfAlphas(int box);
 private:
   friend class WolfCalibrationOutput;
   ~WolfCalibration();

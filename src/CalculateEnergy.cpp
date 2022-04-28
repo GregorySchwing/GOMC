@@ -1915,7 +1915,6 @@ void CalculateEnergy::ChangeLRC(Energy *energyDiff, Energy &dUdL_VDW,
     }
   }
 }
-/*
 void CalculateEnergy::WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS]){
 
   GOMC_EVENT_START(1, GomcProfileEvent::WOLF_CALIBRATION);
@@ -1931,7 +1930,7 @@ void CalculateEnergy::WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_
         molID.push_back(*thisMol);
         ++thisMol;
       }
-      for (double rCutCoulomb = 1; indexForRcut < forcefield.numberOfRCuts[b]; ++indexForRcut){
+      for (int indexForRcut = 0; indexForRcut < forcefield.wolfCal->GetNumberOfRCuts(b); ++indexForRcut){
         double bondEnergy[2] = {0};
         double bondEn = 0.0, nonbondEn = 0.0, correction = 0.0;
         bondEnergy[0] = 0.0;
@@ -1944,7 +1943,7 @@ void CalculateEnergy::WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_
         #endif
         for (int i = 0; i < (int) molID.size(); i++) {
           // Intra only depends on RCut.
-          MoleculeIntra(molID[i], b, bondEnergy, indexForRcut);
+          MoleculeIntra(molID[i], b, bondEnergy, forcefield.wolfCal->GetRCut(b, indexForRcut));
           bondEn += bondEnergy[0];
           nonbondEn += bondEnergy[1];
         }
@@ -1952,11 +1951,13 @@ void CalculateEnergy::WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_
         for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){    
           calcEwald->SetCoulKind(coulKind);
           forcefield.SetCoulKind(coulKind);
-          for (double wolfAlpha = 1; indexForAlpha < forcefield.numberOfAlphas[b]; ++indexForAlpha){
+          for (int indexForAlpha = 0; indexForAlpha < forcefield.wolfCal->GetNumberOfAlphas(b); ++indexForAlpha){
             //calculate LJ interaction and real term of electrostatic interaction
             storagePotential.Zero();
-            storagePotential = BoxInter(storagePotential, currentCoords, currentAxes, b, rCutCoulomb, wolfAlpha);
-            storagePotential.boxVirial[b] = VirialCalc(b, rCutCoulomb, wolfAlpha);
+            storagePotential = BoxInter(storagePotential, currentCoords, currentAxes, b, forcefield.wolfCal->GetRCut(b, indexForRcut), 
+            forcefield.wolfCal->GetAlpha(b, indexForAlpha));
+            storagePotential.boxVirial[b] = VirialCalc(b, forcefield.wolfCal->GetRCut(b, indexForRcut), 
+                                                          forcefield.wolfCal->GetAlpha(b, indexForAlpha));
             for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
               calcEwald->SetWolfKind(wolfKind);
               forcefield.SetWolfKind(coulKind);
@@ -1968,16 +1969,18 @@ void CalculateEnergy::WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_
               correction = 0.0;
               // Correction depends on RCut, Alpha, Wolf Kind, and Coul Kind.
               #ifdef _OPENMP
-              #pragma omp parallel for default(none) private(bondEnergy) shared(b, molID, rCutCoulomb, wolfAlpha) \
+              #pragma omp parallel for default(none) private(bondEnergy) shared(b, molID, indexForRcut, indexForAlpha) \
                 reduction(+:correction)
               #endif
               for (int i = 0; i < (int) molID.size(); i++) {
                 //calculate correction term of electrostatic interaction
-                correction += calcEwald->MolCorrection(molID[i], b, rCutCoulomb, wolfAlpha);
+                correction += calcEwald->MolCorrection(molID[i], b, forcefield.wolfCal->GetRCut(b, indexForRcut), 
+                                                                    forcefield.wolfCal->GetAlpha(b, indexForAlpha));
               }
               summationPotential.boxEnergy[b].correction = correction;
               // Self depends on Rcut, alpha, and Wolf Kind
-              summationPotential.boxEnergy[b].self = calcEwald->BoxSelf(b, rCutCoulomb, wolfAlpha);
+              summationPotential.boxEnergy[b].self = calcEwald->BoxSelf(b, forcefield.wolfCal->GetWolfFactor1(b, indexForRcut, indexForAlpha), 
+                                                                    forcefield.wolfCal->GetAlpha(b, indexForAlpha));
               summationPotential.Total();
               electrostaticEnergies[b][wolfKind][coulKind][indexForRcut][indexForAlpha] = summationPotential.boxEnergy[b].total;
             }
@@ -1987,7 +1990,7 @@ void CalculateEnergy::WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_
     }
   GOMC_EVENT_STOP(1, GomcProfileEvent::WOLF_CALIBRATION);
 }
-*/
+
 #if GOMC_GTEST || GOMC_GTEST_MPI
 double CalculateEnergy::GetCharge(int atomIndex){
   return particleCharge[atomIndex];

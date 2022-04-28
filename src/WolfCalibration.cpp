@@ -10,6 +10,15 @@ WolfCalibration::~WolfCalibration()
   DeallocMem();
 }
 
+double WolfCalibration::GetAlpha(int box, int indexForAlpha){return wolfAlpha[startOfNumAlphas[box]+indexForAlpha];}
+double WolfCalibration::GetRCut(int box, int indexForRCut){return rCutCoulomb[startOfNumRCuts[box]+indexForRCut];}
+double WolfCalibration::GetRCutSq(int box, int indexForRCut){return rCutCoulombSq[startOfNumRCuts[box]+indexForRCut];}
+double WolfCalibration::GetWolfFactor1(int box, int indexForRCut, int indexForAlpha){return wolfFactor1[startOfWolfFactor[box] + numberOfRCuts[box]*indexForRCut + indexForAlpha];}
+double WolfCalibration::GetWolfFactor2(int box, int indexForRCut, int indexForAlpha){return wolfFactor2[startOfWolfFactor[box] + numberOfRCuts[box]*indexForRCut + indexForAlpha];}
+double WolfCalibration::GetWolfFactor3(int box, int indexForRCut, int indexForAlpha){return wolfFactor3[startOfWolfFactor[box] + numberOfRCuts[box]*indexForRCut + indexForAlpha];}
+double WolfCalibration::GetNumberOfRCuts(int box){return numberOfRCuts[box];}
+double WolfCalibration::GetNumberOfAlphas(int box){return numberOfAlphas[box];}
+
 void WolfCalibration::InitWolfCalibration(config_setup::WolfCalibration const& wolfCal){
   for(uint b = 0 ; b < BOX_TOTAL; b++) {
     for(uint r = 0; r < numberOfRCuts[b]-1; r++) {
