@@ -40,6 +40,7 @@ private:
   StaticVals & statValRef;
   CalculateEnergy & calcEn;
   uint stepsPerSample;
+  WolfCalibration * wolfCal;
 
   double ** electrostaticEnergies[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS];
 

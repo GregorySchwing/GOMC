@@ -11,14 +11,14 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 
 
 WolfCalibrationOutput::WolfCalibrationOutput(System & sys, StaticVals & statV):
-sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV)
+sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV), wolfCal(statV.forcefield.wolfCal)
 {
       for(uint b = 0 ; b < BOX_TOTAL; b++) {
             for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
                   for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){
-                        electrostaticEnergies[b][wolfKind][coulKind] =  new double*[statValRef.forcefield.numberOfRCuts[b]];
-                        for (int r = 0; r < statValRef.forcefield.numberOfRCuts[b]; ++r){
-                              electrostaticEnergies[b][wolfKind][coulKind][r] =  new double[statValRef.forcefield.numberOfAlphas[b]];
+                        electrostaticEnergies[b][wolfKind][coulKind] =  new double*[wolfCal->numberOfRCuts[b]];
+                        for (int r = 0; r < wolfCal->numberOfRCuts[b]; ++r){
+                              electrostaticEnergies[b][wolfKind][coulKind][r] =  new double[wolfCal->numberOfAlphas[b]];
                         }
                   }
             }
@@ -30,7 +30,7 @@ sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV)
       for(uint b = 0 ; b < BOX_TOTAL; b++) {
             for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
                   for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){
-                        for (int r = 0; r < statValRef.forcefield.numberOfRCuts[b]; ++r){
+                        for (int r = 0; r < wolfCal->numberOfRCuts[b]; ++r){
                               delete[] electrostaticEnergies[b][wolfKind][coulKind][r];
                         }
                         delete[] electrostaticEnergies[b][wolfKind][coulKind];
@@ -53,9 +53,9 @@ void WolfCalibrationOutput::Init(pdb_setup::Atoms const& atoms,
                               sstrm << (b);
                               sstrm >> strKind;
                               fileName = "Wolf_Calibration_";
-                              fileName += statValRef.forcefield.wolfKindStrings[wolfKind];
+                              fileName += wolfCal->wolfKindStrings[wolfKind];
                               fileName += "_";
-                              fileName += statValRef.forcefield.coulKindStrings[coulKind];
+                              fileName += wolfCal->coulKindStrings[coulKind];
                               fileName += "_BOX_";
                               fileName += strKind;
                               fileName += "_";
@@ -86,12 +86,12 @@ void WolfCalibrationOutput::WriteHeader(uint b, uint wolfKind, uint coulKind)
             // We skip the reference r cut with reference alpha.
             // r = 0, a = 0
             // So there are no duplicate columns.
-            for (int r = 1; r < statValRef.forcefield.numberOfRCuts[b]; ++r){
-                  for (int a = 1; a < statValRef.forcefield.numberOfAlphas[b]; ++a){
+            for (int r = 1; r < wolfCal->numberOfRCuts[b]; ++r){
+                  for (int a = 1; a < wolfCal->numberOfAlphas[b]; ++a){
                         firstRow += "(";
-                        firstRow += GetString(statValRef.forcefield.rCutCoulomb[statValRef.forcefield.startOfNumRCuts[b]+r], 4);
+                        firstRow += GetString(wolfCal->rCutCoulomb[wolfCal->startOfNumRCuts[b]+r], 4);
                         firstRow += ", ";
-                        firstRow += GetString(statValRef.forcefield.wolfAlpha[statValRef.forcefield.startOfNumAlphas[b]+a], 4);
+                        firstRow += GetString(wolfCal->wolfAlpha[wolfCal->startOfNumAlphas[b]+a], 4);
                         firstRow += ")\t";
                   }
             }
@@ -113,14 +113,14 @@ void WolfCalibrationOutput::WriteGraceParFile(uint b, uint wolfKind, uint coulKi
             // We skip the reference r cut with reference alpha.
             // r = 0, a = 0
             // So there are no duplicate columns.
-            for (int r = 1; r < statValRef.forcefield.numberOfRCuts[b]; ++r){
-                  for (int a = 1; a < statValRef.forcefield.numberOfAlphas[b]; ++a){
+            for (int r = 1; r < wolfCal->numberOfRCuts[b]; ++r){
+                  for (int a = 1; a < wolfCal->numberOfAlphas[b]; ++a){
                         firstRow += "\ts";
                         firstRow += GetString(counter);
                         firstRow += " legend \"(";
-                        firstRow += GetString(statValRef.forcefield.rCutCoulomb[statValRef.forcefield.startOfNumRCuts[b]+r], 4);
+                        firstRow += GetString(wolfCal->rCutCoulomb[wolfCal->startOfNumRCuts[b]+r], 4);
                         firstRow += ", ";
-                        firstRow += GetString(statValRef.forcefield.wolfAlpha[statValRef.forcefield.startOfNumAlphas[b]+a], 4);
+                        firstRow += GetString(wolfCal->wolfAlpha[wolfCal->startOfNumAlphas[b]+a], 4);
                         firstRow += ")\"\n";
                         ++counter;
                   }
@@ -174,8 +174,8 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
                         // We skip the reference r cut with reference alpha.
                         // r = 0, a = 0
                         // So there are no duplicate columns.
-                        for (int r = 1; r < statValRef.forcefield.numberOfRCuts[box]; ++r){
-                              for (int a = 1; a < statValRef.forcefield.numberOfAlphas[box]; ++a){
+                        for (int r = 1; r < wolfCal->numberOfRCuts[box]; ++r){
+                              for (int a = 1; a < wolfCal->numberOfAlphas[box]; ++a){
                                     // If you dont use std::abs, double is converted to int 
                                     row += GetString((std::abs(ewaldRef.boxEnergy[box].total) -  std::abs(electrostaticEnergies[box][wolfKind][coulKind][r][a]))/ std::abs(ewaldRef.boxEnergy[box].total), 8);
                                     row += "\t";

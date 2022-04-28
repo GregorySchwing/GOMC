@@ -21,11 +21,6 @@ Forcefield::Forcefield()
   OneThree = false; //default behavior is to turn off 1-3 interaction
   OneFour = true;   // to turn on 1-4 interaction
   OneN = true;      // and turn on 1-n interaction
-  // Default, when not calibrating wolf, these values are 1.
-  for (int box = 0; box < BOX_TOTAL; ++box){
-    numberOfRCuts[box] = 1;
-    numberOfAlphas[box] = 1;
-  }
 }
 
 Forcefield::~Forcefield()
@@ -34,20 +29,16 @@ Forcefield::~Forcefield()
     delete particles;
   if( angles != NULL)
     delete angles;
-  DeallocMem();
 }
 
 void Forcefield::Init(const Setup& set,
                       config_setup::WolfCalibration const& wolfCal)
 {
   wolfCalibration = set.config.out.wolfCalibration.settings.enable;
-  if(wolfCalibration){
-    CalculateWolfCalibrationMemoryUsage(wolfCal);
-  }
-  AllocMem();
+
   InitBasicVals(set.config.sys, set.config.in.ffKind);
   if(wolfCalibration){
-    //InitWolfCalibration(wolfCal);
+    //CalculateWolfCalibrationMemoryUsage(wolfCal);
   }
   particles->Init(set.ff.mie, set.ff.nbfix);
   bonds.Init(set.ff.bond);
@@ -63,37 +54,6 @@ void Forcefield::Init(const Setup& set,
   }
 }
 
-void Forcefield::AllocMem(){
-  totalNumAlphas = 0;
-  totalNumRCuts = 0;
-  totalNumWolfFactors = 0;
-  for (uint b = 0; b < BOX_TOTAL; ++b) {
-    startOfNumAlphas[b] += totalNumAlphas;
-    startOfNumRCuts[b] += totalNumRCuts;
-    startOfWolfFactor[b] += totalNumWolfFactors;
-    totalNumAlphas += numberOfAlphas[b];
-    totalNumRCuts += numberOfRCuts[b];
-    totalNumWolfFactors +=  numberOfAlphas[b] * numberOfRCuts[b];
-  }
-
-  wolfAlpha = new double[totalNumAlphas];
-  rCutCoulomb = new double[totalNumRCuts];
-  rCutCoulombSq = new double[totalNumRCuts];
-  wolfFactor1 = new double[totalNumWolfFactors];
-  wolfFactor2 = new double[totalNumWolfFactors];
-  wolfFactor3 = new double[totalNumWolfFactors];
-}
-
-void Forcefield::DeallocMem(){
-  for (uint b = 0; b < BOX_TOTAL; ++b) {
-    delete[] wolfAlpha;
-    delete[] rCutCoulomb;
-    delete[] rCutCoulombSq;
-    delete[] wolfFactor1;
-    delete[] wolfFactor2;
-    delete[] wolfFactor3;
-  }
-}
 
 void Forcefield::InitBasicVals(config_setup::SystemVals const& val,
                                config_setup::FFKind const& ffKind)
@@ -199,58 +159,6 @@ void Forcefield::InitBasicVals(config_setup::SystemVals const& val,
 
 }
 
-void Forcefield::CalculateWolfCalibrationMemoryUsage(config_setup::WolfCalibration const& wolfCal){
-  // Calculate the number of calibration points from the ranges provided
-  // If delta is not a common multiple of the (End - Start) explicitly add the End.
-  for (uint b = 0; b < BOX_TOTAL; ++b) {
-    numberOfRCuts[b] += (int)((wolfCal.wolfCutoffCoulombEnd[b] - wolfCal.wolfCutoffCoulombStart[b]) / wolfCal.wolfCutoffCoulombDelta[b]);
-    numberOfAlphas[b] += (int)((wolfCal.wolfAlphaEnd[b] - wolfCal.wolfAlphaStart[b]) / wolfCal.wolfAlphaDelta[b]);
-    if (abs(wolfCal.wolfAlphaDelta[b] * numberOfAlphas[b] - wolfCal.wolfCutoffCoulombEnd[b]) > 0.01){
-          numberOfAlphas[b] += 1;
-          explicitlyAddEndAlpha[b] = true;
-    } else {
-          explicitlyAddEndAlpha[b] = false;
-    }
-    if (abs(wolfCal.wolfCutoffCoulombDelta[b] * numberOfRCuts[b] - wolfCal.wolfCutoffCoulombEnd[b]) > 1){
-          numberOfRCuts[b] += 1;
-          explicitlyAddEndRCut[b] = true;
-    } else {
-          explicitlyAddEndRCut[b] = false;
-    }
-  }
-}
-/*
-void Forcefield::InitWolfCalibration(config_setup::WolfCalibration const& wolfCal){
-  for(uint b = 0 ; b < BOX_TOTAL; b++) {
-    // Start at 1, since 0th index is from the config file and initted in InitBasicVals
-    for(uint r = 0; r < numberOfRCuts[b]-1; r++) {
-      // Start at 1, since 0th index is from the config file and initted in InitBasicVals
-      rCutCoulomb[b][r+1] = wolfCal.wolfCutoffCoulombStart[b] + r*wolfCal.wolfCutoffCoulombDelta[b];
-      rCutCoulombSq[b][r+1] = rCutCoulomb[b][r+1] * rCutCoulomb[b][r+1];
-    }
-    for(uint a = 0 ; a < numberOfAlphas[b]-1; a++) {
-      wolfAlpha[b][a+1] = wolfCal.wolfAlphaStart[b] + a*wolfCal.wolfAlphaDelta[b];
-    }
-    if (explicitlyAddEndRCut[b]){
-      rCutCoulomb[b][numberOfRCuts[b]-1] = wolfCal.wolfCutoffCoulombEnd[b];
-      rCutCoulombSq[b][numberOfRCuts[b]-1] = wolfCal.wolfCutoffCoulombEnd[b] * wolfCal.wolfCutoffCoulombEnd[b];
-    }
-    if (explicitlyAddEndRCut[b]){
-      wolfAlpha[b][numberOfAlphas[b]-1] = wolfCal.wolfAlphaEnd[b];
-    }
-    for(uint r = 1; r < numberOfRCuts[b]; r++) {
-      for(uint a = 1 ; a < numberOfAlphas[b]; a++) {
-        wolfFactor1[startOfWolfFactor[b] + numberOfRCuts[b]*r + a] = erfc(wolfAlpha[startOfNumAlphas[b]+a]*rCutCoulomb[startOfNumRCuts[b]+r])/rCutCoulomb[startOfNumRCuts[b]+r];
-        wolfFactor2[startOfWolfFactor[b] + numberOfRCuts[b]*r + a] = wolfFactor1[startOfWolfFactor[b] + numberOfRCuts[b]*r + a]/rCutCoulomb[startOfNumRCuts[b]+r];
-        wolfFactor2[startOfWolfFactor[b] + numberOfRCuts[b]*r + a] += wolfAlpha[startOfNumAlphas[b]+a] *  M_2_SQRTPI * 
-                          exp(-1.0*wolfAlpha[startOfNumAlphas[b]+a]*wolfAlpha[startOfNumAlphas[b]+a]*rCutCoulombSq[startOfNumRCuts[b]+r])
-                          /rCutCoulomb[startOfNumRCuts[b]+r];
-        wolfFactor3[startOfWolfFactor[b] + numberOfRCuts[b]*r + a] = wolfAlpha[startOfNumAlphas[b]+a] *  M_2_SQRTPI;
-      }
-    }
-  }
-}
-*/
 void Forcefield::SetWolfKind(uint wolfKindArg){
     wolfKind = wolfKindArg;
     switch(wolfKindArg) {
