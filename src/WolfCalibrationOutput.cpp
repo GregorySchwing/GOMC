@@ -13,16 +13,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 WolfCalibrationOutput::WolfCalibrationOutput(System & sys, StaticVals & statV):
 sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV), wolfCal(statV.forcefield.wolfCal)
 {
-      for(uint b = 0 ; b < BOX_TOTAL; b++) {
-            for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
-                  for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){
-                        electrostaticEnergies[b][wolfKind][coulKind] =  new double*[wolfCal->numberOfRCuts[b]];
-                        for (int r = 0; r < wolfCal->numberOfRCuts[b]; ++r){
-                              electrostaticEnergies[b][wolfKind][coulKind][r] =  new double[wolfCal->numberOfAlphas[b]];
-                        }
-                  }
-            }
-      }
+
 }
 
   WolfCalibrationOutput::~WolfCalibrationOutput()
@@ -44,6 +35,16 @@ void WolfCalibrationOutput::Init(pdb_setup::Atoms const& atoms,
       stepsPerSample = output.wolfCalibration.settings.frequency;
       stepsPerOut = output.wolfCalibration.settings.frequency;
       enableOut = output.wolfCalibration.settings.enable;
+      for(uint b = 0 ; b < BOX_TOTAL; b++) {
+            for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
+                  for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){
+                        electrostaticEnergies[b][wolfKind][coulKind] =  new double*[wolfCal->numberOfRCuts[b]];
+                        for (int r = 0; r < wolfCal->numberOfRCuts[b]; ++r){
+                              electrostaticEnergies[b][wolfKind][coulKind][r] =  new double[wolfCal->numberOfAlphas[b]];
+                        }
+                  }
+            }
+      }
       if(enableOut) {
             for (uint b = 0; b < BOX_TOTAL; ++b) {
                   for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){

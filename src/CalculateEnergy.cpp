@@ -251,8 +251,8 @@ reduction(+:tempREn, tempLJEn)
                            particleKind[nParticle], qi_qj_fact, lambdaCoulomb, box, 
                             forcefield.rCutCoulomb[box],
                             forcefield.rCutCoulombSq[box], 
+                            forcefield.wolfFactor1[box],
                             forcefield.wolfFactor2[box],
-                            forcefield.wolfFactor3[box],
                             forcefield.wolfAlpha[box]);
               }
             }
@@ -380,8 +380,8 @@ reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
                            particleKind[nParticle], qi_qj_fact, lambdaCoulomb, box, 
                             forcefield.rCutCoulomb[box],
                             forcefield.rCutCoulombSq[box], 
+                            forcefield.wolfFactor1[box],
                             forcefield.wolfFactor2[box],
-                            forcefield.wolfFactor3[box],
                             forcefield.wolfAlpha[box]);
                 // Calculating the force
                 forceReal = virComponents * forcefield.particles->CalcCoulombVir(distSq,
@@ -657,8 +657,8 @@ bool CalculateEnergy::MoleculeInter(Intermolecular &inter_LJ,
                            particleKind[nIndex[i]], qi_qj_fact, lambdaCoulomb, box, 
                             forcefield.rCutCoulomb[box],
                             forcefield.rCutCoulombSq[box], 
+                            forcefield.wolfFactor1[box],
                             forcefield.wolfFactor2[box],
-                            forcefield.wolfFactor3[box],
                             forcefield.wolfAlpha[box]);
             }
           }
@@ -708,8 +708,8 @@ bool CalculateEnergy::MoleculeInter(Intermolecular &inter_LJ,
                            particleKind[nIndex[i]], qi_qj_fact, lambdaCoulomb, box, 
                             forcefield.rCutCoulomb[box],
                             forcefield.rCutCoulombSq[box], 
+                            forcefield.wolfFactor1[box],
                             forcefield.wolfFactor2[box],
-                            forcefield.wolfFactor3[box],
                             forcefield.wolfAlpha[box]);
             }
           }
@@ -829,8 +829,8 @@ reduction(+:tempLJ, tempReal)
                            particleKind[nIndex[i]], qi_qj_fact, lambdaCoulomb, box, 
                             forcefield.rCutCoulomb[box],
                             forcefield.rCutCoulombSq[box], 
+                            forcefield.wolfFactor1[box],
                             forcefield.wolfFactor2[box],
-                            forcefield.wolfFactor3[box],
                             forcefield.wolfAlpha[box]);
           }
         }
@@ -1678,15 +1678,15 @@ reduction(+:tempREnOld, tempLJEnOld, tempREnNew, tempLJEnNew)
                            particleKind[nIndex[i]], qi_qj_fact, lambdaNewCoulomb, box, 
                             forcefield.rCutCoulomb[box],
                             forcefield.rCutCoulombSq[box], 
+                            forcefield.wolfFactor1[box],
                             forcefield.wolfFactor2[box],
-                            forcefield.wolfFactor3[box],
                             forcefield.wolfAlpha[box]);
               tempREnOld += forcefield.particles->CalcCoulomb(distSq, particleKind[atom],
                            particleKind[nIndex[i]], qi_qj_fact, lambdaOldCoulomb, box, 
                             forcefield.rCutCoulomb[box],
                             forcefield.rCutCoulombSq[box], 
+                            forcefield.wolfFactor1[box],
                             forcefield.wolfFactor2[box],
-                            forcefield.wolfFactor3[box],
                             forcefield.wolfAlpha[box]);
             }
           }
@@ -1819,8 +1819,8 @@ reduction(+:dudl_VDW, dudl_Coul, tempREnDiff[:lambdaSize], tempLJEnDiff[:lambdaS
                            particleKind[nIndex[i]], qi_qj_fact, lambda_Coul[iState], box, 
                             forcefield.rCutCoulomb[box],
                             forcefield.rCutCoulombSq[box], 
+                            forcefield.wolfFactor1[box],
                             forcefield.wolfFactor2[box],
-                            forcefield.wolfFactor3[box],
                             forcefield.wolfAlpha[box]);
             dudl_Coul += forcefield.particles->CalcCoulombdEndL(distSq, particleKind[atom],
                          particleKind[nIndex[i]], qi_qj_fact,
@@ -1844,8 +1844,8 @@ reduction(+:dudl_VDW, dudl_Coul, tempREnDiff[:lambdaSize], tempLJEnDiff[:lambdaS
                            particleKind[nIndex[i]], qi_qj_fact, lambda_Coul[s], box, 
                             forcefield.rCutCoulomb[box],
                             forcefield.rCutCoulombSq[box], 
+                            forcefield.wolfFactor1[box],
                             forcefield.wolfFactor2[box],
-                            forcefield.wolfFactor3[box],
                             forcefield.wolfAlpha[box]);
             tempREnDiff[s] += -energyOldCoul;
           }
