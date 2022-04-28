@@ -43,7 +43,7 @@ private:
   WolfCalibration * wolfCal;
 
   double ** electrostaticEnergies[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS];
-
+  //std::vector<double> electrostaticEnergies;
   //const CalculateEnergy& calcEn;
   std::ofstream outF[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS];
   std::ofstream outFPar[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS];

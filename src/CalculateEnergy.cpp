@@ -148,8 +148,12 @@ SystemPotential CalculateEnergy::SystemInter(SystemPotential potential,
 {
   for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
     //calculate LJ interaction and real term of electrostatic interaction
-    potential = BoxInter(potential, coords, boxAxes, b, forcefield.rCutCoulomb[b],
-                                          forcefield.wolfAlpha[b]);
+    potential = BoxInter(potential, coords, boxAxes, b, 
+                          forcefield.rCutCoulomb[b],
+                          forcefield.rCutCoulombSq[b],
+                          forcefield.wolfFactor1[b],
+                          forcefield.wolfFactor2[b],
+                          forcefield.wolfAlpha[b]);
     //calculate reciprocal term of electrostatic interaction
     potential.boxEnergy[b].recip = calcEwald->BoxReciprocal(b, false);
   }
@@ -168,6 +172,9 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
                                           BoxDimensions const& boxAxes,
                                           const uint box,
                                           double rCutCoulomb,
+                                          double rCutCoulombSq,    
+                                          double wolfFactor1,
+                                          double wolfFactor2,                                         
                                           double wolfAlpha)
 {
   //Handles reservoir box case, returning zeroed structure if
@@ -209,11 +216,13 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
 #ifdef _OPENMP
 #if GCC_VERSION >= 90000
   #pragma omp parallel for default(none) shared(boxAxes, cellStartIndex, \
-  cellVector, coords, mapParticleToCell, box, neighborList, rCutCoulomb, wolfAlpha) \
+  cellVector, coords, mapParticleToCell, box, neighborList, rCutCoulomb, rCutCoulombSq, \
+  wolfFactor1, wolfFactor2, wolfAlpha) \
 reduction(+:tempREn, tempLJEn)
 #else
   #pragma omp parallel for default(none) shared(boxAxes, cellStartIndex, \
-  cellVector, coords, mapParticleToCell, neighborList, rCutCoulomb, wolfAlpha) \
+  cellVector, coords, mapParticleToCell, neighborList, rCutCoulomb, rCutCoulombSq, \
+  wolfFactor1, wolfFactor2, wolfAlpha) \
 reduction(+:tempREn, tempLJEn)
 #endif
 #endif
@@ -249,11 +258,11 @@ reduction(+:tempREn, tempLJEn)
               if (qi_qj_fact != 0.0) {
                 tempREn += forcefield.particles->CalcCoulomb(distSq, particleKind[currParticle],
                            particleKind[nParticle], qi_qj_fact, lambdaCoulomb, box, 
-                            forcefield.rCutCoulomb[box],
-                            forcefield.rCutCoulombSq[box], 
-                            forcefield.wolfFactor1[box],
-                            forcefield.wolfFactor2[box],
-                            forcefield.wolfAlpha[box]);
+                            rCutCoulomb,
+                            rCutCoulombSq, 
+                            wolfFactor1,
+                            wolfFactor2,
+                            wolfAlpha);
               }
             }
             tempLJEn += forcefield.particles->CalcEn(distSq,
@@ -1954,8 +1963,12 @@ void CalculateEnergy::WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_
           for (int indexForAlpha = 0; indexForAlpha < forcefield.wolfCal->GetNumberOfAlphas(b); ++indexForAlpha){
             //calculate LJ interaction and real term of electrostatic interaction
             storagePotential.Zero();
-            storagePotential = BoxInter(storagePotential, currentCoords, currentAxes, b, forcefield.wolfCal->GetRCut(b, indexForRcut), 
-            forcefield.wolfCal->GetAlpha(b, indexForAlpha));
+            storagePotential = BoxInter(storagePotential, currentCoords, currentAxes, b, 
+                                        forcefield.wolfCal->GetRCut(b, indexForRcut), 
+                                        forcefield.wolfCal->GetRCutSq(b, indexForRcut), 
+                                        forcefield.wolfCal->GetWolfFactor1(b, indexForRcut, indexForAlpha), 
+                                        forcefield.wolfCal->GetWolfFactor2(b, indexForRcut, indexForAlpha), 
+                                        forcefield.wolfCal->GetAlpha(b, indexForAlpha));
             storagePotential.boxVirial[b] = VirialCalc(b, forcefield.wolfCal->GetRCut(b, indexForRcut), 
                                                           forcefield.wolfCal->GetAlpha(b, indexForAlpha));
             for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){

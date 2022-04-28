@@ -63,6 +63,9 @@ public:
                            BoxDimensions const& boxAxes,
                            const uint box,
                            double rCutCoulomb,
+                           double rCutCoulombSq,    
+                           double wolfFactor1,
+                           double wolfFactor2,                                         
                            double wolfAlpha);
 
   //! Calculates force of a single box in the system
