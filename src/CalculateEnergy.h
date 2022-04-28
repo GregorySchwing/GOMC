@@ -215,8 +215,8 @@ public:
   #if GOMC_GTEST || GOMC_GTEST_MPI
   double GetCharge(int atomIndex);
   #endif
-  void WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS]);
-//
+  void WolfCalibrationEnergy(double * electrostaticEnergies);
+
 private:
 
   //! Calculates full TC energy for one box in current system
@@ -317,6 +317,7 @@ private:
   const Coordinates& currentCoords;
   const COM& currentCOM;
   const Lambda& lambdaRef;
+  WolfCalibration & wolfCalRef;
   // Need to remove const so wolf kind and coul kind can vary during Calibration    
   Forcefield & forcefield;
   Ewald *calcEwald;

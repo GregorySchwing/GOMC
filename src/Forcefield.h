@@ -34,9 +34,7 @@ public:
   Forcefield();
   ~Forcefield();
   //Initialize contained FFxxxx structs from setup data
-  void Init(const Setup& set,
-            config_setup::WolfCalibration const& wolfCalData);
-  
+  void Init(const Setup& set);
   void SetWolfKind(uint wolfKindArg);
   void SetCoulKind(uint coulKindArg); 
   uint GetWolfKind(void);

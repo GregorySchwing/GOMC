@@ -15,7 +15,7 @@ void StaticVals::Init(Setup & set, System& sys)
 {
   //Standard inits
   simEventFreq.Init(set.config.sys.step);
-  forcefield.Init(set, wolfCal);
+  forcefield.Init(set);
   mol.Init(set, forcefield, sys);
 #ifndef VARIABLE_PARTICLE_NUMBER
   molLookup.Init(mol, set.pdb.atoms, forcefield, set.config.in.restart.restartFromCheckpoint);
@@ -137,7 +137,7 @@ StaticVals::StaticVals(Setup & set) : intraMemcVal(set.config.sys.intraMemcVal),
   freeEnVal(set.config.sys.freeEn), memcVal(set.config.sys.memcVal),
   neMTMCVal(set.config.sys.neMTMCVal), targetedSwapVal(set.config.sys.targetedSwapCollection),
   intraTargetedSwapVal(set.config.sys.intraTargetedSwapCollection),
-  wolfCal(set.config.sys.wolfCal)
+  wolfCal(set.config.sys.wolfCal, set.config.out.wolfCalibration.settings.enable)
   
 {
   multiParticleEnabled = set.config.sys.moves.multiParticleEnabled;

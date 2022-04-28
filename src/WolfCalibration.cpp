@@ -1,8 +1,12 @@
 #include "WolfCalibration.h"
-WolfCalibration::WolfCalibration(config_setup::WolfCalibration const& wolfCal){
-  CalculateWolfCalibrationMemoryUsage(wolfCal);
-  AllocMem();
-  InitWolfCalibration(wolfCal);
+WolfCalibration::WolfCalibration(config_setup::WolfCalibration const& wolfCal,
+                                  bool enable)
+{
+  if(enable){
+    CalculateWolfCalibrationMemoryUsage(wolfCal);
+    AllocMem();
+    InitWolfCalibration(wolfCal);
+  }
 }
 
 WolfCalibration::~WolfCalibration()
@@ -82,4 +86,17 @@ void WolfCalibration::DeallocMem(){
     delete[] wolfFactor2;
     delete[] wolfFactor3;
   }
+}
+
+int WolfCalibration::GetIndex(int box, int wolfKind, int coulKind, int r, int a){
+                  // Points to start of array if box 0
+                  // Skips box 0 entries if box 1, 
+      int index = WOLF_TOTAL_KINDS*COUL_TOTAL_KINDS*startOfWolfFactor[box]
+                  // Skip wolf kind entries
+                  + wolfKind*COUL_TOTAL_KINDS*numberOfRCuts[box]*numberOfAlphas[box]
+                  // skip coul kind entries
+                  + coulKind*numberOfRCuts[box]*numberOfAlphas[box]
+                  // Within a file (WOLFKIND_COULKIND_BOX)
+                  + startOfWolfFactor[box] + r*numberOfAlphas[box] + a;
+      return index;
 }

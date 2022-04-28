@@ -26,8 +26,6 @@ public:
   virtual void Init(pdb_setup::Atoms const& atoms,
                     config_setup::Output const& output);
   virtual void Sample(const ulong step) {}
-  int GetIndex(int box, int wolfKind, int coulKind, int r, int a);
-
 
 private:
 
@@ -41,7 +39,7 @@ private:
   StaticVals & statValRef;
   CalculateEnergy & calcEn;
   uint stepsPerSample;
-  WolfCalibration * wolfCal;
+  WolfCalibration & wolfCalRef;
 
 
   int numberOfRCuts[BOX_TOTAL];
