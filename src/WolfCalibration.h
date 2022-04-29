@@ -1,10 +1,12 @@
-
+#ifndef WOLFCALIBRATION_H
+#define WOLFCALIBRATION_H
 #include "EnsemblePreprocessor.h" //For BOX_TOTAL, etc.
 #include "Setup.h"
 
 class WolfCalibration{
 public:
-WolfCalibration(config_setup::WolfCalibration const& wolfCal, bool enable);
+WolfCalibration();
+void Init(config_setup::WolfCalibration const& wolfCal);
 ~WolfCalibration();
 double GetAlpha(int box, int indexForAlpha);
 double GetRCut(int box, int indexForRCut);
@@ -43,3 +45,4 @@ private:
   std::string coulKindStrings[2] = {"DSP", "DSF"};
   // Wolf Calibration
 };
+#endif

@@ -17,6 +17,8 @@ void StaticVals::Init(Setup & set, System& sys)
   simEventFreq.Init(set.config.sys.step);
   forcefield.Init(set);
   mol.Init(set, forcefield, sys);
+  //if(set.config.out.wolfCalibration.settings.enable)
+  //  wolfCal->Init(set.config.sys.wolfCal);
 #ifndef VARIABLE_PARTICLE_NUMBER
   molLookup.Init(mol, set.pdb.atoms, forcefield, set.config.in.restart.restartFromCheckpoint);
 #endif
@@ -32,6 +34,12 @@ void StaticVals::InitOver(Setup & set, System& sys)
 {
   mol.~Molecules();
   mol.Init(set, forcefield, sys);
+  //if(set.config.out.wolfCalibration.settings.enable){
+  //  wolfCal->~WolfCalibration();
+  //  wolfCal->Init(set.config.sys.wolfCal);
+  //}
+ 
+
 }
 
 void StaticVals::InitMovePercents(config_setup::MovePercents const& perc)
@@ -136,8 +144,7 @@ void StaticVals::IsBoxOrthogonal(const double cellAngle[][3])
 StaticVals::StaticVals(Setup & set) : intraMemcVal(set.config.sys.intraMemcVal),
   freeEnVal(set.config.sys.freeEn), memcVal(set.config.sys.memcVal),
   neMTMCVal(set.config.sys.neMTMCVal), targetedSwapVal(set.config.sys.targetedSwapCollection),
-  intraTargetedSwapVal(set.config.sys.intraTargetedSwapCollection),
-  wolfCal(set.config.sys.wolfCal, set.config.out.wolfCalibration.settings.enable)
+  intraTargetedSwapVal(set.config.sys.intraTargetedSwapCollection)
   
 {
   multiParticleEnabled = set.config.sys.moves.multiParticleEnabled;
@@ -147,6 +154,8 @@ StaticVals::StaticVals(Setup & set) : intraMemcVal(set.config.sys.intraMemcVal),
   } else {
     IsBoxOrthogonal(set.config.sys.volume);
   }
+  //if(set.config.out.wolfCalibration.settings.enable)
+  //  wolfCal = new WolfCalibration();
 }
 
 

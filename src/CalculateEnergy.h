@@ -13,7 +13,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "Ewald.h"
 #include "NoEwald.h"
 #include "CellList.h"
-
+#include "WolfCalibration.h"
 #include <vector>
 
 //
@@ -317,7 +317,7 @@ private:
   const Coordinates& currentCoords;
   const COM& currentCOM;
   const Lambda& lambdaRef;
-  WolfCalibration & wolfCalRef;
+  WolfCalibration * wolfCal;
   // Need to remove const so wolf kind and coul kind can vary during Calibration    
   Forcefield & forcefield;
   Ewald *calcEwald;

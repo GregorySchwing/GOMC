@@ -73,6 +73,8 @@ System::~System()
     delete boxDimensions;
   if (calcEwald != NULL)
     delete calcEwald;
+  if (refEwald != NULL)
+    delete refEwald;
   delete moves[mv::DISPLACE];
   delete moves[mv::ROTATE];
   delete moves[mv::MULTIPARTICLE];

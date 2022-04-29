@@ -12,7 +12,6 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "FFBonds.h"
 #include "FFAngles.h"
 #include "FFDihedrals.h"
-#include "WolfCalibration.h"
 
 namespace config_setup
 {
@@ -61,7 +60,6 @@ public:
   double dielectric;              //dielectric for martini
   // Wolf Calibration 
   bool wolfCalibration;
-  WolfCalibration * wolfCal;
 
   double wolfAlpha[BOX_TOTAL]; //alpha term for Wolf Electrostatic and constant factors
   double wolfFactor1[BOX_TOTAL]; //alpha term for Wolf Electrostatic and constant factors
@@ -89,12 +87,8 @@ public:
 
 private:
   //Initialize primitive member variables from setup data
-
   void InitBasicVals(config_setup::SystemVals const& val,
                      config_setup::FFKind const& ffKind);
-  void CalculateWolfCalibrationMemoryUsage(config_setup::WolfCalibration const& wolfCal);
-  //void InitWolfCalibration(config_setup::WolfCalibration const& wolfCal);
-
 };
 
 #endif /*FORCEFIELD_H*/

@@ -39,7 +39,7 @@ private:
   StaticVals & statValRef;
   CalculateEnergy & calcEn;
   uint stepsPerSample;
-  WolfCalibration & wolfCalRef;
+  WolfCalibration * wolfCal;
 
 
   int numberOfRCuts[BOX_TOTAL];

@@ -1,12 +1,13 @@
 #include "WolfCalibration.h"
-WolfCalibration::WolfCalibration(config_setup::WolfCalibration const& wolfCal,
-                                  bool enable)
+WolfCalibration::WolfCalibration()
 {
-  if(enable){
+
+}
+
+void WolfCalibration::Init(config_setup::WolfCalibration const& wolfCal){
     CalculateWolfCalibrationMemoryUsage(wolfCal);
     AllocMem();
     InitWolfCalibration(wolfCal);
-  }
 }
 
 WolfCalibration::~WolfCalibration()
@@ -54,9 +55,6 @@ void WolfCalibration::CalculateWolfCalibrationMemoryUsage(config_setup::WolfCali
     numberOfRCuts[b] = (int)((wolfCal.wolfCutoffCoulombEnd[b] - wolfCal.wolfCutoffCoulombStart[b]) / wolfCal.wolfCutoffCoulombDelta[b]) + 1;
     numberOfAlphas[b] = (int)((wolfCal.wolfAlphaEnd[b] - wolfCal.wolfAlphaStart[b]) / wolfCal.wolfAlphaDelta[b]) + 1;
   }
-}
-
-void WolfCalibration::AllocMem(){
   totalNumAlphas = 0;
   totalNumRCuts = 0;
   totalNumWolfFactors = 0;
@@ -68,7 +66,9 @@ void WolfCalibration::AllocMem(){
     totalNumRCuts += numberOfRCuts[b];
     totalNumWolfFactors +=  numberOfAlphas[b] * numberOfRCuts[b];
   }
+}
 
+void WolfCalibration::AllocMem(){
   wolfAlpha = new double[totalNumAlphas];
   rCutCoulomb = new double[totalNumRCuts];
   rCutCoulombSq = new double[totalNumRCuts];
@@ -78,14 +78,12 @@ void WolfCalibration::AllocMem(){
 }
 
 void WolfCalibration::DeallocMem(){
-  for (uint b = 0; b < BOX_TOTAL; ++b) {
-    delete[] wolfAlpha;
-    delete[] rCutCoulomb;
-    delete[] rCutCoulombSq;
-    delete[] wolfFactor1;
-    delete[] wolfFactor2;
-    delete[] wolfFactor3;
-  }
+  delete[] wolfAlpha;
+  delete[] rCutCoulomb;
+  delete[] rCutCoulombSq;
+  delete[] wolfFactor1;
+  delete[] wolfFactor2;
+  delete[] wolfFactor3;
 }
 
 int WolfCalibration::GetIndex(int box, int wolfKind, int coulKind, int r, int a){

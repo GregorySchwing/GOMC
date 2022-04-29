@@ -11,27 +11,28 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 
 
 WolfCalibrationOutput::WolfCalibrationOutput(System & sys, StaticVals & statV):
-sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV), wolfCalRef(statV.wolfCal)
+sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV), wolfCal(statV.wolfCal)
 {
-      for (int b = 0; b < BOX_TOTAL; ++b){
-            numberOfRCuts[b] = wolfCalRef.GetNumberOfRCuts(b);
-            numberOfAlphas[b] = wolfCalRef.GetNumberOfAlphas(b);
-            startOfWolfFactor[b] = wolfCalRef.GetStartOfWolfFactors(b);
-      }
+
 }
 
-  WolfCalibrationOutput::~WolfCalibrationOutput()
-  {
+WolfCalibrationOutput::~WolfCalibrationOutput()
+{
 
-  }
+}
 
 void WolfCalibrationOutput::Init(pdb_setup::Atoms const& atoms,
                             config_setup::Output const& output) {
+      for (int b = 0; b < BOX_TOTAL; ++b){
+            numberOfRCuts[b] = wolfCal->GetNumberOfRCuts(b);
+            numberOfAlphas[b] = wolfCal->GetNumberOfAlphas(b);
+            startOfWolfFactor[b] = wolfCal->GetStartOfWolfFactors(b);
+      }
       stepsPerSample = output.wolfCalibration.settings.frequency;
       stepsPerOut = output.wolfCalibration.settings.frequency;
       enableOut = output.wolfCalibration.settings.enable;
-      electrostaticEnergies.resize(wolfCalRef.GetTotalNumWolfFactors());
-      electrostaticEnergies.assign(wolfCalRef.GetTotalNumWolfFactors(), 0.0);
+      electrostaticEnergies.resize(wolfCal->GetTotalNumWolfFactors());
+      electrostaticEnergies.assign(wolfCal->GetTotalNumWolfFactors(), 0.0);
       if(enableOut) {
             for (uint b = 0; b < BOX_TOTAL; ++b) {
                   for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
@@ -41,9 +42,9 @@ void WolfCalibrationOutput::Init(pdb_setup::Atoms const& atoms,
                               sstrm << (b);
                               sstrm >> strKind;
                               fileName = "Wolf_Calibration_";
-                              fileName += wolfCalRef.wolfKindStrings[wolfKind];
+                              fileName += wolfCal->wolfKindStrings[wolfKind];
                               fileName += "_";
-                              fileName += wolfCalRef.coulKindStrings[coulKind];
+                              fileName += wolfCal->coulKindStrings[coulKind];
                               fileName += "_BOX_";
                               fileName += strKind;
                               fileName += "_";
@@ -74,12 +75,12 @@ void WolfCalibrationOutput::WriteHeader(uint b, uint wolfKind, uint coulKind)
             // We skip the reference r cut with reference alpha.
             // r = 0, a = 0
             // So there are no duplicate columns.
-            for (int r = 0; r < wolfCalRef.numberOfRCuts[b]; ++r){
-                  for (int a = 0; a < wolfCalRef.numberOfAlphas[b]; ++a){
+            for (int r = 0; r < wolfCal->numberOfRCuts[b]; ++r){
+                  for (int a = 0; a < wolfCal->numberOfAlphas[b]; ++a){
                         firstRow += "(";
-                        firstRow += GetString(wolfCalRef.rCutCoulomb[wolfCalRef.startOfNumRCuts[b]+r], 4);
+                        firstRow += GetString(wolfCal->rCutCoulomb[wolfCal->startOfNumRCuts[b]+r], 4);
                         firstRow += ", ";
-                        firstRow += GetString(wolfCalRef.wolfAlpha[wolfCalRef.startOfNumAlphas[b]+a], 4);
+                        firstRow += GetString(wolfCal->wolfAlpha[wolfCal->startOfNumAlphas[b]+a], 4);
                         firstRow += ")\t";
                   }
             }
@@ -101,14 +102,14 @@ void WolfCalibrationOutput::WriteGraceParFile(uint b, uint wolfKind, uint coulKi
             // We skip the reference r cut with reference alpha.
             // r = 0, a = 0
             // So there are no duplicate columns.
-            for (int r = 0; r < wolfCalRef.numberOfRCuts[b]; ++r){
-                  for (int a = 0; a < wolfCalRef.numberOfAlphas[b]; ++a){
+            for (int r = 0; r < wolfCal->numberOfRCuts[b]; ++r){
+                  for (int a = 0; a < wolfCal->numberOfAlphas[b]; ++a){
                         firstRow += "\ts";
                         firstRow += GetString(counter);
                         firstRow += " legend \"(";
-                        firstRow += GetString(wolfCalRef.rCutCoulomb[wolfCalRef.startOfNumRCuts[b]+r], 4);
+                        firstRow += GetString(wolfCal->rCutCoulomb[wolfCal->startOfNumRCuts[b]+r], 4);
                         firstRow += ", ";
-                        firstRow += GetString(wolfCalRef.wolfAlpha[wolfCalRef.startOfNumAlphas[b]+a], 4);
+                        firstRow += GetString(wolfCal->wolfAlpha[wolfCal->startOfNumAlphas[b]+a], 4);
                         firstRow += ")\"\n";
                         ++counter;
                   }
@@ -163,10 +164,10 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
                         // We skip the reference r cut with reference alpha.
                         // r = 0, a = 0
                         // So there are no duplicate columns.
-                        for (int r = 0; r < wolfCalRef.numberOfRCuts[box]; ++r){
-                              for (int a = 0; a < wolfCalRef.numberOfAlphas[box]; ++a){
+                        for (int r = 0; r < wolfCal->numberOfRCuts[box]; ++r){
+                              for (int a = 0; a < wolfCal->numberOfAlphas[box]; ++a){
                                     // If you dont use std::abs, double is converted to int 
-                                    row += GetString((std::abs(ewaldRef.boxEnergy[box].total) -  std::abs(electrostaticEnergies[wolfCalRef.GetIndex(box, wolfKind, coulKind, r, a)]))/ std::abs(ewaldRef.boxEnergy[box].total), 8);
+                                    row += GetString((std::abs(ewaldRef.boxEnergy[box].total) -  std::abs(electrostaticEnergies[wolfCal->GetIndex(box, wolfKind, coulKind, r, a)]))/ std::abs(ewaldRef.boxEnergy[box].total), 8);
                                     row += "\t";
                               }
                         }
