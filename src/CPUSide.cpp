@@ -46,8 +46,8 @@ void CPUSide::Init( PDBSetup const& pdbSet,
     outObj.push_back(&block);
   if (out.restart.settings.enable)
     outObj.push_back(&checkpoint);
-  //if (out.wolfCalibration.settings.enable)
-  //  outObj.push_back(&wolfCalibration);
+  if (out.wolfCalibration.settings.enable)
+    outObj.push_back(&wolfCalibration);
 
 #if ENSEMBLE == GCMC
   outObj.push_back(&hist);

@@ -37,12 +37,15 @@ void WolfCalibration::InitWolfCalibration(config_setup::WolfCalibration const& w
     }
     for(uint r = 0; r < numberOfRCuts[b]; r++) {
       for(uint a = 0 ; a < numberOfAlphas[b]; a++) {
-        wolfFactor1[startOfWolfFactor[b] + numberOfRCuts[b]*r + a] = erfc(wolfAlpha[startOfNumAlphas[b]+a]*rCutCoulomb[startOfNumRCuts[b]+r])/rCutCoulomb[startOfNumRCuts[b]+r];
-        wolfFactor2[startOfWolfFactor[b] + numberOfRCuts[b]*r + a] = wolfFactor1[startOfWolfFactor[b] + numberOfRCuts[b]*r + a]/rCutCoulomb[startOfNumRCuts[b]+r];
-        wolfFactor2[startOfWolfFactor[b] + numberOfRCuts[b]*r + a] += wolfAlpha[startOfNumAlphas[b]+a] *  M_2_SQRTPI * 
+        if (startOfWolfFactor[b] + numberOfAlphas[b]*r + a >= totalNumWolfFactors){
+          std::cout << "BAD" << std::endl;
+        }
+        wolfFactor1[startOfWolfFactor[b] + numberOfAlphas[b]*r + a] = erfc(wolfAlpha[startOfNumAlphas[b]+a]*rCutCoulomb[startOfNumRCuts[b]+r])/rCutCoulomb[startOfNumRCuts[b]+r];
+        wolfFactor2[startOfWolfFactor[b] + numberOfAlphas[b]*r + a] = wolfFactor1[startOfWolfFactor[b] + numberOfAlphas[b]*r + a]/rCutCoulomb[startOfNumRCuts[b]+r];
+        wolfFactor2[startOfWolfFactor[b] + numberOfAlphas[b]*r + a] += wolfAlpha[startOfNumAlphas[b]+a] *  M_2_SQRTPI * 
                           exp(-1.0*wolfAlpha[startOfNumAlphas[b]+a]*wolfAlpha[startOfNumAlphas[b]+a]*rCutCoulombSq[startOfNumRCuts[b]+r])
                           /rCutCoulomb[startOfNumRCuts[b]+r];
-        wolfFactor3[startOfWolfFactor[b] + numberOfRCuts[b]*r + a] = wolfAlpha[startOfNumAlphas[b]+a] *  M_2_SQRTPI;
+        wolfFactor3[startOfWolfFactor[b] + numberOfAlphas[b]*r + a] = wolfAlpha[startOfNumAlphas[b]+a] *  M_2_SQRTPI;
       }
     }
   }

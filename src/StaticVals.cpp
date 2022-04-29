@@ -17,8 +17,8 @@ void StaticVals::Init(Setup & set, System& sys)
   simEventFreq.Init(set.config.sys.step);
   forcefield.Init(set);
   mol.Init(set, forcefield, sys);
-  //if(set.config.out.wolfCalibration.settings.enable)
-  //  wolfCal->Init(set.config.sys.wolfCal);
+  if(set.config.out.wolfCalibration.settings.enable)
+    wolfCal->Init(set.config.sys.wolfCal);
 #ifndef VARIABLE_PARTICLE_NUMBER
   molLookup.Init(mol, set.pdb.atoms, forcefield, set.config.in.restart.restartFromCheckpoint);
 #endif
@@ -34,12 +34,6 @@ void StaticVals::InitOver(Setup & set, System& sys)
 {
   mol.~Molecules();
   mol.Init(set, forcefield, sys);
-  //if(set.config.out.wolfCalibration.settings.enable){
-  //  wolfCal->~WolfCalibration();
-  //  wolfCal->Init(set.config.sys.wolfCal);
-  //}
- 
-
 }
 
 void StaticVals::InitMovePercents(config_setup::MovePercents const& perc)
@@ -154,8 +148,8 @@ StaticVals::StaticVals(Setup & set) : intraMemcVal(set.config.sys.intraMemcVal),
   } else {
     IsBoxOrthogonal(set.config.sys.volume);
   }
-  //if(set.config.out.wolfCalibration.settings.enable)
-  //  wolfCal = new WolfCalibration();
+  if(set.config.out.wolfCalibration.settings.enable)
+    wolfCal = new WolfCalibration();
 }
 
 

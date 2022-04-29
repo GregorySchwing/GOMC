@@ -31,8 +31,8 @@ void WolfCalibrationOutput::Init(pdb_setup::Atoms const& atoms,
       stepsPerSample = output.wolfCalibration.settings.frequency;
       stepsPerOut = output.wolfCalibration.settings.frequency;
       enableOut = output.wolfCalibration.settings.enable;
-      electrostaticEnergies.resize(wolfCal->GetTotalNumWolfFactors());
-      electrostaticEnergies.assign(wolfCal->GetTotalNumWolfFactors(), 0.0);
+      electrostaticEnergies.resize(BOX_TOTAL*WOLF_TOTAL_KINDS*COUL_TOTAL_KINDS*wolfCal->GetTotalNumWolfFactors());
+      electrostaticEnergies.assign(BOX_TOTAL*WOLF_TOTAL_KINDS*COUL_TOTAL_KINDS*wolfCal->GetTotalNumWolfFactors(), 0.0);
       if(enableOut) {
             for (uint b = 0; b < BOX_TOTAL; ++b) {
                   for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
