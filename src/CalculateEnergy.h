@@ -317,7 +317,7 @@ private:
   const Coordinates& currentCoords;
   const COM& currentCOM;
   const Lambda& lambdaRef;
-  WolfCalibration * wolfCal;
+  WolfCalibration & wolfCalRef;
   // Need to remove const so wolf kind and coul kind can vary during Calibration    
   Forcefield & forcefield;
   Ewald *calcEwald;

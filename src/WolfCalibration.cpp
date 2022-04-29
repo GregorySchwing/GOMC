@@ -1,7 +1,7 @@
 #include "WolfCalibration.h"
 WolfCalibration::WolfCalibration()
 {
-
+  allocDone = false;
 }
 
 void WolfCalibration::Init(config_setup::WolfCalibration const& wolfCal){
@@ -12,7 +12,8 @@ void WolfCalibration::Init(config_setup::WolfCalibration const& wolfCal){
 
 WolfCalibration::~WolfCalibration()
 {
-  DeallocMem();
+  if (allocDone)
+    DeallocMem();
 }
 
 double WolfCalibration::GetAlpha(int box, int indexForAlpha){return wolfAlpha[startOfNumAlphas[box]+indexForAlpha];}
@@ -78,6 +79,7 @@ void WolfCalibration::AllocMem(){
   wolfFactor1 = new double[totalNumWolfFactors];
   wolfFactor2 = new double[totalNumWolfFactors];
   wolfFactor3 = new double[totalNumWolfFactors];
+  allocDone = true;
 }
 
 void WolfCalibration::DeallocMem(){

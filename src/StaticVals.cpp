@@ -18,7 +18,7 @@ void StaticVals::Init(Setup & set, System& sys)
   forcefield.Init(set);
   mol.Init(set, forcefield, sys);
   if(set.config.out.wolfCalibration.settings.enable)
-    wolfCal->Init(set.config.sys.wolfCal);
+    wolfCal.Init(set.config.sys.wolfCal);
 #ifndef VARIABLE_PARTICLE_NUMBER
   molLookup.Init(mol, set.pdb.atoms, forcefield, set.config.in.restart.restartFromCheckpoint);
 #endif
@@ -148,8 +148,6 @@ StaticVals::StaticVals(Setup & set) : intraMemcVal(set.config.sys.intraMemcVal),
   } else {
     IsBoxOrthogonal(set.config.sys.volume);
   }
-  if(set.config.out.wolfCalibration.settings.enable)
-    wolfCal = new WolfCalibration();
 }
 
 

@@ -45,7 +45,7 @@ public:
   SimEventFrequency simEventFreq;
   //All the static molecule info --  kind, start index
   Molecules mol;
-  WolfCalibration * wolfCal;
+  WolfCalibration wolfCal;
 
   double movePerc[mv::MOVE_KINDS_TOTAL];
   double totalPerc;

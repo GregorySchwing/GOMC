@@ -26,7 +26,7 @@ private:
   void CalculateWolfCalibrationMemoryUsage(config_setup::WolfCalibration const& wolfCal);
   void AllocMem();
   void DeallocMem();
-
+  bool allocDone;
   double * wolfAlpha; //alpha term for Wolf Electrostatic and constant factors
   double * wolfFactor1; //alpha term for Wolf Electrostatic and constant factors
   double * wolfFactor2;  //alpha term for Wolf Electrostatic and constant factors

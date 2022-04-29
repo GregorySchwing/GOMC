@@ -196,7 +196,7 @@ public:
 
 private:
   double currentEnergyRecip[BOXES_WITH_U_NB];
-
+  bool allocDone;
 protected:
   const Forcefield& ff;
   const Molecules& mols;

@@ -47,6 +47,9 @@ Ewald::Ewald(StaticVals & stat, System & sys) :
   currentAxes(sys.boxDimRef),
   currentCOM(sys.com), sysPotRef(sys.potential), lambdaRef(sys.lambdaRef)
 {
+  // This bool is necessary until general electrostatic class is written
+  // For now, only destruct if allocated.
+  allocDone = false;
   ewald = false;
   electrostatic = false;
   alpha = 0.0;
@@ -57,7 +60,7 @@ Ewald::Ewald(StaticVals & stat, System & sys) :
 
 Ewald::~Ewald()
 {
-  if(ff.ewald) {
+  if(allocDone) {
 #ifdef GOMC_CUDA
     DestroyEwaldCUDAVars(ff.particles->getCUDAVars());
 #endif
@@ -96,6 +99,7 @@ Ewald::~Ewald()
     delete[] imageSize;
     delete[] imageSizeRef;
   }
+  allocDone = false;
 }
 
 void Ewald::Init()
@@ -188,6 +192,8 @@ void Ewald::AllocMem()
 #ifdef GOMC_CUDA
   InitEwaldVariablesCUDA(ff.particles->getCUDAVars(), imageTotal);
 #endif
+
+  allocDone = true;
 }
 
 
