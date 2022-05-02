@@ -170,13 +170,23 @@ inline void VolumeTransfer::CalcEn()
         calcEwald->RecipInit(bPick[b], newDim);
         //setup reciprocal terms
         calcEwald->BoxReciprocalSetup(bPick[b], newMolsPos);
-        sysPotNew = calcEnRef.BoxInter(sysPotNew, newMolsPos, newDim, bPick[b]);
+        sysPotNew = calcEnRef.BoxInter(sysPotNew, newMolsPos, newDim, bPick[b],
+                                      ffRef.rCutCoulomb[box],
+                                      ffRef.rCutCoulombSq[box],
+                                      ffRef.wolfFactor1[box],
+                                      ffRef.wolfFactor2[box],
+                                      ffRef.wolfAlpha[box]);
       } else {
         calcEwald->RecipInit(bPick[b], newDimNonOrth);
         //setup reciprocal terms
         calcEwald->BoxReciprocalSetup(bPick[b], newMolsPos);
         sysPotNew = calcEnRef.BoxInter(sysPotNew, newMolsPos, newDimNonOrth,
-                                       bPick[b]);
+                                       bPick[b],
+                                      ffRef.rCutCoulomb[box],
+                                      ffRef.rCutCoulombSq[box],
+                                      ffRef.wolfFactor1[box],
+                                      ffRef.wolfFactor2[box],
+                                      ffRef.wolfAlpha[box]);
       }
       //calculate reciprocal term of electrostatic interaction
       sysPotNew.boxEnergy[bPick[b]].recip = calcEwald->BoxReciprocal(bPick[b], true);
@@ -187,12 +197,22 @@ inline void VolumeTransfer::CalcEn()
       calcEwald->RecipInit(box, newDim);
       //setup reciprocal terms
       calcEwald->BoxReciprocalSetup(box, newMolsPos);
-      sysPotNew = calcEnRef.BoxInter(sysPotNew, newMolsPos, newDim, box);
+      sysPotNew = calcEnRef.BoxInter(sysPotNew, newMolsPos, newDim, box,
+                                      ffRef.rCutCoulomb[box],
+                                      ffRef.rCutCoulombSq[box],
+                                      ffRef.wolfFactor1[box],
+                                      ffRef.wolfFactor2[box],
+                                      ffRef.wolfAlpha[box]);
     } else {
       calcEwald->RecipInit(box, newDimNonOrth);
       //setup reciprocal terms
       calcEwald->BoxReciprocalSetup(box, newMolsPos);
-      sysPotNew = calcEnRef.BoxInter(sysPotNew, newMolsPos, newDimNonOrth, box);
+      sysPotNew = calcEnRef.BoxInter(sysPotNew, newMolsPos, newDimNonOrth, box,
+                                      ffRef.rCutCoulomb[box],
+                                      ffRef.rCutCoulombSq[box],
+                                      ffRef.wolfFactor1[box],
+                                      ffRef.wolfFactor2[box],
+                                      ffRef.wolfAlpha[box]);
     }
     //calculate reciprocal term of electrostatic interaction
     sysPotNew.boxEnergy[box].recip = calcEwald->BoxReciprocal(box, true);
