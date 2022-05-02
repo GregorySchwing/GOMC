@@ -908,7 +908,7 @@ Intermolecular CalculateEnergy::MoleculeTailVirChange(const uint box,
 //Calculates intramolecular energy of a full molecule
 void CalculateEnergy::MoleculeIntra(const uint molIndex,
                                     const uint box, double *bondEn,
-                                    double rCutCoulomb) const
+                                    double rCutCoulombSq) const
 {
   GOMC_EVENT_START(1, GomcProfileEvent::EN_MOL_INTRA);
   bondEn[0] = 0.0, bondEn[1] = 0.0;
@@ -921,12 +921,13 @@ void CalculateEnergy::MoleculeIntra(const uint molIndex,
   MolBond(bondEn[0], molKind, bondVec, molIndex, box);
   MolAngle(bondEn[0], molKind, bondVec, box);
   MolDihedral(bondEn[0], molKind, bondVec, box);
-  MolNonbond(bondEn[1], molKind, molIndex, box, forcefield.rCutCoulombSq[box]);
-  MolNonbond_1_4(bondEn[1], molKind, molIndex, box, forcefield.rCutCoulombSq[box]);
-  MolNonbond_1_3(bondEn[1], molKind, molIndex, box, forcefield.rCutCoulombSq[box]);
+  MolNonbond(bondEn[1], molKind, molIndex, box, rCutCoulombSq);
+  MolNonbond_1_4(bondEn[1], molKind, molIndex, box, rCutCoulombSq);
+  MolNonbond_1_3(bondEn[1], molKind, molIndex, box, rCutCoulombSq);
   GOMC_EVENT_STOP(1, GomcProfileEvent::EN_MOL_INTRA);
 }
 
+// GetBox function is used to get RCutCoulSq within MolNonbond* methods
 //used in molecule exchange for calculating bonded and intraNonbonded energy
 Energy CalculateEnergy::MoleculeIntra(cbmc::TrialMol const &mol) const
 {
@@ -1202,7 +1203,7 @@ void CalculateEnergy::MolNonbond_1_4(double & energy,
 
         if (qi_qj_fact != 0.0) {
           forcefield.particles->CalcCoulombAdd_1_4(energy, distSq,
-            qi_qj_fact, false, box, forcefield.rCutCoulombSq[box]);
+            qi_qj_fact, false, box, rCutCoulombSq);
         }
       }
     }
@@ -1949,13 +1950,15 @@ void CalculateEnergy::WolfCalibrationEnergy(double * electrostaticEnergies){
         bondEn = 0.0;
         nonbondEn = 0.0;
         double rCutCoul =  wolfCalRef.GetRCut(b, indexForRcut);
+        double rCutCoulombSq =  wolfCalRef.GetRCutSq(b, indexForRcut);
+
         #ifdef _OPENMP
-        #pragma omp parallel for default(none) private(bondEnergy) shared(b, molID, rCutCoul) \
+        #pragma omp parallel for default(none) private(bondEnergy) shared(b, molID, rCutCoulombSq) \
             reduction(+:bondEn, nonbondEn)
         #endif
         for (int i = 0; i < (int) molID.size(); i++) {
           // Intra only depends on RCut.
-          MoleculeIntra(molID[i], b, bondEnergy, rCutCoul);
+          MoleculeIntra(molID[i], b, bondEnergy, rCutCoulombSq);
           bondEn += bondEnergy[0];
           nonbondEn += bondEnergy[1];
         }

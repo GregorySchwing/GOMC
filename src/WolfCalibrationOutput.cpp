@@ -78,9 +78,9 @@ void WolfCalibrationOutput::WriteHeader(uint b, uint wolfKind, uint coulKind)
             for (int r = 0; r < wolfCalRef.numberOfRCuts[b]; ++r){
                   for (int a = 0; a < wolfCalRef.numberOfAlphas[b]; ++a){
                         firstRow += "(";
-                        firstRow += GetString(wolfCalRef.rCutCoulomb[wolfCalRef.startOfNumRCuts[b]+r], 4);
+                        firstRow += GetString(wolfCalRef.GetRCut(b, r), 4);
                         firstRow += ", ";
-                        firstRow += GetString(wolfCalRef.wolfAlpha[wolfCalRef.startOfNumAlphas[b]+a], 4);
+                        firstRow += GetString(wolfCalRef.GetAlpha(b, a), 4);
                         firstRow += ")\t";
                   }
             }
