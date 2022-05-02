@@ -1126,8 +1126,11 @@ double Ewald::MolCorrection(uint molIndex, uint box) const
 
 // For simple compilation.  Should never be called.
 double Ewald::MolCorrection(uint molIndex, uint box,
-                            double rCutCoulomb,
-                            double wolfAlpha) const {
+                          double rCutCoulomb,
+                          double rCutCoulombSq,
+                          double wolfFactor1,
+                          double wolfFactor2,
+                          double wolfAlpha) const {
   return 0.0;
 }
 

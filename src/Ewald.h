@@ -103,8 +103,11 @@ public:
   //calculate correction term for a molecule
   virtual double MolCorrection(uint molIndex, uint box)const;
   virtual double MolCorrection(uint molIndex, uint box,
-                              double rCutCoulomb,
-                              double wolfAlpha) const;
+                          double rCutCoulomb,
+                          double rCutCoulombSq,
+                          double wolfFactor1,
+                          double wolfFactor2,
+                          double wolfAlpha) const;
 
 
   //calculate reciprocal term in destination box for swap move

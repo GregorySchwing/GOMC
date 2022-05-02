@@ -1993,8 +1993,12 @@ void CalculateEnergy::WolfCalibrationEnergy(double * electrostaticEnergies){
               #endif
               for (int i = 0; i < (int) molID.size(); i++) {
                 //calculate correction term of electrostatic interaction
-                correction += calcEwald->MolCorrection(molID[i], b, wolfCalRef.GetRCut(b, indexForRcut), 
-                                                                    wolfCalRef.GetAlpha(b, indexForAlpha));
+                correction += calcEwald->MolCorrection(molID[i], b, 
+                                                        wolfCalRef.GetRCut(b, indexForRcut),
+                                                        wolfCalRef.GetRCutSq(b, indexForRcut),
+                                                        wolfCalRef.GetWolfFactor1(b, indexForRcut, indexForAlpha),
+                                                        wolfCalRef.GetWolfFactor2(b, indexForRcut, indexForAlpha),
+                                                        wolfCalRef.GetAlpha(b, indexForAlpha));
               }
               summationPotential.boxEnergy[b].correction = correction;
               // Self depends on Rcut, alpha, and Wolf Kind
