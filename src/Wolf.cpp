@@ -433,6 +433,16 @@ double Wolf::SwapSelf(const cbmc::TrialMol& trialMol,
   }
 }
 
+double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
+                             const uint molIndex) const 
+{
+  return SwapCorrection(trialMol,
+                        molIndex,
+                        ffRef.rCutCoulombSq[trialMol.GetBox()],
+                        ffRef.wolfFactor1[trialMol.GetBox()], 
+                        ffRef.wolfAlpha[trialMol.GetBox()]);
+}
+
 //calculate correction term after swap move
 double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
                             double rCutCoulombSq,
