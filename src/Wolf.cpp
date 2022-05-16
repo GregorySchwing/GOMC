@@ -535,6 +535,13 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
   GOMC_EVENT_STOP(1, GomcProfileEvent::CORR_SWAP);
   return num::qqFact * correction;
 }
+
+double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
+                            const uint molIndex) const{
+  return SwapCorrection(trialMol, molIndex, 0, 0);
+}
+
+
 //calculate correction term after swap move
 double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
                             const uint molIndex,

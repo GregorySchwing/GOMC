@@ -82,6 +82,9 @@ public:
                                 int indexForRCut = 0,
                                 int indexForAlpha = 0) const;
 
+  virtual double SwapCorrection(const cbmc::TrialMol& trialMol,
+                              const uint molIndex) const;
+
   //calculate correction term after swap move, with system lambda
   virtual double SwapCorrection(const cbmc::TrialMol& trialMol,
                                 const uint molIndex,
