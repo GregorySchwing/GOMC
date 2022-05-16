@@ -194,6 +194,9 @@ void Ewald::AllocMem()
 #endif
 
   allocDone = true;
+  double vm, rss;
+  MemoryTracker::mem_usage(vm, rss);
+  std::cout << "After Ewald Virtual Memory: " << vm << " KB\nResident set size: " << rss << std::endl;
 }
 
 

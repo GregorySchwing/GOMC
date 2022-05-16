@@ -6,6 +6,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 ********************************************************************************/
 #ifndef EWALD_H
 #define EWALD_H
+#include "MemoryTracker.h"
 
 #include "BasicTypes.h"
 #include "EnergyTypes.h"
