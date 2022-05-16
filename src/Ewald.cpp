@@ -188,15 +188,15 @@ void Ewald::AllocMem()
     sumRref[b] = new double[imageTotal];
     sumIref[b] = new double[imageTotal];
   }
-
-#ifdef GOMC_CUDA
-  InitEwaldVariablesCUDA(ff.particles->getCUDAVars(), imageTotal);
-#endif
-
   allocDone = true;
   double vm, rss;
   MemoryTracker::mem_usage(vm, rss);
   std::cout << "After Ewald Virtual Memory: " << vm << " KB\nResident set size: " << rss << std::endl;
+#ifdef GOMC_CUDA
+  InitEwaldVariablesCUDA(ff.particles->getCUDAVars(), imageTotal);
+#endif
+
+
 }
 
 
