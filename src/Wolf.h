@@ -76,6 +76,10 @@ public:
                                   const uint box);
 
   //calculate self term after swap move
+  virtual double SwapCorrection(const cbmc::TrialMol& trialMol,
+                                const uint molIndex) const;
+
+  //calculate self term after swap move
   virtual double SwapSelf(const cbmc::TrialMol& trialMol,
                                 double wolfFactor1,
                                 double wolfAlpha) const;
