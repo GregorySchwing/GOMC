@@ -11,39 +11,28 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 
 
 WolfCalibrationOutput::WolfCalibrationOutput(System & sys, StaticVals & statV):
-sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV)
+sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV), wolfCalRef(statV.wolfCal)
 {
-      for(uint b = 0 ; b < BOX_TOTAL; b++) {
-            for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
-                  for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){
-                        electrostaticEnergies[b][wolfKind][coulKind] =  new double*[statValRef.forcefield.numberOfRCuts[b]];
-                        for (int r = 0; r < statValRef.forcefield.numberOfRCuts[b]; ++r){
-                              electrostaticEnergies[b][wolfKind][coulKind][r] =  new double[statValRef.forcefield.numberOfAlphas[b]];
-                        }
-                  }
-            }
-      }
+
 }
 
-  WolfCalibrationOutput::~WolfCalibrationOutput()
-  {
-      for(uint b = 0 ; b < BOX_TOTAL; b++) {
-            for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
-                  for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){
-                        for (int r = 0; r < statValRef.forcefield.numberOfRCuts[b]; ++r){
-                              delete[] electrostaticEnergies[b][wolfKind][coulKind][r];
-                        }
-                        delete[] electrostaticEnergies[b][wolfKind][coulKind];
-                  }
-            }
-      }
-  }
+WolfCalibrationOutput::~WolfCalibrationOutput()
+{
+
+}
 
 void WolfCalibrationOutput::Init(pdb_setup::Atoms const& atoms,
                             config_setup::Output const& output) {
+      for (int b = 0; b < BOX_TOTAL; ++b){
+            numberOfRCuts[b] = wolfCalRef.GetNumberOfRCuts(b);
+            numberOfAlphas[b] = wolfCalRef.GetNumberOfAlphas(b);
+            startOfWolfFactor[b] = wolfCalRef.GetStartOfWolfFactors(b);
+      }
       stepsPerSample = output.wolfCalibration.settings.frequency;
       stepsPerOut = output.wolfCalibration.settings.frequency;
       enableOut = output.wolfCalibration.settings.enable;
+      electrostaticEnergies.resize(BOX_TOTAL*WOLF_TOTAL_KINDS*COUL_TOTAL_KINDS*wolfCalRef.GetTotalNumWolfFactors());
+      electrostaticEnergies.assign(BOX_TOTAL*WOLF_TOTAL_KINDS*COUL_TOTAL_KINDS*wolfCalRef.GetTotalNumWolfFactors(), 0.0);
       if(enableOut) {
             for (uint b = 0; b < BOX_TOTAL; ++b) {
                   for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
@@ -53,9 +42,9 @@ void WolfCalibrationOutput::Init(pdb_setup::Atoms const& atoms,
                               sstrm << (b);
                               sstrm >> strKind;
                               fileName = "Wolf_Calibration_";
-                              fileName += statValRef.forcefield.wolfKindStrings[wolfKind];
+                              fileName += wolfCalRef.wolfKindStrings[wolfKind];
                               fileName += "_";
-                              fileName += statValRef.forcefield.coulKindStrings[coulKind];
+                              fileName += wolfCalRef.coulKindStrings[coulKind];
                               fileName += "_BOX_";
                               fileName += strKind;
                               fileName += "_";
@@ -86,12 +75,12 @@ void WolfCalibrationOutput::WriteHeader(uint b, uint wolfKind, uint coulKind)
             // We skip the reference r cut with reference alpha.
             // r = 0, a = 0
             // So there are no duplicate columns.
-            for (int r = 1; r < statValRef.forcefield.numberOfRCuts[b]; ++r){
-                  for (int a = 1; a < statValRef.forcefield.numberOfAlphas[b]; ++a){
+            for (int r = 0; r < wolfCalRef.numberOfRCuts[b]; ++r){
+                  for (int a = 0; a < wolfCalRef.numberOfAlphas[b]; ++a){
                         firstRow += "(";
-                        firstRow += GetString(statValRef.forcefield.rCutCoulomb[b][r], 4);
+                        firstRow += GetString(wolfCalRef.GetRCut(b, r), 4);
                         firstRow += ", ";
-                        firstRow += GetString(statValRef.forcefield.wolfAlpha[b][a], 4);
+                        firstRow += GetString(wolfCalRef.GetAlpha(b, a), 4);
                         firstRow += ")\t";
                   }
             }
@@ -113,14 +102,14 @@ void WolfCalibrationOutput::WriteGraceParFile(uint b, uint wolfKind, uint coulKi
             // We skip the reference r cut with reference alpha.
             // r = 0, a = 0
             // So there are no duplicate columns.
-            for (int r = 1; r < statValRef.forcefield.numberOfRCuts[b]; ++r){
-                  for (int a = 1; a < statValRef.forcefield.numberOfAlphas[b]; ++a){
+            for (int r = 0; r < wolfCalRef.numberOfRCuts[b]; ++r){
+                  for (int a = 0; a < wolfCalRef.numberOfAlphas[b]; ++a){
                         firstRow += "\ts";
                         firstRow += GetString(counter);
                         firstRow += " legend \"(";
-                        firstRow += GetString(statValRef.forcefield.rCutCoulomb[b][r], 4);
+                        firstRow += GetString(wolfCalRef.rCutCoulomb[wolfCalRef.startOfNumRCuts[b]+r], 4);
                         firstRow += ", ";
-                        firstRow += GetString(statValRef.forcefield.wolfAlpha[b][a], 4);
+                        firstRow += GetString(wolfCalRef.wolfAlpha[wolfCalRef.startOfNumAlphas[b]+a], 4);
                         firstRow += ")\"\n";
                         ++counter;
                   }
@@ -134,9 +123,10 @@ void WolfCalibrationOutput::WriteGraceParFile(uint b, uint wolfKind, uint coulKi
 }
 
 void WolfCalibrationOutput::DoOutput(const ulong step) {
+      
       uint wolfKindOrig = sysRef.calcEwald->GetWolfKind();
       uint coulKindOrig = sysRef.calcEwald->GetCoulKind();
-      calcEn.WolfCalibrationEnergy(electrostaticEnergies);
+      calcEn.WolfCalibrationEnergy(&electrostaticEnergies[0]);
 
       // Calc reference epot
       sysRef.SwapWolfAndEwaldPointers();
@@ -164,7 +154,7 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
       std::string row = "";
       row += GetString(step);
       row += "\t";
-
+      
       for (uint box = 0; box < BOX_TOTAL; ++box) {       
             for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
                   for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){  
@@ -174,10 +164,10 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
                         // We skip the reference r cut with reference alpha.
                         // r = 0, a = 0
                         // So there are no duplicate columns.
-                        for (int r = 1; r < statValRef.forcefield.numberOfRCuts[box]; ++r){
-                              for (int a = 1; a < statValRef.forcefield.numberOfAlphas[box]; ++a){
+                        for (int r = 0; r < wolfCalRef.numberOfRCuts[box]; ++r){
+                              for (int a = 0; a < wolfCalRef.numberOfAlphas[box]; ++a){
                                     // If you dont use std::abs, double is converted to int 
-                                    row += GetString((std::abs(ewaldRef.boxEnergy[box].total) -  std::abs(electrostaticEnergies[box][wolfKind][coulKind][r][a]))/ std::abs(ewaldRef.boxEnergy[box].total), 8);
+                                    row += GetString((std::abs(ewaldRef.boxEnergy[box].total) -  std::abs(electrostaticEnergies[wolfCalRef.GetIndex(box, wolfKind, coulKind, r, a)]))/ std::abs(ewaldRef.boxEnergy[box].total), 8);
                                     row += "\t";
                               }
                         }
@@ -187,7 +177,6 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
             }
       }
 }
-
 
 std::string WolfCalibrationOutput::GetString(double a, uint p)
 {

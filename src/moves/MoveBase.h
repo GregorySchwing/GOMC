@@ -40,7 +40,7 @@ public:
     molForceRecRef(sys.molForceRecRef), velocity(sys.vel), prng(sys.prng),
     boxDimRef(sys.boxDimRef), molRef(statV.mol),
     BETA(statV.forcefield.beta), ewald(statV.forcefield.ewald),
-    cellList(sys.cellList)
+    cellList(sys.cellList), ffRef(statV.forcefield)
   {
     atomForceNew.Init(sys.atomForceRef.Count());
     molForceNew.Init(sys.molForceRef.Count());
@@ -101,6 +101,7 @@ protected:
   CellList& cellList;
   bool molRemoved, fixBox0, overlap;
   bool multiParticleEnabled;
+  const Forcefield & ffRef;
 };
 
 //Data needed for transforming a molecule's position via inter or intra box

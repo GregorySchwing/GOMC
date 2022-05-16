@@ -59,6 +59,7 @@ public:
   MoleculeKind * kindsRef;
   MoleculeLookup * molLookupRef;
   CalculateEnergy& calc;
+  const Forcefield& ffRef;
 
   //Local copy of res names.
   std::vector<std::string> molKindNames;

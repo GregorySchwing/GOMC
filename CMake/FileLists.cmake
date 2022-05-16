@@ -49,6 +49,7 @@ set(sources
    src/StaticVals.cpp
    src/System.cpp
    src/Wolf.cpp
+   src/WolfCalibration.cpp
    src/WolfCalibrationOutput.cpp
    src/cbmc/DCCrankShaftAng.cpp
    src/cbmc/DCCrankShaftDih.cpp
@@ -150,6 +151,7 @@ set(headers
    src/Velocity.h
    src/Writer.h
    src/Wolf.h
+   src/WolfCalibration.h
    src/WolfCalibrationOutput.h
    src/XYZArray.h
    src/cbmc/DCComponent.h

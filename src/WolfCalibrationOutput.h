@@ -27,7 +27,6 @@ public:
                     config_setup::Output const& output);
   virtual void Sample(const ulong step) {}
 
-
 private:
 
   void WriteHeader(uint b, uint wolfKind, uint coulKind);
@@ -40,9 +39,14 @@ private:
   StaticVals & statValRef;
   CalculateEnergy & calcEn;
   uint stepsPerSample;
+  WolfCalibration & wolfCalRef;
 
-  double ** electrostaticEnergies[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS];
 
+  int numberOfRCuts[BOX_TOTAL];
+  int numberOfAlphas[BOX_TOTAL];
+  int startOfWolfFactor[BOX_TOTAL];
+  //double ** electrostaticEnergies[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS];
+  std::vector<double> electrostaticEnergies;
   //const CalculateEnergy& calcEn;
   std::ofstream outF[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS];
   std::ofstream outFPar[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS];

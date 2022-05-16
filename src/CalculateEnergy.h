@@ -13,7 +13,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "Ewald.h"
 #include "NoEwald.h"
 #include "CellList.h"
-
+#include "WolfCalibration.h"
 #include <vector>
 
 //
@@ -62,8 +62,11 @@ public:
                            XYZArray const& coords,
                            BoxDimensions const& boxAxes,
                            const uint box,
-                           int indexForRcut = 0,
-                           int indexForAlpha = 0);
+                           double rCutCoulomb,
+                           double rCutCoulombSq,    
+                           double wolfFactor1,
+                           double wolfFactor2,                                         
+                           double wolfAlpha);
 
   //! Calculates force of a single box in the system
   SystemPotential BoxForce(SystemPotential potential,
@@ -75,8 +78,8 @@ public:
 
   //! Calculate force and virial for the box
   Virial VirialCalc(const uint box,
-                    int indexForRcut = 0,
-                    int indexForAlpha = 0);
+                    double rCutCoulomb,
+                    double wolfAlpha);
 
   //! Set the force for atom and mol to zero for box
   void ResetForce(XYZArray& atomForce, XYZArray& molForce, uint box);
@@ -161,7 +164,7 @@ public:
 
   //! Calculates intramolecular energy of a full molecule
   void MoleculeIntra(const uint molIndex, const uint box, double *bondEn,
-                    int indexForRCut = 0) const;
+                    double rCutCoulombSq) const;
 
   //used in molecule exchange for calculating bonded and intraNonbonded energy
   Energy MoleculeIntra(cbmc::TrialMol const &mol) const;
@@ -212,7 +215,7 @@ public:
   #if GOMC_GTEST || GOMC_GTEST_MPI
   double GetCharge(int atomIndex);
   #endif
-  void WolfCalibrationEnergy(double ** electrostaticEnergies[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS]);
+  void WolfCalibrationEnergy(double * electrostaticEnergies);
 
 private:
 
@@ -265,7 +268,7 @@ private:
 
   //! Calculates Nonbonded 1_N intramolecule energy of a full molecule
   void MolNonbond(double & energy, MoleculeKind const& molKind,
-                  const uint molIndex, const uint box, int indexForRCut = 0) const;
+                  const uint molIndex, const uint box, double rCutCoulomb) const;
 
   //! Calculates Nonbonded 1_N intramolecule energy of a non-complete molecule
   void MolNonbond(double & energy, cbmc::TrialMol const &mol,
@@ -273,7 +276,7 @@ private:
 
   //! Calculates Nonbonded 1_4 intramolecule energy of a full molecule
   void MolNonbond_1_4(double & energy, MoleculeKind const& molKind,
-                      const uint molIndex, const uint box, int indexForRCut = 0) const;
+                      const uint molIndex, const uint box, double rCutCoulomb) const;
 
   //! Calculates Nonbonded 1_4 intramolecule energy of a non-complete molecule
   void MolNonbond_1_4(double & energy, cbmc::TrialMol const &mol,
@@ -282,7 +285,7 @@ private:
   //! Calculates Nonbonded 1_3 intramolecule energy of a full molecule
   //for Martini forcefield
   void MolNonbond_1_3(double & energy, MoleculeKind const& molKind,
-                      const uint molIndex, const uint box, int indexForRCut = 0) const;
+                      const uint molIndex, const uint box, double rCutCoulomb) const;
 
   //! Calculates Nonbonded 1_3 intramolecule energy of a non-complete molecule
   //for Martini forcefield
@@ -314,6 +317,7 @@ private:
   const Coordinates& currentCoords;
   const COM& currentCOM;
   const Lambda& lambdaRef;
+  WolfCalibration & wolfCalRef;
   // Need to remove const so wolf kind and coul kind can vary during Calibration    
   Forcefield & forcefield;
   Ewald *calcEwald;

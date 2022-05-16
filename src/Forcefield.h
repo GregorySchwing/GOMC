@@ -33,9 +33,7 @@ public:
   Forcefield();
   ~Forcefield();
   //Initialize contained FFxxxx structs from setup data
-  void Init(const Setup& set,
-            config_setup::WolfCalibration const& wolfCal);
-  
+  void Init(const Setup& set);
   void SetWolfKind(uint wolfKindArg);
   void SetCoulKind(uint coulKindArg); 
   uint GetWolfKind(void);
@@ -49,6 +47,8 @@ public:
   bool useLRC;                    //!<Use long-range tail corrections if true
   double T_in_K;                  //!<System temp in Kelvin
   double beta;                    //!<Thermodynamic beta = 1/(T) K^-1)
+  double rCutCoulomb[BOX_TOTAL];  //!<Cutoff Coulomb interaction(angstroms)
+  double rCutCoulombSq[BOX_TOTAL]; //!<Cutoff Coulomb interaction(angstroms)
   double rCut, rCutSq;            //!<Cutoff radius for LJ/Mie potential (angstroms)
   double rCutLow, rCutLowSq;      //!<Cutoff min for Electrostatic (angstroms)
   double alpha[BOX_TOTAL];        //Ewald sum terms
@@ -60,19 +60,11 @@ public:
   double dielectric;              //dielectric for martini
   // Wolf Calibration 
   bool wolfCalibration;
-  double * wolfAlpha[BOX_TOTAL]; //alpha term for Wolf Electrostatic and constant factors
-  double ** wolfFactor1[BOX_TOTAL]; //alpha term for Wolf Electrostatic and constant factors
-  double ** wolfFactor2[BOX_TOTAL];  //alpha term for Wolf Electrostatic and constant factors
-  double ** wolfFactor3[BOX_TOTAL]; //alpha term for Wolf Electrostatic and constant factors
-  double * rCutCoulomb[BOX_TOTAL];  //!<Cutoff Coulomb interaction(angstroms)
-  double * rCutCoulombSq[BOX_TOTAL]; //!<Cutoff Coulomb interaction(angstroms)
-  int numberOfRCuts[BOX_TOTAL];
-  int numberOfAlphas[BOX_TOTAL];
-  bool explicitlyAddEndAlpha[BOX_TOTAL];
-  bool explicitlyAddEndRCut[BOX_TOTAL];
-  std::string wolfKindStrings[4] = {"HYBRID", "VLUGT", "GROSS", "VLUGTWINTRACUTOFF"};
-  std::string coulKindStrings[2] = {"DSP", "DSF"};
-  // Wolf Calibration
+
+  double wolfAlpha[BOX_TOTAL]; //alpha term for Wolf Electrostatic and constant factors
+  double wolfFactor1[BOX_TOTAL]; //alpha term for Wolf Electrostatic and constant factors
+  double wolfFactor2[BOX_TOTAL];  //alpha term for Wolf Electrostatic and constant factors
+  double wolfFactor3[BOX_TOTAL]; //alpha term for Wolf Electrostatic and constant factors
 
   double scaling_14;              //!<Scaling factor for 1-4 pairs' ewald interactions
   double sc_alpha;                // Free energy parameter
@@ -95,13 +87,8 @@ public:
 
 private:
   //Initialize primitive member variables from setup data
-
   void InitBasicVals(config_setup::SystemVals const& val,
                      config_setup::FFKind const& ffKind);
-  void CalculateWolfCalibrationMemoryUsage(config_setup::WolfCalibration const& wolfCal);
-  void InitWolfCalibration(config_setup::WolfCalibration const& wolfCal);
-  void AllocMem();
-  void DeallocMem();
 };
 
 #endif /*FORCEFIELD_H*/

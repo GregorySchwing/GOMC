@@ -35,8 +35,8 @@ public:
 
   //calculate self term for a box
   double BoxSelf(uint box,
-                int indexForRCut = 0,
-                int indexForAlpha = 0) const;
+                double wolfFactor1,
+                double wolfAlpha) const;
 
   //compute reciprocal term for a box with a new volume
   virtual void BoxReciprocalSetup(uint box, XYZArray const& molCoords);
@@ -60,8 +60,11 @@ public:
 
   //calculate correction term for a molecule
   virtual double MolCorrection(uint molIndex, uint box,
-                              int indexForRCut = 0,
-                              int indexForAlpha = 0)const;
+                              double rCutCoulomb,
+                              double rCutCoulombSq,
+                              double wolfFactor1,
+                              double wolfFactor2, 
+                              double wolfAlpha) const;
 
   //calculate reciprocal term for displacement and rotation move
   virtual double MolReciprocal(XYZArray const& molCoords, const uint molIndex,
@@ -74,19 +77,22 @@ public:
 
   //calculate self term after swap move
   virtual double SwapSelf(const cbmc::TrialMol& trialMol,
-                                int indexForRCut = 0,
-                                int indexForAlpha = 0) const;
+                                double wolfFactor1,
+                                double wolfAlpha) const;
 
-  //calculate correction term after swap move with lambda = 1
-  virtual double SwapCorrection(const cbmc::TrialMol& trialMol,
-                                int indexForRCut = 0,
-                                int indexForAlpha = 0) const;
 
-  //calculate correction term after swap move, with system lambda
+  //calculate correction term after swap move
   virtual double SwapCorrection(const cbmc::TrialMol& trialMol,
-                                const uint molIndex,
-                                int indexForRCut = 0,
-                                int indexForAlpha = 0) const;
+                              const uint molIndex,
+                              double rCutCoulombSq,
+                              double wolfFactor1,
+                              double wolfAlpha) const;
+
+//calculate correction term after swap move
+virtual double SwapCorrection(const cbmc::TrialMol& trialMol,
+                            double rCutCoulombSq,
+                            double wolfFactor1,
+                            double wolfAlpha) const;
 
   //calculate reciprocal term in destination box for swap move
   virtual double SwapDestRecip(const cbmc::TrialMol &newMol, const uint box,
@@ -113,18 +119,19 @@ public:
                           const std::vector<double> &lambda_Coul,
                           const uint iState, const uint molIndex,
                           const uint box,
-                          int indexForRCut = 0,
-                          int indexForAlpha = 0) const;
+                          double wolfFactor1,
+                          double wolfAlpha) const;
 
   //It's called in free energy calculation to calculate the change in
   // correction energy in all lambda states
-  virtual void ChangeCorrection(Energy *energyDiff, Energy &dUdL_Coul,
+  void ChangeCorrection(Energy *energyDiff, Energy &dUdL_Coul,
                                 const std::vector<double> &lambda_Coul,
                                 const uint iState, const uint molIndex,
                                 const uint box,
-                                int indexForRCut = 0,
-                                int indexForAlpha = 0) const;
-
+                                  double rCutCoulomb,
+                                  double rCutCoulombSq,
+                                  double wolfFactor1,
+                                  double wolfAlpha) const;
   //It's called in free energy calculation to calculate the change in
   // reciprocal energy in all lambda states
   virtual void ChangeRecip(Energy *energyDiff, Energy &dUdL_Coul,
@@ -153,6 +160,7 @@ public:
   virtual void UpdateVectorsAndRecipTerms(bool output);
 
   private: 
+    Forcefield & ffRef;
     //double wolfAlpha[BOX_TOTAL], wolfFactor1[BOX_TOTAL], wolfFactor2[BOX_TOTAL], rCutCoulomb[BOX_TOTAL], rCutCoulombSq[BOX_TOTAL]; //alpha term for Wolf Electrostatic and constant factors
     uint coulKind, wolfKind;
     //Molecule self energies

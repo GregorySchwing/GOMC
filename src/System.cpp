@@ -73,6 +73,8 @@ System::~System()
     delete boxDimensions;
   if (calcEwald != NULL)
     delete calcEwald;
+  if (refEwald != NULL)
+    delete refEwald;
   delete moves[mv::DISPLACE];
   delete moves[mv::ROTATE];
   delete moves[mv::MULTIPARTICLE];
@@ -149,10 +151,10 @@ void System::Init(Setup & set)
     calcEwald = new Ewald(statV, *this);
   else if (wolf)
     calcEwald = new Wolf(statV, *this);
-  else if (wolfCalibration)
+  else if (wolfCalibration){
     calcEwald = new Wolf(statV, *this);
     refEwald =  new Ewald(statV, *this);
-  else
+  }else
     calcEwald = new NoEwald(statV, *this);
 #else
   bool cached = set.config.sys.elect.cache;

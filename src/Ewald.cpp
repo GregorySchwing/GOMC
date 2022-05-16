@@ -47,6 +47,9 @@ Ewald::Ewald(StaticVals & stat, System & sys) :
   currentAxes(sys.boxDimRef),
   currentCOM(sys.com), sysPotRef(sys.potential), lambdaRef(sys.lambdaRef)
 {
+  // This bool is necessary until general electrostatic class is written
+  // For now, only destruct if allocated.
+  allocDone = false;
   ewald = false;
   electrostatic = false;
   alpha = 0.0;
@@ -57,7 +60,7 @@ Ewald::Ewald(StaticVals & stat, System & sys) :
 
 Ewald::~Ewald()
 {
-  if(ff.ewald) {
+  if(allocDone) {
 #ifdef GOMC_CUDA
     DestroyEwaldCUDAVars(ff.particles->getCUDAVars());
 #endif
@@ -96,6 +99,7 @@ Ewald::~Ewald()
     delete[] imageSize;
     delete[] imageSizeRef;
   }
+  allocDone = false;
 }
 
 void Ewald::Init()
@@ -188,6 +192,8 @@ void Ewald::AllocMem()
 #ifdef GOMC_CUDA
   InitEwaldVariablesCUDA(ff.particles->getCUDAVars(), imageTotal);
 #endif
+
+  allocDone = true;
 }
 
 
@@ -1106,7 +1112,7 @@ double Ewald::MolCorrection(uint molIndex, uint box) const
     }
     for (uint j = i + 1; j < atomSize; j++) {
       if(currentAxes.InRcut(distSq, virComponents, currentCoords,
-                         start + i, start + j, box)&& distSq<ff.rCutCoulombSq[box][0]){
+                         start + i, start + j, box)&& distSq<ff.rCutCoulombSq[box]){
         dist = sqrt(distSq);
         correction += (thisKind.AtomCharge(i) * thisKind.AtomCharge(j) *
                       erf(ff.alpha[box] * dist) / dist);
@@ -1120,8 +1126,11 @@ double Ewald::MolCorrection(uint molIndex, uint box) const
 
 // For simple compilation.  Should never be called.
 double Ewald::MolCorrection(uint molIndex, uint box,
-                            int indexForRCut,
-                            int indexForAlpha) const {
+                          double rCutCoulomb,
+                          double rCutCoulombSq,
+                          double wolfFactor1,
+                          double wolfFactor2,
+                          double wolfAlpha) const {
   return 0.0;
 }
 
@@ -1147,7 +1156,7 @@ void Ewald::ChangeCorrection(Energy *energyDiff, Energy &dUdL_Coul,
     for (uint j = i + 1; j < atomSize; j++) {
       distSq = 0.0;
       if(currentAxes.InRcut(distSq, virComponents, currentCoords,
-                         start + i, start + j, box)&& distSq<ff.rCutCoulombSq[box][0]){
+                         start + i, start + j, box)&& distSq<ff.rCutCoulombSq[box]){
         dist = sqrt(distSq);
         correction += (particleCharge[i + start] * particleCharge[j + start] *
                       erf(ff.alpha[box] * dist) / dist);
@@ -1208,8 +1217,8 @@ double Ewald::BoxSelf(uint box) const
 
 // For simple compilation.  Should never be called.
 double Ewald::BoxSelf(uint box,
-                      int indexForRCut,
-                      int indexForAlpha) const {
+                      double rCutCoulomb,
+                      double wolfAlpha) const {
   return 0.0;
 }
 
@@ -1374,7 +1383,7 @@ double Ewald::SwapCorrection(const cbmc::TrialMol& trialMol) const
   for (uint i = 0; i < atomSize; i++) {
     for (uint j = i + 1; j < atomSize; j++) {
       if(currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
-                         i, j, box)&& distSq<ff.rCutCoulombSq[box][0]){
+                         i, j, box)&& distSq<ff.rCutCoulombSq[box]){
         dist = sqrt(distSq);
         correction -= (thisKind.AtomCharge(i) * thisKind.AtomCharge(j) *
                       erf(ff.alpha[box] * dist) / dist);
@@ -1409,7 +1418,7 @@ double Ewald::SwapCorrection(const cbmc::TrialMol& trialMol,
     }
     for (uint j = i + 1; j < atomSize; j++) {
       if(currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
-                         i, j, box) && distSq<ff.rCutCoulombSq[box][0]){
+                         i, j, box) && distSq<ff.rCutCoulombSq[box]){
         dist = sqrt(distSq);
         correction -= (thisKind.AtomCharge(i) * thisKind.AtomCharge(j) *
                       erf(ff.alpha[box] * dist) / dist);
