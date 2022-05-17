@@ -130,6 +130,11 @@ public:
   double *gpu_r_k_x, *gpu_r_k_y, *gpu_r_k_z;
   double *gpu_t_k_x, *gpu_t_k_y, *gpu_t_k_z;
 
+  // Permanent arrays, will try texture after I get global working
+  double * gpu_particleCharge;
+  int * gpu_particleKind;
+  int * gpu_particleMol;
+
   // lambda structure
   int *gpu_molIndex;
   double *gpu_lambdaVDW, *gpu_lambdaCoulomb;

@@ -29,7 +29,10 @@ void InitGPUForceField(VariablesCUDA &vars, double const *sigmaSq,
                        double RcutLow, double Ron, double const *alpha,
                        int ewald, double diElectric_1);
 void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
-                         uint maxAtomsInMol, uint maxMolNumber);
+                         uint maxAtomsInMol, uint maxMolNumber,
+                         std::vector<double> & particleCharge,
+                         std::vector<int> & particleKind,
+                         std::vector<int> & particleMol);
 void InitEwaldVariablesCUDA(VariablesCUDA *vars, uint imageTotal);
 void CopyCurrentToRefCUDA(VariablesCUDA *vars, uint box, uint imageTotal);
 void CopyRefToNewCUDA(VariablesCUDA *vars, uint box, uint imageTotal);
