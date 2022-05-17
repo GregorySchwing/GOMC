@@ -80,7 +80,10 @@ void InitGPUForceField(VariablesCUDA &vars, double const *sigmaSq,
 }
 
 void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
-                         uint maxAtomsInMol, uint maxMolNumber)
+                         uint maxAtomsInMol, uint maxMolNumber,
+                         std::vector<double> & particleCharge,
+                         std::vector<int> & particleKind,
+                         std::vector<int> & particleMol)
 {
   CUMALLOC((void**) &vars->gpu_x, atomNumber * sizeof(double));
   CUMALLOC((void**) &vars->gpu_y, atomNumber * sizeof(double));
@@ -138,9 +141,18 @@ void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
   CUMALLOC((void**) &vars->gpu_mForceRecx, maxMolNumber * sizeof(double));
   CUMALLOC((void**) &vars->gpu_mForceRecy, maxMolNumber * sizeof(double));
   CUMALLOC((void**) &vars->gpu_mForceRecz, maxMolNumber * sizeof(double));
+
   CUMALLOC((void**) &vars->gpu_cellVector, atomNumber * sizeof(int));
   CUMALLOC((void**) &vars->gpu_mapParticleToCell, atomNumber * sizeof(int));
   CUMALLOC((void**) &vars->gpu_mapParticleToCellSorted, atomNumber * sizeof(int));
+
+  CUMALLOC((void**) &vars->gpu_particleCharge, atomNumber * sizeof(double));
+  CUMALLOC((void**) &vars->gpu_particleKind, atomNumber * sizeof(int));
+  CUMALLOC((void**) &vars->gpu_particleMol, atomNumber * sizeof(int));
+
+  cudaMemcpy(gpu_particleCharge, &particleCharge[0], atomNumber * sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(gpu_particleKind, &particleKind[0], atomNumber * sizeof(int), cudaMemcpyHostToDevice);
+  cudaMemcpy(gpu_particleMol, &particleMol[0], atomNumber * sizeof(int), cudaMemcpyHostToDevice);
 
   checkLastErrorCUDA(__FILE__, __LINE__);
 }

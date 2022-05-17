@@ -314,12 +314,9 @@ void CallBoxForceGPU(VariablesCUDA *vars,
                      uint const box)
 {
   int atomNumber = coords.Count();
-  int *gpu_particleKind, *gpu_particleMol;
   int numberOfCells = neighborList.size();
   int numberOfCellPairs = numberOfCells * NUMBER_OF_NEIGHBOR_CELLS;
-  int *gpu_neighborList, *gpu_cellStartIndex;
   int blocksPerGrid, threadsPerBlock, energyVectorLen;
-  double *gpu_particleCharge;
   double *gpu_REn, *gpu_LJEn;
   double *gpu_final_REn, *gpu_final_LJEn;
   double cpu_final_REn = 0.0, cpu_final_LJEn = 0.0;
@@ -328,28 +325,6 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   blocksPerGrid = numberOfCells * NUMBER_OF_NEIGHBOR_CELLS;
   energyVectorLen = numberOfCells * NUMBER_OF_NEIGHBOR_CELLS * threadsPerBlock;
 
-  #if GPU_RESIDENT
-  gpu_neighborList = vars->gpu_neighborList;
-  gpu_cellStartIndex = vars->gpu_cellStartIndex;
-  #else
-  // Convert neighbor list to 1D array
-  std::vector<int> neighborlist1D(numberOfCellPairs);
-  for(int i = 0; i < numberOfCells; i++) {
-    for(int j = 0; j < NUMBER_OF_NEIGHBOR_CELLS; j++) {
-      neighborlist1D[i * NUMBER_OF_NEIGHBOR_CELLS + j] = neighborList[i][j];
-    }
-  }
-  CUMALLOC((void**) &gpu_neighborList, numberOfCellPairs * sizeof(int));
-  CUMALLOC((void**) &gpu_cellStartIndex, cellStartIndex.size() * sizeof(int));
-  cudaMemcpy(gpu_neighborList, &neighborlist1D[0], numberOfCellPairs * sizeof(int), cudaMemcpyHostToDevice);
-  cudaMemcpy(gpu_cellStartIndex, &cellStartIndex[0], cellStartIndex.size() * sizeof(int), cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_cellVector, &cellVector[0], atomNumber * sizeof(int), cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_mapParticleToCell, &mapParticleToCell[0], atomNumber * sizeof(int), cudaMemcpyHostToDevice);
-  #endif
-
-  CUMALLOC((void**) &gpu_particleCharge, particleCharge.size() * sizeof(double));
-  CUMALLOC((void**) &gpu_particleKind, particleKind.size() * sizeof(int));
-  CUMALLOC((void**) &gpu_particleMol, particleMol.size() * sizeof(int));
   CUMALLOC((void**) &gpu_LJEn, energyVectorLen * sizeof(double));
   CUMALLOC((void**) &gpu_final_LJEn, sizeof(double));
   if (electrostatic) {
@@ -365,9 +340,6 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   cudaMemcpy(vars->gpu_mForcey, mForcey, molCount * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_mForcez, mForcez, molCount * sizeof(double), cudaMemcpyHostToDevice);
 
-  cudaMemcpy(gpu_particleCharge, &particleCharge[0], particleCharge.size() * sizeof(double), cudaMemcpyHostToDevice);
-  cudaMemcpy(gpu_particleKind, &particleKind[0], particleKind.size() * sizeof(int), cudaMemcpyHostToDevice);
-  cudaMemcpy(gpu_particleMol, &particleMol[0], particleMol.size() * sizeof(int), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_x, coords.x, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_y, coords.y, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_z, coords.z, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
@@ -380,9 +352,9 @@ void CallBoxForceGPU(VariablesCUDA *vars,
                                 boxAxes.GetAxis(box).y * 0.5,
                                 boxAxes.GetAxis(box).z * 0.5);
 
-  BoxForceGPU <<< blocksPerGrid, threadsPerBlock>>>(gpu_cellStartIndex,
+  BoxForceGPU <<< blocksPerGrid, threadsPerBlock>>>(vars->gpu_cellStartIndex,
       vars->gpu_cellVector,
-      gpu_neighborList,
+      vars->gpu_neighborList,
       numberOfCells,
       atomNumber,
       vars->gpu_mapParticleToCell,
@@ -392,9 +364,9 @@ void CallBoxForceGPU(VariablesCUDA *vars,
       axis,
       halfAx,
       electrostatic,
-      gpu_particleCharge,
-      gpu_particleKind,
-      gpu_particleMol,
+      vars->gpu_particleCharge,
+      vars->gpu_particleKind,
+      vars->gpu_particleMol,
       gpu_REn,
       gpu_LJEn,
       vars->gpu_sigmaSq,
@@ -469,17 +441,12 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   cudaMemcpy(mForcez, vars->gpu_mForcez, sizeof(double) * molCount, cudaMemcpyDeviceToHost);
   cudaDeviceSynchronize();
 
-  CUFREE(gpu_particleCharge);
-  CUFREE(gpu_particleKind);
-  CUFREE(gpu_particleMol);
   CUFREE(gpu_LJEn);
   CUFREE(gpu_final_LJEn);
   if (electrostatic) {
     CUFREE(gpu_REn);
     CUFREE(gpu_final_REn);
   }
-  CUFREE(gpu_neighborList);
-  CUFREE(gpu_cellStartIndex);
 }
 
 void CallVirialReciprocalGPU(VariablesCUDA *vars,
