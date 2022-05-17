@@ -150,9 +150,9 @@ void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
   CUMALLOC((void**) &vars->gpu_particleKind, atomNumber * sizeof(int));
   CUMALLOC((void**) &vars->gpu_particleMol, atomNumber * sizeof(int));
 
-  cudaMemcpy(gpu_particleCharge, &particleCharge[0], atomNumber * sizeof(double), cudaMemcpyHostToDevice);
-  cudaMemcpy(gpu_particleKind, &particleKind[0], atomNumber * sizeof(int), cudaMemcpyHostToDevice);
-  cudaMemcpy(gpu_particleMol, &particleMol[0], atomNumber * sizeof(int), cudaMemcpyHostToDevice);
+  cudaMemcpy(vars->gpu_particleCharge, &particleCharge[0], atomNumber * sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(vars->gpu_particleKind, &particleKind[0], atomNumber * sizeof(int), cudaMemcpyHostToDevice);
+  cudaMemcpy(vars->gpu_particleMol, &particleMol[0], atomNumber * sizeof(int), cudaMemcpyHostToDevice);
 
   checkLastErrorCUDA(__FILE__, __LINE__);
 }
