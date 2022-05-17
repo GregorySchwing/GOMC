@@ -13,6 +13,7 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #include "GeomLib.h"
 #include "VariablesCUDA.cuh"
 #include "EnsemblePreprocessor.h"
+#include <cstring>
 
 #define GPU_VDW_STD_KIND 0
 #define GPU_VDW_SHIFT_KIND 1

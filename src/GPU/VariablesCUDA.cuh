@@ -172,7 +172,7 @@ public:
   // New variables for GPU residence
   double * LJEn, RJEn;
   // For launching kernels
-  int *cpu_numberOfCells;
+  int *cpu_numberOfCells[BOX_TOTAL];
 
 };
 #endif
