@@ -171,6 +171,8 @@ public:
   size_t  *temp_storage_bytes_prefix_sum;
   // New variables for GPU residence
   double * LJEn, RJEn;
+  // For launching kernels
+  int *cpu_numberOfCells;
 
 };
 #endif

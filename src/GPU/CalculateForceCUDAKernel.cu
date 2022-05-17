@@ -314,8 +314,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
                      uint const box)
 {
   int atomNumber = coords.Count();
-  int numberOfCells = neighborList.size();
-  int numberOfCellPairs = numberOfCells * NUMBER_OF_NEIGHBOR_CELLS;
+  int numberOfCells = vars->cpu_numberOfCells[box];
   int blocksPerGrid, threadsPerBlock, energyVectorLen;
   double *gpu_REn, *gpu_LJEn;
   double *gpu_final_REn, *gpu_final_LJEn;

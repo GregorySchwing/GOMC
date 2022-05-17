@@ -164,6 +164,8 @@ void InitGPUCellList(VariablesCUDA *vars,
                     const std::vector<int> &edgeCells,
                     const std::vector<double> &cellSize)
 {
+  std::memcpy(cpu_numberOfCells, &numberOfCells[0], sizeof(int)*numberOfCells.size());
+
   CUMALLOC((void**) &vars->gpu_neighborList,  neighborList.size() * sizeof(int));
   CUMALLOC((void**) &vars->gpu_numberOfCells,  numberOfCells.size() * sizeof(int));
   CUMALLOC((void**) &vars->gpu_startOfBoxCellList, startOfBoxCellList.size() * sizeof(int));
