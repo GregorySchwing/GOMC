@@ -4,8 +4,6 @@ Copyright (C) 2022 GOMC Group
 A copy of the MIT License can be found in License.txt
 along with this program, also can be found at <https://opensource.org/licenses/MIT>.
 ********************************************************************************/
-#include "cub/cub.cuh"
-
 #pragma once
 #ifdef GOMC_CUDA
 
@@ -54,6 +52,8 @@ inline void printFreeMemory()
   printf("GPU memory usage: used = %f, free = %f MB, total = %f MB\n",
          used_db / 1024.0 / 1024.0, free_db / 1024.0 / 1024.0, total_db / 1024.0 / 1024.0);
 }
+
+class cub::DoubleBuffer;
 
 class VariablesCUDA
 {
