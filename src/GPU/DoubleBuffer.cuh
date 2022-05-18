@@ -21,6 +21,8 @@ class DoubleBuffer {
         DoubleBuffer<Buf_Type>(int);
         ~DoubleBuffer();
 };
+*/
+template< class T>
 class TestClass
 {
 public:
@@ -30,10 +32,9 @@ public:
     void set(int n) { _n = n; }
 
 private:
-    int _n;
+    T * _n;
 };
-*/
-template< typename T, std::size_t n >
+template< class T, std::size_t n >
 struct MultiBuffer
 {
     MultiBuffer() : _active_offset(0) {}

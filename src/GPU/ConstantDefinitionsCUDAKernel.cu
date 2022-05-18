@@ -133,12 +133,12 @@ void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
   CUMALLOC((void**) &vars->gpu_mForcez, maxMolNumber * sizeof(double));
 
   // Buffer for GPU Residence
-  vars->gpu_aFx = new MultiBuffer<double, 2>(atomNumber);
-  vars->gpu_aFy = new MultiBuffer<double, 2>(atomNumber);
-  vars->gpu_aFz = new MultiBuffer<double, 2>(atomNumber);
-  vars->gpu_mFx = new MultiBuffer<double, 2>(maxMolNumber);
-  vars->gpu_mFy = new MultiBuffer<double, 2>(maxMolNumber);
-  vars->gpu_mFz = new MultiBuffer<double, 2>(maxMolNumber);
+  vars->gpu_aFx = new MultiBuffer<TestClass<double>, 2>(atomNumber);
+  vars->gpu_aFy = new MultiBuffer<TestClass<double>, 2>(atomNumber);
+  vars->gpu_aFz = new MultiBuffer<TestClass<double>, 2>(atomNumber);
+  vars->gpu_mFx = new MultiBuffer<TestClass<double>, 2>(maxMolNumber);
+  vars->gpu_mFy = new MultiBuffer<TestClass<double>, 2>(maxMolNumber);
+  vars->gpu_mFz = new MultiBuffer<TestClass<double>, 2>(maxMolNumber);
 
   CUMALLOC((void**) &vars->gpu_mTorquex, maxMolNumber * sizeof(double));
   CUMALLOC((void**) &vars->gpu_mTorquey, maxMolNumber * sizeof(double));
