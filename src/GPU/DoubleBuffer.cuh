@@ -10,6 +10,14 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #ifdef GOMC_CUDA
 #include "CUDAMemoryManager.cuh"
 //https://stackoverflow.com/questions/2008948/double-buffering-for-game-objects-whats-a-nice-clean-generic-c-way
+
+/**
+ * @brief A helper class for accessing parts of a global array to logically
+            create multiple buffers.
+ * 
+ * @tparam T - datatype of array
+ */
+
 template< typename T>
 class DeviceArray
 {
@@ -22,6 +30,16 @@ public:
 private:
     T * _n;
 };
+
+/**
+ * @brief   Class for managing a general number of states of a single array.
+            Allocates one array and logically partitions it into multiple arrays.
+            Also, manages the buffer states.
+ * 
+ * @tparam T - helper class to hold partial array
+ * @tparam DAT - datatype
+ * @tparam n - number of states
+ */
 template< class T, typename DAT, std::size_t n >
 struct MultiBuffer
 {
