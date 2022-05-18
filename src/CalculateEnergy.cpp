@@ -289,27 +289,8 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   GOMC_EVENT_START(1, GomcProfileEvent::EN_BOX_FORCE);
 
   double tempREn = 0.0, tempLJEn = 0.0;
-  // make a pointer to atom force and mol force for OpenMP
-  double *aForcex = atomForce.x;
-  double *aForcey = atomForce.y;
-  double *aForcez = atomForce.z;
-  double *mForcex = molForce.x;
-  double *mForcey = molForce.y;
-  double *mForcez = molForce.z;
   int atomCount = atomForce.Count();
   int molCount = molForce.Count();
-
-  // Reset Force Arrays
-  ResetForce(atomForce, molForce, box);
-
-  std::vector<int> cellVector, cellStartIndex, mapParticleToCell;
-  std::vector<std::vector<int> > neighborList;
-  #if GPU_RESIDENT
-
-  #else
-  cellList.GetCellListNeighbor(box, coords.Count(), cellVector, cellStartIndex, mapParticleToCell);
-  neighborList = cellList.GetNeighborList(box);
-  #endif
 
 #ifdef GOMC_CUDA
   //update unitcell in GPU
@@ -329,14 +310,29 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
 
   CallBoxForceGPU(forcefield.particles->getCUDAVars(), cellVector,
                   cellStartIndex, neighborList, mapParticleToCell,
-                  coords, boxAxes, electrostatic, particleCharge,
-                  particleKind, particleMol, tempREn, tempLJEn,
-                  aForcex, aForcey, aForcez, mForcex, mForcey, mForcez,
+                  coords, boxAxes, electrostatic, tempREn, tempLJEn,
                   atomCount, molCount, forcefield.sc_coul,
                   forcefield.sc_sigma_6, forcefield.sc_alpha,
                   forcefield.sc_power, box);
 
 #else
+// make a pointer to atom force and mol force for OpenMP
+double *aForcex = atomForce.x;
+double *aForcey = atomForce.y;
+double *aForcez = atomForce.z;
+double *mForcex = molForce.x;
+double *mForcey = molForce.y;
+double *mForcez = molForce.z;
+
+// Reset Force Arrays
+ResetForce(atomForce, molForce, box);
+
+// Not sure if this is neccessary..
+std::vector<int> cellVector, cellStartIndex, mapParticleToCell;
+std::vector<std::vector<int> > neighborList;
+cellList.GetCellListNeighbor(box, coords.Count(), cellVector, cellStartIndex, mapParticleToCell);
+neighborList = cellList.GetNeighborList(box);
+
 #if defined _OPENMP && _OPENMP >= 201511 // check if OpenMP version is 4.5
 #if GCC_VERSION >= 90000
   #pragma omp parallel for default(none) shared(boxAxes, cellStartIndex, \
