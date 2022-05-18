@@ -29,7 +29,7 @@ struct MultiBuffer
     MultiBuffer(std::size_t m) : _active_offset(0) {
         CUMALLOC((void**) &_globalmemory, m * sizeof(DAT));
         for (int index = 0; index < n; ++index)
-            _objects[index].set(_globalmemory[index*m]);
+            _objects[index].set(&_globalmemory[index*m]);
     }
 
     void ChangeBuffers() { ++_active_offset; }
