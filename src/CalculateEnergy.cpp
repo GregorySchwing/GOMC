@@ -82,7 +82,11 @@ void CalculateEnergy::Init(System & sys)
   }
 #ifdef GOMC_CUDA
   InitCoordinatesCUDA(forcefield.particles->getCUDAVars(),
-                      currentCoords.Count(), maxAtomInMol, currentCOM.Count(),
+                      currentCoords.Count(), 
+                      currentCoords.x,
+                      currentCoords.y,
+                      currentCoords.z,
+                      maxAtomInMol, currentCOM.Count(),
                       particleCharge, particleKind, particleMol);
 #endif
 }

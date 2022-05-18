@@ -323,18 +323,15 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   // This same function is used to calculate old and new..
   // Will need to separate the old calculation from the new coordinates.
   // Could use the singleMoveAccepted boolean, though this will only handle 2 buffers.
+  BufferAccess<DeviceArray<double>, double, buffers> coords_x(*(vars->gpu_coords_x), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> coords_y(*(vars->gpu_coords_y), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> coords_z(*(vars->gpu_coords_z), buffer_index);
   BufferAccess<DeviceArray<double>, double, buffers> aFx(*(vars->gpu_aFx), buffer_index);
   BufferAccess<DeviceArray<double>, double, buffers> aFy(*(vars->gpu_aFy), buffer_index);
   BufferAccess<DeviceArray<double>, double, buffers> aFz(*(vars->gpu_aFz), buffer_index);
   BufferAccess<DeviceArray<double>, double, buffers> mFx(*(vars->gpu_mFx), buffer_index);
   BufferAccess<DeviceArray<double>, double, buffers> mFy(*(vars->gpu_mFy), buffer_index);
   BufferAccess<DeviceArray<double>, double, buffers> mFz(*(vars->gpu_mFz), buffer_index);
-
-  // Either get from GPU or host (if last move was not MP/BMP)
-  // Will make this a buffer also
-  cudaMemcpy(vars->gpu_x, coords.x, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_y, coords.y, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_z, coords.z, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
 
   cudaMemset(aFx->get(), 0.0, atomCount * sizeof(double));
   cudaMemset(aFy->get(), 0.0, atomCount * sizeof(double));
@@ -357,9 +354,9 @@ void CallBoxForceGPU(VariablesCUDA *vars,
       numberOfCells,
       atomNumber,
       vars->gpu_mapParticleToCell,
-      vars->gpu_x,
-      vars->gpu_y,
-      vars->gpu_z,
+      coords_x->get(),
+      coords_y->get(),
+      coords_z->get(),
       axis,
       halfAx,
       electrostatic,

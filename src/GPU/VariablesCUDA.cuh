@@ -140,9 +140,9 @@ public:
   double *gpu_aForcex, *gpu_aForcey, *gpu_aForcez;
   double *gpu_mForcex, *gpu_mForcey, *gpu_mForcez;
 
-  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_coord_x;
-  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_coord_y;
-  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_coord_z;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_coords_x;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_coords_y;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_coords_z;
 
   MultiBuffer< DeviceArray<double>, double, buffers > * gpu_aFx;
   MultiBuffer< DeviceArray<double>, double, buffers > * gpu_aFy;
