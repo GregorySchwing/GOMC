@@ -58,7 +58,7 @@ class DoubleBuffer;
 class VariablesCUDA
 {
 public:
-  VariablesCUDA()
+  VariablesCUDA():aFx(gpu_aForcex, gpu_aForcex_buffer)
   {
     gpu_sigmaSq = NULL;
     gpu_epsilon_Cn = NULL;
