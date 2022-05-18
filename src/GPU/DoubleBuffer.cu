@@ -11,6 +11,11 @@ template<typename T> DoubleBuffer<T>::DoubleBuffer(int arraySize) {
     CUMALLOC((void**) selector, 2 * sizeof(void*));
     CUMALLOC((void**) array1, arraySize * sizeof(T));
     CUMALLOC((void**) array2, arraySize * sizeof(T));
+    
+    cudaMemcpy(&selector[0], array1, 1 * sizeof(void*),
+    cudaMemcpyDeviceToDevice);
+    cudaMemcpy(&selector[1], array2, 1 * sizeof(void*),
+    cudaMemcpyDeviceToDevice);
 }
 template<typename T> DoubleBuffer<T>::~DoubleBuffer() {
     CUFREE(array1);
