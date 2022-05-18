@@ -10,11 +10,11 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #ifdef GOMC_CUDA
 #include "CUDAMemoryManager.cuh"
 //https://stackoverflow.com/questions/2008948/double-buffering-for-game-objects-whats-a-nice-clean-generic-c-way
-template< class T>
-class DataArray
+template< typename T>
+class DeviceArray
 {
 public:
-    DataArray(){};
+    DeviceArray(){};
 
     T *  get() const { return _n; }
     void set(T * n) { _n = n; }
@@ -22,11 +22,13 @@ public:
 private:
     T * _n;
 };
-template< class T, std::size_t n >
+template< class T, typename DAT, std::size_t n >
 struct MultiBuffer
 {
     MultiBuffer() : _active_offset(0) {}
-    MultiBuffer(std::size_t m) : _active_offset(0) {}
+    MultiBuffer(std::size_t m) : _active_offset(0) {
+
+    }
 
     void ChangeBuffers() { ++_active_offset; }
     T* GetInstance(std::size_t k) { return &_objects[ (_active_offset + k) % n ]; }
