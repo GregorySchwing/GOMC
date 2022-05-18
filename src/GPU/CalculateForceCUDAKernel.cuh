@@ -40,7 +40,8 @@ void CallBoxForceGPU(VariablesCUDA *vars,
                      double sc_sigma_6,
                      double sc_alpha,
                      uint sc_power,
-                     uint const box);
+                     uint const box,
+                     uint const buffer_index = 0);
 
 void CallBoxInterForceGPU(VariablesCUDA *vars,
                           const std::vector<int> &cellVector,
