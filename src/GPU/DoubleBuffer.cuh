@@ -21,5 +21,7 @@ class DoubleBuffer {
         DoubleBuffer(int);
         ~DoubleBuffer();
 };
+
+#include "DoubleBuffer.cu"
 #endif
 #endif
