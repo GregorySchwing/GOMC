@@ -140,7 +140,7 @@ public:
   double *gpu_aForcex_buffer, *gpu_aForcey_buffer, *gpu_aForcez_buffer;
   double *gpu_mForcex_buffer, *gpu_mForcey_buffer, *gpu_mForcez_buffer;
 
-  extern DoubleBuffer< double >::DoubleBuffer & aFx;
+  extern DoubleBuffer & aFx;
     /*
     cub::DoubleBuffer< double >::DoubleBuffer
     cub::DoubleBuffer< double >::DoubleBuffer
