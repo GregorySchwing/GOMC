@@ -9,7 +9,7 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #include "DoubleBuffer.cuh"
 #ifdef GOMC_CUDA
 
-template<typename T> DoubleBuffer<T>::DoubleBuffer(int arraySize) {
+template<typename T> DoubleBuffer<T>::DoubleBuffer<T>(int arraySize) {
     CUMALLOC((void**) selector, 2 * sizeof(void*));
     CUMALLOC((void**) array1, arraySize * sizeof(T));
     CUMALLOC((void**) array2, arraySize * sizeof(T));
@@ -19,7 +19,7 @@ template<typename T> DoubleBuffer<T>::DoubleBuffer(int arraySize) {
     cudaMemcpy(&selector[1], array2, 1 * sizeof(void*),
     cudaMemcpyDeviceToDevice);
 }
-template<typename T> DoubleBuffer<T>::~DoubleBuffer() {
+template<typename T> DoubleBuffer<T>::~DoubleBuffer<T>() {
     CUFREE(array1);
     CUFREE(array2);
 }
