@@ -11,13 +11,13 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #include "CUDAMemoryManager.cuh"
 //https://stackoverflow.com/questions/2008948/double-buffering-for-game-objects-whats-a-nice-clean-generic-c-way
 template< class T>
-class TestClass
+class DataArray
 {
 public:
-    TestClass() : _n(0) {}
+    DataArray() : {}
 
-    int get() const { return _n; }
-    void set(int n) { _n = n; }
+    T *  get() const { return _n; }
+    void set(T * n) { _n = n; }
 
 private:
     T * _n;
