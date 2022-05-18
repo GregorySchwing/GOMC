@@ -28,7 +28,6 @@ template< class T, std::size_t n >
 struct MultiBuffer
 {
     MultiBuffer() : _active_offset(0) {}
-    MultiBuffer() : _active_offset(0) {}
 
     void ChangeBuffers() { ++_active_offset; }
     T* GetInstance(std::size_t k) { return &_objects[ (_active_offset + k) % n ]; }
