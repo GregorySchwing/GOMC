@@ -146,15 +146,15 @@ void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
   vars->gpu_mFy = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
   vars->gpu_mFz = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
 
-  BufferAccess<DeviceArray<double>, double, buffers> coords_x(*(vars->gpu_coords_x), 0);
-  BufferAccess<DeviceArray<double>, double, buffers> coords_y(*(vars->gpu_coords_y), 0);
-  BufferAccess<DeviceArray<double>, double, buffers> coords_z(*(vars->gpu_coords_z), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> coords_x_view(*(vars->gpu_coords_x), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> coords_y_view(*(vars->gpu_coords_y), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> coords_z_view(*(vars->gpu_coords_z), 0);
 
   // Either get from GPU or host (if last move was not MP/BMP)
   // Will make this a buffer also
-  cudaMemcpy(coords_x->get(), coords_x, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
-  cudaMemcpy(coords_y->get(), coords_y, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
-  cudaMemcpy(coords_z->get(), coords_z, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(coords_x_view->get(), coords_x, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(coords_y_view->get(), coords_y, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(coords_z_view->get(), coords_z, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
 
   CUMALLOC((void**) &vars->gpu_mTorquex, maxMolNumber * sizeof(double));
   CUMALLOC((void**) &vars->gpu_mTorquey, maxMolNumber * sizeof(double));
