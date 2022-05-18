@@ -12,7 +12,7 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #include <cuda_runtime.h>
 #include "EnsemblePreprocessor.h"
 #include "NumLib.h"
-
+#include "DoubleBuffer.cuh"
 //Need a separate float constant for device code with the MSVC compiler
 //See CUDA Programming Guide section I.4.13 for details 
 static const __device__ double qqFactGPU = num::qqFact;
@@ -74,12 +74,12 @@ public:
     gpu_ewald = NULL;
     gpu_diElectric_1 = NULL;
     
-//    cub::DoubleBuffer< double >::DoubleBuffer * ;
+    DoubleBuffer< double > & aFx;
 
     gpu_aForcex = NULL;
     gpu_aForcey = NULL;
     gpu_aForcez = NULL;
-    gpu_mForcex = NULL;
+    gpu_mForcex = NULL;hh
     gpu_mForcey = NULL;
     gpu_mForcez = NULL;
 
@@ -89,8 +89,6 @@ public:
     gpu_mForcex_buffer = NULL;
     gpu_mForcey_buffer = NULL;
     gpu_mForcez_buffer = NULL;
-
-
 
     gpu_startAtomIdx = NULL;
 
@@ -140,23 +138,13 @@ public:
   double *gpu_aForcex_buffer, *gpu_aForcey_buffer, *gpu_aForcez_buffer;
   double *gpu_mForcex_buffer, *gpu_mForcey_buffer, *gpu_mForcez_buffer;
 
-  extern DoubleBuffer & aFx;
-    /*
-    cub::DoubleBuffer< double >::DoubleBuffer
-    cub::DoubleBuffer< double >::DoubleBuffer
-    cub::DoubleBuffer< double >::DoubleBuffer
-    cub::DoubleBuffer< double >::DoubleBuffer
-    cub::DoubleBuffer< double >::DoubleBuffer
-
-    cub::DoubleBuffer< double >::DoubleBuffer
-    cub::DoubleBuffer< double >::DoubleBuffer
-    cub::DoubleBuffer< double >::DoubleBuffer
-    */
-
   double *gpu_mTorquex, *gpu_mTorquey, *gpu_mTorquez;
   int *gpu_inForceRange;
+
+  // Not sure why these need their own arrays
   double *gpu_aForceRecx, *gpu_aForceRecy, *gpu_aForceRecz;
   double *gpu_mForceRecx, *gpu_mForceRecy, *gpu_mForceRecz;
+
   double *gpu_rMin, *gpu_expConst, *gpu_rMaxSq;
 
   double *gpu_r_k_x, *gpu_r_k_y, *gpu_r_k_z;

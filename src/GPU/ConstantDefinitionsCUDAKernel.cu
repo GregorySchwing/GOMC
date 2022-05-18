@@ -131,6 +131,15 @@ void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
   CUMALLOC((void**) &vars->gpu_mForcex, maxMolNumber * sizeof(double));
   CUMALLOC((void**) &vars->gpu_mForcey, maxMolNumber * sizeof(double));
   CUMALLOC((void**) &vars->gpu_mForcez, maxMolNumber * sizeof(double));
+
+  // Buffer for GPU Residence
+  CUMALLOC((void**) &vars->gpu_aForcex_buffer, atomNumber * sizeof(double));
+  CUMALLOC((void**) &vars->gpu_aForcey_buffer, atomNumber * sizeof(double));
+  CUMALLOC((void**) &vars->gpu_aForcez_buffer, atomNumber * sizeof(double));
+  CUMALLOC((void**) &vars->gpu_mForcex_buffer, maxMolNumber * sizeof(double));
+  CUMALLOC((void**) &vars->gpu_mForcey_buffer, maxMolNumber * sizeof(double));
+  CUMALLOC((void**) &vars->gpu_mForcez_buffer, maxMolNumber * sizeof(double));
+
   CUMALLOC((void**) &vars->gpu_mTorquex, maxMolNumber * sizeof(double));
   CUMALLOC((void**) &vars->gpu_mTorquey, maxMolNumber * sizeof(double));
   CUMALLOC((void**) &vars->gpu_mTorquez, maxMolNumber * sizeof(double));
