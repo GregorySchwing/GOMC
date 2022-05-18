@@ -331,8 +331,8 @@ void CallBoxForceGPU(VariablesCUDA *vars,
     CUMALLOC((void**) &gpu_final_REn, sizeof(double));
   }
 
-  BufferAccess<DeviceArray<double>, double, buffers> frontBuffer(gpu_aFx, 0);
-  BufferAccess<DeviceArray<double, double, buffers> backBuffer(gpu_aFx, 1);
+  BufferAccess<DeviceArray<double>, double, buffers> frontBuffer(vars->gpu_aFx, 0);
+  BufferAccess<DeviceArray<double, double, buffers> backBuffer(vars->gpu_aFx, 1);
   
   // All 0.0
   // Replace with a double buffer
