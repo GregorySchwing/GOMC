@@ -4,19 +4,17 @@ Copyright (C) 2022 GOMC Group
 A copy of the MIT License can be found in License.txt
 along with this program, also can be found at <https://opensource.org/licenses/MIT>.
 ********************************************************************************/
-#pragma once
+#include "DoubleBuffer.cuh"
 #ifdef GOMC_CUDA
-#include "CUDAMemoryManager.cuh"
 
-template <typename Buf_Type>
-class DoubleBuffer {
-        DoubleBuffer();
+template<typename T> DoubleBuffer<T>::DoubleBuffer<T>(int arraySize) {
+    CUMALLOC((void**) array1, arraySize * sizeof(T));
+    CUMALLOC((void**) array2, arraySize * sizeof(T));
+}
+template<typename T> DoubleBuffer<T>::~DoubleBuffer<T>() {
+    CUFREE(array1);
+    CUFREE(array2);
+}
+  
 
-        int size;
-        Buf_Type * array1;
-        Buf_Type * array2;
-    public:
-        DoubleBuffer(int);
-        ~DoubleBuffer();
-};
 #endif
