@@ -9,7 +9,7 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 
 #ifdef GOMC_CUDA
 #include "CUDAMemoryManager.cuh"
-
+//https://stackoverflow.com/questions/2008948/double-buffering-for-game-objects-whats-a-nice-clean-generic-c-way
 template< class T>
 class TestClass
 {
