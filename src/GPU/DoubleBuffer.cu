@@ -8,7 +8,7 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #ifdef GOMC_CUDA
 
 template<typename T> DoubleBuffer<T>::DoubleBuffer(int arraySize) {
-    CUMALLOC((void**) selector, 2 * sizeof(*T));
+    CUMALLOC((void**) selector, 2 * sizeof(void*));
     CUMALLOC((void**) array1, arraySize * sizeof(T));
     CUMALLOC((void**) array2, arraySize * sizeof(T));
 }
