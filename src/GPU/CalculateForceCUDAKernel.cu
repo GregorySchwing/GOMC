@@ -331,7 +331,8 @@ void CallBoxForceGPU(VariablesCUDA *vars,
     CUMALLOC((void**) &gpu_final_REn, sizeof(double));
   }
 
-  // Copy necessary data to GPU
+  // All 0.0
+  // Replace with a double buffer
   cudaMemcpy(vars->gpu_aForcex, aForcex, atomCount * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_aForcey, aForcey, atomCount * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_aForcez, aForcez, atomCount * sizeof(double), cudaMemcpyHostToDevice);
@@ -339,6 +340,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   cudaMemcpy(vars->gpu_mForcey, mForcey, molCount * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_mForcez, mForcez, molCount * sizeof(double), cudaMemcpyHostToDevice);
 
+  // Either get from GPU or host (if last move was not MP/BMP)
   cudaMemcpy(vars->gpu_x, coords.x, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_y, coords.y, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_z, coords.z, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
