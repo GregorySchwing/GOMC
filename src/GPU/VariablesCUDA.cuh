@@ -87,9 +87,6 @@ public:
     gpu_mForcex_buffer = NULL;
     gpu_mForcey_buffer = NULL;
     gpu_mForcez_buffer = NULL;
-
-    DoubleBuffer< double > * aFx;
-
     gpu_startAtomIdx = NULL;
 
     // setting lambda values to null
@@ -134,6 +131,8 @@ public:
   int *gpu_nonOrth;
   double *gpu_aForcex, *gpu_aForcey, *gpu_aForcez;
   double *gpu_mForcex, *gpu_mForcey, *gpu_mForcez;
+
+  DoubleBuffer< double > * aFx;
 
   double *gpu_aForcex_buffer, *gpu_aForcey_buffer, *gpu_aForcez_buffer;
   double *gpu_mForcex_buffer, *gpu_mForcey_buffer, *gpu_mForcez_buffer;
