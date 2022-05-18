@@ -4,7 +4,9 @@ Copyright (C) 2022 GOMC Group
 A copy of the MIT License can be found in License.txt
 along with this program, also can be found at <https://opensource.org/licenses/MIT>.
 ********************************************************************************/
-#pragma once
+#ifndef DOUBLE_BUFFER_CUH
+#define DOUBLE_BUFFER_CUH
+
 #ifdef GOMC_CUDA
 #include "CUDAMemoryManager.cuh"
 
@@ -19,4 +21,5 @@ class DoubleBuffer {
         DoubleBuffer(int);
         ~DoubleBuffer();
 };
+#endif
 #endif
