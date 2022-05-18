@@ -9,19 +9,7 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 
 #ifdef GOMC_CUDA
 #include "CUDAMemoryManager.cuh"
-/*
-template <typename Buf_Type>
-class DoubleBuffer {
-        DoubleBuffer();
-        Buf_Type ** selector;
-        int size;
-        Buf_Type * array1;
-        Buf_Type * array2;
-    public:
-        DoubleBuffer<Buf_Type>(int);
-        ~DoubleBuffer();
-};
-*/
+
 template< class T>
 class TestClass
 {
@@ -66,6 +54,5 @@ private:
     MultiBuffer< T, n >& _buffer;
     const std::size_t _offset;
 };
-#include "DoubleBuffer.cu"
 #endif
 #endif
