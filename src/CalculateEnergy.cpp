@@ -309,7 +309,6 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   }
 
   CallBoxForceGPU(forcefield.particles->getCUDAVars(), cellVector,
-                  cellStartIndex, neighborList, mapParticleToCell,
                   coords, boxAxes, electrostatic, tempREn, tempLJEn,
                   atomCount, molCount, forcefield.sc_coul,
                   forcefield.sc_sigma_6, forcefield.sc_alpha,
