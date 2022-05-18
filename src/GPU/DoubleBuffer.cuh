@@ -27,7 +27,7 @@ struct MultiBuffer
 {
     MultiBuffer() : _active_offset(0) {}
     MultiBuffer(std::size_t m) : _active_offset(0) {
-
+        CUMALLOC((void**) &_globalmemory, m * sizeof(DAT));
     }
 
     void ChangeBuffers() { ++_active_offset; }
@@ -36,6 +36,7 @@ struct MultiBuffer
 private:
     T _objects[n];
     std::size_t _active_offset;
+    DAT * _globalmemory;
 };
 
 template< class T, typename DAT, std::size_t n >
