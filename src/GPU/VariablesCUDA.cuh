@@ -56,7 +56,7 @@ inline void printFreeMemory()
 class VariablesCUDA
 {
 public:
-  VariablesCUDA()
+  VariablesCUDA():  aFx(gpu_aForcex, gpu_aForcex_buffer)
   {
     gpu_sigmaSq = NULL;
     gpu_epsilon_Cn = NULL;
@@ -71,12 +71,25 @@ public:
     gpu_rCutCoulomb = NULL;
     gpu_ewald = NULL;
     gpu_diElectric_1 = NULL;
+    
+//    cub::DoubleBuffer< double >::DoubleBuffer * ;
+
     gpu_aForcex = NULL;
     gpu_aForcey = NULL;
     gpu_aForcez = NULL;
     gpu_mForcex = NULL;
     gpu_mForcey = NULL;
     gpu_mForcez = NULL;
+
+    gpu_aForcex_buffer = NULL;
+    gpu_aForcey_buffer = NULL;
+    gpu_aForcez_buffer = NULL;
+    gpu_mForcex_buffer = NULL;
+    gpu_mForcey_buffer = NULL;
+    gpu_mForcez_buffer = NULL;
+
+
+
     gpu_startAtomIdx = NULL;
 
     // setting lambda values to null
@@ -121,6 +134,23 @@ public:
   int *gpu_nonOrth;
   double *gpu_aForcex, *gpu_aForcey, *gpu_aForcez;
   double *gpu_mForcex, *gpu_mForcey, *gpu_mForcez;
+
+  double *gpu_aForcex_buffer, *gpu_aForcey_buffer, *gpu_aForcez_buffer;
+  double *gpu_mForcex_buffer, *gpu_mForcey_buffer, *gpu_mForcez_buffer;
+
+  cub::DoubleBuffer< double >::DoubleBuffer & aFx;
+    /*
+    cub::DoubleBuffer< double >::DoubleBuffer
+    cub::DoubleBuffer< double >::DoubleBuffer
+    cub::DoubleBuffer< double >::DoubleBuffer
+    cub::DoubleBuffer< double >::DoubleBuffer
+    cub::DoubleBuffer< double >::DoubleBuffer
+
+    cub::DoubleBuffer< double >::DoubleBuffer
+    cub::DoubleBuffer< double >::DoubleBuffer
+    cub::DoubleBuffer< double >::DoubleBuffer
+    */
+
   double *gpu_mTorquex, *gpu_mTorquey, *gpu_mTorquez;
   int *gpu_inForceRange;
   double *gpu_aForceRecx, *gpu_aForceRecy, *gpu_aForceRecz;
