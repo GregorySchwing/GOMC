@@ -53,12 +53,10 @@ inline void printFreeMemory()
          used_db / 1024.0 / 1024.0, free_db / 1024.0 / 1024.0, total_db / 1024.0 / 1024.0);
 }
 
-class DoubleBuffer;
-
 class VariablesCUDA
 {
 public:
-  VariablesCUDA():aFx(gpu_aForcex, gpu_aForcex_buffer)
+  VariablesCUDA()
   {
     gpu_sigmaSq = NULL;
     gpu_epsilon_Cn = NULL;
@@ -74,12 +72,12 @@ public:
     gpu_ewald = NULL;
     gpu_diElectric_1 = NULL;
     
-    DoubleBuffer< double > & aFx;
+    aFx = NULL;
 
     gpu_aForcex = NULL;
     gpu_aForcey = NULL;
     gpu_aForcez = NULL;
-    gpu_mForcex = NULL;hh
+    gpu_mForcex = NULL;
     gpu_mForcey = NULL;
     gpu_mForcez = NULL;
 
@@ -89,6 +87,8 @@ public:
     gpu_mForcex_buffer = NULL;
     gpu_mForcey_buffer = NULL;
     gpu_mForcez_buffer = NULL;
+
+    DoubleBuffer< double > * aFx;
 
     gpu_startAtomIdx = NULL;
 
