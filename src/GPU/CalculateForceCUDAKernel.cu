@@ -345,12 +345,12 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   BufferAccess<DeviceArray<double>, double, buffers> mFy_new(*(vars->gpu_mFy), 1);
   BufferAccess<DeviceArray<double>, double, buffers> mFz_new(*(vars->gpu_mFz), 1);
 
-  cudaMemset(aFx_old.get(), 0.0, atomCount * sizeof(double));
-  cudaMemset(aFy_old.get(), 0.0, atomCount * sizeof(double));
-  cudaMemset(aFz_old.get(), 0.0, atomCount * sizeof(double));
-  cudaMemset(mFx_old.get(), 0.0, molCount * sizeof(double));
-  cudaMemset(mFy_old.get(), 0.0, molCount * sizeof(double));
-  cudaMemset(mFz_old.get(), 0.0, molCount * sizeof(double));
+  cudaMemset(aFx_old->get(), 0.0, atomCount * sizeof(double));
+  cudaMemset(aFy_old->get(), 0.0, atomCount * sizeof(double));
+  cudaMemset(aFz_old->get(), 0.0, atomCount * sizeof(double));
+  cudaMemset(mFx_old->get(), 0.0, molCount * sizeof(double));
+  cudaMemset(mFy_old->get(), 0.0, molCount * sizeof(double));
+  cudaMemset(mFz_old->get(), 0.0, molCount * sizeof(double));
 
 
   // Either get from GPU or host (if last move was not MP/BMP)
