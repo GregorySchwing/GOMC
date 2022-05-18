@@ -7,11 +7,11 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #include "DoubleBuffer.cuh"
 #ifdef GOMC_CUDA
 
-template<typename T> DoubleBuffer<T>::DoubleBuffer<T>(int arraySize) {
+template<typename T> DoubleBuffer::DoubleBuffer<T>(int arraySize) {
     CUMALLOC((void**) array1, arraySize * sizeof(T));
     CUMALLOC((void**) array2, arraySize * sizeof(T));
 }
-template<typename T> DoubleBuffer<T>::~DoubleBuffer<T>() {
+template<typename T> DoubleBuffer::~DoubleBuffer<T>() {
     CUFREE(array1);
     CUFREE(array2);
 }
