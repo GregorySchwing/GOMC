@@ -38,11 +38,11 @@ private:
     std::size_t _active_offset;
 };
 
-template< class T, std::size_t n >
+template< class T, typename DAT, std::size_t n >
 class BufferAccess
 {
 public:
-    BufferAccess( MultiBuffer< T, n >& buf, std::size_t offset )
+    BufferAccess( MultiBuffer< T, DAT, n >& buf, std::size_t offset )
         : _buffer(buf), _offset(offset)
     {
     }
@@ -53,7 +53,7 @@ public:
     }
 
 private:
-    MultiBuffer< T, n >& _buffer;
+    MultiBuffer< T, DAT, n >& _buffer;
     const std::size_t _offset;
 };
 #endif
