@@ -225,7 +225,6 @@ set(cudaSources
     src/GPU/CellListGPU.cu
     src/GPU/ConstantDefinitionsCUDAKernel.cu
     src/GPU/CUDAMemoryManager.cu
-    src/GPU/DoubleBuffer.cu
     src/GPU/TransformParticlesCUDAKernel.cu)
 
 source_group("Header Files" FILES ${headers})
