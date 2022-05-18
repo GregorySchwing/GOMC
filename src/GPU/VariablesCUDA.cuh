@@ -53,7 +53,7 @@ inline void printFreeMemory()
          used_db / 1024.0 / 1024.0, free_db / 1024.0 / 1024.0, total_db / 1024.0 / 1024.0);
 }
 
-class cub::DoubleBuffer;
+class DoubleBuffer;
 
 class VariablesCUDA
 {
