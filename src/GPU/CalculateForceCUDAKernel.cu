@@ -331,6 +331,9 @@ void CallBoxForceGPU(VariablesCUDA *vars,
     CUMALLOC((void**) &gpu_final_REn, sizeof(double));
   }
 
+  BufferAccess<DeviceArray<double>, buffers> frontBuffer(gpu_aFx, 0);
+  BufferAccess<DeviceArray<double, buffers> backBuffer(gpu_aFx, 1);
+  
   // All 0.0
   // Replace with a double buffer
   cudaMemcpy(vars->gpu_aForcex, aForcex, atomCount * sizeof(double), cudaMemcpyHostToDevice);

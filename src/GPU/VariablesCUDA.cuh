@@ -16,6 +16,9 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 //Need a separate float constant for device code with the MSVC compiler
 //See CUDA Programming Guide section I.4.13 for details 
 static const __device__ double qqFactGPU = num::qqFact;
+// Number of buffers in a multi-buffer.  For now only 2.
+// Could eventually use one force to try > 1 sequential coord states
+const std::size_t buffers = 2;
 
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort = true)
@@ -137,12 +140,12 @@ public:
   double *gpu_aForcex, *gpu_aForcey, *gpu_aForcez;
   double *gpu_mForcex, *gpu_mForcey, *gpu_mForcez;
 
-  MultiBuffer< DeviceArray<double>, double, 2 > * gpu_aFx;
-  MultiBuffer< DeviceArray<double>, double, 2 > * gpu_aFy;
-  MultiBuffer< DeviceArray<double>, double, 2 > * gpu_aFz;
-  MultiBuffer< DeviceArray<double>, double, 2 > * gpu_mFx;
-  MultiBuffer< DeviceArray<double>, double, 2 > * gpu_mFy;
-  MultiBuffer< DeviceArray<double>, double, 2 > * gpu_mFz;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_aFx;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_aFy;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_aFz;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mFx;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mFy;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mFz;
 
   double *gpu_aForcex_buffer, *gpu_aForcey_buffer, *gpu_aForcez_buffer;
   double *gpu_mForcex_buffer, *gpu_mForcey_buffer, *gpu_mForcez_buffer;
