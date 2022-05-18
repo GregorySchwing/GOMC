@@ -57,7 +57,7 @@ inline void printFreeMemory()
 class VariablesCUDA
 {
 public:
-  VariablesCUDA():  aFx(gpu_aForcex, gpu_aForcex_buffer)
+  VariablesCUDA()//:  aFx(gpu_aForcex, gpu_aForcex_buffer)
   {
     gpu_sigmaSq = NULL;
     gpu_epsilon_Cn = NULL;
@@ -139,7 +139,7 @@ public:
   double *gpu_aForcex_buffer, *gpu_aForcey_buffer, *gpu_aForcez_buffer;
   double *gpu_mForcex_buffer, *gpu_mForcey_buffer, *gpu_mForcez_buffer;
 
-  cub::DoubleBuffer< double >::DoubleBuffer & aFx;
+  //cub::DoubleBuffer< double >::DoubleBuffer & aFx;
     /*
     cub::DoubleBuffer< double >::DoubleBuffer
     cub::DoubleBuffer< double >::DoubleBuffer
