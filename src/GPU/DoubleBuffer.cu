@@ -8,7 +8,7 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #define DOUBLE_BUFFER_CUH
 #include "DoubleBuffer.cuh"
 #ifdef GOMC_CUDA
-
+/*
 template<typename Buf_Type> 
 DoubleBuffer<Buf_Type>::DoubleBuffer<Buf_Type>(int arraySize) {
     CUMALLOC((void**) selector, 2 * sizeof(void*));
@@ -24,7 +24,9 @@ template<typename Buf_Type> DoubleBuffer<Buf_Type>::~DoubleBuffer<Buf_Type>() {
     CUFREE(array1);
     CUFREE(array2);
 }
-  
+*/
+
+
 
 #endif
 #endif
