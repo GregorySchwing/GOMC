@@ -80,6 +80,9 @@ void InitGPUForceField(VariablesCUDA &vars, double const *sigmaSq,
 }
 
 void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
+                         double * coords_x,
+                         double * coords_y,
+                         double * coords_z,
                          uint maxAtomsInMol, uint maxMolNumber,
                          std::vector<double> & particleCharge,
                          std::vector<int> & particleKind,
@@ -133,15 +136,25 @@ void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
   CUMALLOC((void**) &vars->gpu_mForcez, maxMolNumber * sizeof(double));
 
   // Buffer for GPU Residence
-  vars->gpu_coord_x = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
-  vars->gpu_coord_y = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
-  vars->gpu_coord_z = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
+  vars->gpu_coords_x = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
+  vars->gpu_coords_y = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
+  vars->gpu_coords_z = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
   vars->gpu_aFx = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
   vars->gpu_aFy = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
   vars->gpu_aFz = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
   vars->gpu_mFx = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
   vars->gpu_mFy = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
   vars->gpu_mFz = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
+
+  BufferAccess<DeviceArray<double>, double, buffers> coords_x(*(vars->gpu_coords_x), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> coords_y(*(vars->gpu_coords_y), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> coords_z(*(vars->gpu_coords_z), 0);
+
+  // Either get from GPU or host (if last move was not MP/BMP)
+  // Will make this a buffer also
+  cudaMemcpy(coords_x->get(), coords_x, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(coords_y->get(), coords_y, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(coords_z->get(), coords_z, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
 
   CUMALLOC((void**) &vars->gpu_mTorquex, maxMolNumber * sizeof(double));
   CUMALLOC((void**) &vars->gpu_mTorquey, maxMolNumber * sizeof(double));
@@ -165,6 +178,10 @@ void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
   cudaMemcpy(vars->gpu_particleCharge, &particleCharge[0], atomNumber * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_particleKind, &particleKind[0], atomNumber * sizeof(int), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_particleMol, &particleMol[0], atomNumber * sizeof(int), cudaMemcpyHostToDevice);
+
+  cudaMemcpy(vars->gpu_x, coords_x, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(vars->gpu_y, coords_y, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(vars->gpu_z, coords_z, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
 
   checkLastErrorCUDA(__FILE__, __LINE__);
 }
