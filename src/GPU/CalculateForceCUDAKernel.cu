@@ -331,9 +331,20 @@ void CallBoxForceGPU(VariablesCUDA *vars,
     CUMALLOC((void**) &gpu_final_REn, sizeof(double));
   }
 
-  BufferAccess<DeviceArray<double>, double, buffers> frontBuffer(*(vars->gpu_aFx), 0);
-  BufferAccess<DeviceArray<double>, double, buffers> backBuffer(*(vars->gpu_aFx), 1);
-  
+  BufferAccess<DeviceArray<double>, double, buffers> aFx_old(*(vars->gpu_aFx), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> aFy_old(*(vars->gpu_aFy), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> aFz_old(*(vars->gpu_aFz), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> mFx_old(*(vars->gpu_mFx), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> mFy_old(*(vars->gpu_mFy), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> mFz_old(*(vars->gpu_mFz), 0);
+
+  BufferAccess<DeviceArray<double>, double, buffers> aFx_new(*(vars->gpu_aFx), 1);
+  BufferAccess<DeviceArray<double>, double, buffers> aFy_new(*(vars->gpu_aFy), 1);
+  BufferAccess<DeviceArray<double>, double, buffers> aFz_new(*(vars->gpu_aFz), 1);
+  BufferAccess<DeviceArray<double>, double, buffers> mFx_new(*(vars->gpu_mFx), 1);
+  BufferAccess<DeviceArray<double>, double, buffers> mFy_new(*(vars->gpu_mFy), 1);
+  BufferAccess<DeviceArray<double>, double, buffers> mFz_new(*(vars->gpu_mFz), 1);
+
   // All 0.0
   // Replace with a double buffer
   cudaMemcpy(vars->gpu_aForcex, aForcex, atomCount * sizeof(double), cudaMemcpyHostToDevice);
