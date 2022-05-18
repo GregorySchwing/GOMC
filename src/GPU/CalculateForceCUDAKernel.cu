@@ -330,14 +330,11 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   BufferAccess<DeviceArray<double>, double, buffers> mFy(*(vars->gpu_mFy), buffer_index);
   BufferAccess<DeviceArray<double>, double, buffers> mFz(*(vars->gpu_mFz), buffer_index);
 
-  /*
-  BufferAccess<DeviceArray<double>, double, buffers> aFx(*(vars->gpu_aFx), 1);
-  BufferAccess<DeviceArray<double>, double, buffers> aFy(*(vars->gpu_aFy), 1);
-  BufferAccess<DeviceArray<double>, double, buffers> aFz(*(vars->gpu_aFz), 1);
-  BufferAccess<DeviceArray<double>, double, buffers> mFx(*(vars->gpu_mFx), 1);
-  BufferAccess<DeviceArray<double>, double, buffers> mFy(*(vars->gpu_mFy), 1);
-  BufferAccess<DeviceArray<double>, double, buffers> mFz(*(vars->gpu_mFz), 1);
-  */
+  // Either get from GPU or host (if last move was not MP/BMP)
+  // Will make this a buffer also
+  cudaMemcpy(vars->gpu_x, coords.x, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(vars->gpu_y, coords.y, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(vars->gpu_z, coords.z, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
 
   cudaMemset(aFx->get(), 0.0, atomCount * sizeof(double));
   cudaMemset(aFy->get(), 0.0, atomCount * sizeof(double));
