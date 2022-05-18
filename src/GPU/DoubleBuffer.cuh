@@ -11,7 +11,7 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 template <typename Buf_Type>
 class DoubleBuffer {
         DoubleBuffer();
-
+        Buf_Type ** selector;
         int size;
         Buf_Type * array1;
         Buf_Type * array2;
