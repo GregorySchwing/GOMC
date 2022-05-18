@@ -14,7 +14,7 @@ template< class T>
 class DataArray
 {
 public:
-    DataArray() : {}
+    DataArray();
 
     T *  get() const { return _n; }
     void set(T * n) { _n = n; }
