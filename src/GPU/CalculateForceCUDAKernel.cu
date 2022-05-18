@@ -331,6 +331,10 @@ void CallBoxForceGPU(VariablesCUDA *vars,
     CUMALLOC((void**) &gpu_final_REn, sizeof(double));
   }
 
+
+  // This same function is used to calculate old and new..
+  // Will need to separate the old calculation from the new coordinates.
+  // Could use the singleMoveAccepted boolean, though this will only handle 2 buffers.
   BufferAccess<DeviceArray<double>, double, buffers> aFx_old(*(vars->gpu_aFx), 0);
   BufferAccess<DeviceArray<double>, double, buffers> aFy_old(*(vars->gpu_aFy), 0);
   BufferAccess<DeviceArray<double>, double, buffers> aFz_old(*(vars->gpu_aFz), 0);
@@ -338,13 +342,14 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   BufferAccess<DeviceArray<double>, double, buffers> mFy_old(*(vars->gpu_mFy), 0);
   BufferAccess<DeviceArray<double>, double, buffers> mFz_old(*(vars->gpu_mFz), 0);
 
+  /*
   BufferAccess<DeviceArray<double>, double, buffers> aFx_new(*(vars->gpu_aFx), 1);
   BufferAccess<DeviceArray<double>, double, buffers> aFy_new(*(vars->gpu_aFy), 1);
   BufferAccess<DeviceArray<double>, double, buffers> aFz_new(*(vars->gpu_aFz), 1);
   BufferAccess<DeviceArray<double>, double, buffers> mFx_new(*(vars->gpu_mFx), 1);
   BufferAccess<DeviceArray<double>, double, buffers> mFy_new(*(vars->gpu_mFy), 1);
   BufferAccess<DeviceArray<double>, double, buffers> mFz_new(*(vars->gpu_mFz), 1);
-
+  */
   cudaMemset(aFx_old->get(), 0.0, atomCount * sizeof(double));
   cudaMemset(aFy_old->get(), 0.0, atomCount * sizeof(double));
   cudaMemset(aFz_old->get(), 0.0, atomCount * sizeof(double));
@@ -353,10 +358,6 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   cudaMemset(mFz_old->get(), 0.0, molCount * sizeof(double));
 
 
-  // Either get from GPU or host (if last move was not MP/BMP)
-  cudaMemcpy(vars->gpu_x, coords.x, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_y, coords.y, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_z, coords.z, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
 
   double3 axis = make_double3(boxAxes.GetAxis(box).x,
                               boxAxes.GetAxis(box).y,
@@ -403,12 +404,12 @@ void CallBoxForceGPU(VariablesCUDA *vars,
       vars->gpu_Invcell_x[box],
       vars->gpu_Invcell_y[box],
       vars->gpu_Invcell_z[box],
-      vars->gpu_aForcex,
-      vars->gpu_aForcey,
-      vars->gpu_aForcez,
-      vars->gpu_mForcex,
-      vars->gpu_mForcey,
-      vars->gpu_mForcez,
+      aFx_old->get(),
+      aFy_old->get(),
+      aFz_old->get(),
+      mFx_old->get(),
+      mFy_old->get(),
+      mFz_old->get(),
       sc_coul,
       sc_sigma_6,
       sc_alpha,
