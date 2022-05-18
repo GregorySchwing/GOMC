@@ -435,12 +435,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   REn = cpu_final_REn;
   LJEn = cpu_final_LJEn;
 
-  cudaMemcpy(aForcex, vars->gpu_aForcex, sizeof(double) * atomCount, cudaMemcpyDeviceToHost);
-  cudaMemcpy(aForcey, vars->gpu_aForcey, sizeof(double) * atomCount, cudaMemcpyDeviceToHost);
-  cudaMemcpy(aForcez, vars->gpu_aForcez, sizeof(double) * atomCount, cudaMemcpyDeviceToHost);
-  cudaMemcpy(mForcex, vars->gpu_mForcex, sizeof(double) * molCount, cudaMemcpyDeviceToHost);
-  cudaMemcpy(mForcey, vars->gpu_mForcey, sizeof(double) * molCount, cudaMemcpyDeviceToHost);
-  cudaMemcpy(mForcez, vars->gpu_mForcez, sizeof(double) * molCount, cudaMemcpyDeviceToHost);
+  // Neccessary?
   cudaDeviceSynchronize();
 
   CUFREE(gpu_LJEn);
