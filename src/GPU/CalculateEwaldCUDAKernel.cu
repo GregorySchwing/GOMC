@@ -13,7 +13,7 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #include "ConstantDefinitionsCUDAKernel.cuh"
 #include "CalculateMinImageCUDAKernel.cuh"
 #include "CUDAMemoryManager.cuh"
-#include "cub/cub.cuh"
+//#include "cub/cub.cuh"
 #include <vector>
 
 using namespace cub;
