@@ -6,7 +6,7 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 ********************************************************************************/
 #ifdef GOMC_CUDA
 #include <cuda.h>
-//#include "cub/cub.cuh"
+#include "cub/cub.cuh"
 #include <stdio.h>
 #include "ConstantDefinitionsCUDAKernel.cuh"
 #include "CalculateMinImageCUDAKernel.cuh"

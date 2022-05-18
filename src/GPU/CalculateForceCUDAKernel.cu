@@ -12,7 +12,7 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #include "ConstantDefinitionsCUDAKernel.cuh"
 #include "CalculateMinImageCUDAKernel.cuh"
 #include "CUDAMemoryManager.cuh"
-//#include "cub/cub.cuh"
+#include "cub/cub.cuh"
 #include <stdio.h>
 #define NUMBER_OF_NEIGHBOR_CELLS 27
 #define PARTICLES_PER_BLOCK 64

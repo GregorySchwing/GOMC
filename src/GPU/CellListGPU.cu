@@ -1,6 +1,6 @@
 #ifdef GOMC_CUDA
 #include "CellListGPU.cuh"
-//#include "cub/cub.cuh"
+#include "cub/cub.cuh"
 
 
 
