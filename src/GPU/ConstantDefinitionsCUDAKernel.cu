@@ -146,6 +146,7 @@ void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
   vars->gpu_mFy = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
   vars->gpu_mFz = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
 
+  // At the begginning buffer 0 contains as the current coords
   BufferAccess<DeviceArray<double>, double, buffers> coords_x_view(*(vars->gpu_coords_x), 0);
   BufferAccess<DeviceArray<double>, double, buffers> coords_y_view(*(vars->gpu_coords_y), 0);
   BufferAccess<DeviceArray<double>, double, buffers> coords_z_view(*(vars->gpu_coords_z), 0);
