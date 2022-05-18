@@ -214,6 +214,7 @@ set(cudaHeaders
     src/GPU/CalculateEwaldCUDAKernel.cuh
     src/GPU/CellListGPU.cuh
     src/GPU/CUDAMemoryManager.cuh
+    src/GPU/DoubleBuffer.cuh
     src/GPU/TransformParticlesCUDAKernel.cuh
     src/GPU/VariablesCUDA.cuh)
 
