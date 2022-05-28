@@ -59,7 +59,7 @@ then
 
 			# download the zip file 
 			echo "==== Downloading the CUB library... (Shouldn't take too long)"
-			wget https://github.com/NVIDIA/cub/archive/refs/tags/1.16.0.zip > /dev/null 2>&1
+			wget https://github.com/NVIDIA/cub/archive/refs/tags/1.8.0.zip > /dev/null 2>&1
 
 			#unzip
 			echo "==== Extracting the CUB library..."
