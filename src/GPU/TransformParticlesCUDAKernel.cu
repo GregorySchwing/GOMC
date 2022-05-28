@@ -908,12 +908,37 @@ void BrownianMotionRotateParticlesGPU(
   cudaMemcpy(vars->gpu_mTorquex, mTorque.x, molCount * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_mTorquey, mTorque.y, molCount * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_mTorquez, mTorque.z, molCount * sizeof(double), cudaMemcpyHostToDevice);
+
+  // We were modifying the gpu_x,y,z array to convert old -> new.
+  // Not anymore, now we'll pass both the kernel
+  // Read from old.
+  // Write to new.
+  /*
   cudaMemcpy(vars->gpu_x, newMolPos.x, atomCount * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_y, newMolPos.y, atomCount * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_z, newMolPos.z, atomCount * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_comx, newCOMs.x, molCount * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_comy, newCOMs.y, molCount * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_comz, newCOMs.z, molCount * sizeof(double), cudaMemcpyHostToDevice);
+  */
+  // This same function is used to calculate old and new..
+  // Will need to separate the old calculation from the new coordinates.
+  // Could use the singleMoveAccepted boolean, though this will only handle 2 buffers.
+
+  // The number at the end of the constructor indicates how many buffers past active to retrieve
+  // Hence active + 0 is the active buffer.
+  BufferAccess<DeviceArray<double>, double, buffers> old_coords_x(*(vars->gpu_coords_x), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> old_coords_y(*(vars->gpu_coords_y), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> old_coords_z(*(vars->gpu_coords_z), 0);
+  // Hence active + 1 is the inactive buffer.
+  BufferAccess<DeviceArray<double>, double, buffers> new_coords_x(*(vars->gpu_coords_x), 1);
+  BufferAccess<DeviceArray<double>, double, buffers> new_coords_y(*(vars->gpu_coords_y), 1);
+  BufferAccess<DeviceArray<double>, double, buffers> new_coords_z(*(vars->gpu_coords_z), 1);
+
+  BufferAccess<DeviceArray<double>, double, buffers> com_x(*(vars->gpu_coords_x), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> com_y(*(vars->gpu_coords_y), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> com_z(*(vars->gpu_coords_z), 0);
+
   cudaMemcpy(gpu_moleculeInvolved, &moleculeInvolved[0], molCountInBox * sizeof(int), cudaMemcpyHostToDevice);
 
   double3 axis = make_double3(boxAxes.x, boxAxes.y, boxAxes.z);
@@ -922,15 +947,18 @@ void BrownianMotionRotateParticlesGPU(
   if (isOrthogonal)
     BrownianMotionRotateKernel<true><<< blocksPerGrid, threadsPerBlock>>>(
       vars->gpu_startAtomIdx,
-      vars->gpu_x,
-      vars->gpu_y,
-      vars->gpu_z,
+      old_coords_x->get(),
+      old_coords_y->get(),
+      old_coords_z->get(),
+      new_coords_x->get(),
+      new_coords_y->get(),
+      new_coords_z->get(),      
       vars->gpu_mTorquex,
       vars->gpu_mTorquey,
       vars->gpu_mTorquez,
-      vars->gpu_comx,
-      vars->gpu_comy,
-      vars->gpu_comz,
+      com_x->get(),
+      com_y->get(),
+      com_z->get(),
       vars->gpu_r_k_x,
       vars->gpu_r_k_y,
       vars->gpu_r_k_z,
@@ -953,15 +981,18 @@ void BrownianMotionRotateParticlesGPU(
 else
       BrownianMotionRotateKernel<true><<< blocksPerGrid, threadsPerBlock>>>(
       vars->gpu_startAtomIdx,
-      vars->gpu_x,
-      vars->gpu_y,
-      vars->gpu_z,
+      old_coords_x->get(),
+      old_coords_y->get(),
+      old_coords_z->get(),
+      new_coords_x->get(),
+      new_coords_y->get(),
+      new_coords_z->get(),      
       vars->gpu_mTorquex,
       vars->gpu_mTorquey,
       vars->gpu_mTorquez,
-      vars->gpu_comx,
-      vars->gpu_comy,
-      vars->gpu_comz,
+      com_x->get(),
+      com_y->get(),
+      com_z->get(),
       vars->gpu_r_k_x,
       vars->gpu_r_k_y,
       vars->gpu_r_k_z,
@@ -984,10 +1015,11 @@ else
       
   cudaDeviceSynchronize();
   checkLastErrorCUDA(__FILE__, __LINE__);
-
+  /*
   cudaMemcpy(newMolPos.x, vars->gpu_x, atomCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(newMolPos.y, vars->gpu_y, atomCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(newMolPos.z, vars->gpu_z, atomCount * sizeof(double), cudaMemcpyDeviceToHost);
+  */
   cudaMemcpy(r_k.x, vars->gpu_r_k_x, molCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(r_k.y, vars->gpu_r_k_y, molCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(r_k.z, vars->gpu_r_k_z, molCount * sizeof(double), cudaMemcpyDeviceToHost);
@@ -998,9 +1030,12 @@ else
 template<const bool isOrthogonal>
 __global__ void BrownianMotionRotateKernel(
   int *startAtomIdx,
-  double *gpu_x,
-  double *gpu_y,
-  double *gpu_z,
+  double *gpu_old_x,
+  double *gpu_old_y,
+  double *gpu_old_z,
+  double *gpu_new_x,
+  double *gpu_new_y,
+  double *gpu_new_z,
   double *molTorquex,
   double *molTorquey,
   double *molTorquez,

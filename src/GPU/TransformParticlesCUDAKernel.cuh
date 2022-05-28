@@ -248,9 +248,12 @@ void BrownianMotionTranslateParticlesGPU(
 template<const bool isOrthogonal>
 __global__ void BrownianMotionRotateKernel(
   int *startAtomIdx,
-  double *gpu_x,
-  double *gpu_y,
-  double *gpu_z,
+  double *gpu_old_x,
+  double *gpu_old_y,
+  double *gpu_old_z,
+  double *gpu_new_x,
+  double *gpu_new_y,
+  double *gpu_new_z,
   double *molTorquex,
   double *molTorquey,
   double *molTorquez,
