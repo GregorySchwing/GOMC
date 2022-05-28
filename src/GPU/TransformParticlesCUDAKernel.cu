@@ -1197,7 +1197,7 @@ void BrownianMotionTranslateParticlesGPU(
   int blocksPerGrid = molCountInBox;
 
   CUMALLOC((void **) &gpu_moleculeInvolved, molCountInBox * sizeof(int));
-
+/*
   cudaMemcpy(vars->gpu_mForcex, mForce.x, molCount * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_mForcey, mForce.y, molCount * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_mForcez, mForce.z, molCount * sizeof(double), cudaMemcpyHostToDevice);
@@ -1210,6 +1210,26 @@ void BrownianMotionTranslateParticlesGPU(
   cudaMemcpy(vars->gpu_comx, newCOMs.x, molCount * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_comy, newCOMs.y, molCount * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_comz, newCOMs.z, molCount * sizeof(double), cudaMemcpyHostToDevice);
+*/
+
+  // The number at the end of the constructor indicates how many buffers past active to retrieve
+  // Hence active + 0 is the active buffer.
+  BufferAccess<DeviceArray<double>, double, buffers> old_coords_x(*(vars->gpu_coords_x), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> old_coords_y(*(vars->gpu_coords_y), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> old_coords_z(*(vars->gpu_coords_z), 0);
+  // Hence active + 1 is the inactive buffer.
+  BufferAccess<DeviceArray<double>, double, buffers> new_coords_x(*(vars->gpu_coords_x), 1);
+  BufferAccess<DeviceArray<double>, double, buffers> new_coords_y(*(vars->gpu_coords_y), 1);
+  BufferAccess<DeviceArray<double>, double, buffers> new_coords_z(*(vars->gpu_coords_z), 1);
+
+  BufferAccess<DeviceArray<double>, double, buffers> com_x(*(vars->gpu_coords_x), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> com_y(*(vars->gpu_coords_y), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> com_z(*(vars->gpu_coords_z), 0);
+
+  BufferAccess<DeviceArray<double>, double, buffers> mFx(*(vars->gpu_mFx), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> mFy(*(vars->gpu_mFy), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> mFz(*(vars->gpu_mFz), 0);
+
   cudaMemcpy(gpu_moleculeInvolved, &moleculeInvolved[0], molCountInBox * sizeof(int), cudaMemcpyHostToDevice);
 
   double3 axis = make_double3(boxAxes.x, boxAxes.y, boxAxes.z);
@@ -1218,12 +1238,15 @@ void BrownianMotionTranslateParticlesGPU(
   if (isOrthogonal)
     BrownianMotionTranslateKernel<true><<< blocksPerGrid, threadsPerBlock>>>(
       vars->gpu_startAtomIdx,
-      vars->gpu_x,
-      vars->gpu_y,
-      vars->gpu_z,
-      vars->gpu_mForcex,
-      vars->gpu_mForcey,
-      vars->gpu_mForcez,
+      old_coords_x->get(),
+      old_coords_y->get(),
+      old_coords_z->get(),
+      new_coords_x->get(),
+      new_coords_y->get(),
+      new_coords_z->get(), 
+      mFx->get(),
+      mFy->get(),
+      mFz->get(),
       vars->gpu_mForceRecx,
       vars->gpu_mForceRecy,
       vars->gpu_mForceRecz,
@@ -1304,9 +1327,12 @@ void BrownianMotionTranslateParticlesGPU(
 template<const bool isOrthogonal>
 __global__ void BrownianMotionTranslateKernel(
   int *startAtomIdx,
-  double *gpu_x,
-  double *gpu_y,
-  double *gpu_z,
+  double *gpu_old_x,
+  double *gpu_old_y,
+  double *gpu_old_z,
+  double *gpu_new_x,
+  double *gpu_new_y,
+  double *gpu_new_z,
   double *molForcex,
   double *molForcey,
   double *molForcez,
@@ -1388,7 +1414,7 @@ __global__ void BrownianMotionTranslateKernel(
   // use stride of blockDim.x, which is 32
   // each thread handles one atom translation
   for(atomIdx = startIdx + threadIdx.x; atomIdx < endIdx; atomIdx += blockDim.x) {
-    double3 coor = make_double3(gpu_x[atomIdx], gpu_y[atomIdx], gpu_z[atomIdx]);
+    double3 coor = make_double3(gpu_old_x[atomIdx], gpu_old_y[atomIdx], gpu_old_z[atomIdx]);
 
     // translate the atom
     coor.x += shift.x;
@@ -1402,9 +1428,9 @@ __global__ void BrownianMotionTranslateKernel(
                       gpu_Invcell_x, gpu_Invcell_y, gpu_Invcell_z);
 
     // update the new position
-    gpu_x[atomIdx] = coor.x;
-    gpu_y[atomIdx] = coor.y;
-    gpu_z[atomIdx] = coor.z;
+    gpu_new_x[atomIdx] = coor.x;
+    gpu_new_y[atomIdx] = coor.y;
+    gpu_new_z[atomIdx] = coor.z;
   }
 }
 
