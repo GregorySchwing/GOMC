@@ -38,27 +38,28 @@ then
 			echo "==== GOMC needs CUB library to run..."
 			echo "==== Finding latest CUB library..."
 
+
 			# download the download html page
-			wget https://nvlabs.github.io/cub/download_cub.html > /dev/null 2>&1
+			#wget https://nvlabs.github.io/cub/download_cub.html > /dev/null 2>&1
 
 			# find the lines that have the link
-			grep "https://github.com/NVlabs/" download_cub.html > link_lines
+			#grep "https://github.com/NVlabs/" download_cub.html > link_lines
 
 			# the last line is the easiest to find the link
-			awk '/./{line=$0} END{print line}' link_lines > last_line
+			#awk '/./{line=$0} END{print line}' link_lines > last_line
 
 			# the substring between two quotes is the link!!!!
-			LINK="$(awk -F'"' '{ print $2 }' last_line)"
-			echo "==== Link found at ${LINK}"
+			#LINK="$(awk -F'"' '{ print $2 }' last_line)"
+			#echo "==== Link found at ${LINK}"
 
 			# remove any temporary files
-			rm link_lines
-			rm download_cub.html
-			rm last_line
+			#rm link_lines
+			#rm download_cub.html
+			#rm last_line
 
 			# download the zip file 
 			echo "==== Downloading the CUB library... (Shouldn't take too long)"
-			wget "${LINK}" > /dev/null 2>&1
+			wget https://github.com/NVIDIA/cub/archive/refs/tags/1.16.0.zip > /dev/null 2>&1
 
 			#unzip
 			echo "==== Extracting the CUB library..."
