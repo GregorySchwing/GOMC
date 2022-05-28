@@ -144,6 +144,10 @@ public:
   MultiBuffer< DeviceArray<double>, double, buffers > * gpu_coords_y;
   MultiBuffer< DeviceArray<double>, double, buffers > * gpu_coords_z;
 
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_com_x;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_com_y;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_com_z;
+
   MultiBuffer< DeviceArray<double>, double, buffers > * gpu_aFx;
   MultiBuffer< DeviceArray<double>, double, buffers > * gpu_aFy;
   MultiBuffer< DeviceArray<double>, double, buffers > * gpu_aFz;
