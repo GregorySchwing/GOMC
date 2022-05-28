@@ -1134,7 +1134,7 @@ __global__ void BrownianMotionRotateKernel(
   // use stride of blockDim.x, which is 32
   // each thread handles one atom rotation
   for(atomIdx = startIdx + threadIdx.x; atomIdx < endIdx; atomIdx += blockDim.x) {
-    double3 coor = make_double3(gpu_x[atomIdx], gpu_y[atomIdx], gpu_z[atomIdx]);
+    double3 coor = make_double3(gpu_old_x[atomIdx], gpu_old_y[atomIdx], gpu_old_z[atomIdx]);
     // unwrap molecule
     if(isOrthogonal)
       UnwrapPBC3(coor, com, axis, halfAx);
@@ -1164,9 +1164,9 @@ __global__ void BrownianMotionRotateKernel(
                       gpu_Invcell_x, gpu_Invcell_y, gpu_Invcell_z);
 
     // update the new position
-    gpu_x[atomIdx] = coor.x;
-    gpu_y[atomIdx] = coor.y;
-    gpu_z[atomIdx] = coor.z;
+    gpu_new_x[atomIdx] = coor.x;
+    gpu_new_y[atomIdx] = coor.y;
+    gpu_new_z[atomIdx] = coor.z;
   }
 }
 
