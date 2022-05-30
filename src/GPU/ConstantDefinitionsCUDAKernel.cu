@@ -197,9 +197,15 @@ void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
   CUMALLOC((void**) &vars->gpu_particleKind, atomNumber * sizeof(int));
   CUMALLOC((void**) &vars->gpu_particleMol, atomNumber * sizeof(int));
 
+  CUMALLOC((void**) &vars->gpu_particleHasNoCharge, atomNumber * sizeof(bool));
+  CUMALLOC((void**) &vars->gpu_particleUsed, atomNumber * sizeof(bool));
+
   cudaMemcpy(vars->gpu_particleCharge, &particleCharge[0], atomNumber * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_particleKind, &particleKind[0], atomNumber * sizeof(int), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_particleMol, &particleMol[0], atomNumber * sizeof(int), cudaMemcpyHostToDevice);
+  cudaMemcpy(vars->gpu_particleHasNoCharge, &particleKind[0], atomNumber * sizeof(int), cudaMemcpyHostToDevice);
+  cudaMemcpy(vars->gpu_particleUsed, &particleMol[0], atomNumber * sizeof(int), cudaMemcpyHostToDevice);
+
 
   cudaMemcpy(vars->gpu_x, coords_x, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_y, coords_y, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
@@ -280,6 +286,11 @@ void InitEwaldVariablesCUDA(VariablesCUDA *vars, uint imageTotal)
   vars->gpu_prefactRef = new double *[BOX_TOTAL];
   vars->gpu_hsqr = new double *[BOX_TOTAL];
   vars->gpu_hsqrRef = new double *[BOX_TOTAL];
+
+  cudaMemcpy(gpu_particleCharge, &particleCharge[0], sizeof(double) * particleCharge.size(), cudaMemcpyHostToDevice);
+  cudaMemcpy(gpu_particleMol, &particleMol[0], sizeof(int) * particleMol.size(), cudaMemcpyHostToDevice);
+  cudaMemcpy(gpu_particleHasNoCharge, particleHasNoCharge, sizeof(int) * particleHasNoCharge.size(), cudaMemcpyHostToDevice);
+  cudaMemcpy(gpu_particleUsed, particleUsed, sizeof(int) * particleUsed.size(), cudaMemcpyHostToDevice);
 
   for(uint b = 0; b < BOX_TOTAL; b++) {
     CUMALLOC((void**) &vars->gpu_kx[b], imageTotal * sizeof(double));

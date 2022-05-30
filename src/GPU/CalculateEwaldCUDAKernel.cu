@@ -552,11 +552,7 @@ void CallBoxForceReciprocalGPU(
 {
   int atomCount = atomForceRec.Count();
   int molCount = molForceRec.Count();
-  double *gpu_particleCharge;
-  int *gpu_particleMol;
-  bool *gpu_particleHasNoCharge, *gpu_particleUsed;
   bool *arr_particleHasNoCharge = new bool[particleHasNoCharge.size()];
-  int *gpu_startMol, *gpu_lengthMol;
 
   // particleHasNoCharge is stored in vector<bool>, so in order to copy it to GPU
   // it needs to be stored in bool[]. because:
@@ -638,12 +634,6 @@ void CallBoxForceReciprocalGPU(
 
   cudaDeviceSynchronize();
   delete[] arr_particleHasNoCharge;
-  CUFREE(gpu_particleCharge);
-  CUFREE(gpu_particleHasNoCharge);
-  CUFREE(gpu_particleUsed);
-  CUFREE(gpu_startMol);
-  CUFREE(gpu_lengthMol);
-  CUFREE(gpu_particleMol);
 }
 
 __global__ void BoxForceReciprocalGPU(

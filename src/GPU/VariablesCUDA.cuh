@@ -110,6 +110,9 @@ public:
   double *gpu_rOn;
   double *gpu_alpha;
   int *gpu_ewald;
+  double *gpu_particleCharge,
+  int *gpu_particleMol, gpu_particleHasNoCharge, gpu_particleUsed;
+  
   double *gpu_diElectric_1;
   double *gpu_x, *gpu_y, *gpu_z;
   // Single molecule arrays
