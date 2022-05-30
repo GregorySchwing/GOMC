@@ -334,6 +334,7 @@ inline void MultiParticleBrownian::CalcEn()
   // Calculate the new force and energy and we will compare that to the
   // reference values in Accept() function
   //cellList.GridAll(boxDimRef, newMolsPos, molLookup);
+  if(r123wrapper.GetStep() % 10 == 0)
   cellList.GridBox(boxDimRef, newMolsPos, molLookup, bPick);
 
   //back up cached fourier term
