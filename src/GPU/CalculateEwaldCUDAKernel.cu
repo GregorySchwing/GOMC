@@ -546,14 +546,6 @@ void CallBoxForceReciprocalGPU(
 {
   int atomCount = atomForceRec.Count();
   int molCount = molForceRec.Count();
-  bool *arr_particleHasNoCharge = new bool[particleHasNoCharge.size()];
-
-  // particleHasNoCharge is stored in vector<bool>, so in order to copy it to GPU
-  // it needs to be stored in bool[]. because:
-  // std::vector<bool> : Does not necessarily store its elements as a contiguous array
-  for(int i = 0; i < particleHasNoCharge.size(); i++) {
-    arr_particleHasNoCharge[i] = particleHasNoCharge[i];
-  }
 
   // calculate block and grid sizes
   dim3 threadsPerBlock(256, 1, 1);
@@ -623,7 +615,6 @@ void CallBoxForceReciprocalGPU(
   cudaMemcpy(molForceRec.z, vars->gpu_mForceRecz, sizeof(double) * molCount, cudaMemcpyDeviceToHost);
 
   cudaDeviceSynchronize();
-  delete[] arr_particleHasNoCharge;
 }
 
 __global__ void BoxForceReciprocalGPU(
