@@ -142,9 +142,11 @@ void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
   vars->gpu_coords_x = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
   vars->gpu_coords_y = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
   vars->gpu_coords_z = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
+  
   vars->gpu_com_x = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
   vars->gpu_com_y = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
   vars->gpu_com_z = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
+
   vars->gpu_aFx = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
   vars->gpu_aFy = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
   vars->gpu_aFz = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
@@ -152,6 +154,12 @@ void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
   vars->gpu_mFy = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
   vars->gpu_mFz = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
 
+  vars->gpu_aFRx = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
+  vars->gpu_aFRy = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
+  vars->gpu_aFRz = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
+  vars->gpu_mFRx = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
+  vars->gpu_mFRy = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
+  vars->gpu_mFRz = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
   // Access 0-index buffer of multi-buffer
   BufferAccess<DeviceArray<double>, double, buffers> coords_x_view(*(vars->gpu_coords_x), 0);
   BufferAccess<DeviceArray<double>, double, buffers> coords_y_view(*(vars->gpu_coords_y), 0);
