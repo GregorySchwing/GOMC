@@ -38,7 +38,6 @@ void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
                          double * com_y,
                          double * com_z,
                          uint maxAtomsInMol, uint maxMolNumber,
-                         std::vector<double> & particleCharge,
                          std::vector<int> & particleKind,
                          std::vector<int> & particleMol);
 void InitEwaldVariablesCUDA(VariablesCUDA *vars, uint imageTotal);

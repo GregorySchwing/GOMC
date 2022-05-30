@@ -90,7 +90,7 @@ void CalculateEnergy::Init(System & sys)
                       currentCOM.y,
                       currentCOM.z,
                       maxAtomInMol, currentCOM.Count(),
-                      particleCharge, particleKind, particleMol);
+                      particleKind, particleMol);
 #endif
 }
 
