@@ -87,7 +87,6 @@ void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
                          double * com_y,
                          double * com_z,
                          uint maxAtomsInMol, uint maxMolNumber,
-                         std::vector<double> & particleCharge,
                          std::vector<int> & particleKind,
                          std::vector<int> & particleMol)
 {
@@ -193,19 +192,14 @@ void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
   CUMALLOC((void**) &vars->gpu_mapParticleToCell, atomNumber * sizeof(int));
   CUMALLOC((void**) &vars->gpu_mapParticleToCellSorted, atomNumber * sizeof(int));
 
-  CUMALLOC((void**) &vars->gpu_particleCharge, atomNumber * sizeof(double));
   CUMALLOC((void**) &vars->gpu_particleKind, atomNumber * sizeof(int));
   CUMALLOC((void**) &vars->gpu_particleMol, atomNumber * sizeof(int));
 
   CUMALLOC((void**) &vars->gpu_particleHasNoCharge, atomNumber * sizeof(bool));
   CUMALLOC((void**) &vars->gpu_particleUsed, atomNumber * sizeof(bool));
 
-  cudaMemcpy(vars->gpu_particleCharge, &particleCharge[0], atomNumber * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_particleKind, &particleKind[0], atomNumber * sizeof(int), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_particleMol, &particleMol[0], atomNumber * sizeof(int), cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_particleHasNoCharge, &particleKind[0], atomNumber * sizeof(int), cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_particleUsed, &particleMol[0], atomNumber * sizeof(int), cudaMemcpyHostToDevice);
-
 
   cudaMemcpy(vars->gpu_x, coords_x, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_y, coords_y, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
@@ -270,7 +264,10 @@ void InitExp6Variables(VariablesCUDA *vars, double *rMin, double *expConst,
   checkLastErrorCUDA(__FILE__, __LINE__);
 }
 
-void InitEwaldVariablesCUDA(VariablesCUDA *vars, uint imageTotal)
+void InitEwaldVariablesCUDA(VariablesCUDA *vars, uint imageTotal,
+                            std::vector<double> & particleCharge,
+                            std::vector<double> & particleHasNoCharge,
+                            std::vector<double> & particleUsed)
 {
   vars->gpu_kx = new double *[BOX_TOTAL];
   vars->gpu_ky = new double *[BOX_TOTAL];
@@ -287,10 +284,13 @@ void InitEwaldVariablesCUDA(VariablesCUDA *vars, uint imageTotal)
   vars->gpu_hsqr = new double *[BOX_TOTAL];
   vars->gpu_hsqrRef = new double *[BOX_TOTAL];
 
+  CUMALLOC((void**) &vars->gpu_particleCharge, particleCharge.size() * sizeof(double));
+  CUMALLOC((void**) &vars->gpu_particleHasNoCharge, particleHasNoCharge.size() * sizeof(int));
+  CUMALLOC((void**) &vars->gpu_particleUsed, particleUsed.size() * sizeof(int));
+
   cudaMemcpy(vars->gpu_particleCharge, &particleCharge[0], sizeof(double) * particleCharge.size(), cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_particleMol, &particleMol[0], sizeof(int) * particleMol.size(), cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_particleHasNoCharge, particleHasNoCharge, sizeof(int) * particleHasNoCharge.size(), cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_particleUsed, particleUsed, sizeof(int) * particleUsed.size(), cudaMemcpyHostToDevice);
+  cudaMemcpy(vars->gpu_particleHasNoCharge, &particleHasNoCharge[0], sizeof(int) * particleHasNoCharge.size(), cudaMemcpyHostToDevice);
+  cudaMemcpy(vars->gpu_particleUsed, &particleUsed[0], sizeof(int) * particleUsed.size(), cudaMemcpyHostToDevice);
 
   for(uint b = 0; b < BOX_TOTAL; b++) {
     CUMALLOC((void**) &vars->gpu_kx[b], imageTotal * sizeof(double));
