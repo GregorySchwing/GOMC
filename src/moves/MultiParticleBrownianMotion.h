@@ -251,9 +251,9 @@ inline uint MultiParticleBrownian::PrepNEMTMC(const uint box, const uint midx, c
     calcEnRef.BoxForce(sysPotRef, coordCurrRef, atomForceRef, molForceRef,
                        boxDimRef, bPick);
 
-      //Calculate Torque for old positions
-      calcEnRef.CalculateTorque(moleculeIndex, coordCurrRef, comCurrRef,
-                                atomForceRef, atomForceRecRef, molTorqueRef, bPick);
+    //Calculate Torque for old positions
+    calcEnRef.CalculateTorque(moleculeIndex, coordCurrRef, comCurrRef,
+                              atomForceRef, atomForceRecRef, molTorqueRef, bPick);
 
     sysPotRef.Total();
   }

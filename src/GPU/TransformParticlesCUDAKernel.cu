@@ -1015,11 +1015,11 @@ else
       
   cudaDeviceSynchronize();
   checkLastErrorCUDA(__FILE__, __LINE__);
-  /*
-  cudaMemcpy(newMolPos.x, vars->gpu_x, atomCount * sizeof(double), cudaMemcpyDeviceToHost);
-  cudaMemcpy(newMolPos.y, vars->gpu_y, atomCount * sizeof(double), cudaMemcpyDeviceToHost);
-  cudaMemcpy(newMolPos.z, vars->gpu_z, atomCount * sizeof(double), cudaMemcpyDeviceToHost);
-  */
+  
+  cudaMemcpy(newMolPos.x, new_coords_x->get(), atomCount * sizeof(double), cudaMemcpyDeviceToHost);
+  cudaMemcpy(newMolPos.y, new_coords_y->get(), atomCount * sizeof(double), cudaMemcpyDeviceToHost);
+  cudaMemcpy(newMolPos.z, new_coords_z->get(), atomCount * sizeof(double), cudaMemcpyDeviceToHost);
+  
   cudaMemcpy(r_k.x, vars->gpu_r_k_x, molCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(r_k.y, vars->gpu_r_k_y, molCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(r_k.z, vars->gpu_r_k_z, molCount * sizeof(double), cudaMemcpyDeviceToHost);
@@ -1222,9 +1222,13 @@ void BrownianMotionTranslateParticlesGPU(
   BufferAccess<DeviceArray<double>, double, buffers> new_coords_y(*(vars->gpu_coords_y), 1);
   BufferAccess<DeviceArray<double>, double, buffers> new_coords_z(*(vars->gpu_coords_z), 1);
 
-  BufferAccess<DeviceArray<double>, double, buffers> com_x(*(vars->gpu_coords_x), 0);
-  BufferAccess<DeviceArray<double>, double, buffers> com_y(*(vars->gpu_coords_y), 0);
-  BufferAccess<DeviceArray<double>, double, buffers> com_z(*(vars->gpu_coords_z), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> old_com_x(*(vars->gpu_com_x), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> old_com_y(*(vars->gpu_com_y), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> old_com_z(*(vars->gpu_com_z), 0);
+
+  BufferAccess<DeviceArray<double>, double, buffers> new_com_x(*(vars->gpu_com_x), 1);
+  BufferAccess<DeviceArray<double>, double, buffers> new_com_y(*(vars->gpu_com_y), 1);
+  BufferAccess<DeviceArray<double>, double, buffers> new_com_z(*(vars->gpu_com_z), 1);
 
   BufferAccess<DeviceArray<double>, double, buffers> mFx(*(vars->gpu_mFx), 0);
   BufferAccess<DeviceArray<double>, double, buffers> mFy(*(vars->gpu_mFy), 0);
@@ -1250,9 +1254,12 @@ void BrownianMotionTranslateParticlesGPU(
       vars->gpu_mForceRecx,
       vars->gpu_mForceRecy,
       vars->gpu_mForceRecz,
-      com_x->get(),
-      com_y->get(),
-      com_z->get(),
+      old_com_x->get(),
+      old_com_y->get(),
+      old_com_z->get(),
+      new_com_x->get(),
+      new_com_y->get(),
+      new_com_z->get(),
       vars->gpu_t_k_x,
       vars->gpu_t_k_y,
       vars->gpu_t_k_z,
@@ -1287,9 +1294,12 @@ void BrownianMotionTranslateParticlesGPU(
       vars->gpu_mForceRecx,
       vars->gpu_mForceRecy,
       vars->gpu_mForceRecz,
-      com_x->get(),
-      com_y->get(),
-      com_z->get(),
+      old_com_x->get(),
+      old_com_y->get(),
+      old_com_z->get(),
+      new_com_x->get(),
+      new_com_y->get(),
+      new_com_z->get(),
       vars->gpu_t_k_x,
       vars->gpu_t_k_y,
       vars->gpu_t_k_z,
@@ -1313,9 +1323,9 @@ void BrownianMotionTranslateParticlesGPU(
   cudaDeviceSynchronize();
   checkLastErrorCUDA(__FILE__, __LINE__);
 
-  cudaMemcpy(newMolPos.x, vars->gpu_x, atomCount * sizeof(double), cudaMemcpyDeviceToHost);
-  cudaMemcpy(newMolPos.y, vars->gpu_y, atomCount * sizeof(double), cudaMemcpyDeviceToHost);
-  cudaMemcpy(newMolPos.z, vars->gpu_z, atomCount * sizeof(double), cudaMemcpyDeviceToHost);
+  cudaMemcpy(newMolPos.x, new_coords_x->get(), atomCount * sizeof(double), cudaMemcpyDeviceToHost);
+  cudaMemcpy(newMolPos.y, new_coords_y->get(), atomCount * sizeof(double), cudaMemcpyDeviceToHost);
+  cudaMemcpy(newMolPos.z, new_coords_z->get(), atomCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(newCOMs.x, vars->gpu_comx, molCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(newCOMs.y, vars->gpu_comy, molCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(newCOMs.z, vars->gpu_comz, molCount * sizeof(double), cudaMemcpyDeviceToHost);
@@ -1342,9 +1352,12 @@ __global__ void BrownianMotionTranslateKernel(
   double *molForceRecx,
   double *molForceRecy,
   double *molForceRecz,
-  double *gpu_comx,
-  double *gpu_comy,
-  double *gpu_comz,
+  double *gpu_old_comx,
+  double *gpu_old_comy,
+  double *gpu_old_comz,
+  double *gpu_new_comx,
+  double *gpu_new_comy,
+  double *gpu_new_comz,
   double *gpu_t_k_x,
   double *gpu_t_k_y,
   double *gpu_t_k_z,
