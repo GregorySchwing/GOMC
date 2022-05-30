@@ -509,7 +509,7 @@ inline void MultiParticle::CalculateTrialDistRot()
     double *y = r_k.y;
     double *z = r_k.z;
 #ifdef _OPENMP
-    #pragma omp parallel for default(none) shared(lambda, r_max, x, y, z)
+    #pragma omp parallel for default(none) shared(r_max, x, y, z)
 #endif
     for(uint m = 0; m < moleculeIndex.size(); m++) {
       uint molIndex = moleculeIndex[m];
