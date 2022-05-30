@@ -567,9 +567,6 @@ void CallBoxForceReciprocalGPU(
   int blocksPerGridY = (int)(imageSize / IMAGES_PER_BLOCK) + 1;
   dim3 blocksPerGrid(blocksPerGridX, blocksPerGridY, 1);
 
-  CUMALLOC((void **) &gpu_startMol, startMol.size() * sizeof(int));
-  CUMALLOC((void **) &gpu_lengthMol, lengthMol.size() * sizeof(int));
-
   BufferAccess<DeviceArray<double>, double, buffers> coords_x(*(vars->gpu_coords_x), buffer_index);
   BufferAccess<DeviceArray<double>, double, buffers> coords_y(*(vars->gpu_coords_y), buffer_index);
   BufferAccess<DeviceArray<double>, double, buffers> coords_z(*(vars->gpu_coords_z), buffer_index);
@@ -593,7 +590,6 @@ void CallBoxForceReciprocalGPU(
     vars->gpu_particleHasNoCharge,
     vars->gpu_particleUsed,
     vars->gpu_startAtomIdx,
-    gpu_lengthMol,
     alpha,
     alphaSq,
     constValue,
@@ -645,8 +641,8 @@ __global__ void BoxForceReciprocalGPU(
   double *gpu_mForceRecz,
   double *gpu_particleCharge,
   int *gpu_particleMol,
-  bool *gpu_particleHasNoCharge,
-  bool *gpu_particleUsed,
+  int *gpu_particleHasNoCharge,
+  int *gpu_particleUsed,
   int *gpu_startMol,
   double alpha,
   double alphaSq,
