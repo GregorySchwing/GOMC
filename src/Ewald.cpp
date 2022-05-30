@@ -1582,7 +1582,8 @@ void Ewald::BoxForceReciprocal(XYZArray const& molCoords,
       imageSizeRef[box],
       molCoords,
       currentAxes,
-      box
+      box,
+      0
     );
     delete[] particleUsed;
 #else

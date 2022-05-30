@@ -29,7 +29,8 @@ void CallBoxForceReciprocalGPU(VariablesCUDA *vars,
                                uint imageSize,
                                XYZArray const &molCoords,
                                BoxDimensions const &boxAxes,
-                               int box);
+                               int box,
+                               uint const buffer_index);
 
 void CallBoxReciprocalSetupGPU(VariablesCUDA *vars,
                                XYZArray const &coords,

@@ -547,7 +547,8 @@ void CallBoxForceReciprocalGPU(
   uint imageSize,
   XYZArray const &molCoords,
   BoxDimensions const &boxAxes,
-  int box)
+  int box,
+  uint const buffer_index)
 {
   int atomCount = atomForceRec.Count();
   int molCount = molForceRec.Count();
@@ -570,41 +571,34 @@ void CallBoxForceReciprocalGPU(
   int blocksPerGridY = (int)(imageSize / IMAGES_PER_BLOCK) + 1;
   dim3 blocksPerGrid(blocksPerGridX, blocksPerGridY, 1);
 
-  CUMALLOC((void **) &gpu_particleCharge, particleCharge.size() * sizeof(double));
-  CUMALLOC((void **) &gpu_particleHasNoCharge, particleHasNoCharge.size() * sizeof(bool));
-  CUMALLOC((void **) &gpu_particleUsed, atomCount * sizeof(bool));
   CUMALLOC((void **) &gpu_startMol, startMol.size() * sizeof(int));
   CUMALLOC((void **) &gpu_lengthMol, lengthMol.size() * sizeof(int));
-  CUMALLOC((void **) &gpu_particleMol, particleMol.size() * sizeof(int));
 
-  cudaMemcpy(vars->gpu_aForceRecx, atomForceRec.x, sizeof(double) * atomCount, cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_aForceRecy, atomForceRec.y, sizeof(double) * atomCount, cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_aForceRecz, atomForceRec.z, sizeof(double) * atomCount, cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_mForceRecx, molForceRec.x, sizeof(double) * molCount, cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_mForceRecy, molForceRec.y, sizeof(double) * molCount, cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_mForceRecz, molForceRec.z, sizeof(double) * molCount, cudaMemcpyHostToDevice);
-  cudaMemcpy(gpu_particleCharge, &particleCharge[0], sizeof(double) * particleCharge.size(), cudaMemcpyHostToDevice);
-  cudaMemcpy(gpu_particleMol, &particleMol[0], sizeof(int) * particleMol.size(), cudaMemcpyHostToDevice);
-  cudaMemcpy(gpu_particleHasNoCharge, arr_particleHasNoCharge, sizeof(bool) * particleHasNoCharge.size(), cudaMemcpyHostToDevice);
-  cudaMemcpy(gpu_particleUsed, particleUsed, sizeof(bool) * atomCount, cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_x, molCoords.x, sizeof(double) * atomCount, cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_y, molCoords.y, sizeof(double) * atomCount, cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_z, molCoords.z, sizeof(double) * atomCount, cudaMemcpyHostToDevice);
+  BufferAccess<DeviceArray<double>, double, buffers> coords_x(*(vars->gpu_coords_x), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> coords_y(*(vars->gpu_coords_y), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> coords_z(*(vars->gpu_coords_z), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> aFRx(*(vars->gpu_aFRx), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> aFRy(*(vars->gpu_aFRy), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> aFRz(*(vars->gpu_aFRz), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> mFRx(*(vars->gpu_mFRx), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> mFRy(*(vars->gpu_mFRy), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> mFRz(*(vars->gpu_mFRz), buffer_index);
+
   cudaMemcpy(gpu_startMol, &startMol[0], sizeof(int) * startMol.size(), cudaMemcpyHostToDevice);
   cudaMemcpy(gpu_lengthMol, &lengthMol[0], sizeof(int) * lengthMol.size(), cudaMemcpyHostToDevice);
 
   checkLastErrorCUDA(__FILE__, __LINE__);
   BoxForceReciprocalGPU <<< blocksPerGrid, threadsPerBlock>>>(
-    vars->gpu_aForceRecx,
-    vars->gpu_aForceRecy,
-    vars->gpu_aForceRecz,
-    vars->gpu_mForceRecx,
-    vars->gpu_mForceRecy,
-    vars->gpu_mForceRecz,
-    gpu_particleCharge,
-    gpu_particleMol,
-    gpu_particleHasNoCharge,
-    gpu_particleUsed,
+    aFRx->get(),
+    aFRy->get(),
+    aFRz->get(),
+    mFRx->get(),
+    mFRy->get(),
+    mFRz->get(),
+    vars->gpu_particleCharge,
+    vars->gpu_particleMol,
+    vars->gpu_particleHasNoCharge,
+    vars->gpu_particleUsed,
     gpu_startMol,
     gpu_lengthMol,
     alpha,
@@ -614,9 +608,9 @@ void CallBoxForceReciprocalGPU(
     vars->gpu_kxRef[box],
     vars->gpu_kyRef[box],
     vars->gpu_kzRef[box],
-    vars->gpu_x,
-    vars->gpu_y,
-    vars->gpu_z,
+    coords_x->get(),
+    coords_y->get(),
+    coords_z->get(),
     vars->gpu_prefactRef[box],
     vars->gpu_sumRnew[box],
     vars->gpu_sumInew[box],
