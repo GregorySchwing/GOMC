@@ -40,7 +40,10 @@ void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
                          uint maxAtomsInMol, uint maxMolNumber,
                          std::vector<int> & particleKind,
                          std::vector<int> & particleMol);
-void InitEwaldVariablesCUDA(VariablesCUDA *vars, uint imageTotal);
+void InitEwaldVariablesCUDA(VariablesCUDA *vars, uint imageTotal,
+                            std::vector<double> & particleCharge,
+                            std::vector<int> & particleHasNoCharge,
+                            std::vector<int> & particleUsed);
 void CopyCurrentToRefCUDA(VariablesCUDA *vars, uint box, uint imageTotal);
 void CopyRefToNewCUDA(VariablesCUDA *vars, uint box, uint imageTotal);
 void UpdateRecipVecCUDA(VariablesCUDA *vars, uint box);

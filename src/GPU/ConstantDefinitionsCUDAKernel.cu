@@ -266,8 +266,8 @@ void InitExp6Variables(VariablesCUDA *vars, double *rMin, double *expConst,
 
 void InitEwaldVariablesCUDA(VariablesCUDA *vars, uint imageTotal,
                             std::vector<double> & particleCharge,
-                            std::vector<double> & particleHasNoCharge,
-                            std::vector<double> & particleUsed)
+                            std::vector<int> & particleHasNoCharge,
+                            std::vector<int> & particleUsed)
 {
   vars->gpu_kx = new double *[BOX_TOTAL];
   vars->gpu_ky = new double *[BOX_TOTAL];

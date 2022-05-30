@@ -178,7 +178,10 @@ void Ewald::AllocMem()
   }
 
 #ifdef GOMC_CUDA
-  InitEwaldVariablesCUDA(ff.particles->getCUDAVars(), imageTotal);
+  InitEwaldVariablesCUDA(ff.particles->getCUDAVars(), imageTotal,
+                            particleCharge,
+                            particleHasNoCharge,
+                            particleUsed);
 #endif
 }
 
