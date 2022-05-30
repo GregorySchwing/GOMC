@@ -1250,7 +1250,7 @@ void BrownianMotionTranslateParticlesGPU(
       vars->gpu_mForceRecx,
       vars->gpu_mForceRecy,
       vars->gpu_mForceRecz,
-     com_x->get(),
+      com_x->get(),
       com_y->get(),
       com_z->get(),
       vars->gpu_t_k_x,
