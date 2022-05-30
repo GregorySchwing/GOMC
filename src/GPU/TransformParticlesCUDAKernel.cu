@@ -1388,7 +1388,7 @@ __global__ void BrownianMotionTranslateKernel(
 
   // thread 0 will calculate the shift vector and update COM and gpu_t_k
   if(threadIdx.x == 0) {
-    double3 com = make_double3(gpu_comx[molIndex], gpu_comy[molIndex], gpu_comz[molIndex]);
+    double3 com = make_double3(gpu_old_comx[molIndex], gpu_old_comy[molIndex], gpu_old_comz[molIndex]);
     // This section calculates the amount of shift
     double stdDev = sqrt(2.0 * t_max);
     double bfm_x = (molForcex[molIndex] + molForceRecx[molIndex]) * BETA * t_max;
@@ -1415,9 +1415,9 @@ __global__ void BrownianMotionTranslateKernel(
                       gpu_Invcell_x, gpu_Invcell_y, gpu_Invcell_z);
 
     //update COM
-    gpu_comx[molIndex] = com.x;
-    gpu_comy[molIndex] = com.y;
-    gpu_comz[molIndex] = com.z;
+    gpu_new_comx[molIndex] = com.x;
+    gpu_new_comxy[molIndex] = com.y;
+    gpu_new_comxz[molIndex] = com.z;
     //check for bad configuration
     if(!isfinite(shift.x + shift.y + shift.z)) {
       atomicAdd(kill, 1);
