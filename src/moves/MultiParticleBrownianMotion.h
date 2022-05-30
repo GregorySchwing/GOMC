@@ -451,21 +451,21 @@ inline void MultiParticleBrownian::Accept(const uint rejectState, const ulong st
   if(result) {
     sysPotRef = sysPotNew;
 
-  cudaVars->gpu_coords_x->ChangeBuffers()
-  cudaVars->gpu_coords_y->ChangeBuffers()
-  cudaVars->gpu_coords_z->ChangeBuffers()
+  cudaVars->gpu_coords_x->ChangeBuffers();
+  cudaVars->gpu_coords_y->ChangeBuffers();
+  cudaVars->gpu_coords_z->ChangeBuffers();
 
-  cudaVars->gpu_com_x->ChangeBuffers()
-  cudaVars->gpu_com_y->ChangeBuffers()
-  cudaVars->gpu_com_z->ChangeBuffers()
+  cudaVars->gpu_com_x->ChangeBuffers();
+  cudaVars->gpu_com_y->ChangeBuffers();
+  cudaVars->gpu_com_z->ChangeBuffers();
 
-  cudaVars->gpu_aFx->ChangeBuffers()
-  cudaVars->gpu_aFy->ChangeBuffers()
-  cudaVars->gpu_aFz->ChangeBuffers()
+  cudaVars->gpu_aFx->ChangeBuffers();
+  cudaVars->gpu_aFy->ChangeBuffers();
+  cudaVars->gpu_aFz->ChangeBuffers();
 
-  cudaVars->gpu_mFx->ChangeBuffers()
-  cudaVars->gpu_mFy->ChangeBuffers()
-  cudaVars->gpu_mFz->ChangeBuffers()
+  cudaVars->gpu_mFx->ChangeBuffers();
+  cudaVars->gpu_mFy->ChangeBuffers();
+  cudaVars->gpu_mFz->ChangeBuffers();
 
 //    swap(molForceRecRef, molForceRecNew);
 //    swap(atomForceRecRef, atomForceRecNew);
