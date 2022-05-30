@@ -1416,8 +1416,8 @@ __global__ void BrownianMotionTranslateKernel(
 
     //update COM
     gpu_new_comx[molIndex] = com.x;
-    gpu_new_comxy[molIndex] = com.y;
-    gpu_new_comxz[molIndex] = com.z;
+    gpu_new_comy[molIndex] = com.y;
+    gpu_new_comz[molIndex] = com.z;
     //check for bad configuration
     if(!isfinite(shift.x + shift.y + shift.z)) {
       atomicAdd(kill, 1);
