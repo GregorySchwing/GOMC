@@ -89,12 +89,6 @@ public:
     gpu_mForcey = NULL;
     gpu_mForcez = NULL;
 
-    gpu_aForcex_buffer = NULL;
-    gpu_aForcey_buffer = NULL;
-    gpu_aForcez_buffer = NULL;
-    gpu_mForcex_buffer = NULL;
-    gpu_mForcey_buffer = NULL;
-    gpu_mForcez_buffer = NULL;
     gpu_startAtomIdx = NULL;
 
     // setting lambda values to null

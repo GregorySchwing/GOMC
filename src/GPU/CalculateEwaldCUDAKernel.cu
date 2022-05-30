@@ -584,9 +584,6 @@ void CallBoxForceReciprocalGPU(
   BufferAccess<DeviceArray<double>, double, buffers> mFRy(*(vars->gpu_mFRy), buffer_index);
   BufferAccess<DeviceArray<double>, double, buffers> mFRz(*(vars->gpu_mFRz), buffer_index);
 
-  cudaMemcpy(gpu_startMol, &startMol[0], sizeof(int) * startMol.size(), cudaMemcpyHostToDevice);
-  cudaMemcpy(gpu_lengthMol, &lengthMol[0], sizeof(int) * lengthMol.size(), cudaMemcpyHostToDevice);
-
   checkLastErrorCUDA(__FILE__, __LINE__);
   BoxForceReciprocalGPU <<< blocksPerGrid, threadsPerBlock>>>(
     aFRx->get(),
@@ -599,7 +596,7 @@ void CallBoxForceReciprocalGPU(
     vars->gpu_particleMol,
     vars->gpu_particleHasNoCharge,
     vars->gpu_particleUsed,
-    gpu_startMol,
+    vars->gpu_startAtomIdx,
     gpu_lengthMol,
     alpha,
     alphaSq,
@@ -661,7 +658,6 @@ __global__ void BoxForceReciprocalGPU(
   bool *gpu_particleHasNoCharge,
   bool *gpu_particleUsed,
   int *gpu_startMol,
-  int *gpu_lengthMol,
   double alpha,
   double alphaSq,
   double constValue,
@@ -735,8 +731,8 @@ __global__ void BoxForceReciprocalGPU(
   if(blockIdx.y == 0) {
     double intraForce = 0.0, distSq = 0.0, dist = 0.0;
     double3 distVect;
-    int lastParticleWithinSameMolecule = gpu_startMol[particleID] + gpu_lengthMol[particleID];
-    for(int otherParticle = gpu_startMol[particleID];
+    int lastParticleWithinSameMolecule = gpu_startMol[moleculeID+1];
+    for(int otherParticle = gpu_startMol[moleculeID];
         otherParticle < lastParticleWithinSameMolecule;
         otherParticle++) {
       if(particleID != otherParticle) {

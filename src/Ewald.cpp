@@ -114,14 +114,6 @@ void Ewald::Init()
     }
   }
 
-  // initialize starting index and length index of each molecule
-  startMol.resize(currentCoords.Count());
-  lengthMol.resize(currentCoords.Count());
-
-  for(int atom = 0; atom < (int) currentCoords.Count(); atom++) {
-    startMol[atom] = mols.MolStart(particleMol[atom]);
-    lengthMol[atom] = mols.MolLength(particleMol[atom]);
-  }
 
   AllocMem();
   //initialize K vectors and reciprocal terms
