@@ -503,7 +503,7 @@ inline void MultiParticle::CalculateTrialDistRot()
 {
   double r_max = moveSetRef.GetRMAX(bPick);
   double t_max = moveSetRef.GetTMAX(bPick);
-
+  double lambdaLocal = lambda;
   if(moveType == mp::MPROTATE) { // rotate
     double *x = r_k.x;
     double *y = r_k.y;

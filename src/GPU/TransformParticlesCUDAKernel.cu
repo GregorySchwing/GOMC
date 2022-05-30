@@ -1328,10 +1328,13 @@ void BrownianMotionTranslateParticlesGPU(
   cudaMemcpy(newMolPos.x, new_coords_x->get(), atomCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(newMolPos.y, new_coords_y->get(), atomCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(newMolPos.z, new_coords_z->get(), atomCount * sizeof(double), cudaMemcpyDeviceToHost);
+  cudaDeviceSynchronize();
+  checkLastErrorCUDA(__FILE__, __LINE__);
   cudaMemcpy(newCOMs.x, new_com_x->get(), molCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(newCOMs.y, new_com_y->get(), molCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(newCOMs.z, new_com_z->get(), molCount * sizeof(double), cudaMemcpyDeviceToHost);
-
+  cudaDeviceSynchronize();
+  checkLastErrorCUDA(__FILE__, __LINE__);
   cudaMemcpy(t_k.x, vars->gpu_t_k_x, molCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(t_k.y, vars->gpu_t_k_y, molCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(t_k.z, vars->gpu_t_k_z, molCount * sizeof(double), cudaMemcpyDeviceToHost);
