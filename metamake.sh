@@ -169,8 +169,8 @@ if (( use_profiler )); then
     if (( use_cuda )); then
       	echo "Enabling NVTX profiling for CUDA "
 	    CMAKEARGS+="-DGOMC_NVTX_ENABLED=1 "
-    else
-      	echo "Warning: Cannot enable NVTX profiling without CUDA enabled."
+    #else
+    #  	echo "Warning: Cannot enable NVTX profiling without CUDA enabled."
     fi
 fi
 
