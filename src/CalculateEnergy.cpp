@@ -77,6 +77,7 @@ void CalculateEnergy::Init(System & sys)
       particleKind.push_back(molKind.AtomKind(a));
       particleMol.push_back(m);
       particleCharge.push_back(molKind.AtomCharge(a));
+      particleHasNoCharge.push_back(molKind.AtomCharge(a) == 0.0);
       particleIndex.push_back(int(a));
     }
   }
