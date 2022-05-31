@@ -12,8 +12,8 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 class MultiParticleBrownianGPU : public MultiParticleBrownian
 {
 public:
-  MultiParticleBrownian(System &sys, StaticVals const& statV);
-  ~MultiParticleBrownian() {
+  MultiParticleBrownianGPU(System &sys, StaticVals const& statV);
+  ~MultiParticleBrownianGPU() {
 
   }
 
