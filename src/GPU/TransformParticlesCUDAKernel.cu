@@ -1235,6 +1235,10 @@ void BrownianMotionTranslateParticlesGPU(
   BufferAccess<DeviceArray<double>, double, buffers> mFy(*(vars->gpu_mFy), 0);
   BufferAccess<DeviceArray<double>, double, buffers> mFz(*(vars->gpu_mFz), 0);
 
+  BufferAccess<DeviceArray<double>, double, buffers> mFRx(*(vars->gpu_mFx), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> mFRy(*(vars->gpu_mFy), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> mFRz(*(vars->gpu_mFz), 0);
+
   cudaMemcpy(gpu_moleculeInvolved, &moleculeInvolved[0], molCountInBox * sizeof(int), cudaMemcpyHostToDevice);
 
   double3 axis = make_double3(boxAxes.x, boxAxes.y, boxAxes.z);
@@ -1252,9 +1256,9 @@ void BrownianMotionTranslateParticlesGPU(
       mFx->get(),
       mFy->get(),
       mFz->get(),
-      vars->gpu_mForceRecx,
-      vars->gpu_mForceRecy,
-      vars->gpu_mForceRecz,
+      mFRx->get(),
+      mFRy->get(),
+      mFRz->get(),
       old_com_x->get(),
       old_com_y->get(),
       old_com_z->get(),
@@ -1292,9 +1296,9 @@ void BrownianMotionTranslateParticlesGPU(
       mFx->get(),
       mFy->get(),
       mFz->get(),
-      vars->gpu_mForceRecx,
-      vars->gpu_mForceRecy,
-      vars->gpu_mForceRecz,
+      mFRx->get(),
+      mFRy->get(),
+      mFRz->get(),
       old_com_x->get(),
       old_com_y->get(),
       old_com_z->get(),
