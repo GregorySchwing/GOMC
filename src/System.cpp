@@ -24,6 +24,7 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #include "IntraSwap.h"
 #include "MultiParticle.h"
 #include "MultiParticleBrownianMotion.h"
+#include "MultiParticleBrownianMotionGPU.cuh"
 #include "Regrowth.h"
 #include "MoleculeExchange1.h"
 #include "MoleculeExchange2.h"
