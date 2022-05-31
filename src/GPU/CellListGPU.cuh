@@ -57,6 +57,7 @@ class CellListGPU {
     void CalculateCellDegreesCUB(VariablesCUDA * cv,
                               XYZArray const &coords);
     void PrefixScanCellDegrees(VariablesCUDA * cv,
+                                        int *csi,
                                         int numberOfCells);
   private:
     void CreateStartVector(int numberOfAtoms,

@@ -25,13 +25,13 @@ void CellListGPU::GridAll(VariablesCUDA * cv,
                         const int buffer_index){
     GOMC_EVENT_START(1, GomcProfileEvent::GRID_ALL_GPU);
 
-    BufferAccess<DeviceArray<int>, int, buffers> mapParticleToCell_view(*(vars->gpu_mapParticleToCell), buffer_index);
-    BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(vars->gpu_cellVector), 0);
-    BufferAccess<DeviceArray<int>, int, buffers> cellStartIndex_view(*(vars->gpu_cellStartIndex), 0);
+    BufferAccess<DeviceArray<int>, int, buffers> mapParticleToCell_view(*(cv->gpu_mapParticleToCell), buffer_index);
+    BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(cv->gpu_cellVector), 0);
+    BufferAccess<DeviceArray<int>, int, buffers> cellStartIndex_view(*(cv->gpu_cellStartIndex), 0);
 
-    BufferAccess<DeviceArray<double>, double, buffers> coords_x_view(*(vars->gpu_coords_x), buffer_index);
-    BufferAccess<DeviceArray<double>, double, buffers> coords_y_view(*(vars->gpu_coords_y), buffer_index);
-    BufferAccess<DeviceArray<double>, double, buffers> coords_z_view(*(vars->gpu_coords_z), buffer_index);
+    BufferAccess<DeviceArray<double>, double, buffers> coords_x_view(*(cv->gpu_coords_x), buffer_index);
+    BufferAccess<DeviceArray<double>, double, buffers> coords_y_view(*(cv->gpu_coords_y), buffer_index);
+    BufferAccess<DeviceArray<double>, double, buffers> coords_z_view(*(cv->gpu_coords_z), buffer_index);
 
     MapParticlesToCell(cv,
                     coords_x_view->get(),
@@ -45,7 +45,7 @@ void CellListGPU::GridAll(VariablesCUDA * cv,
                         cellVector_view->get(),  
                         coords);
     CalculateCellDegrees(cv,coords);
-    PrefixScanCellDegrees(cv, numberOfCells);
+    PrefixScanCellDegrees(cv, cellStartIndex_view->get(), numberOfCells);
     GOMC_EVENT_STOP(1, GomcProfileEvent::GRID_ALL_GPU);
 }
 
@@ -173,9 +173,10 @@ void CellListGPU::CreateCellDegrees(int numberOfAtoms,
 
 
 void CellListGPU::PrefixScanCellDegrees(VariablesCUDA * cv,
+                                    int *csi,
                                     int numberOfCells){
     CalculateNewRowOffsets(numberOfCells,
-                           cv->gpu_cellStartIndex,
+                           csi,
                            cv->gpu_cellDegrees,
                            cv->d_temp_storage_prefix_sum,
                            cv->temp_storage_bytes_prefix_sum);
