@@ -36,7 +36,8 @@ class CellListGPU {
     void GridAll(VariablesCUDA * cv,
                   XYZArray const &coords,
                   XYZArray const &axes,
-                  int numberOfCells);
+                  int numberOfCells,
+                  const int buffer_index);
     void CopyGPUMemoryToToHost(int * deviceMemory,
                                     int size,
                                     std::vector<int> & hostMemory);

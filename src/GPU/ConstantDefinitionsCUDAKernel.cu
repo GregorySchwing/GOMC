@@ -181,9 +181,9 @@ void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
   CUMALLOC((void**) &vars->gpu_mForceRecy, maxMolNumber * sizeof(double));
   CUMALLOC((void**) &vars->gpu_mForceRecz, maxMolNumber * sizeof(double));
 
-  CUMALLOC((void**) &vars->gpu_cellVector, atomNumber * sizeof(int));
-  CUMALLOC((void**) &vars->gpu_mapParticleToCell, atomNumber * sizeof(int));
-  CUMALLOC((void**) &vars->gpu_mapParticleToCellSorted, atomNumber * sizeof(int));
+  vars->gpu_cellVector = new MultiBuffer<DeviceArray<int>, int, buffers>(atomNumber);
+  vars->gpu_mapParticleToCell = new MultiBuffer<DeviceArray<int>, int, buffers>(atomNumber);
+  vars->gpu_mapParticleToCellSorted = new MultiBuffer<DeviceArray<int>, int, buffers>(atomNumber);
 
   CUMALLOC((void**) &vars->gpu_particleCharge, atomNumber * sizeof(double));
   CUMALLOC((void**) &vars->gpu_particleKind, atomNumber * sizeof(int));

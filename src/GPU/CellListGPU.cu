@@ -21,7 +21,8 @@ CellListGPU::CellListGPU(VariablesCUDA * cv, int atomNumber)
 void CellListGPU::GridAll(VariablesCUDA * cv,
                         XYZArray const &coords,
                         XYZArray const &axes,
-                        int numberOfCells){
+                        int numberOfCells,
+                        const int buffer_index){
     GOMC_EVENT_START(1, GomcProfileEvent::GRID_ALL_GPU);
     MapParticlesToCell(cv,coords,axes);
     SortMappedParticles(cv,coords);

@@ -182,7 +182,10 @@ public:
   bool *gpu_isFraction;
 
   // new pair interaction calculation done on GPU
-  int *gpu_cellVector, *gpu_mapParticleToCell, *gpu_cellStartIndex;
+  //int *gpu_cellVector, *gpu_mapParticleToCell, *gpu_cellStartIndex;
+  MultiBuffer< DeviceArray<int>, int, buffers > * gpu_cellVector;
+  MultiBuffer< DeviceArray<int>, int, buffers > * gpu_mapParticleToCell;
+  MultiBuffer< DeviceArray<int>, int, buffers > * gpu_cellStartIndex;
   // Fixed as long as volume doesnt change
   // Regenerate after volume moves.
   int *gpu_neighborList;
