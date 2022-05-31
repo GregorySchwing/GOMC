@@ -213,7 +213,7 @@ inline uint MultiParticle::Prep(const double subDraw, const double movPerc)
 
     //Calculate short range energy and force for old positions
     calcEnRef.BoxForce(sysPotRef, coordCurrRef, atomForceRef, molForceRef,
-                       boxDimRef, bPick);
+                       boxDimRef, bPick, 0);
 
     //Calculate Torque for old positions
     calcEnRef.CalculateTorque(moleculeIndex, coordCurrRef, comCurrRef,
@@ -270,7 +270,7 @@ inline uint MultiParticle::PrepNEMTMC(const uint box, const uint midx, const uin
 
     //Calculate short range energy and force for old positions
     calcEnRef.BoxForce(sysPotRef, coordCurrRef, atomForceRef, molForceRef,
-                       boxDimRef, bPick);
+                       boxDimRef, bPick, 0);
 
     //Calculate Torque for old positions
     calcEnRef.CalculateTorque(moleculeIndex, coordCurrRef, comCurrRef,
@@ -353,7 +353,7 @@ inline void MultiParticle::CalcEn()
   sysPotNew = sysPotRef;
   //calculate short range energy and force
   sysPotNew = calcEnRef.BoxForce(sysPotNew, newMolsPos, atomForceNew,
-                                 molForceNew, boxDimRef, bPick);
+                                 molForceNew, boxDimRef, bPick, 1);
   //calculate long range electrostatic energy for new positions
   sysPotNew.boxEnergy[bPick].recip = calcEwald->BoxReciprocal(bPick, false);
   //Calculate long range electrostatic force for new positions
