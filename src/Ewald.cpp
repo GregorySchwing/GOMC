@@ -45,7 +45,7 @@ Ewald::Ewald(StaticVals & stat, System & sys) :
   molLookup(stat.molLookup),
 #endif
   currentAxes(sys.boxDimRef),
-  currentCOM(sys.com), sysPotRef(sys.potential), lambdaRef(sys.lambdaRef),
+  currentCOM(sys.com), sysPotRef(sys.potential), lambdaRef(sys.lambdaRef)
 {
   ewald = false;
   electrostatic = false; 
