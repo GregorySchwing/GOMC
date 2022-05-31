@@ -319,7 +319,7 @@ private:
   // stores charge for each global atom idx
   std::vector<double> particleCharge;
   // stores int boolean for gpu 
-  std::vector<double> particleHasNoCharge;
+  std::vector<int> particleHasNoCharge;
 
   const MoleculeLookup& molLookup;
   const BoxDimensions& currentAxes;
