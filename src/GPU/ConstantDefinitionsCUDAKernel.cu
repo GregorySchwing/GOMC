@@ -266,8 +266,7 @@ void InitExp6Variables(VariablesCUDA *vars, double *rMin, double *expConst,
 
 void InitEwaldVariablesCUDA(VariablesCUDA *vars, uint imageTotal,
                             std::vector<double> & particleCharge,
-                            std::vector<int> & particleHasNoCharge,
-                            std::vector<int> & particleUsed)
+                            std::vector<int> & particleHasNoCharge)
 {
   vars->gpu_kx = new double *[BOX_TOTAL];
   vars->gpu_ky = new double *[BOX_TOTAL];
@@ -286,11 +285,10 @@ void InitEwaldVariablesCUDA(VariablesCUDA *vars, uint imageTotal,
 
   CUMALLOC((void**) &vars->gpu_particleCharge, particleCharge.size() * sizeof(double));
   CUMALLOC((void**) &vars->gpu_particleHasNoCharge, particleHasNoCharge.size() * sizeof(int));
-  CUMALLOC((void**) &vars->gpu_particleUsed, particleUsed.size() * sizeof(int));
+  CUMALLOC((void**) &vars->gpu_particleUsed, particleCharge.size() * sizeof(int));
 
   cudaMemcpy(vars->gpu_particleCharge, &particleCharge[0], sizeof(double) * particleCharge.size(), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_particleHasNoCharge, &particleHasNoCharge[0], sizeof(int) * particleHasNoCharge.size(), cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_particleUsed, &particleUsed[0], sizeof(int) * particleUsed.size(), cudaMemcpyHostToDevice);
 
   for(uint b = 0; b < BOX_TOTAL; b++) {
     CUMALLOC((void**) &vars->gpu_kx[b], imageTotal * sizeof(double));
