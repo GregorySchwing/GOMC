@@ -181,8 +181,9 @@ public:
   double *gpu_lambdaVDW, *gpu_lambdaCoulomb;
   bool *gpu_isFraction;
 
-  // new pair interaction calculation done on GPU
+  // To keep molinter working till I port that also
   //int *gpu_cellVector, *gpu_mapParticleToCell, *gpu_cellStartIndex;
+  // new pair interaction calculation done on GPU
   MultiBuffer< DeviceArray<int>, int, buffers > * gpu_cellVector;
   MultiBuffer< DeviceArray<int>, int, buffers > * gpu_mapParticleToCell;
   MultiBuffer< DeviceArray<int>, int, buffers > * gpu_cellStartIndex;

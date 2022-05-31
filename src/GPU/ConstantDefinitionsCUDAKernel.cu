@@ -183,7 +183,8 @@ void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
 
   vars->gpu_cellVector = new MultiBuffer<DeviceArray<int>, int, buffers>(atomNumber);
   vars->gpu_mapParticleToCell = new MultiBuffer<DeviceArray<int>, int, buffers>(atomNumber);
-  vars->gpu_mapParticleToCellSorted = new MultiBuffer<DeviceArray<int>, int, buffers>(atomNumber);
+
+  CUMALLOC((void**) &vars->gpu_mapParticleToCellSorted, atomNumber * sizeof(int));
 
   CUMALLOC((void**) &vars->gpu_particleCharge, atomNumber * sizeof(double));
   CUMALLOC((void**) &vars->gpu_particleKind, atomNumber * sizeof(int));
@@ -216,8 +217,11 @@ void InitGPUCellList(VariablesCUDA *vars,
   CUMALLOC((void**) &vars->gpu_edgeCells, BOX_TOTAL * 3 * sizeof(double));
   CUMALLOC((void**) &vars->gpu_cellDegrees, (neighborList.size()+1) * sizeof(int));
   CUMALLOC((void**) &vars->gpu_CellDegreeSanityCheck, neighborList.size() * sizeof(int));
-  CUMALLOC((void**) &vars->gpu_cellStartIndex, (neighborList.size()+1) * sizeof(int));
   CUMALLOC((void**) &vars->gpu_IterationsReq, 1 * sizeof(int));
+
+  //CUMALLOC((void**) &vars->gpu_cellStartIndex, (neighborList.size()+1) * sizeof(int));
+  vars->gpu_cellStartIndex = new MultiBuffer<DeviceArray<int>, int, buffers>(neighborList.size()+1);
+
 
   vars->d_temp_storage_sort_vals = NULL;
   vars->d_temp_storage_sort = &(vars->d_temp_storage_sort_vals);
