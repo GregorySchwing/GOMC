@@ -4,8 +4,8 @@ Copyright (C) 2018  GOMC Group
 A copy of the GNU General Public License can be found in License.txt
 along with this program, also can be found at <http://www.gnu.org/licenses/>.
 ********************************************************************************/
-#ifndef MULTIPARTICLEBROWNIANMOTION_H
-#define MULTIPARTICLEBROWNIANMOTION_H
+#ifndef MULTIPARTICLEBROWNIANMOTIONGPU_H
+#define MULTIPARTICLEBROWNIANMOTIONGPU_H
 
 #include "MultiParticleBrownianMotion.h"
 
@@ -57,3 +57,5 @@ private:
   double CalculateWRatio(XYZ const &lb_new, XYZ const &lb_old, XYZ const &k,
                          double max4);
 };
+
+#endif
