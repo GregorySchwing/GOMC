@@ -535,6 +535,7 @@ void CallBoxForceReciprocalGPU(
   VariablesCUDA *vars,
   XYZArray &atomForceRec,
   XYZArray &molForceRec,
+  bool * particleUsed,
   double alpha,
   double alphaSq,
   double constValue,
@@ -546,6 +547,8 @@ void CallBoxForceReciprocalGPU(
 {
   int atomCount = atomForceRec.Count();
   int molCount = molForceRec.Count();
+
+  cudaMemcpy(vars->gpu_particleUsed, particleUsed, sizeof(bool) * atomCount, cudaMemcpyHostToDevice);
 
   // calculate block and grid sizes
   dim3 threadsPerBlock(256, 1, 1);

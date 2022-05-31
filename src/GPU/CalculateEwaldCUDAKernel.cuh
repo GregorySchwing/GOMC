@@ -17,6 +17,7 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 void CallBoxForceReciprocalGPU(VariablesCUDA *vars,
                                XYZArray &atomForceRec,
                                XYZArray &molForceRec,
+                               bool * particleUsed,
                                double alpha,
                                double alphaSq,
                                double constValue,

@@ -179,7 +179,7 @@ public:
   int * gpu_particleKind;
   int * gpu_particleMol;
   int * gpu_particleHasNoCharge;
-  int * gpu_particleUsed;
+  bool * gpu_particleUsed;
 
   // lambda structure
   int *gpu_molIndex;

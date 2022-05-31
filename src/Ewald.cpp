@@ -45,7 +45,9 @@ Ewald::Ewald(StaticVals & stat, System & sys) :
   molLookup(stat.molLookup),
 #endif
   currentAxes(sys.boxDimRef),
-  currentCOM(sys.com), sysPotRef(sys.potential), lambdaRef(sys.lambdaRef)
+  currentCOM(sys.com), sysPotRef(sys.potential), lambdaRef(sys.lambdaRef),
+  particleCharge(sys.calcEnergy.particleCharge),
+  particleHasNoCharge(sys.calcEnergy.particleHasNoCharge)
 {
   ewald = false;
   electrostatic = false;
@@ -1565,6 +1567,7 @@ void Ewald::BoxForceReciprocal(XYZArray const& molCoords,
       ff.particles->getCUDAVars(),
       atomForceRec,
       molForceRec,
+      particleUsed,
       ff.alpha[box],
       ff.alphaSq[box],
       constValue,

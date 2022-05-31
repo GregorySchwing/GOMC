@@ -217,15 +217,15 @@ protected:
   std::vector<int> particleKind;
   std::vector<int> particleMol;
   // which atoms don't have charge
-  std::vector<int> particleHasNoCharge;
-  std::vector<int> particleUsed;
+  std::vector<int> & particleHasNoCharge;
+  // atom charges
+  std::vector<double> & particleCharge;
 
   // starting atom index of each box
   int boxStart[BOX_TOTAL];
   // ending atom index of each box
   int boxEnd[BOX_TOTAL];
-  // atom charges
-  std::vector<double> particleCharge;
+
 };
 
 
