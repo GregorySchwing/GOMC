@@ -26,8 +26,8 @@ void CellListGPU::GridAll(VariablesCUDA * cv,
     GOMC_EVENT_START(1, GomcProfileEvent::GRID_ALL_GPU);
 
     BufferAccess<DeviceArray<int>, int, buffers> mapParticleToCell_view(*(cv->gpu_mapParticleToCell), buffer_index);
-    BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(cv->gpu_cellVector), 0);
-    BufferAccess<DeviceArray<int>, int, buffers> cellStartIndex_view(*(cv->gpu_cellStartIndex), 0);
+    BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(cv->gpu_cellVector), buffer_index);
+    BufferAccess<DeviceArray<int>, int, buffers> cellStartIndex_view(*(cv->gpu_cellStartIndex), buffer_index);
 
     BufferAccess<DeviceArray<double>, double, buffers> coords_x_view(*(cv->gpu_coords_x), buffer_index);
     BufferAccess<DeviceArray<double>, double, buffers> coords_y_view(*(cv->gpu_coords_y), buffer_index);
