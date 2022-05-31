@@ -26,6 +26,7 @@ public:
   virtual void PrintAcceptKind();
 */
 private:
+  VariablesCUDA * cv;
   uint bPick;
   bool initMol;
   //SystemPotential sysPotNew;
@@ -59,6 +60,6 @@ private:
 };
 
 inline MultiParticleBrownianGPU::MultiParticleBrownianGPU(System &sys, StaticVals const &statV) :
-  MultiParticleBrownian(sys, statV){}
+  MultiParticleBrownian(sys, statV), cv(statV.forcefield.particles->getCUDAVars()){}
 
 #endif
