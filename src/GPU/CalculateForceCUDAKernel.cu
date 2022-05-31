@@ -352,12 +352,17 @@ void CallBoxForceGPU(VariablesCUDA *vars,
                                 boxAxes.GetAxis(box).y * 0.5,
                                 boxAxes.GetAxis(box).z * 0.5);
 
-  BoxForceGPU <<< blocksPerGrid, threadsPerBlock>>>(vars->gpu_cellStartIndex,
-      vars->gpu_cellVector,
+  BufferAccess<DeviceArray<int>, int, buffers> mapParticleToCell_view(*(vars->gpu_mapParticleToCell), buffer_index);
+  BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(vars->gpu_cellVector), buffer_index);
+  BufferAccess<DeviceArray<int>, int, buffers> cellStartIndex_view(*(vars->gpu_cellStartIndex), buffer_index);
+
+
+  BoxForceGPU <<< blocksPerGrid, threadsPerBlock>>>(cellStartIndex_view->get(),
+      cellVector_view->get(),
       vars->gpu_neighborList,
       numberOfCells,
       atomNumber,
-      vars->gpu_mapParticleToCell,
+      mapParticleToCell_view->get(),
       coords_x->get(),
       coords_y->get(),
       coords_z->get(),
