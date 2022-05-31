@@ -12,7 +12,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 class MultiParticleBrownianGPU : public MultiParticleBrownian
 {
 public:
-  MultiParticleBrownianGPU(System &sys, StaticVals const& statV){}
+  MultiParticleBrownianGPU(System &sys, StaticVals const& statV);
   ~MultiParticleBrownianGPU() {
 
   }
@@ -57,5 +57,12 @@ private:
   double CalculateWRatio(XYZ const &lb_new, XYZ const &lb_old, XYZ const &k,
                          double max4);
 };
+
+inline MultiParticleBrownianGPU::MultiParticleBrownianGPU(System &sys, StaticVals const &statV) :
+  MoveBase(sys, statV),
+  newMolsPos(sys.boxDimRef, newCOMs, sys.molLookupRef, sys.prng, statV.mol, sys.r123Wrapper),
+  newCOMs(sys.boxDimRef, newMolsPos, sys.molLookupRef, statV.mol),
+  molLookup(sys.molLookup), r123Wrapper(sys.r123Wrapper)
+{}
 
 #endif
