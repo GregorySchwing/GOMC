@@ -16,7 +16,7 @@ public:
   ~MultiParticleBrownianGPU() {
 
   }
-
+/*
   virtual uint Prep(const double subDraw, const double movPerc);
   // To relax the system in NE_MTMC move
   virtual uint PrepNEMTMC(const uint box, const uint midx = 0, const uint kidx = 0);
@@ -24,7 +24,7 @@ public:
   virtual uint Transform();
   virtual void Accept(const uint rejectState, const ulong step);
   virtual void PrintAcceptKind();
-
+*/
 private:
   uint bPick;
   bool initMol;
