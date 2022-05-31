@@ -630,7 +630,7 @@ __global__ void BoxForceReciprocalGPU(
   double *gpu_particleCharge,
   int *gpu_particleMol,
   int *gpu_particleHasNoCharge,
-  int *gpu_particleUsed,
+  bool *gpu_particleUsed,
   int *gpu_startMol,
   double alpha,
   double alphaSq,
