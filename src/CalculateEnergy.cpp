@@ -286,7 +286,8 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
     XYZArray& atomForce,
     XYZArray& molForce,
     BoxDimensions const& boxAxes,
-    const uint box)
+    const uint box,
+    const int buffer_index)
 {
   //Handles reservoir box case, returning zeroed structure if
   //interactions are off.

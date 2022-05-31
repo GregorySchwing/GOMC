@@ -69,7 +69,8 @@ public:
                            XYZArray& atomForce,
                            XYZArray& molForce,
                            BoxDimensions const& boxAxes,
-                           const uint box);
+                           const uint box,
+                           const int buffer_index);
 
   //! Calculate force and virial for the box
   Virial VirialCalc(const uint box);
