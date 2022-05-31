@@ -582,8 +582,13 @@ void CallBoxInterGPU(VariablesCUDA *vars,
                                 boxAxes.GetAxis(box).y * 0.5,
                                 boxAxes.GetAxis(box).z * 0.5);
 
-  BoxInterGPU <<< blocksPerGrid, threadsPerBlock>>>(gpu_cellStartIndex,
-      vars->gpu_cellVector,
+  //BufferAccess<DeviceArray<int>, int, buffers> mapParticleToCell_view(*(vars->gpu_mapParticleToCell), 0);
+  BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(vars->gpu_cellVector), 0);
+  BufferAccess<DeviceArray<int>, int, buffers> cellStartIndex_view(*(vars->gpu_cellStartIndex), 0);
+
+
+  BoxInterGPU <<< blocksPerGrid, threadsPerBlock>>>(cellStartIndex_view->get(),
+      gpu_cellVector_view->get(),
       gpu_neighborList,
       numberOfCells,
       vars->gpu_x,
