@@ -24,8 +24,26 @@ void CellListGPU::GridAll(VariablesCUDA * cv,
                         int numberOfCells,
                         const int buffer_index){
     GOMC_EVENT_START(1, GomcProfileEvent::GRID_ALL_GPU);
-    MapParticlesToCell(cv,coords,axes);
-    SortMappedParticles(cv,coords);
+
+    BufferAccess<DeviceArray<int>, int, buffers> mapParticleToCell_view(*(vars->gpu_mapParticleToCell), buffer_index);
+    BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(vars->gpu_cellVector), 0);
+    BufferAccess<DeviceArray<int>, int, buffers> cellStartIndex_view(*(vars->gpu_cellStartIndex), 0);
+
+    BufferAccess<DeviceArray<double>, double, buffers> coords_x_view(*(vars->gpu_coords_x), buffer_index);
+    BufferAccess<DeviceArray<double>, double, buffers> coords_y_view(*(vars->gpu_coords_y), buffer_index);
+    BufferAccess<DeviceArray<double>, double, buffers> coords_z_view(*(vars->gpu_coords_z), buffer_index);
+
+    MapParticlesToCell(cv,
+                    coords_x_view->get(),
+                    coords_y_view->get(),
+                    coords_z_view->get(),  
+                    mapParticleToCell_view->get(),  
+                    coords,
+                    axes);
+    SortMappedParticles(cv,
+                        mapParticleToCell_view->get(),  
+                        cellVector_view->get(),  
+                        coords);
     CalculateCellDegrees(cv,coords);
     PrefixScanCellDegrees(cv, numberOfCells);
     GOMC_EVENT_STOP(1, GomcProfileEvent::GRID_ALL_GPU);
@@ -33,18 +51,23 @@ void CellListGPU::GridAll(VariablesCUDA * cv,
 
 
 void CellListGPU::MapParticlesToCell(VariablesCUDA * cv,
+                                    double * x,
+                                    double * y,
+                                    double * z,
+                                    int * mp2c,
                                     XYZArray const &coords,
                                     XYZArray const &axes){
     int atomNumber = coords.Count();
     // Run the kernel
     int threadsPerBlock = 256;
     int blocksPerGrid = (int)(atomNumber / threadsPerBlock) + 1;
+
     MapParticlesToCellKernel<<< blocksPerGrid, threadsPerBlock>>>(
                             atomNumber,
-                            cv->gpu_x,
-                            cv->gpu_y,
-                            cv->gpu_z,                                
-                            cv->gpu_mapParticleToCell,
+                            x,
+                            y,
+                            z,                               
+                            mp2c,
                             cv->gpu_cellSize,
                             cv->gpu_edgeCells,
                             cv->gpu_nonOrth,
@@ -58,14 +81,17 @@ void CellListGPU::MapParticlesToCell(VariablesCUDA * cv,
 
 
 void CellListGPU::SortMappedParticles(VariablesCUDA * cv,
+                                    int * mp2c,
+                                    int * cellVec,
                                     XYZArray const &coords){
     int atomNumber = coords.Count();
+    
     // Run the kernel
     CreateStartVector(atomNumber,
-                    cv->gpu_mapParticleToCell,
+                    mp2c,
                     cv->gpu_mapParticleToCellSorted,
                     cv->gpu_particleIndices,
-                    cv->gpu_cellVector,
+                    cellVec,
                     cv->d_temp_storage_sort,
                     cv->temp_storage_bytes_sort);
     cudaDeviceSynchronize();

@@ -42,10 +42,16 @@ class CellListGPU {
                                     int size,
                                     std::vector<int> & hostMemory);
     void MapParticlesToCell(VariablesCUDA * cv,
-                            XYZArray const &coords,
-                            XYZArray const &axes);
+                                    double * x,
+                                    double * y,
+                                    double * z,
+                                    int * mp2c,
+                                    XYZArray const &coords,
+                                    XYZArray const &axes);
     void SortMappedParticles(VariablesCUDA * cv,
-                              XYZArray const &coords);
+                                    int * mp2c,
+                                    int * cellVec,
+                                    XYZArray const &coords);
     void CalculateCellDegrees(VariablesCUDA * cv,
                               XYZArray const &coords);
     void CalculateCellDegreesCUB(VariablesCUDA * cv,

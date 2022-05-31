@@ -588,7 +588,7 @@ void CallBoxInterGPU(VariablesCUDA *vars,
 
 
   BoxInterGPU <<< blocksPerGrid, threadsPerBlock>>>(cellStartIndex_view->get(),
-      gpu_cellVector_view->get(),
+      cellVector_view->get(),
       gpu_neighborList,
       numberOfCells,
       vars->gpu_x,
