@@ -207,6 +207,7 @@ set(libSources
     lib/FloydWarshallCycle.cpp)
 
 set(cudaHeaders
+    src/moves/MultiParticleBrownianMotion.cuh
     src/GPU/ConstantDefinitionsCUDAKernel.cuh
     src/GPU/CalculateMinImageCUDAKernel.cuh
     src/GPU/CalculateEnergyCUDAKernel.cuh
