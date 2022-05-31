@@ -324,6 +324,7 @@ private:
   const MoleculeLookup& molLookup;
   const BoxDimensions& currentAxes;
   const CellList& cellList;
+  friend class Ewald;
 };
 
 #endif /*ENERGY_H*/
