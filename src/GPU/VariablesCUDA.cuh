@@ -19,6 +19,8 @@ static const __device__ double qqFactGPU = num::qqFact;
 // Number of buffers in a multi-buffer.  For now only 2.
 // Could eventually use one force to try > 1 sequential coord states
 const std::size_t buffers = 2;
+const int currentState = 0;
+const int nextState = 1;
 
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort = true)
