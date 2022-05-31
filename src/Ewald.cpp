@@ -46,11 +46,9 @@ Ewald::Ewald(StaticVals & stat, System & sys) :
 #endif
   currentAxes(sys.boxDimRef),
   currentCOM(sys.com), sysPotRef(sys.potential), lambdaRef(sys.lambdaRef),
-  particleCharge(sys.calcEnergy.particleCharge),
-  particleHasNoCharge(sys.calcEnergy.particleHasNoCharge)
 {
   ewald = false;
-  electrostatic = false;
+  electrostatic = false; 
   alpha = 0.0;
   recip_rcut = 0.0;
   recip_rcut_Sq = 0.0;
