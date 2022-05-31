@@ -59,6 +59,6 @@ private:
 };
 
 inline MultiParticleBrownianGPU::MultiParticleBrownianGPU(System &sys, StaticVals const &statV) :
-  MultiParticleBrownian(sys, statV)
+  MultiParticleBrownian(sys, statV){}
 
 #endif
