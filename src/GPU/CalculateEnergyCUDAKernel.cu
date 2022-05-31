@@ -227,8 +227,8 @@ void CallMolInterGPU(VariablesCUDA *vars,
   MolInterGPU <<< blocksPerGrid, threadsPerBlock>>>(
       moleculeStart,
       moleculeLength,
-      gpu_cellStartIndex,
-      vars->gpu_cellVector,
+      cellStartIndex_view->get(),
+      cellVector_view->get(),
       gpu_neighborList,
       numberOfCells,
       vars->gpu_x,
@@ -237,7 +237,7 @@ void CallMolInterGPU(VariablesCUDA *vars,
       vars->gpu_nx,
       vars->gpu_ny,
       vars->gpu_nz,
-      vars->gpu_mapParticleToCell,
+      mapParticleToCell_view->get(),
       gpu_mapNewMoleculeToCell,
       axis,
       halfAx,
@@ -412,17 +412,22 @@ void CallMolInterSummationGPU(VariablesCUDA *vars,
                                 boxAxes.GetAxis(box).y * 0.5,
                                 boxAxes.GetAxis(box).z * 0.5);
 
+  BufferAccess<DeviceArray<int>, int, buffers> mapParticleToCell_view(*(vars->gpu_mapParticleToCell), 0);
+  BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(vars->gpu_cellVector), 0);
+  BufferAccess<DeviceArray<int>, int, buffers> cellStartIndex_view(*(vars->gpu_cellStartIndex), 0);
+
+
   MolInterSummationKernelGPU <<< blocksPerGrid, threadsPerBlock>>>(
       moleculeStart,
       moleculeLength,
-      gpu_cellStartIndex,
-      vars->gpu_cellVector,
+      cellStartIndex_view->get(),
+      cellVector_view->get(),
       gpu_neighborList,
       numberOfCells,
       vars->gpu_x,
       vars->gpu_y,
       vars->gpu_z,
-      vars->gpu_mapParticleToCell,
+      mapParticleToCell_view->get(),
       axis,
       halfAx,
       electrostatic,
