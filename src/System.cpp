@@ -24,7 +24,6 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #include "IntraSwap.h"
 #include "MultiParticle.h"
 #include "MultiParticleBrownianMotion.h"
-#include "MultiParticleBrownianMotionGPU.cuh"
 #include "Regrowth.h"
 #include "MoleculeExchange1.h"
 #include "MoleculeExchange2.h"
@@ -172,11 +171,7 @@ void System::InitMoves(Setup const& set)
 {
   moves[mv::DISPLACE] = new Translate(*this, statV);
   moves[mv::MULTIPARTICLE] = new MultiParticle(*this, statV);
-  #ifdef GPU_RESIDENT
-  moves[mv::MULTIPARTICLE_BM] = new MultiParticleBrownianGPU(*this, statV);
-  #else
   moves[mv::MULTIPARTICLE_BM] = new MultiParticleBrownian(*this, statV);
-  #endif
   moves[mv::ROTATE] = new Rotate(*this, statV);
   moves[mv::INTRA_SWAP] = new IntraSwap(*this, statV);
   moves[mv::REGROWTH] = new Regrowth(*this, statV);
