@@ -172,7 +172,7 @@ void System::InitMoves(Setup const& set)
   moves[mv::DISPLACE] = new Translate(*this, statV);
   moves[mv::MULTIPARTICLE] = new MultiParticle(*this, statV);
   #ifdef GPU_RESIDENT
-  moves[mv::MULTIPARTICLE_BM] = new MultiParticleBrownianGPU(*this, statV);\
+  moves[mv::MULTIPARTICLE_BM] = new MultiParticleBrownianGPU(*this, statV);
   #else
   moves[mv::MULTIPARTICLE_BM] = new MultiParticleBrownian(*this, statV);
   #endif
