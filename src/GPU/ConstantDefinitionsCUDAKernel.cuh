@@ -29,11 +29,10 @@ void InitGPUForceField(VariablesCUDA &vars, double const *sigmaSq,
                        double Rcut, double const *rCutCoulomb,
                        double RcutLow, double Ron, double const *alpha,
                        int ewald, double diElectric_1);
-                       
+
 void InitMPVars(VariablesCUDA *vars,
                 std::vector<double> & t_max,
-                std::vector<double> & r_max,
-                int maxMolNumber);
+                std::vector<double> & r_max);
 
 void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
                          double * coords_x,

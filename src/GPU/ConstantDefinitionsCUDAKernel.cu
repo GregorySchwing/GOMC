@@ -85,8 +85,8 @@ void InitMPVars(VariablesCUDA *vars,
   CUMALLOC((void**) &vars->gpu_t_max, BOX_TOTAL * sizeof(double));
   CUMALLOC((void**) &vars->gpu_r_max, BOX_TOTAL * sizeof(double));
 
-  cudaMemcpy(vars.gpu_t_max, &t_max[0], sizeof(double), cudaMemcpyHostToDevice);
-  cudaMemcpy(vars.gpu_r_max, &r_max[0], sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(vars->gpu_t_max, &t_max[0], sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(vars->gpu_r_max, &r_max[0], sizeof(double), cudaMemcpyHostToDevice);
 
 }
 void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
