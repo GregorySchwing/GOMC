@@ -17,7 +17,7 @@ __global__ void GetCoeff(   double * molForceRefX,
                             double * molForceRefZ,
                             double * molForceNewX,
                             double * molForceNewY,
-                            double * molForceNewZ,
+                            double * molForceNewZ
                         ){
 
 }

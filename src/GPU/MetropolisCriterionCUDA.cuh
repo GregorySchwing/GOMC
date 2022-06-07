@@ -9,6 +9,12 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 
 void CallBMPAccept();
 
-__global__ void GetCoeff();
+__global__ void GetCoeff(   double * molForceRefX,
+                            double * molForceRefY,
+                            double * molForceRefZ,
+                            double * molForceNewX,
+                            double * molForceNewY,
+                            double * molForceNewZ
+                        );
 
 #endif
