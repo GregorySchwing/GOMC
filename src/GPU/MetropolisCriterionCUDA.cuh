@@ -11,12 +11,22 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 
 void CallBMPAccept();
 
-__global__ void GetCoeffTranslation(   double * molForceRefX,
+__global__ void GetCoeffTranslation(   
+                            int numberOfMolecules,
+                            double * BETA,
+                            double * t_max,
+                            double * t_k,
+                            double * molForceRefX,
                             double * molForceRefY,
                             double * molForceRefZ,
                             double * molForceNewX,
                             double * molForceNewY,
-                            double * molForceNewZ
-                        );
+                            double * molForceNewZ,
+                            double * molForceRecRefX,
+                            double * molForceRecRefY,
+                            double * molForceRecRefZ,
+                            double * molForceRecNewX,
+                            double * molForceRecNewY,
+                            double * molForceRecNewZ);
 
 #endif

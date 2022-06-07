@@ -14,6 +14,7 @@ void CallBMPAccept(){
 
 __global__ void GetCoeffTranslation(   
                             int numberOfMolecules,
+                            double * BETA,
                             double * t_max,
                             double * t_k,
                             double * molForceRefX,
@@ -27,9 +28,21 @@ __global__ void GetCoeffTranslation(
                             double * molForceRecRefZ,
                             double * molForceRecNewX,
                             double * molForceRecNewY,
-                            double * molForceRecNewZ
-                        ){
-          //forceReal =  make_double3(0.0, 0.0, 0.0);
+                            double * molForceRecNewZ){
+
+    int threadID = blockIdx.x * blockDim.x + threadIdx.x;
+    if (threadID >= numberOfMolecules) return;
+    double t_max4 = t_max*4;
+    double w_ratio = 0.0;
+    // bf_ = BETA * torque * maxTorque
+    double3 bf_old = make_double3   ((molForceRefX[molNumber] + molForceRecRefX[molNumber]),
+                                    (molForceRefY[molNumber] + molForceRecRefY[molNumber]),
+                                    (molForceRefZ[molNumber] + molForceRecRefZ[molNumber]));
+    double3 bf_new = make_double3   ((molForceNewX[molNumber] + molForceRecNewX[molNumber]),
+                                    (molForceNewY[molNumber] + molForceRecNewY[molNumber]),
+                                    (molForceNewZ[molNumber] + molForceRecNewZ[molNumber]));             
+            
+    w_ratio += CalculateWRatio(bf_new, bf_old, t_k[molNumber], t_max4) * BETA * t_max;
 
 }
 
