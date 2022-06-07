@@ -13,8 +13,8 @@ void CallBMPAccept();
 
 __global__ void GetCoeffTranslation(   
                             int numberOfMolecules,
+                            double t_max,
                             double * BETA,
-                            double * t_max,
                             double * t_k,
                             double * molForceRefX,
                             double * molForceRefY,
@@ -28,5 +28,10 @@ __global__ void GetCoeffTranslation(
                             double * molForceRecNewX,
                             double * molForceRecNewY,
                             double * molForceRecNewZ);
+
+__device__ double CalculateWRatio(  const double3 &lb_new,
+                                    const double3 &lb_old,
+                                    const double3 &k,
+                                    const double max4);
 
 #endif
