@@ -15,7 +15,6 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #include "EnsemblePreprocessor.h"
 #include <cstring>
 #include "DoubleBuffer.cuh"
-#include "MoveSettings.h"
 #define GPU_VDW_STD_KIND 0
 #define GPU_VDW_SHIFT_KIND 1
 #define GPU_VDW_SWITCH_KIND 2
@@ -30,7 +29,10 @@ void InitGPUForceField(VariablesCUDA &vars, double const *sigmaSq,
                        double Rcut, double const *rCutCoulomb,
                        double RcutLow, double Ron, double const *alpha,
                        int ewald, double diElectric_1);
+                       
 void InitMPVars(VariablesCUDA *vars,
+                std::vector<double> & t_max,
+                std::vector<double> & r_max,
                 int maxMolNumber);
 
 void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,

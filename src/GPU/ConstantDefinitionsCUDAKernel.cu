@@ -80,22 +80,15 @@ void InitGPUForceField(VariablesCUDA &vars, double const *sigmaSq,
 }
 
 void InitMPVars(VariablesCUDA *vars,
-                MoveSettings & moveSetRef,
-                int maxMolNumber){
+                std::vector<double> & t_max,
+                std::vector<double> & r_max){
   CUMALLOC((void**) &vars->gpu_t_max, BOX_TOTAL * sizeof(double));
   CUMALLOC((void**) &vars->gpu_r_max, BOX_TOTAL * sizeof(double));
 
-  CUMALLOC((void**) &vars->gpu_r_k_x, maxMolNumber * sizeof(double));
-  CUMALLOC((void**) &vars->gpu_r_k_y, maxMolNumber * sizeof(double));
-  CUMALLOC((void**) &vars->gpu_r_k_z, maxMolNumber * sizeof(double));
-
-  CUMALLOC((void**) &vars->gpu_t_k_x, maxMolNumber * sizeof(double));
-  CUMALLOC((void**) &vars->gpu_t_k_y, maxMolNumber * sizeof(double));
-  CUMALLOC((void**) &vars->gpu_t_k_z, maxMolNumber * sizeof(double));
-
+  cudaMemcpy(vars.gpu_t_max, &t_max[0], sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(vars.gpu_r_max, &r_max[0], sizeof(double), cudaMemcpyHostToDevice);
 
 }
-
 void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
                          double * coords_x,
                          double * coords_y,
@@ -123,6 +116,14 @@ void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
   CUMALLOC((void**) &vars->gpu_comx, maxMolNumber * sizeof(double));
   CUMALLOC((void**) &vars->gpu_comy, maxMolNumber * sizeof(double));
   CUMALLOC((void**) &vars->gpu_comz, maxMolNumber * sizeof(double));
+
+  CUMALLOC((void**) &vars->gpu_r_k_x, maxMolNumber * sizeof(double));
+  CUMALLOC((void**) &vars->gpu_r_k_y, maxMolNumber * sizeof(double));
+  CUMALLOC((void**) &vars->gpu_r_k_z, maxMolNumber * sizeof(double));
+
+  CUMALLOC((void**) &vars->gpu_t_k_x, maxMolNumber * sizeof(double));
+  CUMALLOC((void**) &vars->gpu_t_k_y, maxMolNumber * sizeof(double));
+  CUMALLOC((void**) &vars->gpu_t_k_z, maxMolNumber * sizeof(double));
 
   CUMALLOC((void**) &vars->gpu_nonOrth, sizeof(int));
   vars->gpu_cell_x = new double *[BOX_TOTAL];
@@ -504,6 +505,11 @@ void DestroyCUDAVars(VariablesCUDA *vars)
   delete [] vars-> gpu_Invcell_x;
   delete [] vars-> gpu_Invcell_y;
   delete [] vars-> gpu_Invcell_z;
+}
+
+void DestroyMPVars(VariablesCUDA *vars){
+  CUFREE(vars->gpu_t_max);
+  CUFREE(vars->gpu_r_max);
 }
 
 #endif /*GOMC_CUDA*/
