@@ -79,6 +79,23 @@ void InitGPUForceField(VariablesCUDA &vars, double const *sigmaSq,
   checkLastErrorCUDA(__FILE__, __LINE__);
 }
 
+void InitMPVars(VariablesCUDA *vars,
+                MoveSettings & moveSetRef,
+                int maxMolNumber){
+  CUMALLOC((void**) &vars->gpu_t_max, BOX_TOTAL * sizeof(double));
+  CUMALLOC((void**) &vars->gpu_r_max, BOX_TOTAL * sizeof(double));
+
+  CUMALLOC((void**) &vars->gpu_r_k_x, maxMolNumber * sizeof(double));
+  CUMALLOC((void**) &vars->gpu_r_k_y, maxMolNumber * sizeof(double));
+  CUMALLOC((void**) &vars->gpu_r_k_z, maxMolNumber * sizeof(double));
+
+  CUMALLOC((void**) &vars->gpu_t_k_x, maxMolNumber * sizeof(double));
+  CUMALLOC((void**) &vars->gpu_t_k_y, maxMolNumber * sizeof(double));
+  CUMALLOC((void**) &vars->gpu_t_k_z, maxMolNumber * sizeof(double));
+
+
+}
+
 void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
                          double * coords_x,
                          double * coords_y,
@@ -106,14 +123,6 @@ void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
   CUMALLOC((void**) &vars->gpu_comx, maxMolNumber * sizeof(double));
   CUMALLOC((void**) &vars->gpu_comy, maxMolNumber * sizeof(double));
   CUMALLOC((void**) &vars->gpu_comz, maxMolNumber * sizeof(double));
-
-  CUMALLOC((void**) &vars->gpu_r_k_x, maxMolNumber * sizeof(double));
-  CUMALLOC((void**) &vars->gpu_r_k_y, maxMolNumber * sizeof(double));
-  CUMALLOC((void**) &vars->gpu_r_k_z, maxMolNumber * sizeof(double));
-
-  CUMALLOC((void**) &vars->gpu_t_k_x, maxMolNumber * sizeof(double));
-  CUMALLOC((void**) &vars->gpu_t_k_y, maxMolNumber * sizeof(double));
-  CUMALLOC((void**) &vars->gpu_t_k_z, maxMolNumber * sizeof(double));
 
   CUMALLOC((void**) &vars->gpu_nonOrth, sizeof(int));
   vars->gpu_cell_x = new double *[BOX_TOTAL];

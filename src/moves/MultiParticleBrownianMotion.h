@@ -18,6 +18,7 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "CUDAMemoryManager.cuh"
 #include "TransformParticlesCUDAKernel.cuh"
 #include "VariablesCUDA.cuh"
+#include "MetropolisCriterionCUDA.cuh"
 #endif
 
 class MultiParticleBrownian : public MoveBase
@@ -194,7 +195,7 @@ inline uint MultiParticleBrownian::Prep(const double subDraw, const double movPe
 
     //calculate short range energy and force for old positions
     calcEnRef.BoxForce(sysPotRef, coordCurrRef, atomForceRef, molForceRef,
-                       boxDimRef, bPick, currentState);
+                       boxDimRef, bPick);
 
     //Calculate Torque for old positions
     calcEnRef.CalculateTorque(moleculeIndex, coordCurrRef, comCurrRef,
@@ -249,7 +250,7 @@ inline uint MultiParticleBrownian::PrepNEMTMC(const uint box, const uint midx, c
 
     //Calculate short range energy and force for old positions
     calcEnRef.BoxForce(sysPotRef, coordCurrRef, atomForceRef, molForceRef,
-                       boxDimRef, bPick, currentState);
+                       boxDimRef, bPick);
 
     //Calculate Torque for old positions
     calcEnRef.CalculateTorque(moleculeIndex, coordCurrRef, comCurrRef,
@@ -362,9 +363,9 @@ inline void MultiParticleBrownian::CalcEn()
   calcEwald->BoxReciprocalSums(bPick, newMolsPos);
 
   sysPotNew = sysPotRef;
-  //calculate short range energy and force for new pos
+  //calculate short range energy and force
   sysPotNew = calcEnRef.BoxForce(sysPotNew, newMolsPos, atomForceNew,
-                                 molForceNew, boxDimRef, bPick, nextState);
+                                 molForceNew, boxDimRef, bPick);
   //calculate long range of new electrostatic energy
   sysPotNew.boxEnergy[bPick].recip = calcEwald->BoxReciprocal(bPick, false);
   //Calculate long range of new electrostatic force
@@ -444,6 +445,43 @@ inline void MultiParticleBrownian::Accept(const uint rejectState, const ulong st
   GOMC_EVENT_START(1, GomcProfileEvent::ACC_MULTIPARTICLE_BM);
   // Here we compare the values of reference and trial and decide whether to
   // accept or reject the move
+
+  #if GOMC_CUDA
+  CallAccept();
+  double MPCoeff = GetCoeff();
+  double accept = exp(-BETA * (sysPotNew.Total() - sysPotRef.Total()) + MPCoeff);
+  bool result = (rejectState == mv::fail_state::NO_FAIL) && prng() < accept;
+  if(result) {
+    sysPotRef = sysPotNew;
+
+  cudaVars->gpu_coords_x->ChangeBuffers();
+  cudaVars->gpu_coords_y->ChangeBuffers();
+  cudaVars->gpu_coords_z->ChangeBuffers();
+
+  cudaVars->gpu_com_x->ChangeBuffers();
+  cudaVars->gpu_com_y->ChangeBuffers();
+  cudaVars->gpu_com_z->ChangeBuffers();
+
+  cudaVars->gpu_aFx->ChangeBuffers();
+  cudaVars->gpu_aFy->ChangeBuffers();
+  cudaVars->gpu_aFz->ChangeBuffers();
+
+  cudaVars->gpu_mFx->ChangeBuffers();
+  cudaVars->gpu_mFy->ChangeBuffers();
+  cudaVars->gpu_mFz->ChangeBuffers();
+
+//    swap(molForceRecRef, molForceRecNew);
+//    swap(atomForceRecRef, atomForceRecNew);
+//    swap(molTorqueRef, molTorqueNew);
+    //update reciprocate value
+    calcEwald->UpdateRecip(bPick);
+    // Update the velocity in box
+    velocity.UpdateBoxVelocity(bPick);
+  } else {
+    cellListGPU->GridAll(cudaVars, coordCurrRef, boxDimRef.axis, cellList.CellsInBox(0));
+    calcEwald->exgMolCache();
+  }
+  #else
   double MPCoeff = GetCoeff();
   double accept = exp(-BETA * (sysPotNew.Total() - sysPotRef.Total()) + MPCoeff);
   bool result = (rejectState == mv::fail_state::NO_FAIL) && prng() < accept;
@@ -468,7 +506,7 @@ inline void MultiParticleBrownian::Accept(const uint rejectState, const ulong st
     #endif
     calcEwald->exgMolCache();
   }
-
+  #endif
   moveSetRef.UpdateMoveSettingMultiParticle(bPick, result, moveType);
   moveSetRef.Update(mv::MULTIPARTICLE_BM, result, bPick);
   GOMC_EVENT_STOP(1, GomcProfileEvent::ACC_MULTIPARTICLE_BM);
