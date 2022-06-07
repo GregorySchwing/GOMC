@@ -7,9 +7,11 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #pragma once
 #ifdef GOMC_CUDA
 
+#include "HelperFunctionsCUDA.cuh"
+
 void CallBMPAccept();
 
-__global__ void GetCoeff(   double * molForceRefX,
+__global__ void GetCoeffTranslation(   double * molForceRefX,
                             double * molForceRefY,
                             double * molForceRefZ,
                             double * molForceNewX,

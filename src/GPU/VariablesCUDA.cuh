@@ -144,7 +144,8 @@ public:
 
   double *gpu_t_max;
   double *gpu_r_max;
-
+  // Currently means translation or rotate MP. Will eventually mean any move.
+  int* gpu_move_type;
 
   MultiBuffer< DeviceArray<double>, double, buffers > * gpu_coords_x;
   MultiBuffer< DeviceArray<double>, double, buffers > * gpu_coords_y;
