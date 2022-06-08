@@ -16,9 +16,7 @@ __global__ void GetCoeffTranslation(
                             int numberOfMolecules,
                             double t_max,
                             double * BETA,
-                            double * t_k_x,
-                            double * t_k_y,
-                            double * t_k_z,
+                            double * t_k,
                             double * molForceRefX,
                             double * molForceRefY,
                             double * molForceRefZ,
@@ -43,10 +41,8 @@ __global__ void GetCoeffTranslation(
     double3 bf_new = make_double3   ((molForceNewX[molNumber] + molForceRecNewX[molNumber]),
                                     (molForceNewY[molNumber] + molForceRecNewY[molNumber]),
                                     (molForceNewZ[molNumber] + molForceRecNewZ[molNumber]));             
-    
-    double3 k = make_double3   (t_k_x[molNumber],t_k_y[molNumber],t_k_z[molNumber]);
-
-    w_ratio += CalculateWRatio(bf_new, bf_old, k, t_max4) * BETA[0] * t_max;
+            
+    w_ratio += CalculateWRatio(bf_new, bf_old, t_k[molNumber], t_max4) * BETA[0] * t_max;
 
 }
 
