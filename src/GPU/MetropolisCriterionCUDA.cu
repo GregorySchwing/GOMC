@@ -15,7 +15,6 @@ void CallBMPAccept(){
 __global__ void GetCoeffTranslation(   
                             int numberOfMolecules,
                             double t_max,
-                            double * mp_coefficient,
                             double * BETA,
                             double * t_k_x,
                             double * t_k_y,
@@ -48,7 +47,6 @@ __global__ void GetCoeffTranslation(
     double3 k = make_double3   (t_k_x[molNumber],t_k_y[molNumber],t_k_z[molNumber]);
 
     w_ratio += CalculateWRatio(bf_new, bf_old, k, t_max4) * BETA[0] * t_max;
-    atomicAdd(&mp_coefficient[0], w_ratio);
 
 }
 
