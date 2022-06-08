@@ -14,6 +14,7 @@ void CallBMPAccept();
 __global__ void GetCoeffTranslation(   
                             int numberOfMolecules,
                             double t_max,
+                            double * mp_coefficient,
                             double * BETA,
                             double * t_k_x,
                             double * t_k_y,
