@@ -447,7 +447,7 @@ inline void MultiParticleBrownian::Accept(const uint rejectState, const ulong st
   // accept or reject the move
 
   #if GOMC_CUDA
-    CallBMPAccept(cudaVars, comCurrRef.size());
+    CallBMPAccept(cudaVars, comCurrRef.Count());
   #else
   double MPCoeff = GetCoeff();
   double accept = exp(-BETA * (sysPotNew.Total() - sysPotRef.Total()) + MPCoeff);
