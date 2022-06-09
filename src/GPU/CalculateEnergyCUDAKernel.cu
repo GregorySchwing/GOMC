@@ -585,7 +585,8 @@ void CallBoxInterGPU(VariablesCUDA *vars,
   //BufferAccess<DeviceArray<int>, int, buffers> mapParticleToCell_view(*(vars->gpu_mapParticleToCell), 0);
   BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(vars->gpu_cellVector), 0);
   BufferAccess<DeviceArray<int>, int, buffers> cellStartIndex_view(*(vars->gpu_cellStartIndex), 0);
-
+  cudaDeviceSynchronize();
+  checkLastErrorCUDA(__FILE__, __LINE__);
 
   BoxInterGPU <<< blocksPerGrid, threadsPerBlock>>>(cellStartIndex_view->get(),
       cellVector_view->get(),
