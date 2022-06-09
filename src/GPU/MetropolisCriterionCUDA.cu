@@ -149,5 +149,12 @@ __device__ double CalculateWRatio(  const double3 &lb_new,
     return w_ratio;
 }
 
-
+__global__ void Accept(   
+                            double mp_coefficient,
+                            double BETA,
+                            double sysPotNew,
+                            double sysPotRef){
+  double accept = exp(-BETA * (sysPotNew - sysPotRef) + MPCoeff);
+  //bool result = (rejectState == mv::fail_state::NO_FAIL) && prng() < accept;
+}
 #endif

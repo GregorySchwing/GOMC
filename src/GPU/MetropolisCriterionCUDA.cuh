@@ -34,6 +34,12 @@ __global__ void GetCoeffTranslation(
                             double * molForceRecNewY,
                             double * molForceRecNewZ);
 
+__global__ void Accept(   
+                            double mp_coefficient,
+                            double BETA,
+                            double sysPotNew,
+                            double sysPotRef);
+
 __device__ double CalculateWRatio(  const double3 &lb_new,
                                     const double3 &lb_old,
                                     const double3 &k,
