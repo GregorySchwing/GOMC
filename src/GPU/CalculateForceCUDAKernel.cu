@@ -75,8 +75,11 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
   }
 
   CUMALLOC((void**) &gpu_neighborList, numberOfCellPairs * sizeof(int));
+  // GPU resident cell list        
+  /*
   CUMALLOC((void**) &gpu_cellStartIndex,
            cellStartIndex.size() * sizeof(int));
+  */
   CUMALLOC((void**) &gpu_particleCharge,
            particleCharge.size() * sizeof(double));
   CUMALLOC((void**) &gpu_particleKind, particleKind.size() * sizeof(int));
@@ -98,18 +101,20 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
   CUMALLOC((void**) &vars->gpu_vT33, energyVectorLen * sizeof(double));
   checkLastErrorCUDA(__FILE__, __LINE__);
 
-
-  cudaMemcpy(vars->gpu_mapParticleToCell, &mapParticleToCell[0],
-             atomNumber * sizeof(int), cudaMemcpyHostToDevice);
   cudaMemcpy(gpu_neighborList, &neighborlist1D[0],
              numberOfCellPairs * sizeof(int),
              cudaMemcpyHostToDevice);
+  // GPU resident cell list        
+  /*
+  cudaMemcpy(vars->gpu_mapParticleToCell, &mapParticleToCell[0],
+             atomNumber * sizeof(int), cudaMemcpyHostToDevice);
   cudaMemcpy(gpu_cellStartIndex, &cellStartIndex[0],
              cellStartIndex.size() * sizeof(int),
              cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_cellVector, &cellVector[0],
              atomNumber * sizeof(int),
              cudaMemcpyHostToDevice);
+  */
   cudaMemcpy(vars->gpu_x, currentCoords.x, atomNumber * sizeof(double),
              cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_y, currentCoords.y, atomNumber * sizeof(double),
