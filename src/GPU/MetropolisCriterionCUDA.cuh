@@ -10,7 +10,8 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #include "HelperFunctionsCUDA.cuh"
 #include "CalculateMinImageCUDAKernel.cuh"
 
-void CallBMPAccept();
+void CallBMPAccept(VariablesCUDA *vars,
+                    int buffer_index);
 
 __global__ void GetCoeffTranslation(   
                             int numberOfMolecules,
