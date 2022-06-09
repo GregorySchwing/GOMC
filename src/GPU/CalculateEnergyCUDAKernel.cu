@@ -564,10 +564,10 @@ void CallBoxInterGPU(VariablesCUDA *vars,
     CUMALLOC((void**) &gpu_REn, energyVectorLen * sizeof(double));
     CUMALLOC((void**) &gpu_final_REn, sizeof(double));
   }
-    cudaDeviceSynchronize();
-  checkLastErrorCUDA(__FILE__, __LINE__);
+
   // Copy necessary data to GPU
   cudaMemcpy(gpu_neighborList, &neighborlist1D[0], neighborListCount * sizeof(int), cudaMemcpyHostToDevice);
+  // GPU resident cell list
  // cudaMemcpy(gpu_cellStartIndex, &cellStartIndex[0], cellStartIndex.size() * sizeof(int), cudaMemcpyHostToDevice);
   //cudaMemcpy(vars->gpu_cellVector, &cellVector[0], atomNumber * sizeof(int), cudaMemcpyHostToDevice);
   cudaMemcpy(gpu_particleCharge, &particleCharge[0], particleCharge.size() * sizeof(double), cudaMemcpyHostToDevice);
