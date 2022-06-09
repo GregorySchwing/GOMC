@@ -564,7 +564,8 @@ void CallBoxInterGPU(VariablesCUDA *vars,
     CUMALLOC((void**) &gpu_REn, energyVectorLen * sizeof(double));
     CUMALLOC((void**) &gpu_final_REn, sizeof(double));
   }
-
+    cudaDeviceSynchronize();
+  checkLastErrorCUDA(__FILE__, __LINE__);
   // Copy necessary data to GPU
   cudaMemcpy(gpu_neighborList, &neighborlist1D[0], neighborListCount * sizeof(int), cudaMemcpyHostToDevice);
   cudaMemcpy(gpu_cellStartIndex, &cellStartIndex[0], cellStartIndex.size() * sizeof(int), cudaMemcpyHostToDevice);
@@ -575,7 +576,8 @@ void CallBoxInterGPU(VariablesCUDA *vars,
   cudaMemcpy(vars->gpu_x, coords.x, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_y, coords.y, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_z, coords.z, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
-
+    cudaDeviceSynchronize();
+  checkLastErrorCUDA(__FILE__, __LINE__);
   double3 axis = make_double3(boxAxes.GetAxis(box).x,
                               boxAxes.GetAxis(box).y,
                               boxAxes.GetAxis(box).z);
