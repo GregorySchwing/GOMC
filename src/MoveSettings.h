@@ -143,6 +143,14 @@ public:
     this->SetScaleValues(rhs);
   }
 
+  std::vector<double> & GetTMax() {
+    return mp_t_max;
+  }
+
+  std::vector<double> & GetRMax() {
+    return mp_r_max;
+  }
+
 #if GOMC_GTEST
   bool operator==(const MoveSettings & rhs);
 #endif

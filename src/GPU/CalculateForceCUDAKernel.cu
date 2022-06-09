@@ -55,7 +55,7 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
   int numberOfCellPairs = numberOfCells * NUMBER_OF_NEIGHBOR_CELLS;
   int *gpu_particleKind;
   int *gpu_particleMol;
-  int *gpu_neighborList, *gpu_cellStartIndex;
+  int *gpu_neighborList; //, *gpu_cellStartIndex;
   int blocksPerGrid, threadsPerBlock;
   int energyVectorLen = 0;
   double *gpu_particleCharge;
@@ -292,7 +292,7 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
   CUFREE(gpu_particleCharge);
   CUFREE(gpu_final_value);
   CUFREE(gpu_neighborList);
-  CUFREE(gpu_cellStartIndex);
+  //CUFREE(gpu_cellStartIndex);
 }
 
 void CallBoxForceGPU(VariablesCUDA *vars,

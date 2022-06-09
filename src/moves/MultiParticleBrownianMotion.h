@@ -108,6 +108,9 @@ inline MultiParticleBrownian::MultiParticleBrownian(System &sys, StaticVals cons
   cudaVars = sys.statV.forcefield.particles->getCUDAVars();
   isOrthogonal = statV.isOrthogonal;
   cellListGPU = sys.cellListGPU;
+  InitMPVars(cudaVars,
+                moveSetRef.GetTMax(),
+                moveSetRef.GetRMax());
   cudaMallocHost((void**) &kill, sizeof(int));
   checkLastErrorCUDA(__FILE__, __LINE__);
 #endif
