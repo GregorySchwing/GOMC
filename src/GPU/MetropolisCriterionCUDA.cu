@@ -27,7 +27,7 @@ void CallBMPAccept(VariablesCUDA *vars,
     int blocksPerGrid = (int)(molCount / threadsPerBlock) + 1;
 
     GetCoeffTranslation<<< blocksPerGrid, threadsPerBlock>>>(molCount,
-                                                            vars->gpu_t_max,
+                                                            vars->gpu_t_max[0],
                                                             vars->gpu_BETA,
                                                             vars->gpu_mp_coefficient,
                                                             vars->gpu_t_k_x,
