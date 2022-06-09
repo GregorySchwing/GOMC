@@ -144,6 +144,8 @@ public:
 
   double *gpu_t_max;
   double *gpu_r_max;
+  double *gpu_BETA;
+  double *gpu_mp_coefficient;
   // Currently means translation or rotate MP. Will eventually mean any move.
   int* gpu_move_type;
 

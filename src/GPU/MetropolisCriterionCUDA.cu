@@ -8,22 +8,40 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 
 #include "MetropolisCriterionCUDA.cuh"
 
-void CallBMPAccept(VariablesCUDA *vars,
-                    int molCount,
-                    int buffer_index){
+const int curr_state = 0;
+const int next_state = 1;
 
-    BufferAccess<DeviceArray<double>, double, buffers> mFx(*(vars->gpu_mFx), buffer_index);
-    BufferAccess<DeviceArray<double>, double, buffers> mFy(*(vars->gpu_mFy), buffer_index);
-    BufferAccess<DeviceArray<double>, double, buffers> mFz(*(vars->gpu_mFz), buffer_index);
+
+void CallBMPAccept(VariablesCUDA *vars,
+                    int molCount){
+
+    BufferAccess<DeviceArray<double>, double, buffers> mFxRef(*(vars->gpu_mFx), curr_state);
+    BufferAccess<DeviceArray<double>, double, buffers> mFyRef(*(vars->gpu_mFy), curr_state);
+    BufferAccess<DeviceArray<double>, double, buffers> mFzRef(*(vars->gpu_mFz), curr_state);
+
+    BufferAccess<DeviceArray<double>, double, buffers> mFxNew(*(vars->gpu_mFx), next_state);
+    BufferAccess<DeviceArray<double>, double, buffers> mFyNew(*(vars->gpu_mFy), next_state);
+    BufferAccess<DeviceArray<double>, double, buffers> mFzNew(*(vars->gpu_mFz), next_state);
 
     int threadsPerBlock = 256;
     int blocksPerGrid = (int)(molCount / threadsPerBlock) + 1;
 
     GetCoeffTranslation<<< blocksPerGrid, threadsPerBlock>>>(molCount,
-                                                            vars->t_max,
+                                                            vars->gpu_t_max,
+                                                            vars->gpu_BETA,
+                                                            vars->gpu_mp_coefficient,
                                                             vars->gpu_t_k_x,
                                                             vars->gpu_t_k_y,
                                                             vars->gpu_t_k_z,
+                                                            mFxRef->get(),
+                                                            mFyRef->get(),
+                                                            mFzRef->get(),
+                                                            mFxNew->get(),
+                                                            mFyNew->get(),
+                                                            mFzNew->get(),
+                                                            vars->gpu_mForceRecx,
+                                                            vars->gpu_mForceRecy,
+                                                            vars->gpu_mForceRecz,
                                                             vars->gpu_mForceRecx,
                                                             vars->gpu_mForceRecy,
                                                             vars->gpu_mForceRecz);

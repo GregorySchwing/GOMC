@@ -11,7 +11,7 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #include "CalculateMinImageCUDAKernel.cuh"
 
 void CallBMPAccept(VariablesCUDA *vars,
-                    int buffer_index);
+                    int molCount);
 
 __global__ void GetCoeffTranslation(   
                             int numberOfMolecules,
