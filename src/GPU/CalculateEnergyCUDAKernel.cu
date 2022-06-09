@@ -527,6 +527,8 @@ void CallBoxInterGPU(VariablesCUDA *vars,
                      uint sc_power,
                      uint const box)
 {
+    cudaDeviceSynchronize();
+  checkLastErrorCUDA(__FILE__, __LINE__);
   int atomNumber = coords.Count();
   int neighborListCount = neighborList.size() * NUMBER_OF_NEIGHBOR_CELL;
   int numberOfCells = neighborList.size();
@@ -581,13 +583,11 @@ void CallBoxInterGPU(VariablesCUDA *vars,
   double3 halfAx = make_double3(boxAxes.GetAxis(box).x * 0.5,
                                 boxAxes.GetAxis(box).y * 0.5,
                                 boxAxes.GetAxis(box).z * 0.5);
-  cudaDeviceSynchronize();
-  checkLastErrorCUDA(__FILE__, __LINE__);
+
   //BufferAccess<DeviceArray<int>, int, buffers> mapParticleToCell_view(*(vars->gpu_mapParticleToCell), 0);
   BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(vars->gpu_cellVector), 0);
   BufferAccess<DeviceArray<int>, int, buffers> cellStartIndex_view(*(vars->gpu_cellStartIndex), 0);
-  cudaDeviceSynchronize();
-  checkLastErrorCUDA(__FILE__, __LINE__);
+
   BoxInterGPU <<< blocksPerGrid, threadsPerBlock>>>(cellStartIndex_view->get(),
       cellVector_view->get(),
       gpu_neighborList,
