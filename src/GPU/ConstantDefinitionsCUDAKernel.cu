@@ -57,7 +57,7 @@ void InitGPUForceField(VariablesCUDA &vars, double const *sigmaSq,
   CUMALLOC((void**) &vars.gpu_lambdaCoulomb, (int)BOX_TOTAL * sizeof(double));
   CUMALLOC((void**) &vars.gpu_isFraction, (int)BOX_TOTAL * sizeof(bool));
 
-  cudaMemcpy(vars.gpu_BETA, &beta, sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(vars.gpu_BETA, &BETA, sizeof(double), cudaMemcpyHostToDevice);
 
   cudaMemcpy(vars.gpu_sigmaSq, sigmaSq, countSq * sizeof(double),
              cudaMemcpyHostToDevice);
