@@ -32,7 +32,8 @@ void InitGPUForceField(VariablesCUDA &vars, double const *sigmaSq,
                        double const *n, int VDW_Kind, int isMartini,
                        int count, double Rcut, double const *rCutCoulomb,
                        double RcutLow, double Ron, double const *alpha,
-                       int ewald, double diElectric_1)
+                       int ewald, double diElectric_1,
+                       double BETA)
 {
   int countSq = count * count;
   CUMALLOC((void**) &vars.gpu_sigmaSq, countSq * sizeof(double));
@@ -48,12 +49,15 @@ void InitGPUForceField(VariablesCUDA &vars, double const *sigmaSq,
   CUMALLOC((void**) &vars.gpu_alpha, BOX_TOTAL * sizeof(double));
   CUMALLOC((void**) &vars.gpu_ewald, sizeof(int));
   CUMALLOC((void**) &vars.gpu_diElectric_1, sizeof(double));
+  CUMALLOC((void**) &vars->gpu_BETA, 1 * sizeof(double));
 
   // allocate gpu memory for lambda variables
   CUMALLOC((void**) &vars.gpu_molIndex, (int)BOX_TOTAL * sizeof(int));
   CUMALLOC((void**) &vars.gpu_lambdaVDW, (int)BOX_TOTAL * sizeof(double));
   CUMALLOC((void**) &vars.gpu_lambdaCoulomb, (int)BOX_TOTAL * sizeof(double));
   CUMALLOC((void**) &vars.gpu_isFraction, (int)BOX_TOTAL * sizeof(bool));
+
+  cudaMemcpy(vars->gpu_BETA, BETA, sizeof(double), cudaMemcpyHostToDevice);
 
   cudaMemcpy(vars.gpu_sigmaSq, sigmaSq, countSq * sizeof(double),
              cudaMemcpyHostToDevice);
@@ -84,11 +88,12 @@ void InitMPVars(VariablesCUDA *vars,
                 std::vector<double> & r_max){
   CUMALLOC((void**) &vars->gpu_t_max, BOX_TOTAL * sizeof(double));
   CUMALLOC((void**) &vars->gpu_r_max, BOX_TOTAL * sizeof(double));
-  CUMALLOC((void**) &vars->gpu_BETA, 1 * sizeof(double));
   CUMALLOC((void**) &vars->gpu_mp_coefficient, 1 * sizeof(double));
 
   cudaMemcpy(vars->gpu_t_max, &t_max[0], sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_r_max, &r_max[0], sizeof(double), cudaMemcpyHostToDevice);
+
+
 
 }
 void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,

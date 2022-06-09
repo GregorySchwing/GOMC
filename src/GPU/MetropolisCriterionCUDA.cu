@@ -25,8 +25,6 @@ void CallBMPAccept(VariablesCUDA *vars,
 
     double zero = 0.0;
 
-    cudaMemcpy(vars->gpu_BETA, &zero, 1 * sizeof(double),
-              cudaMemcpyHostToDevice);
     cudaMemcpy(vars->gpu_mp_coefficient, &zero, 1 * sizeof(double),
               cudaMemcpyHostToDevice);
 
@@ -35,7 +33,7 @@ void CallBMPAccept(VariablesCUDA *vars,
 
     GetCoeffTranslation<<< blocksPerGrid, threadsPerBlock>>>(molCount,
                                                             vars->gpu_t_max[0],
-                                                            vars->gpu_BETA,
+                                                            vars->gpu_BETA[0],
                                                             vars->gpu_mp_coefficient,
                                                             vars->gpu_t_k_x,
                                                             vars->gpu_t_k_y,
@@ -95,8 +93,8 @@ void CallBMPAccept(VariablesCUDA *vars,
 __global__ void GetCoeffTranslation(   
                             int numberOfMolecules,
                             double t_max,
+                            double BETA,
                             double * mp_coefficient,
-                            double * BETA,
                             double * t_k_x,
                             double * t_k_y,
                             double * t_k_z,

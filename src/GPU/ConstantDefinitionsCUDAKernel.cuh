@@ -28,7 +28,7 @@ void InitGPUForceField(VariablesCUDA &vars, double const *sigmaSq,
                        int VDW_Kind, int isMartini, int count,
                        double Rcut, double const *rCutCoulomb,
                        double RcutLow, double Ron, double const *alpha,
-                       int ewald, double diElectric_1);
+                       int ewald, double diElectric_1, double BETA);
 
 void InitMPVars(VariablesCUDA *vars,
                 std::vector<double> & t_max,
