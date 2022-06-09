@@ -449,8 +449,8 @@ inline void MultiParticleBrownian::Accept(const uint rejectState, const ulong st
   #if GOMC_CUDA
   CallBMPAccept(cudaVars, comCurrRef.size());
   //double MPCoeff = GetCoeff();
-  double accept = exp(-BETA * (sysPotNew.Total() - sysPotRef.Total()) + MPCoeff);
-  bool result = (rejectState == mv::fail_state::NO_FAIL) && prng() < accept;
+  //double accept = exp(-BETA * (sysPotNew.Total() - sysPotRef.Total()) + MPCoeff);
+  //bool result = (rejectState == mv::fail_state::NO_FAIL) && prng() < accept;
   if(result) {
     sysPotRef = sysPotNew;
 
