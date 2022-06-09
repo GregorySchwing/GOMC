@@ -9,18 +9,21 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #include "MetropolisCriterionCUDA.cuh"
 
 void CallBMPAccept(VariablesCUDA *vars,
+                    int molCount,
                     int buffer_index){
 
     BufferAccess<DeviceArray<double>, double, buffers> mFx(*(vars->gpu_mFx), buffer_index);
     BufferAccess<DeviceArray<double>, double, buffers> mFy(*(vars->gpu_mFy), buffer_index);
     BufferAccess<DeviceArray<double>, double, buffers> mFz(*(vars->gpu_mFz), buffer_index);
 
+    int threadsPerBlock = 256;
+    int blocksPerGrid = (int)(molCount / threadsPerBlock) + 1;
+
     GetCoeffTranslation<<< blocksPerGrid, threadsPerBlock>>>(molCount,
-                                                            t_max,
+                                                            vars->t_max,
                                                             vars->gpu_t_k_x,
                                                             vars->gpu_t_k_y,
                                                             vars->gpu_t_k_z,
-                                                            gpu_isMoleculeInvolved,
                                                             vars->gpu_mForceRecx,
                                                             vars->gpu_mForceRecy,
                                                             vars->gpu_mForceRecz);
