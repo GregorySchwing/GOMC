@@ -447,40 +447,7 @@ inline void MultiParticleBrownian::Accept(const uint rejectState, const ulong st
   // accept or reject the move
 
   #if GOMC_CUDA
-  CallBMPAccept(cudaVars, comCurrRef.size());
-  //double MPCoeff = GetCoeff();
-  //double accept = exp(-BETA * (sysPotNew.Total() - sysPotRef.Total()) + MPCoeff);
-  //bool result = (rejectState == mv::fail_state::NO_FAIL) && prng() < accept;
-  if(result) {
-    sysPotRef = sysPotNew;
-
-  cudaVars->gpu_coords_x->ChangeBuffers();
-  cudaVars->gpu_coords_y->ChangeBuffers();
-  cudaVars->gpu_coords_z->ChangeBuffers();
-
-  cudaVars->gpu_com_x->ChangeBuffers();
-  cudaVars->gpu_com_y->ChangeBuffers();
-  cudaVars->gpu_com_z->ChangeBuffers();
-
-  cudaVars->gpu_aFx->ChangeBuffers();
-  cudaVars->gpu_aFy->ChangeBuffers();
-  cudaVars->gpu_aFz->ChangeBuffers();
-
-  cudaVars->gpu_mFx->ChangeBuffers();
-  cudaVars->gpu_mFy->ChangeBuffers();
-  cudaVars->gpu_mFz->ChangeBuffers();
-
-//    swap(molForceRecRef, molForceRecNew);
-//    swap(atomForceRecRef, atomForceRecNew);
-//    swap(molTorqueRef, molTorqueNew);
-    //update reciprocate value
-    calcEwald->UpdateRecip(bPick);
-    // Update the velocity in box
-    velocity.UpdateBoxVelocity(bPick);
-  } else {
-    cellListGPU->GridAll(cudaVars, coordCurrRef, boxDimRef.axis, cellList.CellsInBox(0));
-    calcEwald->exgMolCache();
-  }
+    CallBMPAccept(cudaVars, comCurrRef.size());
   #else
   double MPCoeff = GetCoeff();
   double accept = exp(-BETA * (sysPotNew.Total() - sysPotRef.Total()) + MPCoeff);
