@@ -10,8 +10,9 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #include "HelperFunctionsCUDA.cuh"
 #include "CalculateMinImageCUDAKernel.cuh"
 
-void CallBMPAccept(VariablesCUDA *vars,
-                    int molCount);
+void CallGetCoeffTranslation(VariablesCUDA *vars,
+                    int molCount,
+                    double * MPCoeff);
 
 __global__ void GetCoeffTranslation(   
                             int numberOfMolecules,
@@ -33,13 +34,13 @@ __global__ void GetCoeffTranslation(
                             double * molForceRecNewX,
                             double * molForceRecNewY,
                             double * molForceRecNewZ);
-
+/*
 __global__ void Accept(   
                             double mp_coefficient,
                             double BETA,
                             double sysPotNew,
                             double sysPotRef);
-
+*/
 __device__ double CalculateWRatio(  const double3 &lb_new,
                                     const double3 &lb_old,
                                     const double3 &k,

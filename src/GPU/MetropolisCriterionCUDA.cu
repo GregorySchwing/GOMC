@@ -12,8 +12,9 @@ const int curr_state = 0;
 const int next_state = 1;
 
 
-void CallBMPAccept(VariablesCUDA *vars,
-                    int molCount){
+void CallGetCoeffTranslation(VariablesCUDA *vars,
+                    int molCount,
+                    double * MPCoeff){
 
     BufferAccess<DeviceArray<double>, double, buffers> mFxRef(*(vars->gpu_mFx), curr_state);
     BufferAccess<DeviceArray<double>, double, buffers> mFyRef(*(vars->gpu_mFy), curr_state);
@@ -23,9 +24,7 @@ void CallBMPAccept(VariablesCUDA *vars,
     BufferAccess<DeviceArray<double>, double, buffers> mFyNew(*(vars->gpu_mFy), next_state);
     BufferAccess<DeviceArray<double>, double, buffers> mFzNew(*(vars->gpu_mFz), next_state);
 
-    double zero = 0.0;
-
-    cudaMemcpy(vars->gpu_mp_coefficient, &zero, 1 * sizeof(double),
+    cudaMemcpy(vars->gpu_mp_coefficient, MPCoeff, 1 * sizeof(double),
               cudaMemcpyHostToDevice);
 
     int threadsPerBlock = 256;
@@ -52,42 +51,8 @@ void CallBMPAccept(VariablesCUDA *vars,
                                                             vars->gpu_mForceRecz);
                                                         cudaDeviceSynchronize();
                                                         checkLastErrorCUDA(__FILE__, __LINE__);
-
-  //double MPCoeff = GetCoeff();
-  /*
-  double accept = exp(-BETA * (sysPotNew.Total() - sysPotRef.Total()) + MPCoeff);
-  bool result = (rejectState == mv::fail_state::NO_FAIL) && prng() < accept;
-  if(result) {
-    sysPotRef = sysPotNew;
-
-  cudaVars->gpu_coords_x->ChangeBuffers();
-  cudaVars->gpu_coords_y->ChangeBuffers();
-  cudaVars->gpu_coords_z->ChangeBuffers();
-
-  cudaVars->gpu_com_x->ChangeBuffers();
-  cudaVars->gpu_com_y->ChangeBuffers();
-  cudaVars->gpu_com_z->ChangeBuffers();
-
-  cudaVars->gpu_aFx->ChangeBuffers();
-  cudaVars->gpu_aFy->ChangeBuffers();
-  cudaVars->gpu_aFz->ChangeBuffers();
-
-  cudaVars->gpu_mFx->ChangeBuffers();
-  cudaVars->gpu_mFy->ChangeBuffers();
-  cudaVars->gpu_mFz->ChangeBuffers();
-
-//    swap(molForceRecRef, molForceRecNew);
-//    swap(atomForceRecRef, atomForceRecNew);
-//    swap(molTorqueRef, molTorqueNew);
-    //update reciprocate value
-    calcEwald->UpdateRecip(bPick);
-    // Update the velocity in box
-    velocity.UpdateBoxVelocity(bPick);
-  } else {
-    cellListGPU->GridAll(cudaVars, coordCurrRef, boxDimRef.axis, cellList.CellsInBox(0));
-    calcEwald->exgMolCache();
-  }
-  */
+    cudaMemcpy(MPCoeff, vars->gpu_mp_coefficient, 1 * sizeof(double),
+              cudaMemcpyDeviceToHost);
 }
 
 __global__ void GetCoeffTranslation(   
@@ -148,13 +113,17 @@ __device__ double CalculateWRatio(  const double3 &lb_new,
 
     return w_ratio;
 }
-
+//Since the ChangeBuffers and GridAll functions have CPU wrappers, I can't get full GPU residence yet.
+/*
 __global__ void Accept(   
                             double mp_coefficient,
                             double BETA,
                             double sysPotNew,
                             double sysPotRef){
   double accept = exp(-BETA * (sysPotNew - sysPotRef) + mp_coefficient);
-  //bool result = (rejectState == mv::fail_state::NO_FAIL) && prng() < accept;
+  bool result = true;
+  //bool result = prng() < accept;
+
 }
+*/
 #endif
