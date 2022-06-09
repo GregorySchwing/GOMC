@@ -154,7 +154,7 @@ __global__ void Accept(
                             double BETA,
                             double sysPotNew,
                             double sysPotRef){
-  double accept = exp(-BETA * (sysPotNew - sysPotRef) + MPCoeff);
+  double accept = exp(-BETA * (sysPotNew - sysPotRef) + mp_coefficient);
   //bool result = (rejectState == mv::fail_state::NO_FAIL) && prng() < accept;
 }
 #endif
