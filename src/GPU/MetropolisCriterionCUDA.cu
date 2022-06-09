@@ -23,6 +23,13 @@ void CallBMPAccept(VariablesCUDA *vars,
     BufferAccess<DeviceArray<double>, double, buffers> mFyNew(*(vars->gpu_mFy), next_state);
     BufferAccess<DeviceArray<double>, double, buffers> mFzNew(*(vars->gpu_mFz), next_state);
 
+    double zero = 0.0;
+
+    cudaMemcpy(vars->gpu_BETA, &zero, 1 * sizeof(double),
+              cudaMemcpyHostToDevice);
+    cudaMemcpy(vars->gpu_mp_coefficient, &zero, 1 * sizeof(double),
+              cudaMemcpyHostToDevice);
+
     int threadsPerBlock = 256;
     int blocksPerGrid = (int)(molCount / threadsPerBlock) + 1;
 
