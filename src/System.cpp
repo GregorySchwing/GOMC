@@ -149,19 +149,19 @@ void System::Init(Setup & set)
   InitLambda();
   calcEnergy.Init(*this);
   calcEwald->Init();
-  potential = calcEnergy.SystemTotal();
-  InitMoves(set);
-  for(uint m = 0; m < mv::MOVE_KINDS_TOTAL; m++)
-    moveTime[m] = 0.0;
-
   #ifdef GOMC_CUDA
   // For now copy the neighbor list to the GPU
   // Once this can be built on the GPU we can only do this in GTest
-  // This has to be after CalcEnergy.Init to call GridAll.
+  // This has to be after CalcEnergy.Init to call GridAll.,
+  // but before SystemTotal()
   cellList.CopyNeighborListToGPU(statV.forcefield.particles->getCUDAVars());
   cellListGPU = new CellListGPU(statV.forcefield.particles->getCUDAVars(), coordinates.Count());
   cellListGPU->GridAll(statV.forcefield.particles->getCUDAVars(), coordinates, boxDimRef.axis, cellList.CellsInBox(0));
   #endif
+  potential = calcEnergy.SystemTotal();
+  InitMoves(set);
+  for(uint m = 0; m < mv::MOVE_KINDS_TOTAL; m++)
+    moveTime[m] = 0.0;
 }
 
 void System::InitOver(Setup & set, Molecules & molRef)
