@@ -16,8 +16,8 @@ void CallGetCoeffTranslation(VariablesCUDA *vars,
 
 __global__ void GetCoeffTranslation(   
                             int numberOfMolecules,
-                            double t_max,
-                            double BETA,
+                            double * t_max,
+                            double * BETA,
                             double * mp_coefficient,
                             double * t_k_x,
                             double * t_k_y,

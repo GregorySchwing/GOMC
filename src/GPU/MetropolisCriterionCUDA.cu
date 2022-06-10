@@ -31,8 +31,8 @@ void CallGetCoeffTranslation(VariablesCUDA *vars,
     int blocksPerGrid = (int)(molCount / threadsPerBlock) + 1;
 
     GetCoeffTranslation<<< blocksPerGrid, threadsPerBlock>>>(molCount,
-                                                            0.0,
-                                                            vars->gpu_BETA[0],
+                                                            vars->gpu_t_max,
+                                                            vars->gpu_BETA,
                                                             vars->gpu_mp_coefficient,
                                                             vars->gpu_t_k_x,
                                                             vars->gpu_t_k_y,
@@ -57,8 +57,8 @@ void CallGetCoeffTranslation(VariablesCUDA *vars,
 
 __global__ void GetCoeffTranslation(   
                             int numberOfMolecules,
-                            double t_max,
-                            double BETA,
+                            double * t_max,
+                            double * BETA,
                             double * mp_coefficient,
                             double * t_k_x,
                             double * t_k_y,
@@ -79,7 +79,7 @@ __global__ void GetCoeffTranslation(
     int molNumber = blockIdx.x * blockDim.x + threadIdx.x;
     if (molNumber >= numberOfMolecules) return;
     printf("Entered method\n");
-    double t_max4 = t_max*4;
+    double t_max4 = t_max[0]*4;
     double w_ratio = 0.0;
     // bf_ = BETA * torque * maxTorque
     double3 bf_old = make_double3   ((molForceRefX[molNumber] + molForceRecRefX[molNumber]),
@@ -93,7 +93,7 @@ __global__ void GetCoeffTranslation(
     double3 k = make_double3   (t_k_x[molNumber],t_k_y[molNumber],t_k_z[molNumber]);
     printf("Entered k\n");
 
-    w_ratio += CalculateWRatio(bf_new, bf_old, k, t_max4) * BETA * t_max;
+    w_ratio += CalculateWRatio(bf_new, bf_old, k, t_max4) * BETA[0] * t_max[0];
        printf("Entered CalculateWRatio\n");
 
     atomicAdd(&mp_coefficient[0], w_ratio);
