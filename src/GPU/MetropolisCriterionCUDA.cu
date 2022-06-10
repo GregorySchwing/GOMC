@@ -78,7 +78,7 @@ __global__ void GetCoeffTranslation(
 
     int molNumber = blockIdx.x * blockDim.x + threadIdx.x;
     if (molNumber >= numberOfMolecules) return;
-    printf("Entered method\n");
+
     double t_max4 = t_max[0]*4;
     double w_ratio = 0.0;
     // bf_ = BETA * torque * maxTorque
@@ -88,13 +88,10 @@ __global__ void GetCoeffTranslation(
     double3 bf_new = make_double3   ((molForceNewX[molNumber] + molForceRecNewX[molNumber]),
                                     (molForceNewY[molNumber] + molForceRecNewY[molNumber]),
                                     (molForceNewZ[molNumber] + molForceRecNewZ[molNumber]));             
-        printf("Entered bf_new\n");
 
     double3 k = make_double3   (t_k_x[molNumber],t_k_y[molNumber],t_k_z[molNumber]);
-    printf("Entered k\n");
 
     w_ratio += CalculateWRatio(bf_new, bf_old, k, t_max4) * BETA[0] * t_max[0];
-       printf("Entered CalculateWRatio\n");
 
     atomicAdd(&mp_coefficient[0], w_ratio);
 
