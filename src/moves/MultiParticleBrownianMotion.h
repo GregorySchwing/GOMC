@@ -359,7 +359,7 @@ inline void MultiParticleBrownian::CalcEn()
   // reference values in Accept() function
   //cellList.GridAll(boxDimRef, newMolsPos, molLookup);
   #if GOMC_CUDA
-  cellListGPU->GridAll(cudaVars, coordCurrRef, boxDimRef.axis, cellList.CellsInBox(0));
+  cellListGPU->GridAll(cudaVars, coordCurrRef, boxDimRef.axis, cellList.CellsInBox(0), nextStateBufferIndex);
   #else
   cellList.GridBox(boxDimRef, newMolsPos, molLookup, bPick);
   #endif
