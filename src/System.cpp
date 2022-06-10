@@ -157,6 +157,7 @@ void System::Init(Setup & set)
   #ifdef GOMC_CUDA
   // For now copy the neighbor list to the GPU
   // Once this can be built on the GPU we can only do this in GTest
+  // This has to be after CalcEnergy.Init to call GridAll.
   cellList.CopyNeighborListToGPU(statV.forcefield.particles->getCUDAVars());
   cellListGPU = new CellListGPU(statV.forcefield.particles->getCUDAVars(), coordinates.Count());
   cellListGPU->GridAll(statV.forcefield.particles->getCUDAVars(), coordinates, boxDimRef.axis, cellList.CellsInBox(0));
