@@ -801,7 +801,7 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                             bool *gpu_isFraction,
                             int box)
 {
-  if (threadIdx.x == 0 blockId.x == 0)
+  if (threadIdx.x == 0 && blockId.x == 0)
   printf("call boxforce\n");
   int threadID = blockIdx.x * blockDim.x + threadIdx.x;
   double distSq;
