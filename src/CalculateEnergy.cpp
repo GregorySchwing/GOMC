@@ -320,7 +320,7 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
                   coords, boxAxes, electrostatic, tempREn, tempLJEn,
                   atomCount, molCount, forcefield.sc_coul,
                   forcefield.sc_sigma_6, forcefield.sc_alpha,
-                  forcefield.sc_power, box);
+                  forcefield.sc_power, box, buffer_index);
 
 #else
 // make a pointer to atom force and mol force for OpenMP
