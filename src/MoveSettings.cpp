@@ -25,7 +25,7 @@ void MoveSettings::Init(StaticVals const& statV,
 {
   //Set to true so that we calculate the forces for the current system, even if
   //a MultiParticle move is called before any other moves are accepted.
-
+printf("MoveSetInit restartFromCheckpoint %d\n", restartFromCheckpoint);
   totKind = tkind;
   perAdjust = statV.simEventFreq.perAdjust;
   if (!restartFromCheckpoint){
