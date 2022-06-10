@@ -805,8 +805,6 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                             bool *gpu_isFraction,
                             int box)
 {
-  if (threadIdx.x == 0 && blockIdx.x == 0)
-  printf("call boxforce\n");
   int threadID = blockIdx.x * blockDim.x + threadIdx.x;
   double distSq;
   double3 virComponents, forceReal, forceLJ;
@@ -832,8 +830,6 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
 
   // total number of pairs
   int numberOfPairs = particlesInsideCurrentCell * particlesInsideNeighboringCell;
-  if (threadIdx.x == 0 && (particlesInsideCurrentCell != 0 && particlesInsideNeighboringCell != 0))
-    printf("Box force CCell %d NCell %d CP %d NP %d\n", currentCell, neighborCell,particlesInsideCurrentCell,particlesInsideNeighboringCell);
   for(int pairIndex = threadIdx.x; pairIndex < numberOfPairs; pairIndex += blockDim.x) {
     int neighborParticleIndex = pairIndex / particlesInsideCurrentCell;
     int currentParticleIndex = pairIndex % particlesInsideCurrentCell;
@@ -841,7 +837,6 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
     int currentParticle = gpu_cellVector[gpu_cellStartIndex[currentCell] + currentParticleIndex];
     int neighborParticle = gpu_cellVector[gpu_cellStartIndex[neighborCell] + neighborParticleIndex];
     
-    printf("box force currentParticle %d neighborParticle %d x %f x %f\n", currentParticle, neighborParticle,gpu_x[currentParticle],gpu_x[neighborParticle]);
 
     if(currentParticle < neighborParticle && gpu_particleMol[currentParticle] != gpu_particleMol[neighborParticle]) {
       if(InRcutGPU(distSq, virComponents, gpu_x, gpu_y, gpu_z,

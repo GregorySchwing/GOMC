@@ -542,7 +542,6 @@ void CallBoxInterGPU(VariablesCUDA *vars,
 
   // Run the kernel
   threadsPerBlock = 256;
-  printf("EN NUM CELLS %d\n ", numberOfCells);
   blocksPerGrid = numberOfCells * NUMBER_OF_NEIGHBOR_CELL;
   energyVectorLen = blocksPerGrid * threadsPerBlock;
 
@@ -749,8 +748,6 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
 
   // total number of pairs
   int numberOfPairs = particlesInsideCurrentCell * particlesInsideNeighboringCells;
-  if (threadIdx.x == 0 && (particlesInsideCurrentCell != 0 && particlesInsideNeighboringCells != 0))
-    printf("CCell %d NCell %d CP %d NP %d\n", currentCell, neighborCell,particlesInsideCurrentCell,particlesInsideNeighboringCells);
   for(int pairIndex = threadIdx.x; pairIndex < numberOfPairs; pairIndex += blockDim.x) {
     int neighborParticleIndex = pairIndex / particlesInsideCurrentCell;
     int currentParticleIndex = pairIndex % particlesInsideCurrentCell;
