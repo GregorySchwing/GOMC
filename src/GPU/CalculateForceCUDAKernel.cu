@@ -312,15 +312,16 @@ void CallBoxForceGPU(VariablesCUDA *vars,
 {
   int atomNumber = coords.Count();
   int numberOfCells = vars->cpu_numberOfCells[box];
-  printf("BF NUM CELLS %d\n ", numberOfCells);
+  printf("BF NUM CELLS %d\n ", numberOfCells)
   int blocksPerGrid, threadsPerBlock, energyVectorLen;
   double *gpu_REn, *gpu_LJEn;
   double *gpu_final_REn, *gpu_final_LJEn;
   double cpu_final_REn = 0.0, cpu_final_LJEn = 0.0;
 
   threadsPerBlock = 256;
-  //blocksPerGrid = numberOfCells;
-  blocksPerGrid = numberOfCells  * 27;
+  blocksPerGrid = numberOfCells;
+  // Why not this?
+  // blocksPerGrid = numberOfCells  * NUMBER_OF_NEIGHBOR_CELL;
   energyVectorLen = numberOfCells * threadsPerBlock;
 
   CUMALLOC((void**) &gpu_LJEn, energyVectorLen * sizeof(double));
@@ -830,7 +831,7 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
 
   // total number of pairs
   int numberOfPairs = particlesInsideCurrentCell * particlesInsideNeighboringCell;
-  if (threadIdx.x == 0 && (particlesInsideCurrentCell != 0 || particlesInsideNeighboringCell != 0))
+  if (threadIdx.x == 0 && (particlesInsideCurrentCell != 0 && particlesInsideNeighboringCell != 0))
     printf("Box force CCell %d NCell %d CP %d NP %d\n", currentCell, neighborCell,particlesInsideCurrentCell,particlesInsideNeighboringCell);
   for(int pairIndex = threadIdx.x; pairIndex < numberOfPairs; pairIndex += blockDim.x) {
     int neighborParticleIndex = pairIndex / particlesInsideCurrentCell;
