@@ -29,7 +29,7 @@ printf("MoveSetInit restartFromCheckpoint %d\n", restartFromCheckpoint);
   totKind = tkind;
   perAdjust = statV.simEventFreq.perAdjust;
   if (!restartFromCheckpoint){
-    for (uint b; b < BOXES_WITH_U_NB; b++) {
+    for (uint b = 0; b < BOXES_WITH_U_NB; b++) {
       SetSingleMoveAccepted(b);
     }    
     for(uint b = 0; b < BOX_TOTAL; b++) {
