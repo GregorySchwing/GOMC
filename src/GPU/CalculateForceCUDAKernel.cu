@@ -841,6 +841,7 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                    axis, halfAx, cutoff, gpu_nonOrth[0], gpu_cell_x,
                    gpu_cell_y, gpu_cell_z, gpu_Invcell_x, gpu_Invcell_y,
                    gpu_Invcell_z)) {
+        printf("distSq %f\n", distSq);
         int kA = gpu_particleKind[currentParticle];
         int kB = gpu_particleKind[neighborParticle];
         int mA = gpu_particleMol[currentParticle];
