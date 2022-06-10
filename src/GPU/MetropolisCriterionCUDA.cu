@@ -31,8 +31,8 @@ void CallGetCoeffTranslation(VariablesCUDA *vars,
     int blocksPerGrid = (int)(molCount / threadsPerBlock) + 1;
 
     GetCoeffTranslation<<< blocksPerGrid, threadsPerBlock>>>(molCount,
-                                                            vars->gpu_t_max[0],
-                                                            vars->gpu_BETA[0],
+                                                            0.0,
+                                                            0.0,
                                                             vars->gpu_mp_coefficient,
                                                             vars->gpu_t_k_x,
                                                             vars->gpu_t_k_y,
