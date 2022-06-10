@@ -21,6 +21,9 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "MetropolisCriterionCUDA.cuh"
 #endif
 
+const int currentStateBufferIndex = 0;
+const int nextStateBufferIndex = 1;
+
 class MultiParticleBrownian : public MoveBase
 {
 public:
@@ -198,7 +201,7 @@ inline uint MultiParticleBrownian::Prep(const double subDraw, const double movPe
 
     //calculate short range energy and force for old positions
     calcEnRef.BoxForce(sysPotRef, coordCurrRef, atomForceRef, molForceRef,
-                       boxDimRef, bPick, currentState);
+                       boxDimRef, bPick, currentStateBufferIndex);
 
     //Calculate Torque for old positions
     calcEnRef.CalculateTorque(moleculeIndex, coordCurrRef, comCurrRef,
@@ -253,7 +256,7 @@ inline uint MultiParticleBrownian::PrepNEMTMC(const uint box, const uint midx, c
 
     //Calculate short range energy and force for old positions
     calcEnRef.BoxForce(sysPotRef, coordCurrRef, atomForceRef, molForceRef,
-                       boxDimRef, bPick, currentState);
+                       boxDimRef, bPick, currentStateBufferIndex);
 
     //Calculate Torque for old positions
     calcEnRef.CalculateTorque(moleculeIndex, coordCurrRef, comCurrRef,
@@ -368,7 +371,7 @@ inline void MultiParticleBrownian::CalcEn()
   sysPotNew = sysPotRef;
   //calculate short range energy and force
   sysPotNew = calcEnRef.BoxForce(sysPotNew, newMolsPos, atomForceNew,
-                                 molForceNew, boxDimRef, bPick, nextState);
+                                 molForceNew, boxDimRef, bPick, nextStateBufferIndex);
   //calculate long range of new electrostatic energy
   sysPotNew.boxEnergy[bPick].recip = calcEwald->BoxReciprocal(bPick, false);
   //Calculate long range of new electrostatic force
