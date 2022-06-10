@@ -32,7 +32,7 @@ void CallGetCoeffTranslation(VariablesCUDA *vars,
 
     GetCoeffTranslation<<< blocksPerGrid, threadsPerBlock>>>(molCount,
                                                             0.0,
-                                                            0.0,
+                                                            vars->gpu_BETA[0],
                                                             vars->gpu_mp_coefficient,
                                                             vars->gpu_t_k_x,
                                                             vars->gpu_t_k_y,
