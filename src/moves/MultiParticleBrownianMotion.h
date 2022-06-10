@@ -98,7 +98,7 @@ inline MultiParticleBrownian::MultiParticleBrownian(System &sys, StaticVals cons
   initMol = false;
   
   // Check to see if we have only monoatomic molecule or not
-  allTranslate = false;
+  allTranslate = true;
   uint numAtomsPerKind = 0;
   for (uint k = 0; k < molLookup.GetNumKind(); ++k) {
     numAtomsPerKind += molRef.NumAtoms(k);
