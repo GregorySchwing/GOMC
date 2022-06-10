@@ -193,6 +193,7 @@ inline uint MultiParticleBrownian::Prep(const double subDraw, const double movPe
   //Or, if this is the first MP move, which is handled with the same flag.
   if(moveSetRef.GetSingleMoveAccepted(bPick)) {
     GOMC_EVENT_START(1, GomcProfileEvent::CALC_EN_MULTIPARTICLE_BM);
+    printf("entered SMA\n")
     //Copy ref reciprocal terms to new for calculation with old positions
     calcEwald->CopyRecip(bPick);
 
@@ -248,6 +249,7 @@ inline uint MultiParticleBrownian::PrepNEMTMC(const uint box, const uint midx, c
   //current system if any other moves, besides other MP moves, have been accepted.
   //Or, if this is the first MP move, which is handled with the same flag.
   if(moveSetRef.GetSingleMoveAccepted(bPick)) {
+    printf("entered SMA\n")
     //Copy ref reciprocal terms to new for calculation with old positions
     calcEwald->CopyRecip(bPick);
 
@@ -369,6 +371,7 @@ inline void MultiParticleBrownian::CalcEn()
   calcEwald->BoxReciprocalSums(bPick, newMolsPos);
 
   sysPotNew = sysPotRef;
+  printf("Entered CalcEn\n");
   //calculate short range energy and force
   sysPotNew = calcEnRef.BoxForce(sysPotNew, newMolsPos, atomForceNew,
                                  molForceNew, boxDimRef, bPick, nextStateBufferIndex);
