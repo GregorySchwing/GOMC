@@ -249,7 +249,7 @@ inline uint MultiParticleBrownian::PrepNEMTMC(const uint box, const uint midx, c
   //current system if any other moves, besides other MP moves, have been accepted.
   //Or, if this is the first MP move, which is handled with the same flag.
   if(moveSetRef.GetSingleMoveAccepted(bPick)) {
-    printf("entered SMA\n")
+    printf("entered SMA\n");
     //Copy ref reciprocal terms to new for calculation with old positions
     calcEwald->CopyRecip(bPick);
 
