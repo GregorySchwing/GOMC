@@ -826,8 +826,8 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
 
   // total number of pairs
   int numberOfPairs = particlesInsideCurrentCell * particlesInsideNeighboringCell;
-  if (threadIdx.x == 0 && (particlesInsideCurrentCell != 0 || particlesInsideNeighboringCells != 0))
-    printf("CCell %d NCell %d CP %d NP %d\n", currentCell, neighborCell,particlesInsideCurrentCell,particlesInsideNeighboringCells);
+  if (threadIdx.x == 0 && (particlesInsideCurrentCell != 0 || particlesInsideNeighboringCell != 0))
+    printf("CCell %d NCell %d CP %d NP %d\n", currentCell, neighborCell,particlesInsideCurrentCell,particlesInsideNeighboringCell);
   for(int pairIndex = threadIdx.x; pairIndex < numberOfPairs; pairIndex += blockDim.x) {
     int neighborParticleIndex = pairIndex / particlesInsideCurrentCell;
     int currentParticleIndex = pairIndex % particlesInsideCurrentCell;
