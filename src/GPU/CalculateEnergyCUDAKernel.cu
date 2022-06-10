@@ -542,7 +542,7 @@ void CallBoxInterGPU(VariablesCUDA *vars,
 
   // Run the kernel
   threadsPerBlock = 256;
-  printf("EN NUM CELLS %d\n ", numberOfCells)
+  printf("EN NUM CELLS %d\n ", numberOfCells);
   blocksPerGrid = numberOfCells * NUMBER_OF_NEIGHBOR_CELL;
   energyVectorLen = blocksPerGrid * threadsPerBlock;
 
