@@ -834,6 +834,8 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
 
     int currentParticle = gpu_cellVector[gpu_cellStartIndex[currentCell] + currentParticleIndex];
     int neighborParticle = gpu_cellVector[gpu_cellStartIndex[neighborCell] + neighborParticleIndex];
+    
+    printf("currentParticle %d neighborParticle %d x %f x %f\n", currentParticle, neighborParticle,gpu_x[currentParticle],gpu_x[neighborParticle]);
 
     if(currentParticle < neighborParticle && gpu_particleMol[currentParticle] != gpu_particleMol[neighborParticle]) {
       if(InRcutGPU(distSq, virComponents, gpu_x, gpu_y, gpu_z,
