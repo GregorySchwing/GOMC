@@ -312,13 +312,15 @@ void CallBoxForceGPU(VariablesCUDA *vars,
 {
   int atomNumber = coords.Count();
   int numberOfCells = vars->cpu_numberOfCells[box];
+  printf("BF NUM CELLS %d\n ", numberOfCells)
   int blocksPerGrid, threadsPerBlock, energyVectorLen;
   double *gpu_REn, *gpu_LJEn;
   double *gpu_final_REn, *gpu_final_LJEn;
   double cpu_final_REn = 0.0, cpu_final_LJEn = 0.0;
 
   threadsPerBlock = 256;
-  blocksPerGrid = numberOfCells;
+  //blocksPerGrid = numberOfCells;
+  blocksPerGrid = numberOfCells  * NUMBER_OF_NEIGHBOR_CELL;
   energyVectorLen = numberOfCells * threadsPerBlock;
 
   CUMALLOC((void**) &gpu_LJEn, energyVectorLen * sizeof(double));
