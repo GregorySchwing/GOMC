@@ -193,7 +193,7 @@ inline uint MultiParticleBrownian::Prep(const double subDraw, const double movPe
   //Or, if this is the first MP move, which is handled with the same flag.
   if(moveSetRef.GetSingleMoveAccepted(bPick)) {
     GOMC_EVENT_START(1, GomcProfileEvent::CALC_EN_MULTIPARTICLE_BM);
-    printf("entered SMA\n")
+    printf("entered SMA\n");
     //Copy ref reciprocal terms to new for calculation with old positions
     calcEwald->CopyRecip(bPick);
 
