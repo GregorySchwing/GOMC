@@ -405,7 +405,7 @@ reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
     }
   }
 #endif
-
+  printf("inter %f real %f\n", tempLJEn, tempREn);
   // setting energy and virial of LJ interaction
   potential.boxEnergy[box].inter = tempLJEn;
   // setting energy and virial of coulomb interaction
