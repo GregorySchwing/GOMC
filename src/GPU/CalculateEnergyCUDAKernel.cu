@@ -532,11 +532,11 @@ void CallBoxInterGPU(VariablesCUDA *vars,
   int atomNumber = coords.Count();
   int neighborListCount = neighborList.size() * NUMBER_OF_NEIGHBOR_CELL;
   int numberOfCells = neighborList.size();
-  int *gpu_particleKind, *gpu_particleMol;
-  int *gpu_neighborList, *gpu_cellStartIndex;
+  //int *gpu_particleKind, *gpu_particleMol;
+  //int *gpu_neighborList, *gpu_cellStartIndex;
   int blocksPerGrid, threadsPerBlock;
   int energyVectorLen;
-  double *gpu_particleCharge;
+  //double *gpu_particleCharge;
   double *gpu_REn, *gpu_LJEn;
   double *gpu_final_REn, *gpu_final_LJEn;
 
@@ -546,18 +546,19 @@ void CallBoxInterGPU(VariablesCUDA *vars,
   energyVectorLen = blocksPerGrid * threadsPerBlock;
 
   // Convert neighbor list to 1D array
+  /*
   std::vector<int> neighborlist1D(neighborListCount);
   for(int i = 0; i < neighborList.size(); i++) {
     for(int j = 0; j < NUMBER_OF_NEIGHBOR_CELL; j++) {
       neighborlist1D[i * NUMBER_OF_NEIGHBOR_CELL + j] = neighborList[i][j];
     }
   }
-
-  CUMALLOC((void**) &gpu_neighborList, neighborListCount * sizeof(int));
-  CUMALLOC((void**) &gpu_cellStartIndex, cellStartIndex.size() * sizeof(int));
-  CUMALLOC((void**) &gpu_particleCharge, particleCharge.size() * sizeof(double));
-  CUMALLOC((void**) &gpu_particleKind, particleKind.size() * sizeof(int));
-  CUMALLOC((void**) &gpu_particleMol, particleMol.size() * sizeof(int));
+*/
+  //CUMALLOC((void**) &gpu_neighborList, neighborListCount * sizeof(int));
+  //CUMALLOC((void**) &gpu_cellStartIndex, cellStartIndex.size() * sizeof(int));
+  //CUMALLOC((void**) &gpu_particleCharge, particleCharge.size() * sizeof(double));
+  //CUMALLOC((void**) &gpu_particleKind, particleKind.size() * sizeof(int));
+  //CUMALLOC((void**) &gpu_particleMol, particleMol.size() * sizeof(int));
   CUMALLOC((void**) &gpu_LJEn, energyVectorLen * sizeof(double));
   CUMALLOC((void**) &gpu_final_LJEn, sizeof(double));
   if (electrostatic) {
@@ -566,16 +567,16 @@ void CallBoxInterGPU(VariablesCUDA *vars,
   }
 
   // Copy necessary data to GPU
-  cudaMemcpy(gpu_neighborList, &neighborlist1D[0], neighborListCount * sizeof(int), cudaMemcpyHostToDevice);
   // GPU resident cell list
+  //cudaMemcpy(gpu_neighborList, &neighborlist1D[0], neighborListCount * sizeof(int), cudaMemcpyHostToDevice);
  // cudaMemcpy(gpu_cellStartIndex, &cellStartIndex[0], cellStartIndex.size() * sizeof(int), cudaMemcpyHostToDevice);
   //cudaMemcpy(vars->gpu_cellVector, &cellVector[0], atomNumber * sizeof(int), cudaMemcpyHostToDevice);
-  cudaMemcpy(gpu_particleCharge, &particleCharge[0], particleCharge.size() * sizeof(double), cudaMemcpyHostToDevice);
-  cudaMemcpy(gpu_particleKind, &particleKind[0], particleKind.size() * sizeof(int), cudaMemcpyHostToDevice);
-  cudaMemcpy(gpu_particleMol, &particleMol[0], particleMol.size() * sizeof(int), cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_x, coords.x, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_y, coords.y, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_z, coords.z, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
+  //cudaMemcpy(gpu_particleCharge, &particleCharge[0], particleCharge.size() * sizeof(double), cudaMemcpyHostToDevice);
+  //cudaMemcpy(gpu_particleKind, &particleKind[0], particleKind.size() * sizeof(int), cudaMemcpyHostToDevice);
+  //cudaMemcpy(gpu_particleMol, &particleMol[0], particleMol.size() * sizeof(int), cudaMemcpyHostToDevice);
+  //cudaMemcpy(vars->gpu_x, coords.x, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
+  //cudaMemcpy(vars->gpu_y, coords.y, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
+  //cudaMemcpy(vars->gpu_z, coords.z, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
     cudaDeviceSynchronize();
   checkLastErrorCUDA(__FILE__, __LINE__);
   double3 axis = make_double3(boxAxes.GetAxis(box).x,
@@ -586,23 +587,27 @@ void CallBoxInterGPU(VariablesCUDA *vars,
                                 boxAxes.GetAxis(box).y * 0.5,
                                 boxAxes.GetAxis(box).z * 0.5);
 
+  BufferAccess<DeviceArray<double>, double, buffers> coords_x(*(vars->gpu_coords_x), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> coords_y(*(vars->gpu_coords_y), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> coords_z(*(vars->gpu_coords_z), 0);
+
   //BufferAccess<DeviceArray<int>, int, buffers> mapParticleToCell_view(*(vars->gpu_mapParticleToCell), 0);
   BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(vars->gpu_cellVector), 0);
   BufferAccess<DeviceArray<int>, int, buffers> cellStartIndex_view(*(vars->gpu_cellStartIndex), 0);
 
   BoxInterGPU <<< blocksPerGrid, threadsPerBlock>>>(cellStartIndex_view->get(),
       cellVector_view->get(),
-      gpu_neighborList,
+      vars->gpu_neighborList,
       numberOfCells,
-      vars->gpu_x,
-      vars->gpu_y,
-      vars->gpu_z,
+      coords_x->get(),
+      coords_y->get(),
+      coords_z->get(),
       axis,
       halfAx,
       electrostatic,
-      gpu_particleCharge,
-      gpu_particleKind,
-      gpu_particleMol,
+      vars->gpu_particleCharge,
+      vars->gpu_particleKind,
+      vars->gpu_particleMol,
       gpu_REn,
       gpu_LJEn,
       vars->gpu_sigmaSq,
@@ -664,17 +669,17 @@ void CallBoxInterGPU(VariablesCUDA *vars,
   }
   CUFREE(d_temp_storage);
 
-  CUFREE(gpu_particleCharge);
-  CUFREE(gpu_particleKind);
-  CUFREE(gpu_particleMol);
+  //CUFREE(gpu_particleCharge);
+  //CUFREE(gpu_particleKind);
+  //CUFREE(gpu_particleMol);
   CUFREE(gpu_LJEn);
   CUFREE(gpu_final_LJEn);
   if (electrostatic) {
     CUFREE(gpu_REn);
     CUFREE(gpu_final_REn);
   }
-  CUFREE(gpu_neighborList);
-  CUFREE(gpu_cellStartIndex);
+ // CUFREE(gpu_neighborList);
+ // CUFREE(gpu_cellStartIndex);
 }
 
 __global__ void BoxInterGPU(int *gpu_cellStartIndex,
