@@ -461,6 +461,7 @@ inline void MultiParticleBrownian::Accept(const uint rejectState, const ulong st
   // Need to update sysPots
   double accept = exp(-BETA * (sysPotNew.Total() - sysPotRef.Total()) + MPCoeff);
   bool result = (rejectState == mv::fail_state::NO_FAIL) && prng() < accept;
+  printf("MPCoeff %f Delta %f\n",MPCoeff, (sysPotNew.Total() - sysPotRef.Total()));
   if(result) {
     sysPotRef = sysPotNew;
 
@@ -496,6 +497,7 @@ inline void MultiParticleBrownian::Accept(const uint rejectState, const ulong st
   double MPCoeff = GetCoeff();
   double accept = exp(-BETA * (sysPotNew.Total() - sysPotRef.Total()) + MPCoeff);
   bool result = (rejectState == mv::fail_state::NO_FAIL) && prng() < accept;
+  printf("MPCoeff %f Delta %f\n",MPCoeff, (sysPotNew.Total() - sysPotRef.Total()));
   if(result) {
     sysPotRef = sysPotNew;
     swap(coordCurrRef, newMolsPos);
@@ -518,7 +520,6 @@ inline void MultiParticleBrownian::Accept(const uint rejectState, const ulong st
     calcEwald->exgMolCache();
   }
   #endif
-  printf("MPCoeff %f Delta %f\n",MPCoeff, (sysPotNew.Total() - sysPotRef.Total()));
   moveSetRef.UpdateMoveSettingMultiParticle(bPick, result, moveType);
   moveSetRef.Update(mv::MULTIPARTICLE_BM, result, bPick);
   GOMC_EVENT_STOP(1, GomcProfileEvent::ACC_MULTIPARTICLE_BM);
