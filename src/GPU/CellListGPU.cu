@@ -1,10 +1,6 @@
 #ifdef GOMC_CUDA
 #include "CellListGPU.cuh"
 #include "cub/cub.cuh"
-#include <cuda.h>
-#include <cuda_runtime.h>
-#include <cuda_runtime_api.h>
-
 
 CellListGPU::CellListGPU(VariablesCUDA * cv, int _atomNumber) : atomNumber(_atomNumber)
 {
@@ -30,7 +26,8 @@ void CellListGPU::GridAll(VariablesCUDA * cv,
     // Need to reinitialize the sequence 0..N-1 every GridAll
     cudaMemcpy(cv->gpu_particleIndices, thrust::raw_pointer_cast(&pI[0]), atomNumber * sizeof(int), cudaMemcpyDeviceToDevice);
     // Clear Cell Degrees
-    cuMemsetD32(reinterpret_cast<CUdeviceptr>(cv->gpu_cellDegrees),  0, size_t(numberOfCells));
+    //cuMemsetD32(reinterpret_cast<CUdeviceptr>(cv->gpu_cellDegrees),  0, size_t(numberOfCells));
+    cudaMemset(cv->gpu_cellDegrees, 0, numberOfCells*sizeof(int));
 
 
     BufferAccess<DeviceArray<int>, int, buffers> mapParticleToCell_view(*(cv->gpu_mapParticleToCell), buffer_index);
