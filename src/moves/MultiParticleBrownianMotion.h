@@ -105,7 +105,7 @@ inline MultiParticleBrownian::MultiParticleBrownian(System &sys, StaticVals cons
   }
   // If we have only one atom in each kind, it means all molecule
   // in the system is monoatomic
-  allTranslate = (numAtomsPerKind == molLookup.GetNumKind());
+  //allTranslate = (numAtomsPerKind == molLookup.GetNumKind());
 
 #ifdef GOMC_CUDA
   cudaVars = sys.statV.forcefield.particles->getCUDAVars();
