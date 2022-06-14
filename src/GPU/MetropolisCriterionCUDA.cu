@@ -82,12 +82,12 @@ __global__ void GetCoeffTranslation(
     double t_max4 = t_max[0]*4;
     double w_ratio = 0.0;
     // bf_ = BETA * torque * maxTorque
-    double3 bf_old = make_double3   ((molForceRefX[molNumber] + molForceRecRefX[molNumber]),
-                                    (molForceRefY[molNumber] + molForceRecRefY[molNumber]),
-                                    (molForceRefZ[molNumber] + molForceRecRefZ[molNumber]));
-    double3 bf_new = make_double3   ((molForceNewX[molNumber] + molForceRecNewX[molNumber]),
-                                    (molForceNewY[molNumber] + molForceRecNewY[molNumber]),
-                                    (molForceNewZ[molNumber] + molForceRecNewZ[molNumber]));             
+    double3 bf_old = make_double3   ((molForceRefX[molNumber] + molForceRecRefX[molNumber]) * BETA[0] * t_max[0],
+                                    (molForceRefY[molNumber] + molForceRecRefY[molNumber])  * BETA[0] * t_max[0],
+                                    (molForceRefZ[molNumber] + molForceRecRefZ[molNumber])  * BETA[0] * t_max[0]);
+    double3 bf_new = make_double3   ((molForceNewX[molNumber] + molForceRecNewX[molNumber]) * BETA[0] * t_max[0],
+                                    (molForceNewY[molNumber] + molForceRecNewY[molNumber])  * BETA[0] * t_max[0],
+                                    (molForceNewZ[molNumber] + molForceRecNewZ[molNumber])  * BETA[0] * t_max[0]);             
 
     double3 k = make_double3   (t_k_x[molNumber],t_k_y[molNumber],t_k_z[molNumber]);
 
