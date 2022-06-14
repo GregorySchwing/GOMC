@@ -27,6 +27,9 @@ void CellListGPU::GridAll(VariablesCUDA * cv,
 
     // Need to reinitialize the sequence 0..N-1 every GridAll
     cudaMemcpy(cv->gpu_particleIndices, thrust::raw_pointer_cast(&pI[0]), atomNumber * sizeof(int), cudaMemcpyDeviceToDevice);
+    // Clear Cell Degrees
+    cuMemsetD32(reinterpret_cast<CUdeviceptr>(cv->gpu_cellDegrees),  0, size_t(numberOfCells));
+
 
     BufferAccess<DeviceArray<int>, int, buffers> mapParticleToCell_view(*(cv->gpu_mapParticleToCell), buffer_index);
     BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(cv->gpu_cellVector), buffer_index);
