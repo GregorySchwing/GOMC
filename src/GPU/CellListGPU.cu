@@ -1,7 +1,9 @@
 #ifdef GOMC_CUDA
 #include "CellListGPU.cuh"
 #include "cub/cub.cuh"
-
+#include <cuda.h>
+#include <cuda_runtime.h>
+#include <cuda_runtime_api.h>
 
 
 CellListGPU::CellListGPU(VariablesCUDA * cv, int _atomNumber) : atomNumber(_atomNumber)
