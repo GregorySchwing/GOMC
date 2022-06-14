@@ -487,9 +487,10 @@ inline void MultiParticleBrownian::Accept(const uint rejectState, const ulong st
       calcEwald->UpdateRecip(bPick);
       // Update the velocity in box
       velocity.UpdateBoxVelocity(bPick);
-  } else {
-    cellListGPU->GridAll(cudaVars, coordCurrRef, boxDimRef.axis, cellList.CellsInBox(0));
-    calcEwald->exgMolCache();
+  // No longer necessary since both states are retained.
+  //} else {
+  //  cellListGPU->GridAll(cudaVars, coordCurrRef, boxDimRef.axis, cellList.CellsInBox(0));
+  //  calcEwald->exgMolCache();
   }
   #else
   double MPCoeff = GetCoeff();
@@ -517,6 +518,7 @@ inline void MultiParticleBrownian::Accept(const uint rejectState, const ulong st
     calcEwald->exgMolCache();
   }
   #endif
+  printf("MPCoeff %f Delta %f\n"MPCoeff, (sysPotNew.Total() - sysPotRef.Total()));
   moveSetRef.UpdateMoveSettingMultiParticle(bPick, result, moveType);
   moveSetRef.Update(mv::MULTIPARTICLE_BM, result, bPick);
   GOMC_EVENT_STOP(1, GomcProfileEvent::ACC_MULTIPARTICLE_BM);
