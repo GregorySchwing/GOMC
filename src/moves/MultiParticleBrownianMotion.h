@@ -579,6 +579,7 @@ inline void MultiParticleBrownian::CalculateTrialDistRot()
       uint molIndex = moleculeIndex[m];
       XYZ bf = (molForceRef.Get(molIndex) + molForceRecRef.Get(molIndex)) * BETA;
       XYZ val = CalcRandomTransform(bf, t_max, molIndex);
+      // val is a shift not a new coord
       x[molIndex] = val.x; 
       y[molIndex] = val.y; 
       z[molIndex] = val.z; 

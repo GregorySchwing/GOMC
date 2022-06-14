@@ -60,6 +60,8 @@ class CellListGPU {
                                         int *csi,
                                         int numberOfCells);
   private:
+    int atomNumber;
+
     void CreateStartVector(int numberOfAtoms,
                           int * mapParticleToCell,
                           int * mapParticleToCellSorted,

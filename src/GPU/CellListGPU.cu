@@ -4,7 +4,7 @@
 
 
 
-CellListGPU::CellListGPU(VariablesCUDA * cv, int atomNumber)
+CellListGPU::CellListGPU(VariablesCUDA * cv, int _atomNumber) : atomNumber(_atomNumber)
 {
     CUMALLOC((void**) &cv->gpu_Ones, atomNumber * sizeof(int));
     CUMALLOC((void**) &cv->gpu_particleIndices, atomNumber * sizeof(int));
@@ -25,7 +25,8 @@ void CellListGPU::GridAll(VariablesCUDA * cv,
                         const int buffer_index){
     GOMC_EVENT_START(1, GomcProfileEvent::GRID_ALL_GPU);
 
-    
+    // Need to reinitialize the sequence 0..N-1 every GridAll
+    cudaMemcpy(cv->gpu_particleIndices, thrust::raw_pointer_cast(&pI[0]), atomNumber * sizeof(int), cudaMemcpyDeviceToDevice);
 
     BufferAccess<DeviceArray<int>, int, buffers> mapParticleToCell_view(*(cv->gpu_mapParticleToCell), buffer_index);
     BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(cv->gpu_cellVector), buffer_index);
