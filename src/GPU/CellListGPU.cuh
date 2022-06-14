@@ -61,8 +61,8 @@ class CellListGPU {
                                         int numberOfCells);
   private:
     int atomNumber;
-    thrust::device_vector<int> &pI;
-    thrust::device_vector<int> &ones;
+    thrust::device_vector<int> pI;
+    thrust::device_vector<int> ones;
     void CreateStartVector(int numberOfAtoms,
                           int * mapParticleToCell,
                           int * mapParticleToCellSorted,
