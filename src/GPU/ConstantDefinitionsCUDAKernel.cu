@@ -169,6 +169,10 @@ void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
   vars->gpu_mFy = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
   vars->gpu_mFz = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
 
+  vars->gpu_mTx = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
+  vars->gpu_mTy = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
+  vars->gpu_mTz = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
+
   // Access 0-index buffer of multi-buffer
   BufferAccess<DeviceArray<double>, double, buffers> coords_x_view(*(vars->gpu_coords_x), 0);
   BufferAccess<DeviceArray<double>, double, buffers> coords_y_view(*(vars->gpu_coords_y), 0);

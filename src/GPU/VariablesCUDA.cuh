@@ -164,6 +164,10 @@ public:
   MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mFx;
   MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mFy;
   MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mFz;
+  
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mTx;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mTy;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mTz;
 
   double *gpu_aForcex_buffer, *gpu_aForcey_buffer, *gpu_aForcez_buffer;
   double *gpu_mForcex_buffer, *gpu_mForcey_buffer, *gpu_mForcez_buffer;

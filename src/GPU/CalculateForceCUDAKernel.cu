@@ -457,6 +457,83 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   }
 }
 
+void CallBoxTorqueGPU(VariablesCUDA *vars,
+                     BoxDimensions const &boxAxes,
+                     bool electrostatic,
+                     int atomCount,
+                     int molCount,
+                     uint const box,
+                     uint const buffer_index){
+
+  int blocksPerGrid, threadsPerBlock;
+  int numberOfCells = vars->cpu_numberOfCells[box];
+  threadsPerBlock = 256;
+  blocksPerGrid = numberOfCells;
+  // This same function is used to calculate old and new..
+  // Will need to separate the old calculation from the new coordinates.
+  // Could use the singleMoveAccepted boolean, though this will only handle 2 buffers.
+  BufferAccess<DeviceArray<double>, double, buffers> coords_x(*(vars->gpu_coords_x), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> coords_y(*(vars->gpu_coords_y), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> coords_z(*(vars->gpu_coords_z), buffer_index);
+  
+  BufferAccess<DeviceArray<double>, double, buffers> com_x(*(vars->gpu_com_x), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> com_y(*(vars->gpu_com_y), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> com_z(*(vars->gpu_com_z), buffer_index);
+  
+  BufferAccess<DeviceArray<double>, double, buffers> aFx(*(vars->gpu_aFx), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> aFy(*(vars->gpu_aFy), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> aFz(*(vars->gpu_aFz), buffer_index);
+
+  BufferAccess<DeviceArray<double>, double, buffers> mTx(*(vars->gpu_mTx), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> mTy(*(vars->gpu_mTy), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> mTz(*(vars->gpu_mTz), buffer_index);
+
+  cudaMemset(mTx->get(), 0.0, molCount * sizeof(double));
+  cudaMemset(mTy->get(), 0.0, molCount * sizeof(double));
+  cudaMemset(mTz->get(), 0.0, molCount * sizeof(double));
+
+  double3 axis = make_double3(boxAxes.GetAxis(box).x,
+                              boxAxes.GetAxis(box).y,
+                              boxAxes.GetAxis(box).z);
+
+  double3 halfAx = make_double3(boxAxes.GetAxis(box).x * 0.5,
+                                boxAxes.GetAxis(box).y * 0.5,
+                                boxAxes.GetAxis(box).z * 0.5);
+
+  BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(vars->gpu_cellVector), 0);
+  BufferAccess<DeviceArray<int>, int, buffers> cellStartIndex_view(*(vars->gpu_cellStartIndex), 0);
+
+BoxTorqueGPU <<< blocksPerGrid, threadsPerBlock>>>(cellStartIndex_view->get(),
+                            cellVector_view->get(),
+                            coords_x->get(),
+                            coords_y->get(),
+                            coords_z->get(),
+                            com_x->get(),
+                            com_y->get(),
+                            com_z->get(),
+                            axis,
+                            halfAx,
+                            electrostatic,
+                            vars->gpu_particleMol,
+                            aFx->get(),
+                            aFy->get(),
+                            aFz->get(),
+                            mTx->get(),
+                            mTy->get(),
+                            mTz->get(),
+                            vars->gpu_nonOrth,
+                            vars->gpu_cell_x[box],
+                            vars->gpu_cell_y[box],
+                            vars->gpu_cell_z[box],
+                            vars->gpu_Invcell_x[box],
+                            vars->gpu_Invcell_y[box],
+                            vars->gpu_Invcell_z[box]);
+
+  cudaDeviceSynchronize();
+  checkLastErrorCUDA(__FILE__, __LINE__);
+  
+}
+
 void CallVirialReciprocalGPU(VariablesCUDA *vars,
                              XYZArray const &currentCoords,
                              XYZArray const &currentCOMDiff,
@@ -924,6 +1001,63 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
   if (electrostatic)
     gpu_REn[threadID] = REn;
 }
+
+__global__ void BoxTorqueGPU(
+                            int *gpu_cellStartIndex,
+                            int *gpu_cellVector,
+                            double *gpu_coord_x,
+                            double *gpu_coord_y,
+                            double *gpu_coord_z,
+                            double *gpu_com_x,
+                            double *gpu_com_y,
+                            double *gpu_com_z,
+                            double3 axis,
+                            double3 halfAx,
+                            bool electrostatic,
+                            int *gpu_particleMol,
+                            double *gpu_aForcex,
+                            double *gpu_aForcey,
+                            double *gpu_aForcez,
+                            double *gpu_mTorquex,
+                            double *gpu_mTorquey,
+                            double *gpu_mTorquez,
+                            int* gpu_nonOrth,
+                            double *gpu_cell_x,
+                            double *gpu_cell_y,
+                            double *gpu_cell_z,
+                            double *gpu_Invcell_x,
+                            double *gpu_Invcell_y,
+                            double *gpu_Invcell_z)
+{
+  double3 aT, diff_com;
+  aT = make_double3(0.0, 0.0, 0.0);
+  diff_com = make_double3(0.0, 0.0, 0.0);
+  int currentCell = blockIdx.x;
+  // Calculate number of particles inside current Cell
+  int endIndex = gpu_cellStartIndex[currentCell + 1];
+  int particlesInsideCurrentCell = endIndex - gpu_cellStartIndex[currentCell];
+
+  for(int particleIndex = threadIdx.x; particleIndex < particlesInsideCurrentCell; particleIndex += blockDim.x) {
+    int currentParticle = gpu_cellVector[gpu_cellStartIndex[currentCell] + particleIndex];    
+    int mI = gpu_particleMol[currentParticle];
+    diff_com = make_double3(gpu_coord_x[currentParticle] - gpu_com_x[mI],
+                            gpu_coord_y[currentParticle] - gpu_com_y[mI], 
+                            gpu_coord_z[currentParticle] - gpu_com_z[mI]);
+    if (gpu_nonOrth[0])
+      diff_com = MinImageNonOrthGPU(diff_com, axis, halfAx, gpu_cell_x, gpu_cell_y, gpu_cell_z,
+                                    gpu_Invcell_x, gpu_Invcell_y, gpu_Invcell_z);
+    else
+      diff_com = MinImageGPU(diff_com, axis, halfAx);
+
+    if(electrostatic) {
+    }
+
+    atomicAdd(&gpu_mTorquex[mI], aT.x);
+    atomicAdd(&gpu_mTorquey[mI], aT.y);
+    atomicAdd(&gpu_mTorquez[mI], aT.z);
+  }
+}
+
 
 __global__ void VirialReciprocalGPU(double *gpu_x,
                                     double *gpu_y,

@@ -1497,43 +1497,54 @@ void CalculateEnergy::CalculateTorque(std::vector<uint>& moleculeIndex,
                                       XYZArray const& atomForce,
                                       XYZArray const& atomForceRec,
                                       XYZArray& molTorque,
-                                      const uint box)
+                                      const uint box,
+                                      uint const buffer_index)
 {
+  GOMC_EVENT_START(1, GomcProfileEvent::BOX_TORQUE);
   if(multiParticleEnabled && (box < BOXES_WITH_U_NB)) {
-    GOMC_EVENT_START(1, GomcProfileEvent::BOX_TORQUE);
-    // make a pointer to mol torque for OpenMP
-    double *torquex = molTorque.x;
-    double *torquey = molTorque.y;
-    double *torquez = molTorque.z;
 
-#if defined _OPENMP
-#if GCC_VERSION >= 90000
-    #pragma omp parallel for default(none) shared(atomForce, atomForceRec, com, coordinates,\
-    moleculeIndex, torquex, torquey, torquez, box)
-#else
-    #pragma omp parallel for default(none) shared(atomForce, atomForceRec, com, coordinates,\
-    moleculeIndex, torquex, torquey, torquez)
-#endif
-#endif
-    for(int m = 0; m < (int) moleculeIndex.size(); m++) {
-      int mIndex = moleculeIndex[m];
-      int length = mols.GetKind(mIndex).NumAtoms();
-      int start = mols.MolStart(mIndex);
-      double tx = 0.0; double ty = 0.0; double tz = 0.0;
-      // atom iterator
-      for(int p = start; p < start + length; p++) {
-        XYZ distFromCOM = coordinates.Difference(p, com, mIndex);
-        distFromCOM = currentAxes.MinImage(distFromCOM, box);
-        XYZ tempTorque = Cross(distFromCOM, atomForce[p] + atomForceRec[p]);
+    #ifdef GOMC_CUDA
+      CallBoxTorqueGPU(forcefield.particles->getCUDAVars(),
+                        currentAxes,
+                        electrostatic,
+                        coordinates.Count(),
+                        com.Count(),
+                        box);
+    #else
+      // make a pointer to mol torque for OpenMP
+      double *torquex = molTorque.x;
+      double *torquey = molTorque.y;
+      double *torquez = molTorque.z;
 
-        tx += tempTorque.x;
-        ty += tempTorque.y;
-        tz += tempTorque.z;
+  #if defined _OPENMP
+  #if GCC_VERSION >= 90000
+      #pragma omp parallel for default(none) shared(atomForce, atomForceRec, com, coordinates,\
+      moleculeIndex, torquex, torquey, torquez, box)
+  #else
+      #pragma omp parallel for default(none) shared(atomForce, atomForceRec, com, coordinates,\
+      moleculeIndex, torquex, torquey, torquez)
+  #endif
+  #endif
+      for(int m = 0; m < (int) moleculeIndex.size(); m++) {
+        int mIndex = moleculeIndex[m];
+        int length = mols.GetKind(mIndex).NumAtoms();
+        int start = mols.MolStart(mIndex);
+        double tx = 0.0; double ty = 0.0; double tz = 0.0;
+        // atom iterator
+        for(int p = start; p < start + length; p++) {
+          XYZ distFromCOM = coordinates.Difference(p, com, mIndex);
+          distFromCOM = currentAxes.MinImage(distFromCOM, box);
+          XYZ tempTorque = Cross(distFromCOM, atomForce[p] + atomForceRec[p]);
+
+          tx += tempTorque.x;
+          ty += tempTorque.y;
+          tz += tempTorque.z;
+        }
+        torquex[mIndex] = tx;
+        torquey[mIndex] = ty;
+        torquez[mIndex] = tz;
       }
-      torquex[mIndex] = tx;
-      torquey[mIndex] = ty;
-      torquez[mIndex] = tz;
-    }
+  #endif
   }
   GOMC_EVENT_STOP(1, GomcProfileEvent::BOX_TORQUE);
 }

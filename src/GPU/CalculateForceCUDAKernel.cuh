@@ -30,6 +30,14 @@ void CallBoxForceGPU(VariablesCUDA *vars,
                      uint const box,
                      uint const buffer_index = 0);
 
+void CallBoxTorqueGPU(VariablesCUDA *vars,
+                     BoxDimensions const &boxAxes,
+                     bool electrostatic,
+                     int atomCount,
+                     int molCount,
+                     uint const box,
+                     uint const buffer_index = 0);
+
 void CallBoxInterForceGPU(VariablesCUDA *vars,
                           const std::vector<int> &cellVector,
                           const std::vector<int> &cellStartIndex,
@@ -129,6 +137,33 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                             double *gpu_lambdaCoulomb,
                             bool *gpu_isFraction,
                             int box);
+
+__global__ void BoxTorqueGPU(
+                            int *gpu_cellStartIndex,
+                            int *gpu_cellVector,
+                            double *gpu_coord_x,
+                            double *gpu_coord_y,
+                            double *gpu_coord_z,
+                            double *gpu_com_x,
+                            double *gpu_com_y,
+                            double *gpu_com_z,
+                            double3 axis,
+                            double3 halfAx,
+                            bool electrostatic,
+                            int *gpu_particleMol,
+                            double *gpu_aForcex,
+                            double *gpu_aForcey,
+                            double *gpu_aForcez,
+                            double *gpu_mTorquex,
+                            double *gpu_mTorquey,
+                            double *gpu_mTorquez,
+                            int* gpu_nonOrth,
+                            double *gpu_cell_x,
+                            double *gpu_cell_y,
+                            double *gpu_cell_z,
+                            double *gpu_Invcell_x,
+                            double *gpu_Invcell_y,
+                            double *gpu_Invcell_z);
 
 __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
                                  int *gpu_cellVector,
