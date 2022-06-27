@@ -180,6 +180,11 @@ private:
   //If the MultiParticle acceptance percentage is within mp_accept_tol, we don't adjust the max
   static const double mp_accept_tol;
 
+#ifdef GOMC_CUDA
+  VariablesCUDA *cudaVars;
+#endif
+
+
   // make CheckpointOutput and CheckpointSetup friend classes to have access to
   // private data
   friend class Checkpoint;

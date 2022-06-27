@@ -84,6 +84,10 @@ void MoveSettings::Init(StaticVals const& statV,
       }
     }
   }
+#ifdef GOMC_CUDA
+  cudaVars = statV.forcefield.particles->getCUDAVars();
+#endif
+
 }
 
 //Process results of move we just did in terms of acceptance counters
@@ -158,6 +162,8 @@ void MoveSettings::AdjustMoves(const ulong step)
   }
 }
 
+
+// TODO : Port this to GPU kernel for gpu residence
 void MoveSettings::AdjustMultiParticle(const uint box, const uint typePick)
 {
   //Make sure we tried some moves of this move type, otherwise move max will be NaN
@@ -190,6 +196,11 @@ void MoveSettings::AdjustMultiParticle(const uint box, const uint typePick)
     mp_interval_accepted[box][typePick] = 0;
     mp_interval_tries[box][typePick] = 0;
   }
+  #ifdef GOMC_CUDA
+  cudaMemcpy(&cudaVars->gpu_t_max[box], &mp_t_max[box], sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(&cudaVars->gpu_r_max[box], &mp_r_max[box], sizeof(double), cudaMemcpyHostToDevice);
+  #endif
+
 }
 
 void MoveSettings::UpdateMoveSettingMultiParticle(const uint box, bool isAccept,
