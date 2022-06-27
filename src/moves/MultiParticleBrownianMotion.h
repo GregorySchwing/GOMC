@@ -454,7 +454,7 @@ inline void MultiParticleBrownian::Accept(const uint rejectState, const ulong st
 
   #if GOMC_CUDA
   double MPCoeff = 0.0;
-  CallGetCoeffTranslation(cudaVars, comCurrRef.Count(), &MPCoeff);
+  CallGetCoeff(cudaVars, moveType, comCurrRef.Count(), &MPCoeff);
   // Need to update sysPots
   double accept = exp(-BETA * (sysPotNew.Total() - sysPotRef.Total()) + MPCoeff);
   bool result = (rejectState == mv::fail_state::NO_FAIL) && prng() < accept;
@@ -477,7 +477,7 @@ inline void MultiParticleBrownian::Accept(const uint rejectState, const ulong st
     cudaVars->gpu_mFx->ChangeBuffers();
     cudaVars->gpu_mFy->ChangeBuffers();
     cudaVars->gpu_mFz->ChangeBuffers();
-    
+
     cudaVars->gpu_mTx->ChangeBuffers();
     cudaVars->gpu_mTy->ChangeBuffers();
     cudaVars->gpu_mTz->ChangeBuffers();
