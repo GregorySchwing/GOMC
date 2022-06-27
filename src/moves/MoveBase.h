@@ -33,6 +33,9 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #include "VariablesCUDA.cuh"
 #endif
 
+const int currentStateBufferIndex = 0;
+const int nextStateBufferIndex = 1;
+
 class MoveBase
 {
 public:

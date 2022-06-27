@@ -1509,7 +1509,8 @@ void CalculateEnergy::CalculateTorque(std::vector<uint>& moleculeIndex,
                         electrostatic,
                         coordinates.Count(),
                         com.Count(),
-                        box);
+                        box,
+                        buffer_index);
     #else
       // make a pointer to mol torque for OpenMP
       double *torquex = molTorque.x;

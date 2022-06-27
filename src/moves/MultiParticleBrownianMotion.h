@@ -21,9 +21,6 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "MetropolisCriterionCUDA.cuh"
 #endif
 
-const int currentStateBufferIndex = 0;
-const int nextStateBufferIndex = 1;
-
 class MultiParticleBrownian : public MoveBase
 {
 public:
@@ -98,14 +95,14 @@ inline MultiParticleBrownian::MultiParticleBrownian(System &sys, StaticVals cons
   initMol = false;
   
   // Check to see if we have only monoatomic molecule or not
-  allTranslate = true;
+  allTranslate = false;
   uint numAtomsPerKind = 0;
   for (uint k = 0; k < molLookup.GetNumKind(); ++k) {
     numAtomsPerKind += molRef.NumAtoms(k);
   }
   // If we have only one atom in each kind, it means all molecule
   // in the system is monoatomic
-  //allTranslate = (numAtomsPerKind == molLookup.GetNumKind());
+  allTranslate = (numAtomsPerKind == molLookup.GetNumKind());
 
 #ifdef GOMC_CUDA
   cudaVars = sys.statV.forcefield.particles->getCUDAVars();
@@ -206,7 +203,7 @@ inline uint MultiParticleBrownian::Prep(const double subDraw, const double movPe
 
     //Calculate Torque for old positions
     calcEnRef.CalculateTorque(moleculeIndex, coordCurrRef, comCurrRef,
-                              atomForceRef, atomForceRecRef, molTorqueRef, bPick);
+                              atomForceRef, atomForceRecRef, molTorqueRef, bPick, currentStateBufferIndex);
 
     sysPotRef.Total();
     GOMC_EVENT_STOP(1, GomcProfileEvent::CALC_EN_MULTIPARTICLE_BM);
@@ -262,10 +259,10 @@ inline uint MultiParticleBrownian::PrepNEMTMC(const uint box, const uint midx, c
 
     //Calculate Torque for old positions
     calcEnRef.CalculateTorque(moleculeIndex, coordCurrRef, comCurrRef,
-                              atomForceRef, atomForceRecRef, molTorqueRef, bPick);
+                              atomForceRef, atomForceRecRef, molTorqueRef, bPick, currentStateBufferIndex);
 
     sysPotRef.Total();
-  }
+  } 
   coordCurrRef.CopyRange(newMolsPos, 0, 0, coordCurrRef.Count());
   comCurrRef.CopyRange(newCOMs, 0, 0, comCurrRef.Count());
   #if ENSEMBLE == GCMC || ENSEMBLE == GEMC
@@ -383,7 +380,7 @@ inline void MultiParticleBrownian::CalcEn()
 
   //Calculate Torque for new positions
   calcEnRef.CalculateTorque(moleculeIndex, newMolsPos, newCOMs, atomForceNew,
-                            atomForceRecNew, molTorqueNew, bPick);
+                            atomForceRecNew, molTorqueNew, bPick, nextStateBufferIndex);
   
   sysPotNew.Total();
   GOMC_EVENT_STOP(1, GomcProfileEvent::CALC_EN_MULTIPARTICLE);
@@ -480,7 +477,10 @@ inline void MultiParticleBrownian::Accept(const uint rejectState, const ulong st
     cudaVars->gpu_mFx->ChangeBuffers();
     cudaVars->gpu_mFy->ChangeBuffers();
     cudaVars->gpu_mFz->ChangeBuffers();
-
+    
+    cudaVars->gpu_mTx->ChangeBuffers();
+    cudaVars->gpu_mTy->ChangeBuffers();
+    cudaVars->gpu_mTz->ChangeBuffers();
   //    swap(molForceRecRef, molForceRecNew);
   //    swap(atomForceRecRef, atomForceRecNew);
   //    swap(molTorqueRef, molTorqueNew);

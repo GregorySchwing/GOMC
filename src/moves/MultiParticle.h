@@ -213,11 +213,11 @@ inline uint MultiParticle::Prep(const double subDraw, const double movPerc)
 
     //Calculate short range energy and force for old positions
     calcEnRef.BoxForce(sysPotRef, coordCurrRef, atomForceRef, molForceRef,
-                       boxDimRef, bPick, 0);
+                       boxDimRef, bPick, currentStateBufferIndex);
 
     //Calculate Torque for old positions
     calcEnRef.CalculateTorque(moleculeIndex, coordCurrRef, comCurrRef,
-                              atomForceRef, atomForceRecRef, molTorqueRef, bPick);
+                              atomForceRef, atomForceRecRef, molTorqueRef, bPick, currentStateBufferIndex);
 
     sysPotRef.Total();
     GOMC_EVENT_STOP(1, GomcProfileEvent::CALC_EN_MULTIPARTICLE);
@@ -270,11 +270,11 @@ inline uint MultiParticle::PrepNEMTMC(const uint box, const uint midx, const uin
 
     //Calculate short range energy and force for old positions
     calcEnRef.BoxForce(sysPotRef, coordCurrRef, atomForceRef, molForceRef,
-                       boxDimRef, bPick, 0);
+                       boxDimRef, bPick, currentStateBufferIndex);
 
     //Calculate Torque for old positions
     calcEnRef.CalculateTorque(moleculeIndex, coordCurrRef, comCurrRef,
-                              atomForceRef, atomForceRecRef, molTorqueRef, bPick);
+                              atomForceRef, atomForceRecRef, molTorqueRef, bPick, currentStateBufferIndex);
 
     sysPotRef.Total();
   }
@@ -353,7 +353,7 @@ inline void MultiParticle::CalcEn()
   sysPotNew = sysPotRef;
   //calculate short range energy and force
   sysPotNew = calcEnRef.BoxForce(sysPotNew, newMolsPos, atomForceNew,
-                                 molForceNew, boxDimRef, bPick, 1);
+                                 molForceNew, boxDimRef, bPick, nextStateBufferIndex);
   //calculate long range electrostatic energy for new positions
   sysPotNew.boxEnergy[bPick].recip = calcEwald->BoxReciprocal(bPick, false);
   //Calculate long range electrostatic force for new positions
@@ -362,7 +362,7 @@ inline void MultiParticle::CalcEn()
 
   //Calculate Torque for new positions
   calcEnRef.CalculateTorque(moleculeIndex, newMolsPos, newCOMs, atomForceNew,
-                            atomForceRecNew, molTorqueNew, bPick);
+                            atomForceRecNew, molTorqueNew, bPick, nextStateBufferIndex);
   
   GOMC_EVENT_STOP(1, GomcProfileEvent::CALC_EN_MULTIPARTICLE);
 }

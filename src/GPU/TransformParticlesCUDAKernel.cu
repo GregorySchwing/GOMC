@@ -905,9 +905,12 @@ void BrownianMotionRotateParticlesGPU(
 
   CUMALLOC((void **) &gpu_moleculeInvolved, molCountInBox * sizeof(int));
 
-  cudaMemcpy(vars->gpu_mTorquex, mTorque.x, molCount * sizeof(double), cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_mTorquey, mTorque.y, molCount * sizeof(double), cudaMemcpyHostToDevice);
-  cudaMemcpy(vars->gpu_mTorquez, mTorque.z, molCount * sizeof(double), cudaMemcpyHostToDevice);
+  //cudaMemcpy(vars->gpu_mTorquex, mTorque.x, molCount * sizeof(double), cudaMemcpyHostToDevice);
+  //cudaMemcpy(vars->gpu_mTorquey, mTorque.y, molCount * sizeof(double), cudaMemcpyHostToDevice);
+  //cudaMemcpy(vars->gpu_mTorquez, mTorque.z, molCount * sizeof(double), cudaMemcpyHostToDevice);
+  BufferAccess<DeviceArray<double>, double, buffers> mTx(*(vars->gpu_mTx), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> mTy(*(vars->gpu_mTy), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> mTz(*(vars->gpu_mTz), 0);
 
   // We were modifying the gpu_x,y,z array to convert old -> new.
   // Not anymore, now we'll pass both the kernel
@@ -953,9 +956,9 @@ void BrownianMotionRotateParticlesGPU(
       new_coords_x->get(),
       new_coords_y->get(),
       new_coords_z->get(),      
-      vars->gpu_mTorquex,
-      vars->gpu_mTorquey,
-      vars->gpu_mTorquez,
+      mTx->get(),
+      mTy->get(),
+      mTz->get(),
       com_x->get(),
       com_y->get(),
       com_z->get(),
@@ -987,9 +990,9 @@ else
       new_coords_x->get(),
       new_coords_y->get(),
       new_coords_z->get(),      
-      vars->gpu_mTorquex,
-      vars->gpu_mTorquey,
-      vars->gpu_mTorquez,
+      mTx->get(),
+      mTy->get(),
+      mTz->get(),
       com_x->get(),
       com_y->get(),
       com_z->get(),
