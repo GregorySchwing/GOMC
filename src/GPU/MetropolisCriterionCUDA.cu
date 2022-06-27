@@ -17,7 +17,7 @@ void CallGetCoeff(VariablesCUDA *vars,
                     int molCount,
                     double * MPCoeff){
 
-
+    // Zeroes value.
     cudaMemcpy(vars->gpu_mp_coefficient, MPCoeff, 1 * sizeof(double),
               cudaMemcpyHostToDevice);
 
