@@ -25,9 +25,9 @@ void CallGetCoeff(VariablesCUDA *vars,
     int blocksPerGrid = (int)(molCount / threadsPerBlock) + 1;
 
     if (moveType == MPROTATE){
-        BufferAccess<DeviceArray<double>, double, buffers> mTxRef(*(vars->gpu_mTx), next_state);
-        BufferAccess<DeviceArray<double>, double, buffers> mTyRef(*(vars->gpu_mTy), next_state);
-        BufferAccess<DeviceArray<double>, double, buffers> mTzRef(*(vars->gpu_mTz), next_state);
+        BufferAccess<DeviceArray<double>, double, buffers> mTxRef(*(vars->gpu_mTx), curr_state);
+        BufferAccess<DeviceArray<double>, double, buffers> mTyRef(*(vars->gpu_mTy), curr_state);
+        BufferAccess<DeviceArray<double>, double, buffers> mTzRef(*(vars->gpu_mTz), curr_state);
 
         BufferAccess<DeviceArray<double>, double, buffers> mTxNew(*(vars->gpu_mTx), next_state);
         BufferAccess<DeviceArray<double>, double, buffers> mTyNew(*(vars->gpu_mTy), next_state);
