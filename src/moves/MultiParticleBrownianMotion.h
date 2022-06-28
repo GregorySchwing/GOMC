@@ -460,6 +460,7 @@ inline void MultiParticleBrownian::Accept(const uint rejectState, const ulong st
   bool result = (rejectState == mv::fail_state::NO_FAIL) && prng() < accept;
   printf("MPCoeff %f Delta %f\n",MPCoeff, (sysPotNew.Total() - sysPotRef.Total()));
   if(result) {
+    printf("Accepted %s move\n", moveType ? "ROT" : "TRANS");
     sysPotRef = sysPotNew;
 
     cudaVars->gpu_coords_x->ChangeBuffers();
@@ -492,6 +493,8 @@ inline void MultiParticleBrownian::Accept(const uint rejectState, const ulong st
   //} else {
   //  cellListGPU->GridAll(cudaVars, coordCurrRef, boxDimRef.axis, cellList.CellsInBox(0));
   //  calcEwald->exgMolCache();
+  } else {
+      printf("Rejected %s move\n", moveType ? "ROT" : "TRANS");
   }
   #else
   double MPCoeff = GetCoeff();
@@ -499,6 +502,7 @@ inline void MultiParticleBrownian::Accept(const uint rejectState, const ulong st
   bool result = (rejectState == mv::fail_state::NO_FAIL) && prng() < accept;
   printf("MPCoeff %f Delta %f\n",MPCoeff, (sysPotNew.Total() - sysPotRef.Total()));
   if(result) {
+    printf("Accepted %s move\n", moveType ? "ROT" : "TRANS");
     sysPotRef = sysPotNew;
     swap(coordCurrRef, newMolsPos);
     swap(comCurrRef, newCOMs);
@@ -512,11 +516,8 @@ inline void MultiParticleBrownian::Accept(const uint rejectState, const ulong st
     // Update the velocity in box
     velocity.UpdateBoxVelocity(bPick);
   } else {
-    #if GOMC_CUDA
-    cellListGPU->GridAll(cudaVars, coordCurrRef, boxDimRef.axis, cellList.CellsInBox(0));
-    #else
+    printf("Rejected %s move\n", moveType ? "ROT" : "TRANS");
     cellList.GridAll(boxDimRef, coordCurrRef, molLookup);
-    #endif
     calcEwald->exgMolCache();
   }
   #endif
