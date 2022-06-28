@@ -1030,7 +1030,7 @@ __global__ void BoxTorqueGPU(
                             double *gpu_Invcell_z)
 {
   double3 aT, diff_com;
-  aT = make_double3(0.0, 0.0, 0.0);
+  //aT = make_double3(0.0, 0.0, 0.0);
   diff_com = make_double3(0.0, 0.0, 0.0);
   int currentCell = blockIdx.x;
   // Calculate number of particles inside current Cell
@@ -1051,7 +1051,15 @@ __global__ void BoxTorqueGPU(
 
     if(electrostatic) {
     }
-
+    aT = Cross(diff_com.x, diff_com.y, diff_com.z, 
+              gpu_aForcex[currentParticle],
+              gpu_aForcey[currentParticle],
+              gpu_aForcez[currentParticle]);
+/*    aT = Cross(diff_com.x, diff_com.y, diff_com.z, 
+              gpu_aForcex[currentParticle] + reciptermX,
+              gpu_aForcey[currentParticle] + reciptermY,
+              gpu_aForcez[currentParticle] + reciptermZ);
+*/
     atomicAdd(&gpu_mTorquex[mI], aT.x);
     atomicAdd(&gpu_mTorquey[mI], aT.y);
     atomicAdd(&gpu_mTorquez[mI], aT.z);

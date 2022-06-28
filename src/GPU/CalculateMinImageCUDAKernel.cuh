@@ -24,6 +24,17 @@ __device__ inline double3 Difference(const double *x, const double *y, const dou
   return make_double3(x[i] - nx[j], y[i] - ny[j], z[i] - nz[j]);
 }
 
+
+//Returns cross product of two vectors A and B that share a vertex.
+//NOTE:
+//To use this on three topologically connected points, we must
+//shift all three points such that the shared vertex is at the origin.
+__device__ inline double3 Cross(const double x1, const double y1, const double z1,
+                    const double x2, const double y2, const double z2)
+{
+  return make_double3(y1 * z2 - z1 * y2, z1 * x2 - x1 * z2, x1 * y2 - y1 * x2);
+}
+
 __device__ inline void TransformSlantGPU(double3 &dist, const double3 &slant,
                                          const double *gpu_cell_x, const double *gpu_cell_y,
                                          const double *gpu_cell_z)
