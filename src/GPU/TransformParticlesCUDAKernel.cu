@@ -942,6 +942,10 @@ void BrownianMotionRotateParticlesGPU(
   BufferAccess<DeviceArray<double>, double, buffers> com_y(*(vars->gpu_com_y), 0);
   BufferAccess<DeviceArray<double>, double, buffers> com_z(*(vars->gpu_com_z), 0);
 
+  BufferAccess<DeviceArray<double>, double, buffers> new_com_x(*(vars->gpu_com_x), 1);
+  BufferAccess<DeviceArray<double>, double, buffers> new_com_y(*(vars->gpu_com_y), 1);
+  BufferAccess<DeviceArray<double>, double, buffers> new_com_z(*(vars->gpu_com_z), 1);
+
   cudaMemcpy(gpu_moleculeInvolved, &moleculeInvolved[0], molCountInBox * sizeof(int), cudaMemcpyHostToDevice);
 
   double3 axis = make_double3(boxAxes.x, boxAxes.y, boxAxes.z);
@@ -1023,6 +1027,12 @@ else
   cudaMemcpy(newMolPos.x, new_coords_x->get(), atomCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(newMolPos.y, new_coords_y->get(), atomCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(newMolPos.z, new_coords_z->get(), atomCount * sizeof(double), cudaMemcpyDeviceToHost);
+  
+
+  // Could simply avoid incrementing the counter for com on rotation moves..
+  cudaMemcpy(new_com_x->get(), com_x->get(), molCount * sizeof(double), cudaMemcpyDeviceToHost);
+  cudaMemcpy(new_com_y->get(), com_y->get(), molCount * sizeof(double), cudaMemcpyDeviceToHost);
+  cudaMemcpy(new_com_z->get(), com_z->get(), molCount * sizeof(double), cudaMemcpyDeviceToHost);
   
   cudaMemcpy(r_k.x, vars->gpu_r_k_x, molCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(r_k.y, vars->gpu_r_k_y, molCount * sizeof(double), cudaMemcpyDeviceToHost);
