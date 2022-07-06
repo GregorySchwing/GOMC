@@ -423,8 +423,6 @@ void CallBoxForceGPU(VariablesCUDA *vars,
       // Copy the result back to CPU ! :)
     CubDebugExit(cudaMemcpy(&REn, gpu_REn->get(), sizeof(double),
                             cudaMemcpyDeviceToHost));
-  // Neccessary?
-  cudaDeviceSynchronize();
 }
 
 void CallBoxTorqueGPU(VariablesCUDA *vars,
