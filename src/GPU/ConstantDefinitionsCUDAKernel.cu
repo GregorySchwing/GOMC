@@ -156,6 +156,9 @@ void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
   CUMALLOC((void**) &vars->gpu_mForcez, maxMolNumber * sizeof(double));
 
   // Buffer for GPU Residence
+  vars->gpu_LJEn = new MultiBuffer<DeviceArray<double>, double, buffers>(1);
+  vars->gpu_REn = new MultiBuffer<DeviceArray<double>, double, buffers>(1);
+
   vars->gpu_coords_x = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
   vars->gpu_coords_y = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
   vars->gpu_coords_z = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);

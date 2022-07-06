@@ -312,29 +312,20 @@ void CallBoxForceGPU(VariablesCUDA *vars,
 {
   int atomNumber = coords.Count();
   int numberOfCells = vars->cpu_numberOfCells[box];
-  int blocksPerGrid, threadsPerBlock, energyVectorLen;
-  double *gpu_REn, *gpu_LJEn;
-  double *gpu_final_REn, *gpu_final_LJEn;
-  double cpu_final_REn = 0.0, cpu_final_LJEn = 0.0;
+  int blocksPerGrid, threadsPerBlock;
 
   threadsPerBlock = 256;
 //  blocksPerGrid = numberOfCells;
 //  energyVectorLen = numberOfCells * threadsPerBlock;
   
   blocksPerGrid = numberOfCells * NUMBER_OF_NEIGHBOR_CELLS;
-  energyVectorLen = numberOfCells * NUMBER_OF_NEIGHBOR_CELLS * threadsPerBlock;
-
-  CUMALLOC((void**) &gpu_LJEn, energyVectorLen * sizeof(double));
-  CUMALLOC((void**) &gpu_final_LJEn, sizeof(double));
-  if (electrostatic) {
-    CUMALLOC((void**) &gpu_REn, energyVectorLen * sizeof(double));
-    CUMALLOC((void**) &gpu_final_REn, sizeof(double));
-  }
-
 
   // This same function is used to calculate old and new..
   // Will need to separate the old calculation from the new coordinates.
   // Could use the singleMoveAccepted boolean, though this will only handle 2 buffers.
+  BufferAccess<DeviceArray<double>, double, buffers> gpu_LJEn(*(vars->gpu_LJEn), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> gpu_REn(*(vars->gpu_REn), buffer_index);
+
   BufferAccess<DeviceArray<double>, double, buffers> coords_x(*(vars->gpu_coords_x), buffer_index);
   BufferAccess<DeviceArray<double>, double, buffers> coords_y(*(vars->gpu_coords_y), buffer_index);
   BufferAccess<DeviceArray<double>, double, buffers> coords_z(*(vars->gpu_coords_z), buffer_index);
@@ -351,6 +342,8 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   cudaMemset(mFx->get(), 0.0, molCount * sizeof(double));
   cudaMemset(mFy->get(), 0.0, molCount * sizeof(double));
   cudaMemset(mFz->get(), 0.0, molCount * sizeof(double));
+  cudaMemset(gpu_LJEn->get(), 0.0, 1 * sizeof(double));
+  cudaMemset(gpu_REn->get(), 0.0, 1 * sizeof(double));
 
   double3 axis = make_double3(boxAxes.GetAxis(box).x,
                               boxAxes.GetAxis(box).y,
@@ -365,7 +358,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   BufferAccess<DeviceArray<int>, int, buffers> cellStartIndex_view(*(vars->gpu_cellStartIndex), buffer_index);
 
 
-  BoxForceGPU <<< blocksPerGrid, threadsPerBlock>>>(cellStartIndex_view->get(),
+  BoxForceGPU <<< blocksPerGrid, threadsPerBlock, 2*threadsPerBlock*sizeof(double)>>>(cellStartIndex_view->get(),
       cellVector_view->get(),
       vars->gpu_neighborList,
       numberOfCells,
@@ -380,8 +373,8 @@ void CallBoxForceGPU(VariablesCUDA *vars,
       vars->gpu_particleCharge,
       vars->gpu_particleKind,
       vars->gpu_particleMol,
-      gpu_REn,
-      gpu_LJEn,
+      gpu_REn->get(),
+      gpu_LJEn->get(),
       vars->gpu_sigmaSq,
       vars->gpu_epsilon_Cn,
       vars->gpu_n,
@@ -423,38 +416,15 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   cudaDeviceSynchronize();
   checkLastErrorCUDA(__FILE__, __LINE__);
   // LJ ReduceSum
-  void *d_temp_storage = NULL;
-  size_t temp_storage_bytes = 0;
-  DeviceReduce::Sum(d_temp_storage, temp_storage_bytes, gpu_LJEn,
-                    gpu_final_LJEn, energyVectorLen);
-  CubDebugExit(CUMALLOC(&d_temp_storage, temp_storage_bytes));
-  DeviceReduce::Sum(d_temp_storage, temp_storage_bytes, gpu_LJEn,
-                    gpu_final_LJEn, energyVectorLen);
   // Copy the result back to CPU ! :)
-  CubDebugExit(cudaMemcpy(&cpu_final_LJEn, gpu_final_LJEn, sizeof(double),
+  CubDebugExit(cudaMemcpy(&LJEn, gpu_LJEn->get(), sizeof(double),
                           cudaMemcpyDeviceToHost));
-  if (electrostatic) {
-    // Real Term ReduceSum
-    DeviceReduce::Sum(d_temp_storage, temp_storage_bytes, gpu_REn,
-                      gpu_final_REn, energyVectorLen);
-    // Copy the result back to CPU ! :)
-    CubDebugExit(cudaMemcpy(&cpu_final_REn, gpu_final_REn, sizeof(double),
+  if (electrostatic)
+      // Copy the result back to CPU ! :)
+    CubDebugExit(cudaMemcpy(&REn, gpu_REn->get(), sizeof(double),
                             cudaMemcpyDeviceToHost));
-  }
-  CUFREE(d_temp_storage);
-
-  REn = cpu_final_REn;
-  LJEn = cpu_final_LJEn;
-
   // Neccessary?
   cudaDeviceSynchronize();
-
-  CUFREE(gpu_LJEn);
-  CUFREE(gpu_final_LJEn);
-  if (electrostatic) {
-    CUFREE(gpu_REn);
-    CUFREE(gpu_final_REn);
-  }
 }
 
 void CallBoxTorqueGPU(VariablesCUDA *vars,
@@ -881,7 +851,9 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                             bool *gpu_isFraction,
                             int box)
 {
-  int threadID = blockIdx.x * blockDim.x + threadIdx.x;
+  extern __shared__ double temp[];
+  int threadID = threadIdx.x;
+  //int threadID = blockIdx.x * blockDim.x + threadIdx.x;
   double distSq;
   double3 virComponents, forceReal, forceLJ;
   virComponents = make_double3(0.0, 0.0, 0.0);
@@ -997,9 +969,22 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
       }
     }
   }
-  gpu_LJEn[threadID] = LJEn;
-  if (electrostatic)
-    gpu_REn[threadID] = REn;
+  temp[threadID] = LJEn;
+  for (int d=blockDim.x>>1; d>=1; d>>=1) {
+    __syncthreads();
+    if (threadID<d) temp[threadID] += temp[threadID+d];
+  }
+  // Add block reduced value to global value.
+  if (threadIdx.x == 0) atomicAdd(&gpu_LJEn[0], temp[threadID]);
+
+  if (!electrostatic) return;
+
+  temp[blockDim.x + threadID] = REn;
+  for (int d=blockDim.x>>1; d>=1; d>>=1) {
+    __syncthreads();
+    if (threadID<d) temp[blockDim.x + threadID] += temp[blockDim.x + threadID+d];
+  }
+  if (threadIdx.x == 0) atomicAdd(&gpu_REn[0], temp[blockDim.x + threadID]);
 }
 
 __global__ void BoxTorqueGPU(

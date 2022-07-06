@@ -149,6 +149,9 @@ public:
   // Currently means translation or rotate MP. Will eventually mean any move.
   int* gpu_move_type;
 
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_LJEn;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_REn;
+
   MultiBuffer< DeviceArray<double>, double, buffers > * gpu_coords_x;
   MultiBuffer< DeviceArray<double>, double, buffers > * gpu_coords_y;
   MultiBuffer< DeviceArray<double>, double, buffers > * gpu_coords_z;
