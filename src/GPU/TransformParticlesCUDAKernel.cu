@@ -898,12 +898,11 @@ void BrownianMotionRotateParticlesGPU(
   int atomCount = newMolPos.Count();
   int molCount = newCOMs.Count();
   int molCountInBox = moleculeInvolved.size();
-  int *gpu_moleculeInvolved;
   // Each block would handle one molecule
   int threadsPerBlock = 32;
   int blocksPerGrid = molCountInBox;
-
-  CUMALLOC((void **) &gpu_moleculeInvolved, molCountInBox * sizeof(int));
+	int blocksPerGridAtoms = (atomCount + threadsPerBlock - 1)/threadsPerBlock;
+	int blocksPerGridMols = (molCount + threadsPerBlock - 1)/threadsPerBlock;
 
   //cudaMemcpy(vars->gpu_mTorquex, mTorque.x, molCount * sizeof(double), cudaMemcpyHostToDevice);
   //cudaMemcpy(vars->gpu_mTorquey, mTorque.y, molCount * sizeof(double), cudaMemcpyHostToDevice);
@@ -946,12 +945,10 @@ void BrownianMotionRotateParticlesGPU(
   BufferAccess<DeviceArray<double>, double, buffers> new_com_y(*(vars->gpu_com_y), 1);
   BufferAccess<DeviceArray<double>, double, buffers> new_com_z(*(vars->gpu_com_z), 1);
 
-  cudaMemcpy(gpu_moleculeInvolved, &moleculeInvolved[0], molCountInBox * sizeof(int), cudaMemcpyHostToDevice);
-
   double3 axis = make_double3(boxAxes.x, boxAxes.y, boxAxes.z);
   double3 halfAx = make_double3(boxAxes.x * 0.5, boxAxes.y * 0.5, boxAxes.z * 0.5);
 
-  if (isOrthogonal)
+  if (isOrthogonal){
     BrownianMotionRotateKernel<true><<< blocksPerGrid, threadsPerBlock>>>(
       vars->gpu_startAtomIdx,
       old_coords_x->get(),
@@ -969,7 +966,7 @@ void BrownianMotionRotateParticlesGPU(
       vars->gpu_r_k_x,
       vars->gpu_r_k_y,
       vars->gpu_r_k_z,
-      gpu_moleculeInvolved,
+      vars->gpu_moleculeFixed,
       vars->gpu_cell_x[box],
       vars->gpu_cell_y[box],
       vars->gpu_cell_z[box],
@@ -985,7 +982,7 @@ void BrownianMotionRotateParticlesGPU(
       seed,
       BETA,
       kill);
-else
+  } else {
       BrownianMotionRotateKernel<true><<< blocksPerGrid, threadsPerBlock>>>(
       vars->gpu_startAtomIdx,
       old_coords_x->get(),
@@ -1003,7 +1000,7 @@ else
       vars->gpu_r_k_x,
       vars->gpu_r_k_y,
       vars->gpu_r_k_z,
-      gpu_moleculeInvolved,
+      vars->gpu_moleculeFixed,
       vars->gpu_cell_x[box],
       vars->gpu_cell_y[box],
       vars->gpu_cell_z[box],
@@ -1019,7 +1016,7 @@ else
       seed,
       BETA,
       kill);
-      
+  }
   cudaDeviceSynchronize();
   checkLastErrorCUDA(__FILE__, __LINE__);
   
@@ -1037,7 +1034,6 @@ else
   cudaMemcpy(r_k.x, vars->gpu_r_k_x, molCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(r_k.y, vars->gpu_r_k_y, molCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(r_k.z, vars->gpu_r_k_z, molCount * sizeof(double), cudaMemcpyDeviceToHost);
-  CUFREE(gpu_moleculeInvolved);
   checkLastErrorCUDA(__FILE__, __LINE__);
 }
 
@@ -1077,7 +1073,8 @@ __global__ void BrownianMotionRotateKernel(
   int *kill)
 {
   //Each block takes care of one molecule
-  int molIndex = moleculeInvolved[blockIdx.x];
+  int molIndex = blockIdx.x;
+  //int molIndex = moleculeInvolved[blockIdx.x];
   int startIdx = startAtomIdx[molIndex];
   int endIdx = startAtomIdx[molIndex + 1];
   int atomIdx;
@@ -1205,12 +1202,11 @@ void BrownianMotionTranslateParticlesGPU(
   int atomCount = newMolPos.Count();
   int molCount = newCOMs.Count();
   int molCountInBox = moleculeInvolved.size();
-  int *gpu_moleculeInvolved;
   // Each block would handle one molecule
   int threadsPerBlock = 32;
   int blocksPerGrid = molCountInBox;
-
-  CUMALLOC((void **) &gpu_moleculeInvolved, molCountInBox * sizeof(int));
+	int blocksPerGridAtoms = (atomCount + threadsPerBlock - 1)/threadsPerBlock;
+	int blocksPerGridMols = (molCount + threadsPerBlock - 1)/threadsPerBlock;
 /*
   cudaMemcpy(vars->gpu_mForcex, mForce.x, molCount * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_mForcey, mForce.y, molCount * sizeof(double), cudaMemcpyHostToDevice);
@@ -1248,12 +1244,11 @@ void BrownianMotionTranslateParticlesGPU(
   BufferAccess<DeviceArray<double>, double, buffers> mFy(*(vars->gpu_mFy), 0);
   BufferAccess<DeviceArray<double>, double, buffers> mFz(*(vars->gpu_mFz), 0);
 
-  cudaMemcpy(gpu_moleculeInvolved, &moleculeInvolved[0], molCountInBox * sizeof(int), cudaMemcpyHostToDevice);
 
   double3 axis = make_double3(boxAxes.x, boxAxes.y, boxAxes.z);
   double3 halfAx = make_double3(boxAxes.x * 0.5, boxAxes.y * 0.5, boxAxes.z * 0.5);
 
-  if (isOrthogonal)
+  if (isOrthogonal){
     BrownianMotionTranslateKernel<true><<< blocksPerGrid, threadsPerBlock>>>(
       vars->gpu_startAtomIdx,
       old_coords_x->get(),
@@ -1277,7 +1272,7 @@ void BrownianMotionTranslateParticlesGPU(
       vars->gpu_t_k_x,
       vars->gpu_t_k_y,
       vars->gpu_t_k_z,
-      gpu_moleculeInvolved,
+      vars->gpu_moleculeFixed,
       vars->gpu_cell_x[box],
       vars->gpu_cell_y[box],
       vars->gpu_cell_z[box],
@@ -1293,7 +1288,7 @@ void BrownianMotionTranslateParticlesGPU(
       seed,
       BETA,
       kill);
-  else
+  } else {
     BrownianMotionTranslateKernel<false><<< blocksPerGrid, threadsPerBlock>>>(
       vars->gpu_startAtomIdx,
       old_coords_x->get(),
@@ -1317,7 +1312,7 @@ void BrownianMotionTranslateParticlesGPU(
       vars->gpu_t_k_x,
       vars->gpu_t_k_y,
       vars->gpu_t_k_z,
-      gpu_moleculeInvolved,
+      vars->gpu_moleculeFixed,
       vars->gpu_cell_x[box],
       vars->gpu_cell_y[box],
       vars->gpu_cell_z[box],
@@ -1333,7 +1328,7 @@ void BrownianMotionTranslateParticlesGPU(
       seed,
       BETA,
       kill);
-
+  }
   cudaDeviceSynchronize();
   checkLastErrorCUDA(__FILE__, __LINE__);
 
@@ -1351,7 +1346,6 @@ void BrownianMotionTranslateParticlesGPU(
   cudaMemcpy(t_k.x, vars->gpu_t_k_x, molCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(t_k.y, vars->gpu_t_k_y, molCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(t_k.z, vars->gpu_t_k_z, molCount * sizeof(double), cudaMemcpyDeviceToHost);
-  CUFREE(gpu_moleculeInvolved);
   checkLastErrorCUDA(__FILE__, __LINE__);
 }
 
@@ -1398,7 +1392,7 @@ __global__ void BrownianMotionTranslateKernel(
   int *kill)
 {
   //Each block takes care of one molecule
-  int molIndex = moleculeInvolved[blockIdx.x];
+  int molIndex = blockIdx.x;
   int startIdx = startAtomIdx[molIndex];
   int endIdx = startAtomIdx[molIndex + 1];
   int atomIdx;

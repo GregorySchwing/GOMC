@@ -151,7 +151,8 @@ public:
 
   MultiBuffer< DeviceArray<double>, double, buffers > * gpu_LJEn;
   MultiBuffer< DeviceArray<double>, double, buffers > * gpu_REn;
-
+  // a flag to prevent translation/rotation of fixed molecules
+  int * gpu_moleculeFixed;
   MultiBuffer< DeviceArray<double>, double, buffers > * gpu_coords_x;
   MultiBuffer< DeviceArray<double>, double, buffers > * gpu_coords_y;
   MultiBuffer< DeviceArray<double>, double, buffers > * gpu_coords_z;
