@@ -417,6 +417,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   checkLastErrorCUDA(__FILE__, __LINE__);
   // LJ ReduceSum
   // Copy the result back to CPU ! :)
+  // Currently needed until Accept move is on GPU
   CubDebugExit(cudaMemcpy(&LJEn, gpu_LJEn->get(), sizeof(double),
                           cudaMemcpyDeviceToHost));
   if (electrostatic)

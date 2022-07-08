@@ -1020,10 +1020,10 @@ void BrownianMotionRotateParticlesGPU(
   cudaDeviceSynchronize();
   checkLastErrorCUDA(__FILE__, __LINE__);
   
-  // Eventually replace this with incrementing the active counter
-  cudaMemcpy(newMolPos.x, new_coords_x->get(), atomCount * sizeof(double), cudaMemcpyDeviceToHost);
-  cudaMemcpy(newMolPos.y, new_coords_y->get(), atomCount * sizeof(double), cudaMemcpyDeviceToHost);
-  cudaMemcpy(newMolPos.z, new_coords_z->get(), atomCount * sizeof(double), cudaMemcpyDeviceToHost);
+  // Move this to energy calc or non-BMP move.
+  //cudaMemcpy(newMolPos.x, new_coords_x->get(), atomCount * sizeof(double), cudaMemcpyDeviceToHost);
+  //cudaMemcpy(newMolPos.y, new_coords_y->get(), atomCount * sizeof(double), cudaMemcpyDeviceToHost);
+  //cudaMemcpy(newMolPos.z, new_coords_z->get(), atomCount * sizeof(double), cudaMemcpyDeviceToHost);
   
 
   // Avoided by not incrementing the counter for com on rotation moves..
@@ -1031,10 +1031,11 @@ void BrownianMotionRotateParticlesGPU(
   //cudaMemcpy(new_com_y->get(), com_y->get(), molCount * sizeof(double), cudaMemcpyDeviceToHost);
   //cudaMemcpy(new_com_z->get(), com_z->get(), molCount * sizeof(double), cudaMemcpyDeviceToHost);
   
-  cudaMemcpy(r_k.x, vars->gpu_r_k_x, molCount * sizeof(double), cudaMemcpyDeviceToHost);
-  cudaMemcpy(r_k.y, vars->gpu_r_k_y, molCount * sizeof(double), cudaMemcpyDeviceToHost);
-  cudaMemcpy(r_k.z, vars->gpu_r_k_z, molCount * sizeof(double), cudaMemcpyDeviceToHost);
-  checkLastErrorCUDA(__FILE__, __LINE__);
+  // Not necessary since translation is on the gpu.
+  //cudaMemcpy(r_k.x, vars->gpu_r_k_x, molCount * sizeof(double), cudaMemcpyDeviceToHost);
+  //cudaMemcpy(r_k.y, vars->gpu_r_k_y, molCount * sizeof(double), cudaMemcpyDeviceToHost);
+  //cudaMemcpy(r_k.z, vars->gpu_r_k_z, molCount * sizeof(double), cudaMemcpyDeviceToHost);
+  //checkLastErrorCUDA(__FILE__, __LINE__);
 }
 
 template<const bool isOrthogonal>
@@ -1332,21 +1333,21 @@ void BrownianMotionTranslateParticlesGPU(
   cudaDeviceSynchronize();
   checkLastErrorCUDA(__FILE__, __LINE__);
 
-  // Eventually replace this with incrementing the active counter
+  // Move this to calc energy or non-BMP move
+  /*
   cudaMemcpy(newMolPos.x, new_coords_x->get(), atomCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(newMolPos.y, new_coords_y->get(), atomCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(newMolPos.z, new_coords_z->get(), atomCount * sizeof(double), cudaMemcpyDeviceToHost);
-  cudaDeviceSynchronize();
-  checkLastErrorCUDA(__FILE__, __LINE__);
   cudaMemcpy(newCOMs.x, new_com_x->get(), molCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(newCOMs.y, new_com_y->get(), molCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(newCOMs.z, new_com_z->get(), molCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaDeviceSynchronize();
   checkLastErrorCUDA(__FILE__, __LINE__);
-  cudaMemcpy(t_k.x, vars->gpu_t_k_x, molCount * sizeof(double), cudaMemcpyDeviceToHost);
-  cudaMemcpy(t_k.y, vars->gpu_t_k_y, molCount * sizeof(double), cudaMemcpyDeviceToHost);
-  cudaMemcpy(t_k.z, vars->gpu_t_k_z, molCount * sizeof(double), cudaMemcpyDeviceToHost);
-  checkLastErrorCUDA(__FILE__, __LINE__);
+  */
+  //cudaMemcpy(t_k.x, vars->gpu_t_k_x, molCount * sizeof(double), cudaMemcpyDeviceToHost);
+  //cudaMemcpy(t_k.y, vars->gpu_t_k_y, molCount * sizeof(double), cudaMemcpyDeviceToHost);
+  //cudaMemcpy(t_k.z, vars->gpu_t_k_z, molCount * sizeof(double), cudaMemcpyDeviceToHost);
+  //checkLastErrorCUDA(__FILE__, __LINE__);
 }
 
 
