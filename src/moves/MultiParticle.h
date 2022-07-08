@@ -217,7 +217,7 @@ inline uint MultiParticle::Prep(const double subDraw, const double movPerc)
 
     //Calculate Torque for old positions
     calcEnRef.CalculateTorque(moleculeIndex, coordCurrRef, comCurrRef,
-                              atomForceRef, atomForceRecRef, molTorqueRef, bPick, currentStateBufferIndex);
+                              atomForceRef, atomForceRecRef, molTorqueRef, bPick, moveType, currentStateBufferIndex);
 
     sysPotRef.Total();
     GOMC_EVENT_STOP(1, GomcProfileEvent::CALC_EN_MULTIPARTICLE);
@@ -274,7 +274,7 @@ inline uint MultiParticle::PrepNEMTMC(const uint box, const uint midx, const uin
 
     //Calculate Torque for old positions
     calcEnRef.CalculateTorque(moleculeIndex, coordCurrRef, comCurrRef,
-                              atomForceRef, atomForceRecRef, molTorqueRef, bPick, currentStateBufferIndex);
+                              atomForceRef, atomForceRecRef, molTorqueRef, bPick, moveType, currentStateBufferIndex);
 
     sysPotRef.Total();
   }
@@ -362,7 +362,7 @@ inline void MultiParticle::CalcEn()
 
   //Calculate Torque for new positions
   calcEnRef.CalculateTorque(moleculeIndex, newMolsPos, newCOMs, atomForceNew,
-                            atomForceRecNew, molTorqueNew, bPick, nextStateBufferIndex);
+                            atomForceRecNew, molTorqueNew, bPick, moveType, nextStateBufferIndex);
   
   GOMC_EVENT_STOP(1, GomcProfileEvent::CALC_EN_MULTIPARTICLE);
 }

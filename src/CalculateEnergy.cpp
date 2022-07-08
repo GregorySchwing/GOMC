@@ -1498,6 +1498,7 @@ void CalculateEnergy::CalculateTorque(std::vector<uint>& moleculeIndex,
                                       XYZArray const& atomForceRec,
                                       XYZArray& molTorque,
                                       const uint box,
+                                      int moveType,
                                       uint const buffer_index)
 {
   GOMC_EVENT_START(1, GomcProfileEvent::BOX_TORQUE);
@@ -1505,6 +1506,7 @@ void CalculateEnergy::CalculateTorque(std::vector<uint>& moleculeIndex,
 
     #ifdef GOMC_CUDA
       CallBoxTorqueGPU(forcefield.particles->getCUDAVars(),
+                        moveType,
                         currentAxes,
                         electrostatic,
                         coordinates.Count(),

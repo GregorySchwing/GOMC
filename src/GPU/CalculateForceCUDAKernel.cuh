@@ -31,6 +31,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
                      uint const buffer_index = 0);
 
 void CallBoxTorqueGPU(VariablesCUDA *vars,
+                     int moveType,
                      BoxDimensions const &boxAxes,
                      bool electrostatic,
                      int atomCount,

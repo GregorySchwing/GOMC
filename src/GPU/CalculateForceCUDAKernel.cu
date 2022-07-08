@@ -426,6 +426,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
 }
 
 void CallBoxTorqueGPU(VariablesCUDA *vars,
+                     int moveType,
                      BoxDimensions const &boxAxes,
                      bool electrostatic,
                      int atomCount,
@@ -444,9 +445,15 @@ void CallBoxTorqueGPU(VariablesCUDA *vars,
   BufferAccess<DeviceArray<double>, double, buffers> coords_y(*(vars->gpu_coords_y), buffer_index);
   BufferAccess<DeviceArray<double>, double, buffers> coords_z(*(vars->gpu_coords_z), buffer_index);
   
-  BufferAccess<DeviceArray<double>, double, buffers> com_x(*(vars->gpu_com_x), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> com_y(*(vars->gpu_com_y), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> com_z(*(vars->gpu_com_z), buffer_index);
+  // moveType == Rotate == 1, Disp == 0
+  int com_index;
+  if (moveType)
+    com_index = 0;
+  else 
+    com_index = buffer_index;
+  BufferAccess<DeviceArray<double>, double, buffers> com_x(*(vars->gpu_com_x), com_index);
+  BufferAccess<DeviceArray<double>, double, buffers> com_y(*(vars->gpu_com_y), com_index);
+  BufferAccess<DeviceArray<double>, double, buffers> com_z(*(vars->gpu_com_z), com_index);
   
   BufferAccess<DeviceArray<double>, double, buffers> aFx(*(vars->gpu_aFx), buffer_index);
   BufferAccess<DeviceArray<double>, double, buffers> aFy(*(vars->gpu_aFy), buffer_index);

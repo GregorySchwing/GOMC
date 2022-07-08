@@ -180,6 +180,7 @@ public:
                        XYZArray const& atomForceRec,
                        XYZArray& molTorque,
                        const uint box,
+                       int moveType,
                        uint const buffer_index = 0);
 
   //Finding the molecule inside cavity using geometric center
