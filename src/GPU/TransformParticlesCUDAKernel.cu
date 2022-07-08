@@ -1028,7 +1028,7 @@ void BrownianMotionRotateParticlesGPU(
       BETA,
       kill);
 
-      BrownianMotionRotateKernel<true><<< blocksPerGridAtoms, threadsPerBlock>>>(
+      BrownianMotionRotateKernel<false><<< blocksPerGridAtoms, threadsPerBlock>>>(
       vars->gpu_startAtomIdx,
       old_coords_x->get(),
       old_coords_y->get(),
