@@ -467,10 +467,11 @@ inline void MultiParticleBrownian::Accept(const uint rejectState, const ulong st
     cudaVars->gpu_coords_y->ChangeBuffers();
     cudaVars->gpu_coords_z->ChangeBuffers();
 
-    cudaVars->gpu_com_x->ChangeBuffers();
-    cudaVars->gpu_com_y->ChangeBuffers();
-    cudaVars->gpu_com_z->ChangeBuffers();
-
+    if(moveType == mp::MPDISPLACE) {// rotate, 
+      cudaVars->gpu_com_x->ChangeBuffers();
+      cudaVars->gpu_com_y->ChangeBuffers();
+      cudaVars->gpu_com_z->ChangeBuffers();
+    }
     cudaVars->gpu_aFx->ChangeBuffers();
     cudaVars->gpu_aFy->ChangeBuffers();
     cudaVars->gpu_aFz->ChangeBuffers();

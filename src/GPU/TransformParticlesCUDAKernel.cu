@@ -1026,7 +1026,7 @@ void BrownianMotionRotateParticlesGPU(
   cudaMemcpy(newMolPos.z, new_coords_z->get(), atomCount * sizeof(double), cudaMemcpyDeviceToHost);
   
 
-  // Could simply avoid incrementing the counter for com on rotation moves..
+  // Avoided by not incrementing the counter for com on rotation moves..
   cudaMemcpy(new_com_x->get(), com_x->get(), molCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(new_com_y->get(), com_y->get(), molCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(new_com_z->get(), com_z->get(), molCount * sizeof(double), cudaMemcpyDeviceToHost);
