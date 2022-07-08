@@ -336,6 +336,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   BufferAccess<DeviceArray<double>, double, buffers> mFy(*(vars->gpu_mFy), buffer_index);
   BufferAccess<DeviceArray<double>, double, buffers> mFz(*(vars->gpu_mFz), buffer_index);
 
+  // Might move this to the prepare or accept function..
   cudaMemset(aFx->get(), 0.0, atomCount * sizeof(double));
   cudaMemset(aFy->get(), 0.0, atomCount * sizeof(double));
   cudaMemset(aFz->get(), 0.0, atomCount * sizeof(double));

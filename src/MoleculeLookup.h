@@ -213,9 +213,9 @@ static uint GetConsensusMolBeta( const uint pStart,
   int32_t *atomKind; // stores the atom kind for global atom index
   double *atomCharge; // stores the atom's charge for global
 
-  std::vector <uint32_t> fixedMolecule;
-  std::vector <uint32_t> canSwapKind; //Kinds that can move intra and inter box
-  std::vector <uint32_t> canMoveKind; //Kinds that can move intra box only
+  std::vector <int32_t> fixedMolecule;
+  std::vector <int32_t> canSwapKind; //Kinds that can move intra and inter box
+  std::vector <int32_t> canMoveKind; //Kinds that can move intra box only
 
   // make CheckpointOutput class a friend so it can print all the private data
   friend class CheckpointOutput;

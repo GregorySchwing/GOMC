@@ -126,6 +126,11 @@ void MoleculeLookup::Init(const Molecules& mols,
   CUMALLOC((void**) &cudaVars->gpu_startAtomIdx, numMol * sizeof(int));
   // copy start atom index
   cudaMemcpy(cudaVars->gpu_startAtomIdx, mols.start, numMol * sizeof(int), cudaMemcpyHostToDevice);
+
+  CUMALLOC((void**) &cudaVars->gpu_moleculeFixed, numMol * sizeof(int));
+  // copy fixed flag
+  cudaMemcpy(cudaVars->gpu_moleculeFixed, &fixedMolecule[0], numMol * sizeof(int), cudaMemcpyHostToDevice);
+
 #endif
 
 }
