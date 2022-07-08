@@ -904,7 +904,9 @@ void BrownianMotionRotateParticlesGPU(
 
   // Each block would handle one molecule
   int threadsPerBlock = 32;
-  int blocksPerGrid = molCountInBox;
+  //int blocksPerGrid = molCountInBox;
+	int blocksPerGridAtoms = (atomCount + threadsPerBlock - 1)/threadsPerBlock;
+	int blocksPerGridMols = (molCount + threadsPerBlock - 1)/threadsPerBlock;
 
 
   //cudaMemcpy(vars->gpu_mTorquex, mTorque.x, molCount * sizeof(double), cudaMemcpyHostToDevice);
@@ -952,8 +954,27 @@ void BrownianMotionRotateParticlesGPU(
   double3 axis = make_double3(boxAxes.x, boxAxes.y, boxAxes.z);
   double3 halfAx = make_double3(boxAxes.x * 0.5, boxAxes.y * 0.5, boxAxes.z * 0.5);
 
-  if (isOrthogonal)
-    BrownianMotionRotateKernel<true><<< blocksPerGrid, threadsPerBlock>>>(
+  if (isOrthogonal){
+    BrownianMotionRotateKernelUpdateR_K<true><<< blocksPerGridMols, threadsPerBlock>>>(
+      molCount,   
+      mTx->get(),
+      mTy->get(),
+      mTz->get(),
+      com_x->get(),
+      com_y->get(),
+      com_z->get(),
+      vars->gpu_r_k_x,
+      vars->gpu_r_k_y,
+      vars->gpu_r_k_z,
+      vars->gpu_moleculeFixed,
+      r_max,
+      step,
+      key,
+      seed,
+      BETA,
+      kill);
+  
+    BrownianMotionRotateKernel<true><<< blocksPerGridAtoms, threadsPerBlock>>>(
       vars->gpu_startAtomIdx,
       old_coords_x->get(),
       old_coords_y->get(),
@@ -987,8 +1008,27 @@ void BrownianMotionRotateParticlesGPU(
       seed,
       BETA,
       kill);
-else
-      BrownianMotionRotateKernel<true><<< blocksPerGrid, threadsPerBlock>>>(
+  } else {
+    BrownianMotionRotateKernelUpdateR_K<false><<< blocksPerGridMols, threadsPerBlock>>>(
+      molCount,   
+      mTx->get(),
+      mTy->get(),
+      mTz->get(),
+      com_x->get(),
+      com_y->get(),
+      com_z->get(),
+      vars->gpu_r_k_x,
+      vars->gpu_r_k_y,
+      vars->gpu_r_k_z,
+      vars->gpu_moleculeFixed,
+      r_max,
+      step,
+      key,
+      seed,
+      BETA,
+      kill);
+
+      BrownianMotionRotateKernel<true><<< blocksPerGridAtoms, threadsPerBlock>>>(
       vars->gpu_startAtomIdx,
       old_coords_x->get(),
       old_coords_y->get(),
@@ -1022,7 +1062,7 @@ else
       seed,
       BETA,
       kill);
-      
+  }
   cudaDeviceSynchronize();
   checkLastErrorCUDA(__FILE__, __LINE__);
   
@@ -1041,6 +1081,51 @@ else
   cudaMemcpy(r_k.y, vars->gpu_r_k_y, molCount * sizeof(double), cudaMemcpyDeviceToHost);
   cudaMemcpy(r_k.z, vars->gpu_r_k_z, molCount * sizeof(double), cudaMemcpyDeviceToHost);
   checkLastErrorCUDA(__FILE__, __LINE__);
+}
+
+
+template<const bool isOrthogonal>
+__global__ void BrownianMotionRotateKernelUpdateR_K(
+  int molCount,
+  double *molTorquex,
+  double *molTorquey,
+  double *molTorquez,
+  double *gpu_comx,
+  double *gpu_comy,
+  double *gpu_comz,
+  double *gpu_r_k_x,
+  double *gpu_r_k_y,
+  double *gpu_r_k_z,
+  int *moleculeInvolved,
+  double r_max,
+  ulong step,
+  unsigned int key,
+  ulong seed,
+  double BETA,
+  int *kill)
+{
+  //Each thread takes care of one molecule
+  int molIndex = threadIdx.x + blockDim.x*blockIdx.x;
+  if (molIndex >= molCount) return;
+  
+// This section calculates the amount of rotation
+  double stdDev = sqrt(2.0 * r_max);
+  double btm_x = molTorquex[molIndex] * BETA * r_max;
+  double btm_y = molTorquey[molIndex] * BETA * r_max;
+  double btm_z = molTorquez[molIndex] * BETA * r_max;
+
+  double3 randnums = randomGaussianCoordsGPU(molIndex, key, step, seed, 0.0, stdDev);
+  double rot_x = btm_x + randnums.x;
+  double rot_y = btm_y + randnums.y;
+  double rot_z = btm_z + randnums.z;
+  // update the trial torque
+  gpu_r_k_x[molIndex] = rot_x;
+  gpu_r_k_y[molIndex] = rot_y;
+  gpu_r_k_z[molIndex] = rot_z;
+  //check for bad configuration
+  if(!isfinite(rot_x + rot_y + rot_z)) {
+    atomicAdd(kill, 1);
+  }
 }
 
 template<const bool isOrthogonal>
@@ -1079,112 +1164,89 @@ __global__ void BrownianMotionRotateKernel(
   double BETA,
   int *kill)
 {
-  //Each block takes care of one molecule
-  int molIndex = moleculeInvolved[blockIdx.x];
-  int startIdx = startAtomIdx[molIndex];
-  int endIdx = startAtomIdx[molIndex + 1];
-  int atomIdx;
+  //Each thread takes care of one atom
+  int atomIdx = threadIdx.x + blockDim.x*blockIdx.x;
+  if (atomIdx >= atomCount) return;
 
-  __shared__ double matrix[3][3];
-  __shared__ double3 com;
+  int molIndex = gpu_particleMol[atomIdx];
+  int molFixed = moleculeInvolved[molIndex];
 
-  // thread 0 will set up the matrix and update the gpu_r_k
-  if(threadIdx.x == 0) {
-    com = make_double3(gpu_comx[molIndex], gpu_comy[molIndex], gpu_comz[molIndex]);
-    // This section calculates the amount of rotation
-    double stdDev = sqrt(2.0 * r_max);
-    double btm_x = molTorquex[molIndex] * BETA * r_max;
-    double btm_y = molTorquey[molIndex] * BETA * r_max;
-    double btm_z = molTorquez[molIndex] * BETA * r_max;
+  double matrix[3][3];
+  double3 com;
+  // build rotation matrix
+  double cross[3][3], tensor[3][3];
+  double rot_x = gpu_r_k_x[molIndex];
+  double rot_y = gpu_r_k_y[molIndex] ;
+  double rot_z = gpu_r_k_z[molIndex];
 
-    double3 randnums = randomGaussianCoordsGPU(molIndex, key, step, seed, 0.0, stdDev);
-    double rot_x = btm_x + randnums.x;
-    double rot_y = btm_y + randnums.y;
-    double rot_z = btm_z + randnums.z;
-    // update the trial torque
-    gpu_r_k_x[molIndex] = rot_x;
-    gpu_r_k_y[molIndex] = rot_y;
-    gpu_r_k_z[molIndex] = rot_z;
-    //check for bad configuration
-    if(!isfinite(rot_x + rot_y + rot_z)) {
-      atomicAdd(kill, 1);
+  double rotLen = sqrt(rot_x * rot_x + rot_y * rot_y + rot_z * rot_z);
+  double axisx = rot_x * (1.0 / rotLen);
+  double axisy = rot_y * (1.0 / rotLen);
+  double axisz = rot_z * (1.0 / rotLen);
+  // build cross
+  cross[0][0] = 0.0; cross[0][1] = -axisz; cross[0][2] = axisy;
+  cross[1][0] = axisz; cross[1][1] = 0.0; cross[1][2] = -axisx;
+  cross[2][0] = -axisy; cross[2][1] = axisx; cross[2][2] = 0.0;
+  // build tensor
+  int i, j;
+  for(i = 0; i < 3; ++i) {
+    tensor[0][i] = axisx;
+    tensor[1][i] = axisy;
+    tensor[2][i] = axisz;
+  }
+  for(i = 0; i < 3; ++i) {
+    tensor[i][0] *= axisx;
+    tensor[i][1] *= axisy;
+    tensor[i][2] *= axisz;
+  }
+  // build matrix
+  double s, c;
+  sincos(rotLen, &s, &c);
+  for(i = 0; i < 3; ++i) {
+    for(j = 0; j < 3; ++j) {
+      matrix[i][j] = 0.0;
     }
-    // build rotation matrix
-    double cross[3][3], tensor[3][3];
-    double rotLen = sqrt(rot_x * rot_x + rot_y * rot_y + rot_z * rot_z);
-    double axisx = rot_x * (1.0 / rotLen);
-    double axisy = rot_y * (1.0 / rotLen);
-    double axisz = rot_z * (1.0 / rotLen);
-    // build cross
-    cross[0][0] = 0.0; cross[0][1] = -axisz; cross[0][2] = axisy;
-    cross[1][0] = axisz; cross[1][1] = 0.0; cross[1][2] = -axisx;
-    cross[2][0] = -axisy; cross[2][1] = axisx; cross[2][2] = 0.0;
-    // build tensor
-    int i, j;
-    for(i = 0; i < 3; ++i) {
-      tensor[0][i] = axisx;
-      tensor[1][i] = axisy;
-      tensor[2][i] = axisz;
-    }
-    for(i = 0; i < 3; ++i) {
-      tensor[i][0] *= axisx;
-      tensor[i][1] *= axisy;
-      tensor[i][2] *= axisz;
-    }
-    // build matrix
-    double s, c;
-    sincos(rotLen, &s, &c);
-    for(i = 0; i < 3; ++i) {
-      for(j = 0; j < 3; ++j) {
-        matrix[i][j] = 0.0;
-      }
-      matrix[i][i] = c;
-    }
-    for(i = 0; i < 3; ++i) {
-      for(j = 0; j < 3; ++j) {
-        matrix[i][j] += s * cross[i][j] + (1 - c) * tensor[i][j];
-      }
+    matrix[i][i] = c;
+  }
+  for(i = 0; i < 3; ++i) {
+    for(j = 0; j < 3; ++j) {
+      matrix[i][j] += s * cross[i][j] + (1 - c) * tensor[i][j];
     }
   }
-
-  __syncthreads();
-  // use stride of blockDim.x, which is 32
   // each thread handles one atom rotation
-  for(atomIdx = startIdx + threadIdx.x; atomIdx < endIdx; atomIdx += blockDim.x) {
-    double3 coor = make_double3(gpu_old_x[atomIdx], gpu_old_y[atomIdx], gpu_old_z[atomIdx]);
-    // unwrap molecule
-    if(isOrthogonal)
-      UnwrapPBC3(coor, com, axis, halfAx);
-    else
-      UnwrapPBCNonOrth3(coor, com, axis, halfAx, gpu_cell_x, gpu_cell_y, gpu_cell_z,
-                        gpu_Invcell_x, gpu_Invcell_y, gpu_Invcell_z);
-
-    // move COM of molecule to zero
-    coor.x -= com.x;
-    coor.y -= com.y;
-    coor.z -= com.z;
-    // rotate
-    double newx = matrix[0][0] * coor.x + matrix[0][1] * coor.y + matrix[0][2] * coor.z;
-    double newy = matrix[1][0] * coor.x + matrix[1][1] * coor.y + matrix[1][2] * coor.z;
-    double newz = matrix[2][0] * coor.x + matrix[2][1] * coor.y + matrix[2][2] * coor.z;
-
-    // move back to com
-    coor.x = newx + com.x;
-    coor.y = newy + com.y;
-    coor.z = newz + com.z;
-
-    // wrap again
-    if(isOrthogonal)
-      WrapPBC3(coor, axis);
-    else
-      WrapPBCNonOrth3(coor, axis, gpu_cell_x, gpu_cell_y, gpu_cell_z,
+  double3 coor = make_double3(gpu_old_x[atomIdx], gpu_old_y[atomIdx], gpu_old_z[atomIdx]);
+  // unwrap molecule
+  if(isOrthogonal)
+    UnwrapPBC3(coor, com, axis, halfAx);
+  else
+    UnwrapPBCNonOrth3(coor, com, axis, halfAx, gpu_cell_x, gpu_cell_y, gpu_cell_z,
                       gpu_Invcell_x, gpu_Invcell_y, gpu_Invcell_z);
 
-    // update the new position
-    gpu_new_x[atomIdx] = coor.x;
-    gpu_new_y[atomIdx] = coor.y;
-    gpu_new_z[atomIdx] = coor.z;
-  }
+  // move COM of molecule to zero
+  coor.x -= com.x;
+  coor.y -= com.y;
+  coor.z -= com.z;
+  // rotate
+  double newx = matrix[0][0] * coor.x + matrix[0][1] * coor.y + matrix[0][2] * coor.z;
+  double newy = matrix[1][0] * coor.x + matrix[1][1] * coor.y + matrix[1][2] * coor.z;
+  double newz = matrix[2][0] * coor.x + matrix[2][1] * coor.y + matrix[2][2] * coor.z;
+
+  // move back to com
+  coor.x = newx + com.x;
+  coor.y = newy + com.y;
+  coor.z = newz + com.z;
+
+  // wrap again
+  if(isOrthogonal)
+    WrapPBC3(coor, axis);
+  else
+    WrapPBCNonOrth3(coor, axis, gpu_cell_x, gpu_cell_y, gpu_cell_z,
+                    gpu_Invcell_x, gpu_Invcell_y, gpu_Invcell_z);
+
+  // update the new position
+  gpu_new_x[atomIdx] = coor.x;
+  gpu_new_y[atomIdx] = coor.y;
+  gpu_new_z[atomIdx] = coor.z;
 }
 
 void BrownianMotionTranslateParticlesGPU(

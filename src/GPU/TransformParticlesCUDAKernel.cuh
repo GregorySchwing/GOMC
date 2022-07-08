@@ -244,6 +244,25 @@ void BrownianMotionTranslateParticlesGPU(
   const bool isOrthogonal,
   int *kill);
 
+template<const bool isOrthogonal>
+__global__ void BrownianMotionRotateKernelUpdateR_K(
+  int molCount,
+  double *molTorquex,
+  double *molTorquey,
+  double *molTorquez,
+  double *gpu_comx,
+  double *gpu_comy,
+  double *gpu_comz,
+  double *gpu_r_k_x,
+  double *gpu_r_k_y,
+  double *gpu_r_k_z,
+  int *moleculeInvolved,
+  double r_max,
+  ulong step,
+  unsigned int key,
+  ulong seed,
+  double BETA,
+  int *kill);
 
 template<const bool isOrthogonal>
 __global__ void BrownianMotionRotateKernel(
