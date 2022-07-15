@@ -647,50 +647,48 @@ void ConfigSetup::Init(const char *fileName, MultiSim const*const& multisim)
     } else if (CheckString(line[0], "Wolf")){
           sys.elect.wolf = checkBool(line[1]);
           printf("%-40s %-s \n", "Info: Wolf Electrostatic", sys.elect.wolf ? "Active" : "Inactive");
-          if (line.size() > 2){
-            if (CheckString(line[2], "DSP")){
-              sys.ff.COUL_KIND = sys.ff.COUL_DSP_KIND;
-              printf("%-40s %-s \n", "Info: Wolf Dampened Shifted Potential", "Active");
-              sys.elect.readWolfType = true;
-            } else if (CheckString(line[2], "DSF")){              
-              sys.ff.COUL_KIND = sys.ff.COUL_DSF_KIND;
-              printf("%-40s %-s \n", "Info: Wolf Dampened Shifted Force", "Active");
-              sys.elect.readWolfType = true;
-            } else {
-              std::cout <<  "Error: Wolf Potential incorrectly specified!" << std::endl <<
-                            "Usage : WolfKind\t(True/False)\t(DSP/DSF)" << std::endl <<
-                            "Example : Wolf\tTrue\tDSP" << std::endl;
-            }
-          }
     } else if (CheckString(line[0], "WolfKind")){
-          if (line.size() == 2){
-            if (CheckString(line[1], "Hybrid")){
-              sys.ff.WOLF_KIND = sys.ff.WOLF_HYBRID_KIND;
-              printf("%-40s %-s \n", "Info: Wolf Hybrid Vlugt/Gross Implementation", "Active");
-              sys.elect.readWolfKind = true;
-            } else if (CheckString(line[1], "Gross")){    
-              sys.ff.WOLF_KIND = sys.ff.WOLF_GROSS_KIND;
-              printf("%-40s %-s \n", "Info: Wolf Gross Implementation", "Active");
-              sys.elect.readWolfKind = true;
-            } else if (CheckString(line[1], "Vlugt")) {
-              sys.ff.WOLF_KIND = sys.ff.WOLF_VLUGT_KIND;
-              printf("%-40s %-s \n", "Info: Wolf Vlugt Implementation", "Active");
-              sys.elect.readWolfKind = true;
-            } else if (CheckString(line[1], "VlugtWIntraCutoff")) {
-              sys.ff.WOLF_KIND = sys.ff.WOLF_VLUGTWINTRACUTOFF_KIND;
-              printf("%-40s %-s \n", "Info: Wolf Vlugt With Intramolecular Coulombic Cutoff Implementation", "Active");
-              sys.elect.readWolfKind = true;
-            } else {
-              std::cout <<  "Error: Wolf Kind incorrectly specified!" << std::endl <<
-                            "Usage : WolfKind\tHybrid/Gross/Vlugt" << std::endl <<
-                            "Example : WolfKind\tGross" << std::endl;
-              exit(1);
-            }
-          } else {
-            std::cout <<  "Error: Wolf Kind incorrectly specified!" << std::endl <<
-              "Usage : WolfKind\tHybrid/Gross/Vlugt" << std::endl <<
-              "Example : WolfKind\tGross" << std::endl;
-          }
+      if (line.size() >= 2){
+        if (CheckString(line[1], "Hybrid")){
+          sys.ff.WOLF_KIND = sys.ff.WOLF_HYBRID_KIND;
+          printf("%-40s %-s \n", "Info: Wolf Hybrid Vlugt/Gross Implementation", "Active");
+          sys.elect.readWolfKind = true;
+        } else if (CheckString(line[1], "Gross")){    
+          sys.ff.WOLF_KIND = sys.ff.WOLF_GROSS_KIND;
+          printf("%-40s %-s \n", "Info: Wolf Gross Implementation", "Active");
+          sys.elect.readWolfKind = true;
+        } else if (CheckString(line[1], "Vlugt")) {
+          sys.ff.WOLF_KIND = sys.ff.WOLF_VLUGT_KIND;
+          printf("%-40s %-s \n", "Info: Wolf Vlugt Implementation", "Active");
+          sys.elect.readWolfKind = true;
+        } else if (CheckString(line[1], "VlugtWIntraCutoff")) {
+          sys.ff.WOLF_KIND = sys.ff.WOLF_VLUGTWINTRACUTOFF_KIND;
+          printf("%-40s %-s \n", "Info: Wolf Vlugt With Intramolecular Coulombic Cutoff Implementation", "Active");
+          sys.elect.readWolfKind = true;
+        } else {
+          std::cout <<  "Error: Wolf Kind incorrectly specified!" << std::endl <<
+                        "Usage : WolfKind\tHybrid/Gross/Vlugt/VlugtWIntraCutoff" << std::endl <<
+                        "Example : WolfKind\tGross" << std::endl;
+          exit(EXIT_FAILURE);
+        }
+      }
+    } else if (CheckString(line[0], "WolfPotential")){
+      if (line.size() >= 2){
+        if (CheckString(line[1], "DSP")){
+          sys.ff.COUL_KIND = sys.ff.COUL_DSP_KIND;
+          printf("%-40s %-s \n", "Info: Wolf Dampened Shifted Potential", "Active");
+          sys.elect.readWolfType = true;
+        } else if (CheckString(line[1], "DSF")){              
+          sys.ff.COUL_KIND = sys.ff.COUL_DSF_KIND;
+          printf("%-40s %-s \n", "Info: Wolf Dampened Shifted Force", "Active");
+          sys.elect.readWolfType = true;
+        } else {
+          std::cout <<  "Error: WolfPotential incorrectly specified!" << std::endl <<
+                        "Usage : WolfPotential\t(DSP/DSF)" << std::endl <<
+                        "Example : WolfPotential\tDSP" << std::endl;
+          exit(EXIT_FAILURE);
+        }
+      }
     } else if (CheckString(line[0], "WolfAlpha")) {
       if (line.size() != 3){
           std::cout <<  "Error: Wolf Alpha incorrectly specified!" << std::endl <<
@@ -708,6 +706,7 @@ void ConfigSetup::Init(const char *fileName, MultiSim const*const& multisim)
         else{
           std::cout <<  "Error: Only (0/1) for box is supported!" << std::endl <<
           "You entered : WolfAlpha\t" << b << "\tvalue" << std::endl;
+          exit(EXIT_FAILURE);
         }
       }
     } else if (CheckString(line[0], "WolfAlphaRange")){
@@ -722,6 +721,8 @@ void ConfigSetup::Init(const char *fileName, MultiSim const*const& multisim)
         } else {
           std::cout <<  "Error: WolfAlphaRange requires 4 arguments!" << std::endl <<
           "Usage: WolfAlphaRange\tBOX\tSTART\tEND\tDELTA" << std::endl;
+          exit(EXIT_FAILURE);
+
         }
     } else if(CheckString(line[0], "Tolerance")) {
       sys.elect.tolerance = stringtod(line[1]);
@@ -1705,7 +1706,7 @@ void ConfigSetup::fillDefaults(void)
       }
     }
     if (!sys.elect.readWolfType){
-      sys.ff.WOLF_KIND = sys.ff.WOLF_HYBRID_KIND;
+      sys.ff.WOLF_KIND = sys.ff.WOLF_VLUGTWINTRACUTOFF_KIND;
     }
     for(uint b = 0; b < BOX_TOTAL; b++) {
       if(!sys.elect.readWolfAlpha[b]) {
