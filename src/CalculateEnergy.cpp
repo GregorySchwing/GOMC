@@ -61,6 +61,10 @@ CalculateEnergy::CalculateEnergy(StaticVals & stat, System & sys) :
 
 }
 
+void CalculateEnergy::UpdatePointer(System & sys)
+{
+  calcEwald = sys.GetEwald();
+}
 
 void CalculateEnergy::Init(System & sys)
 {

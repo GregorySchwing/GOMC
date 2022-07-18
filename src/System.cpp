@@ -390,4 +390,5 @@ void System::PrintTime()
 
 void System::SwapWolfAndEwaldPointers(){
   std::swap(calcEwald, refEwald);
+  calcEnergy.UpdatePointer(*this);
 }

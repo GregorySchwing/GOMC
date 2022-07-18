@@ -216,6 +216,7 @@ public:
   double GetCharge(int atomIndex);
   #endif
   void WolfCalibrationEnergy(double * electrostaticEnergies);
+  void UpdatePointer(System & sys);
 
 private:
 
