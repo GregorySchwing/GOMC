@@ -1979,7 +1979,7 @@ void CalculateEnergy::WolfCalibrationEnergy(double * electrostaticEnergies){
                                                           wolfCalRef.GetAlpha(b, indexForAlpha));
             for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
               calcEwald->SetWolfKind(wolfKind);
-              forcefield.SetWolfKind(coulKind);
+              forcefield.SetWolfKind(wolfKind);
               summationPotential.Zero();
               summationPotential += storagePotential;
               summationPotential.boxEnergy[b].intraBond = bondEn;
@@ -2005,6 +2005,7 @@ void CalculateEnergy::WolfCalibrationEnergy(double * electrostaticEnergies){
               summationPotential.boxEnergy[b].self = calcEwald->BoxSelf(b, wolfCalRef.GetWolfFactor1(b, indexForRcut, indexForAlpha), 
                                                                     wolfCalRef.GetAlpha(b, indexForAlpha));
               summationPotential.Total();
+              printf("en %f\n", summationPotential.boxEnergy[b].total);
               electrostaticEnergies[wolfCalRef.GetIndex(b, wolfKind, coulKind, indexForRcut, indexForAlpha)] = summationPotential.boxEnergy[b].total;
             }
           }

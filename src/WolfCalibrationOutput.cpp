@@ -13,7 +13,8 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 WolfCalibrationOutput::WolfCalibrationOutput(System & sys, StaticVals & statV):
 sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV), wolfCalRef(statV.wolfCal)
 {
-
+      // This is neccessary to check for correctness of single point energy calculations.
+      printOnFirstStep = true;
 }
 
 WolfCalibrationOutput::~WolfCalibrationOutput()
@@ -137,7 +138,8 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
       // Since ewald and wolf share a ff object
       statValRef.forcefield.SetWolfKind(0);
       SystemPotential ewaldRef = calcEn.SystemTotal();
-
+      ewaldRef.Total();
+      printf("ew en %f\n", ewaldRef.boxEnergy[0].total);
       sysRef.SwapWolfAndEwaldPointers();
 
       // Restore original wolf settings
