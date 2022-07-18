@@ -139,7 +139,6 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
       statValRef.forcefield.SetWolfKind(0);
       SystemPotential ewaldRef = calcEn.SystemTotal();
       ewaldRef.Total();
-      printf("ew en %f\n", ewaldRef.boxEnergy[0].total);
       sysRef.SwapWolfAndEwaldPointers();
 
       // Restore original wolf settings
