@@ -237,9 +237,6 @@ void ConfigSetup::Init(const char *fileName, MultiSim const*const& multisim)
         std::cout << "Error: PRNG can be one of three kinds (RANDOM/INTSEED/RESTART)!\n";
         exit(EXIT_FAILURE);
       }
-    } else if(CheckString(line[0], "PRNG_Seed_File")) {
-      in.seed.files = line[1];
-      in.seed.defined = true;
     } else if(CheckString(line[0], "PRNG_ParallelTempering")) {
       in.prngParallelTempering.kind = line[1];
       if("RANDOM" == line[1])
@@ -2532,7 +2529,6 @@ void ConfigSetup::verifyInputs(void)
 
 const std::string config_setup::PRNGKind::KIND_RANDOM = "RANDOM";
 const std::string config_setup::PRNGKind::KIND_SEED = "INTSEED";
-const std::string config_setup::PRNGKind::KIND_RESTART = "RESTART";
 const std::string config_setup::FFKind::FF_CHARMM = "CHARMM";
 const std::string config_setup::FFKind::FF_EXOTIC = "EXOTIC";
 const std::string config_setup::FFKind::FF_MARTINI = "MARTINI";
