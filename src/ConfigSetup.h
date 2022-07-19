@@ -96,7 +96,11 @@ struct PRNGKind {
   {
     return str::compare(KIND_SEED, kind);
   }
-  static const std::string KIND_RANDOM, KIND_SEED;
+  bool IsRestart(void) const
+  {
+    return str::compare(KIND_RESTART, kind);
+  }
+  static const std::string KIND_RANDOM, KIND_SEED, KIND_RESTART;
 };
 
 struct FFKind {
