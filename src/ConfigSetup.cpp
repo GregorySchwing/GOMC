@@ -230,11 +230,8 @@ void ConfigSetup::Init(const char *fileName, MultiSim const*const& multisim)
       } else if ("INTSEED" == line[1]){ 
         printf("%-40s %-s \n", "Info: Integer seed", "Active");
         in.prng.kind = line[1];
-      } else if ("RESTART" == line[1]) {
-        printf("%-40s %-s \n", "Info: Restart seed", "Active");
-        in.prng.kind = line[1];
       } else {
-        std::cout << "Error: PRNG can be one of three kinds (RANDOM/INTSEED/RESTART)!\n";
+        std::cout << "Error: PRNG can be either (RANDOM/INTSEED)!\n";
         exit(EXIT_FAILURE);
       }
     } else if(CheckString(line[0], "PRNG_ParallelTempering")) {
