@@ -17,6 +17,8 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #include <cuda_runtime.h>
 #include "CUDAMemoryManager.cuh"
 #include "VariablesCUDA.cuh"
+#include "MoleculeLookupGPU.cuh"
+
 #endif
 
 void MoleculeLookup::Init(const Molecules& mols,
@@ -130,6 +132,15 @@ void MoleculeLookup::Init(const Molecules& mols,
   CUMALLOC((void**) &cudaVars->gpu_moleculeFixed, numMol * sizeof(int));
   // copy fixed flag
   cudaMemcpy(cudaVars->gpu_moleculeFixed, &fixedMolecule[0], numMol * sizeof(int), cudaMemcpyHostToDevice);
+
+  cudaVars->molLookupGPU = new MoleculeLookupGPU(molLookupCount,
+                                                atomCount,
+                                                boxAndKindStartLength,
+                                                boxAndKindSwappableLength,
+                                                numKinds,
+                                                molLookup,  
+                                                &fixedMolecule[0],                                    
+                                                boxAndKindStart);
 
 #endif
 

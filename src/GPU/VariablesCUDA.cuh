@@ -4,15 +4,16 @@ Copyright (C) 2022 GOMC Group
 A copy of the MIT License can be found in License.txt
 along with this program, also can be found at <https://opensource.org/licenses/MIT>.
 ********************************************************************************/
-#pragma once
 #ifdef GOMC_CUDA
-
+#ifndef VARIABLES_CUDA_CUH
+#define VARIABLES_CUDA_CUH
 #include <cuda.h>
 #include <stdio.h>
 #include <cuda_runtime.h>
 #include "EnsemblePreprocessor.h"
 #include "NumLib.h"
 #include "DoubleBuffer.cuh"
+#include "MoleculeLookupGPU.cuh"
 //Need a separate float constant for device code with the MSVC compiler
 //See CUDA Programming Guide section I.4.13 for details 
 static const __device__ double qqFactGPU = num::qqFact;
@@ -173,6 +174,8 @@ public:
   MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mTy;
   MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mTz;
 
+  MoleculeLookupGPU * molLookupGPU;
+
   double *gpu_aForcex_buffer, *gpu_aForcey_buffer, *gpu_aForcez_buffer;
   double *gpu_mForcex_buffer, *gpu_mForcey_buffer, *gpu_mForcez_buffer;
 
@@ -237,4 +240,5 @@ public:
   int cpu_numberOfCells[BOX_TOTAL];
 
 };
+#endif
 #endif
