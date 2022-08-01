@@ -191,6 +191,10 @@ void Molecules::Init(Setup & setup, Forcefield & forcefield,
       }
     }
   }
+
+  #ifdef GOMC_CUDA 
+    refVarCUDA = forcefield.particles->getCUDAVars();
+  #endif
 }
 
 bool Molecules::operator==(const Molecules & other){

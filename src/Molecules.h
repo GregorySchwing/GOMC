@@ -133,6 +133,10 @@ public:
   double* pairVirCorrections;
 
   bool printFlag, restartFromCheckpoint;
+
+  #ifdef GOMC_CUDA 
+  VariablesCUDA *refVarCUDA;
+  #endif
 };
 
 

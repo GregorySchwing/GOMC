@@ -103,7 +103,7 @@ System::~System()
 void System::Init(Setup & set)
 {
 #ifdef VARIABLE_PARTICLE_NUMBER
-  molLookup.Init(statV.mol, set.pdb.atoms, statV.forcefield,
+  molLookup.Init(statV.mol, set.pdb.atoms,
                     set.config.in.restart.restartFromCheckpoint);
 #endif
   moveSettings.Init(statV, set.pdb.remarks, molLookupRef.GetNumKind(),
@@ -254,7 +254,7 @@ void System::RecalculateTrajectory(Setup &set, uint frameNum)
   set.pdb.Init(set.config.in.restart, set.config.in.files.pdb.name, frameNum);
   statV.InitOver(set, *this);
 #ifdef VARIABLE_PARTICLE_NUMBER
-  molLookup.Init(statV.mol, set.pdb.atoms, statV.forcefield,
+  molLookup.Init(statV.mol, set.pdb.atoms,
                   set.config.in.restart.restartFromCheckpoint);
 #endif
   coordinates.InitFromPDB(set.pdb.atoms);

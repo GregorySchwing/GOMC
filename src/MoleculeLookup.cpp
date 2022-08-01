@@ -18,12 +18,10 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #include "CUDAMemoryManager.cuh"
 #include "VariablesCUDA.cuh"
 #include "MoleculeLookupGPU.cuh"
-
 #endif
 
 void MoleculeLookup::Init(const Molecules& mols,
                           const pdb_setup::Atoms& atomData,
-                          Forcefield &ff,
                           bool restartFromCheckpoint)
 {
   // If we restFromChk, this info comes from file
@@ -122,7 +120,7 @@ void MoleculeLookup::Init(const Molecules& mols,
   }
 // allocate and set gpu variables
 #ifdef GOMC_CUDA
-  VariablesCUDA *cudaVars = ff.particles->getCUDAVars();
+  VariablesCUDA *cudaVars = mols.refVarCUDA;
   int numMol = mols.count + 1;
   // allocate memory to store molecule start atom index
   CUMALLOC((void**) &cudaVars->gpu_startAtomIdx, numMol * sizeof(int));
@@ -133,14 +131,15 @@ void MoleculeLookup::Init(const Molecules& mols,
   // copy fixed flag
   cudaMemcpy(cudaVars->gpu_moleculeFixed, &fixedMolecule[0], numMol * sizeof(int), cudaMemcpyHostToDevice);
 
-  cudaVars->molLookupGPU = new MoleculeLookupGPU(molLookupCount,
-                                                atomCount,
-                                                boxAndKindStartLength,
-                                                boxAndKindSwappableLength,
-                                                numKinds,
-                                                molLookup,  
-                                                &fixedMolecule[0],                                    
-                                                boxAndKindStart);
+  molLookupGPU = new MoleculeLookupGPU(molLookupCount,
+                                      atomCount,
+                                      boxAndKindStartLength,
+                                      boxAndKindSwappableLength,
+                                      numKinds,
+                                      molLookup,  
+                                      &fixedMolecule[0],                                    
+                                      boxAndKindStart);
+
 
 #endif
 

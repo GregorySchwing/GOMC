@@ -10,7 +10,6 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #include "EnsemblePreprocessor.h" //for BOX_TOTAL
 #include "BasicTypes.h" //For uint
 #include "algorithm"
-#include "Forcefield.h"
 #include <vector>
 #include <cstring>
 
@@ -18,6 +17,9 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #include <cereal/types/vector.hpp>
 #include <cereal/cereal.hpp>
 
+#ifdef GOMC_CUDA
+#include "MoleculeLookupGPU.cuh"
+#endif
 class CheckpointOutput;
 
 namespace pdb_setup
@@ -55,6 +57,9 @@ public:
       delete[] boxAndKindStart;
     if (boxAndKindSwappableCounts != NULL)
       delete[] boxAndKindSwappableCounts;
+  #ifdef GOMC_CUDA
+    delete molLookupGPU;
+  #endif
   }
 
   MoleculeLookup& operator=(const MoleculeLookup & rhs);
@@ -62,7 +67,7 @@ public:
 
   //Initialize this object to be consistent with Molecules mols
   void Init(Molecules const& mols, const pdb_setup::Atoms& atomData,
-            Forcefield &ff, bool restartFromCheckpoint);
+            bool restartFromCheckpoint);
 
   uint GetNumKind(void) const
   {
@@ -216,6 +221,10 @@ static uint GetConsensusMolBeta( const uint pStart,
   std::vector <int32_t> fixedMolecule;
   std::vector <int32_t> canSwapKind; //Kinds that can move intra and inter box
   std::vector <int32_t> canMoveKind; //Kinds that can move intra box only
+  
+  #ifdef GOMC_CUDA
+  MoleculeLookupGPU * molLookupGPU;
+  #endif
 
   // make CheckpointOutput class a friend so it can print all the private data
   friend class CheckpointOutput;

@@ -21,29 +21,33 @@ class MoleculeLookupGPU {
     ~MoleculeLookupGPU();
 
   private:
-    uint32_t * molLookupCount;
-    uint32_t * atomCount;
-    uint32_t * boxAndKindStartLength;
-    uint32_t * boxAndKindSwappableLength;
-    uint32_t * numKinds;
+
+    uint32_t * gpu_molLookupCount;
+    uint32_t * gpu_atomCount;
+    uint32_t * gpu_boxAndKindStartLength;
+    uint32_t * gpu_boxAndKindSwappableLength;
+    uint32_t * gpu_numKinds;
 
     //array of indices for type Molecule, sorted by box and kind for
     //move selection
-    uint32_t* molLookup;
+    uint32_t* gpu_molLookup;
 
     //index [BOX_TOTAL * kind + box] is the first element of that kind/box in
     //molLookup
     //index [BOX_TOTAL * kind + box + 1] is the element after the end
     //of that kind/box
-    uint32_t* boxAndKindStart;
-    uint32_t* boxAndKindSwappableCounts;
+    uint32_t* gpu_boxAndKindStart;
+    uint32_t* gpu_boxAndKindSwappableCounts;
 
-    int32_t *molIndex; // stores the molecule index for global atom index
-    int32_t *atomIndex; // stores the local atom index for global atom index
+    int32_t *gpu_molIndex; // stores the molecule index for global atom index
+    int32_t *gpu_atomIndex; // stores the local atom index for global atom index
 
-    int32_t * fixedMolecule; //Molecules that can't move 
-    int32_t * canSwapKind; //Kinds that can move intra and inter box
-    int32_t * canMoveKind; //Kinds that can move intra box only
+    int32_t * gpu_fixedMolecule; //Molecules that can't move 
+    int32_t * gpu_canSwapKind; //Kinds that can move intra and inter box
+    int32_t * gpu_canMoveKind; //Kinds that can move intra box only
+
+    int32_t * gpu_startAtomIdx;
+
 };
 
 #endif
