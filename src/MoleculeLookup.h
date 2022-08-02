@@ -53,6 +53,8 @@ public:
       delete[] atomKind;
     if (atomCharge != NULL)
       delete[] atomCharge;
+    if (atomsPerKind != NULL)
+      delete[] atomsPerKind;
     if (boxAndKindStart != NULL)
       delete[] boxAndKindStart;
     if (boxAndKindSwappableCounts != NULL)
@@ -121,6 +123,8 @@ public:
 
   //!Returns total number of molecules in a given box
   uint NumInBox(const uint box) const;
+  //!Returns total number of atoms in a given box
+  uint NumAtomsInBox(const uint box) const;
 
   uint GetBeta( const uint m) const
   {
@@ -217,6 +221,7 @@ static uint GetConsensusMolBeta( const uint pStart,
   int32_t *molKind; // stores the molecule kind for global atom index
   int32_t *atomKind; // stores the atom kind for global atom index
   double *atomCharge; // stores the atom's charge for global
+  int32_t *atomsPerKind;// stores the number of atoms per kind
 
   std::vector <int32_t> fixedMolecule;
   std::vector <int32_t> canSwapKind; //Kinds that can move intra and inter box

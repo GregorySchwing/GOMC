@@ -40,6 +40,7 @@ void MoleculeLookup::Init(const Molecules& mols,
     molKind = new int[atomCount];
     atomKind = new int[atomCount];
     atomCharge = new double[atomCount];
+    atomsPerKind = new int[numKinds];
 
     //+1 to store end value
     boxAndKindStartLength = numKinds * BOX_TOTAL + 1;
@@ -61,6 +62,11 @@ void MoleculeLookup::Init(const Molecules& mols,
 
     for (uint b = 0; b < BOX_TOTAL; ++b) {
       indexVector[b].resize(numKinds);
+    }
+
+    for (int k = 0; k < numKinds; ++k){
+      const MoleculeKind& mk = mols.GetKind(k);
+      atomsPerKind[k] = mk.NumAtoms();
     }
 
     int counter = 0;
@@ -149,6 +155,17 @@ uint MoleculeLookup::NumInBox(const uint box) const
 {
   return boxAndKindStart[(box + 1) * numKinds]
          - boxAndKindStart[box * numKinds];
+}
+
+uint MoleculeLookup::NumAtomsInBox(const uint box) const
+{
+    int numberOfAtoms = 0, i = 0;
+
+    for(int k = 0; k < numKinds; k++) {
+      int atomsPerMol = atomsPerKind[k];
+      numberOfAtoms += atomsPerMol * NumKindInBox(k, box);
+    }
+    return numberOfAtoms;
 }
 
 void MoleculeLookup::TotalAndDensity

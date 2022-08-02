@@ -25,12 +25,14 @@ void CellListGPU::GridBox(VariablesCUDA * cv,
                         const uint b){
     GOMC_EVENT_START(1, GomcProfileEvent::GRID_ALL_GPU);
 
+    int atomCount = molLookRef.NumAtomsInBox(b);
+    int boxAtomOffset = b ? atomCount : 0;
+
     // Need to reinitialize the sequence 0..N-1 every GridAll
     cudaMemcpy(cv->gpu_particleIndices, thrust::raw_pointer_cast(&pI[0]), atomNumber * sizeof(int), cudaMemcpyDeviceToDevice);
     // Clear Cell Degrees
     //cuMemsetD32(reinterpret_cast<CUdeviceptr>(cv->gpu_cellDegrees),  0, size_t(numberOfCells));
     cudaMemset(cv->gpu_cellDegrees, 0, numberOfCells*sizeof(int));
-
 
     BufferAccess<DeviceArray<int>, int, buffers> mapParticleToCell_view(*(cv->gpu_mapParticleToCell), buffer_index);
     BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(cv->gpu_cellVector), buffer_index);
@@ -45,12 +47,13 @@ void CellListGPU::GridBox(VariablesCUDA * cv,
                     coords_y_view->get(),
                     coords_z_view->get(),  
                     mapParticleToCell_view->get(),  
-                    coords,
+                    atomCount,
                     axes);
     SortMappedParticles(cv,
                         mapParticleToCell_view->get(),  
                         cellVector_view->get(),  
                         coords);
+
     CalculateCellDegrees(cv,coords);
     PrefixScanCellDegrees(cv, cellStartIndex_view->get(), numberOfCells);
     GOMC_EVENT_STOP(1, GomcProfileEvent::GRID_ALL_GPU);
@@ -62,6 +65,8 @@ void CellListGPU::GridAll(VariablesCUDA * cv,
                         int numberOfCells,
                         const int buffer_index){
     GOMC_EVENT_START(1, GomcProfileEvent::GRID_ALL_GPU);
+
+    
 
     // Need to reinitialize the sequence 0..N-1 every GridAll
     cudaMemcpy(cv->gpu_particleIndices, thrust::raw_pointer_cast(&pI[0]), atomNumber * sizeof(int), cudaMemcpyDeviceToDevice);
@@ -100,9 +105,8 @@ void CellListGPU::MapParticlesToCell(VariablesCUDA * cv,
                                     double * y,
                                     double * z,
                                     int * mp2c,
-                                    XYZArray const &coords,
+                                    int atomNumber,
                                     XYZArray const &axes){
-    int atomNumber = coords.Count();
     // Run the kernel
     int threadsPerBlock = 256;
     int blocksPerGrid = (int)(atomNumber / threadsPerBlock) + 1;
