@@ -3,6 +3,7 @@
 #ifdef GOMC_CUDA
 
 #include "VariablesCUDA.cuh"
+#include "MoleculeLookup.h"
 #include "XYZArray.h"
 #include "CalculateMinImageCUDAKernel.cuh"
 #include<thrust/device_vector.h>
@@ -32,7 +33,13 @@ __global__ void CalculateCellDegreesKernel(int atomNumber,
 
 class CellListGPU {
   public:
-    CellListGPU(VariablesCUDA * cv, int atomCount);
+    CellListGPU(VariablesCUDA * cv, int atomCount, MoleculeLookup & molLookup);
+    void GridBox(VariablesCUDA * cv,
+                        XYZArray const &coords,
+                        XYZArray const &axes,
+                        int numberOfCells,
+                        const int buffer_index,
+                        const uint b);
     void GridAll(VariablesCUDA * cv,
                   XYZArray const &coords,
                   XYZArray const &axes,
@@ -61,6 +68,7 @@ class CellListGPU {
                                         int numberOfCells);
   private:
     int atomNumber;
+    MoleculeLookup & molLookRef;
     thrust::device_vector<int> pI;
     thrust::device_vector<int> ones;
     void CreateStartVector(int numberOfAtoms,

@@ -2,7 +2,8 @@
 #include "CellListGPU.cuh"
 #include "cub/cub.cuh"
 
-CellListGPU::CellListGPU(VariablesCUDA * cv, int _atomNumber) : atomNumber(_atomNumber)
+CellListGPU::CellListGPU(VariablesCUDA * cv, int _atomNumber, MoleculeLookup & molLookup) : 
+atomNumber(_atomNumber), molLookRef(molLookup)
 {
     CUMALLOC((void**) &cv->gpu_Ones, atomNumber * sizeof(int));
     CUMALLOC((void**) &cv->gpu_particleIndices, atomNumber * sizeof(int));
@@ -14,6 +15,45 @@ CellListGPU::CellListGPU(VariablesCUDA * cv, int _atomNumber) : atomNumber(_atom
     // Fill with 1s
     cudaMemcpy(cv->gpu_Ones, thrust::raw_pointer_cast(&ones[0]), atomNumber * sizeof(int), cudaMemcpyDeviceToDevice);
     cudaMemcpy(cv->gpu_particleIndices, thrust::raw_pointer_cast(&pI[0]), atomNumber * sizeof(int), cudaMemcpyDeviceToDevice);
+}
+
+void CellListGPU::GridBox(VariablesCUDA * cv,
+                        XYZArray const &coords,
+                        XYZArray const &axes,
+                        int numberOfCells,
+                        const int buffer_index,
+                        const uint b){
+    GOMC_EVENT_START(1, GomcProfileEvent::GRID_ALL_GPU);
+
+    // Need to reinitialize the sequence 0..N-1 every GridAll
+    cudaMemcpy(cv->gpu_particleIndices, thrust::raw_pointer_cast(&pI[0]), atomNumber * sizeof(int), cudaMemcpyDeviceToDevice);
+    // Clear Cell Degrees
+    //cuMemsetD32(reinterpret_cast<CUdeviceptr>(cv->gpu_cellDegrees),  0, size_t(numberOfCells));
+    cudaMemset(cv->gpu_cellDegrees, 0, numberOfCells*sizeof(int));
+
+
+    BufferAccess<DeviceArray<int>, int, buffers> mapParticleToCell_view(*(cv->gpu_mapParticleToCell), buffer_index);
+    BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(cv->gpu_cellVector), buffer_index);
+    BufferAccess<DeviceArray<int>, int, buffers> cellStartIndex_view(*(cv->gpu_cellStartIndex), buffer_index);
+
+    BufferAccess<DeviceArray<double>, double, buffers> coords_x_view(*(cv->gpu_coords_x), buffer_index);
+    BufferAccess<DeviceArray<double>, double, buffers> coords_y_view(*(cv->gpu_coords_y), buffer_index);
+    BufferAccess<DeviceArray<double>, double, buffers> coords_z_view(*(cv->gpu_coords_z), buffer_index);
+
+    MapParticlesToCell(cv,
+                    coords_x_view->get(),
+                    coords_y_view->get(),
+                    coords_z_view->get(),  
+                    mapParticleToCell_view->get(),  
+                    coords,
+                    axes);
+    SortMappedParticles(cv,
+                        mapParticleToCell_view->get(),  
+                        cellVector_view->get(),  
+                        coords);
+    CalculateCellDegrees(cv,coords);
+    PrefixScanCellDegrees(cv, cellStartIndex_view->get(), numberOfCells);
+    GOMC_EVENT_STOP(1, GomcProfileEvent::GRID_ALL_GPU);
 }
 
 void CellListGPU::GridAll(VariablesCUDA * cv,
