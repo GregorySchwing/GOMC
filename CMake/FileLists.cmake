@@ -216,6 +216,7 @@ set(cudaHeaders
     src/GPU/CUDAMemoryManager.cuh
     src/GPU/DoubleBuffer.cuh
     src/GPU/MetropolisCriterionCUDA.cuh
+    src/GPU/MoleculeLookupGPU.cuh
     src/GPU/TransformParticlesCUDAKernel.cuh
     src/GPU/VariablesCUDA.cuh)
 
@@ -227,6 +228,7 @@ set(cudaSources
     src/GPU/ConstantDefinitionsCUDAKernel.cu
     src/GPU/CUDAMemoryManager.cu
     src/GPU/MetropolisCriterionCUDA.cu
+    src/GPU/MoleculeLookupGPU.cu
     src/GPU/TransformParticlesCUDAKernel.cu)
 
 source_group("Header Files" FILES ${headers})
