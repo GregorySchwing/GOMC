@@ -1134,7 +1134,9 @@ double Ewald::MolCorrection(uint molIndex, uint box,
                           double wolfFactor1,
                           double wolfFactor2,
                           double wolfAlpha) const {
-  return 0.0;
+    std::cout << "This method signature is only valid for Wolf!\n";
+    exit(EXIT_FAILURE);  
+    return 0.0;
 }
 
 //It's called in free energy calculation to calculate the change in

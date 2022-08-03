@@ -293,8 +293,8 @@ inline void NEMTMC::CalcEnNEMT(uint lambdaIdxOldS, uint lambdaIdxNewS)
   //For electrostatic we use linear scaling
   double coefDiffS = lambdaNew_Coulomb_S - lambdaOld_Coulomb_S;
   double coefDiffD = lambdaNew_Coulomb_D - lambdaOld_Coulomb_D;
-  correctDiffSource = coefDiffS * calcEwald->SwapCorrection(oldMolNEMT);
-  correctDiffDest = coefDiffD * calcEwald->SwapCorrection(newMolNEMT);
+  correctDiffSource = coefDiffS * calcEwald->SwapCorrection(oldMolNEMT, molIndex);
+  correctDiffDest = coefDiffD * calcEwald->SwapCorrection(newMolNEMT, molIndex);
   selfDiffSource = coefDiffS * calcEwald->SwapSelf(oldMolNEMT);
   selfDiffDest = coefDiffD * calcEwald->SwapSelf(newMolNEMT);
   //calculate Reciprocal Difference in source and dest box

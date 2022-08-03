@@ -59,7 +59,8 @@ public:
   virtual double MolCorrection(uint molIndex, uint box)const;
 
   //calculate correction term for a molecule
-  virtual double MolCorrection(uint molIndex, uint box,
+  virtual double MolCorrection(uint molIndex, 
+                              uint box,
                               double rCutCoulomb,
                               double rCutCoulombSq,
                               double wolfFactor1,
@@ -87,16 +88,13 @@ public:
 
   //calculate correction term after swap move
   virtual double SwapCorrection(const cbmc::TrialMol& trialMol,
-                              const uint molIndex,
-                              double rCutCoulombSq,
-                              double wolfFactor1,
-                              double wolfAlpha) const;
-
-//calculate correction term after swap move
-virtual double SwapCorrection(const cbmc::TrialMol& trialMol,
-                            double rCutCoulombSq,
-                            double wolfFactor1,
-                            double wolfAlpha) const;
+                          const uint molIndex,
+                          uint box,
+                          double rCutCoulomb,
+                          double rCutCoulombSq,
+                          double wolfFactor1,
+                          double wolfFactor2,
+                          double wolfAlpha) const;
 
   //calculate reciprocal term in destination box for swap move
   virtual double SwapDestRecip(const cbmc::TrialMol &newMol, const uint box,
@@ -126,6 +124,11 @@ virtual double SwapCorrection(const cbmc::TrialMol& trialMol,
                           double wolfFactor1,
                           double wolfAlpha) const;
 
+  virtual void ChangeCorrection(Energy *energyDiff, Energy &dUdL_Coul,
+                              const std::vector<double> &lambda_Coul,
+                              const uint iState, const uint molIndex,
+                              const uint box) const;
+
   //It's called in free energy calculation to calculate the change in
   // correction energy in all lambda states
   void ChangeCorrection(Energy *energyDiff, Energy &dUdL_Coul,
@@ -135,6 +138,7 @@ virtual double SwapCorrection(const cbmc::TrialMol& trialMol,
                                   double rCutCoulomb,
                                   double rCutCoulombSq,
                                   double wolfFactor1,
+                                  double wolfFactor2,
                                   double wolfAlpha) const;
   //It's called in free energy calculation to calculate the change in
   // reciprocal energy in all lambda states

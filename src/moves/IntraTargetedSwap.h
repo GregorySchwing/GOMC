@@ -497,8 +497,8 @@ inline void IntraTargetedSwap::CalcEn()
   correct_new = 0.0;
 
   if (newMol.GetWeight() > SMALL_WEIGHT && !overlap) {
-    correct_new = calcEwald->SwapCorrection(newMol);
-    correct_old = calcEwald->SwapCorrection(oldMol);
+    correct_new = calcEwald->SwapCorrection(newMol, molIndex);
+    correct_old = calcEwald->SwapCorrection(oldMol, molIndex);
     //SwapDestRecip must be called first to backup the cosMol and sinMol
     recipDiff.energy = calcEwald->MolReciprocal(newMol.GetCoords(), molIndex,
                        box);

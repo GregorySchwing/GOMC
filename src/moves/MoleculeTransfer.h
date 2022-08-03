@@ -126,8 +126,8 @@ inline void MoleculeTransfer::CalcEn()
   }
 
   if (newMol.GetWeight() > SMALL_WEIGHT && !overlap) {
-    correct_new = calcEwald->SwapCorrection(newMol);
-    correct_old = calcEwald->SwapCorrection(oldMol);
+    correct_new = calcEwald->SwapCorrection(newMol, molIndex);
+    correct_old = calcEwald->SwapCorrection(oldMol, molIndex);
     self_new = calcEwald->SwapSelf(newMol);
     self_old = calcEwald->SwapSelf(oldMol);
     //SwapDestRecip must be called first to backup the cosMol and sinMol
