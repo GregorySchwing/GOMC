@@ -22,6 +22,7 @@ MoleculeLookupGPU::MoleculeLookupGPU(
     CUMALLOC((void**) gpu_molLookup, (_molLookupCount + 1) * sizeof(uint32_t));
     CUMALLOC((void**) gpu_fixedMolecule, (_molLookupCount) * sizeof(int32_t));
     CUMALLOC((void**) gpu_boxAndKindStart, (_boxAndKindStartLength) * sizeof(uint32_t));
+    CUMALLOC((void**) gpu_mol2Box, _molLookupCount * sizeof(uint32_t));
 
     // copy lambda data
     cudaMemcpy(gpu_molLookupCount, &_molLookupCount, sizeof(uint32_t), cudaMemcpyHostToDevice);
@@ -44,6 +45,7 @@ MoleculeLookupGPU::~MoleculeLookupGPU(){
     CUFREE(gpu_boxAndKindSwappableLength);
     CUFREE(gpu_numKinds);
 
+    CUFREE(gpu_mol2Box);
     CUFREE(gpu_molLookup);
     CUFREE(gpu_fixedMolecule);
     CUFREE(gpu_boxAndKindStart);

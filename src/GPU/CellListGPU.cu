@@ -20,7 +20,6 @@ atomNumber(_atomNumber), molLookRef(molLookup)
 void CellListGPU::GridBox(VariablesCUDA * cv,
                         XYZArray const &coords,
                         XYZArray const &axes,
-                        int numberOfCells,
                         const int buffer_index,
                         const uint b){
     GOMC_EVENT_START(1, GomcProfileEvent::GRID_ALL_GPU);
@@ -32,7 +31,52 @@ void CellListGPU::GridBox(VariablesCUDA * cv,
     cudaMemcpy(cv->gpu_particleIndices, thrust::raw_pointer_cast(&pI[0]), atomNumber * sizeof(int), cudaMemcpyDeviceToDevice);
     // Clear Cell Degrees
     //cuMemsetD32(reinterpret_cast<CUdeviceptr>(cv->gpu_cellDegrees),  0, size_t(numberOfCells));
+    
+
+    // Make sure cpu_numberOfCells == gpu_numberOfCells
+    cudaMemset(&cv->gpu_cellDegrees[cv->cpu_startOfBoxCellList[b]], 0, cv->cpu_numberOfCells[b]*sizeof(int));
+
+    BufferAccess<DeviceArray<int>, int, buffers> mapParticleToCell_view(*(cv->gpu_mapParticleToCell), buffer_index);
+    BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(cv->gpu_cellVector), buffer_index);
+    BufferAccess<DeviceArray<int>, int, buffers> cellStartIndex_view(*(cv->gpu_cellStartIndex), buffer_index);
+
+    BufferAccess<DeviceArray<double>, double, buffers> coords_x_view(*(cv->gpu_coords_x), buffer_index);
+    BufferAccess<DeviceArray<double>, double, buffers> coords_y_view(*(cv->gpu_coords_y), buffer_index);
+    BufferAccess<DeviceArray<double>, double, buffers> coords_z_view(*(cv->gpu_coords_z), buffer_index);
+
+    MapParticlesToCell(cv,
+                    coords_x_view->get(),
+                    coords_y_view->get(),
+                    coords_z_view->get(),  
+                    mapParticleToCell_view->get(),  
+                    atomCount,
+                    axes,
+                    b);
+    SortMappedParticles(cv,
+                        mapParticleToCell_view->get(),  
+                        cellVector_view->get(),  
+                        coords);
+
+    CalculateCellDegrees(cv,coords);
+    PrefixScanCellDegrees(cv, cellStartIndex_view->get(), cv->cpu_numberOfCells[b]);
+    GOMC_EVENT_STOP(1, GomcProfileEvent::GRID_ALL_GPU);
+}
+
+void CellListGPU::GridAll(VariablesCUDA * cv,
+                        XYZArray const &coords,
+                        XYZArray const &axes,
+                        int numberOfCells,
+                        const int buffer_index){
+    GOMC_EVENT_START(1, GomcProfileEvent::GRID_ALL_GPU);
+
+    int atomCount = coords.Count();
+
+    // Need to reinitialize the sequence 0..N-1 every GridAll
+    cudaMemcpy(cv->gpu_particleIndices, thrust::raw_pointer_cast(&pI[0]), atomNumber * sizeof(int), cudaMemcpyDeviceToDevice);
+    // Clear Cell Degrees
+    //cuMemsetD32(reinterpret_cast<CUdeviceptr>(cv->gpu_cellDegrees),  0, size_t(numberOfCells));
     cudaMemset(cv->gpu_cellDegrees, 0, numberOfCells*sizeof(int));
+
 
     BufferAccess<DeviceArray<int>, int, buffers> mapParticleToCell_view(*(cv->gpu_mapParticleToCell), buffer_index);
     BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(cv->gpu_cellVector), buffer_index);
@@ -53,47 +97,6 @@ void CellListGPU::GridBox(VariablesCUDA * cv,
                         mapParticleToCell_view->get(),  
                         cellVector_view->get(),  
                         coords);
-
-    CalculateCellDegrees(cv,coords);
-    PrefixScanCellDegrees(cv, cellStartIndex_view->get(), numberOfCells);
-    GOMC_EVENT_STOP(1, GomcProfileEvent::GRID_ALL_GPU);
-}
-
-void CellListGPU::GridAll(VariablesCUDA * cv,
-                        XYZArray const &coords,
-                        XYZArray const &axes,
-                        int numberOfCells,
-                        const int buffer_index){
-    GOMC_EVENT_START(1, GomcProfileEvent::GRID_ALL_GPU);
-
-    
-
-    // Need to reinitialize the sequence 0..N-1 every GridAll
-    cudaMemcpy(cv->gpu_particleIndices, thrust::raw_pointer_cast(&pI[0]), atomNumber * sizeof(int), cudaMemcpyDeviceToDevice);
-    // Clear Cell Degrees
-    //cuMemsetD32(reinterpret_cast<CUdeviceptr>(cv->gpu_cellDegrees),  0, size_t(numberOfCells));
-    cudaMemset(cv->gpu_cellDegrees, 0, numberOfCells*sizeof(int));
-
-
-    BufferAccess<DeviceArray<int>, int, buffers> mapParticleToCell_view(*(cv->gpu_mapParticleToCell), buffer_index);
-    BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(cv->gpu_cellVector), buffer_index);
-    BufferAccess<DeviceArray<int>, int, buffers> cellStartIndex_view(*(cv->gpu_cellStartIndex), buffer_index);
-
-    BufferAccess<DeviceArray<double>, double, buffers> coords_x_view(*(cv->gpu_coords_x), buffer_index);
-    BufferAccess<DeviceArray<double>, double, buffers> coords_y_view(*(cv->gpu_coords_y), buffer_index);
-    BufferAccess<DeviceArray<double>, double, buffers> coords_z_view(*(cv->gpu_coords_z), buffer_index);
-
-    MapParticlesToCell(cv,
-                    coords_x_view->get(),
-                    coords_y_view->get(),
-                    coords_z_view->get(),  
-                    mapParticleToCell_view->get(),  
-                    coords,
-                    axes);
-    SortMappedParticles(cv,
-                        mapParticleToCell_view->get(),  
-                        cellVector_view->get(),  
-                        coords);
     CalculateCellDegrees(cv,coords);
     PrefixScanCellDegrees(cv, cellStartIndex_view->get(), numberOfCells);
     GOMC_EVENT_STOP(1, GomcProfileEvent::GRID_ALL_GPU);
@@ -106,7 +109,8 @@ void CellListGPU::MapParticlesToCell(VariablesCUDA * cv,
                                     double * z,
                                     int * mp2c,
                                     int atomNumber,
-                                    XYZArray const &axes){
+                                    XYZArray const &axes,
+                                    const int b){
     // Run the kernel
     int threadsPerBlock = 256;
     int blocksPerGrid = (int)(atomNumber / threadsPerBlock) + 1;
@@ -120,9 +124,10 @@ void CellListGPU::MapParticlesToCell(VariablesCUDA * cv,
                             cv->gpu_cellSize,
                             cv->gpu_edgeCells,
                             cv->gpu_nonOrth,
-                            cv->gpu_Invcell_x[0],
-                            cv->gpu_Invcell_y[0],
-                            cv->gpu_Invcell_z[0]);
+                            cv->gpu_Invcell_x[b],
+                            cv->gpu_Invcell_y[b],
+                            cv->gpu_Invcell_z[b],
+                            b);
     cudaDeviceSynchronize();
     checkLastErrorCUDA(__FILE__, __LINE__);
 
@@ -252,7 +257,8 @@ __device__ int PositionToCell(int atomIndex,
                             int* gpu_nonOrth,
                             double *gpu_Invcell_x,
                             double *gpu_Invcell_y,
-                            double *gpu_Invcell_z){
+                            double *gpu_Invcell_z,
+                            const int b = 0){
     double3 pos = make_double3(gpu_x[atomIndex],
                                gpu_y[atomIndex],
                                gpu_z[atomIndex]);
@@ -262,15 +268,15 @@ __device__ int PositionToCell(int atomIndex,
                                 gpu_Invcell_y,
                                 gpu_Invcell_z);
     }
-    int x = (int)(pos.x / gpu_cellSize[0]);
-    int y = (int)(pos.y / gpu_cellSize[1]);
-    int z = (int)(pos.z / gpu_cellSize[2]);
+    int x = (int)(pos.x / gpu_cellSize[3*b + 0]);
+    int y = (int)(pos.y / gpu_cellSize[3*b + 1]);
+    int z = (int)(pos.z / gpu_cellSize[3*b + 2]);
     //Check the cell number to avoid segfaults for coordinates close to axis
     //x, y, and z should never be equal or greater than number of cells in x, y,
     // and z axis, respectively.
-    x -= (x == gpu_edgeCells[0] ?  1 : 0);
-    y -= (y == gpu_edgeCells[1] ?  1 : 0);
-    z -= (z == gpu_edgeCells[2] ?  1 : 0);
+    x -= (x == gpu_edgeCells[3*b + 0] ?  1 : 0);
+    y -= (y == gpu_edgeCells[3*b + 1] ?  1 : 0);
+    z -= (z == gpu_edgeCells[3*b + 2] ?  1 : 0);
     return x * gpu_edgeCells[1] * gpu_edgeCells[2] + y * gpu_edgeCells[2] + z;
 }
 
@@ -284,7 +290,8 @@ __global__ void MapParticlesToCellKernel(int atomNumber,
                             int* gpu_nonOrth,
                             double *gpu_Invcell_x,
                             double *gpu_Invcell_y,
-                            double *gpu_Invcell_z){
+                            double *gpu_Invcell_z,
+                            const int b){
     int threadID = blockIdx.x * blockDim.x + threadIdx.x;
     if (threadID >= atomNumber)
         return;

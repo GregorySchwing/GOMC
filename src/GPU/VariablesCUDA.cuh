@@ -215,7 +215,7 @@ public:
   int *gpu_startOfBoxCellList;
   int *gpu_edgeCells;
   double *gpu_cellSize;
-    // Intermediate variable for counting number of molecules in cell
+  // Intermediate variable for counting number of molecules in cell
   int *gpu_cellDegrees;
   int *gpu_particleIndices;
   int *gpu_mapParticleToCellSorted;
@@ -236,6 +236,7 @@ public:
   double * LJEn, RJEn;
   // For launching kernels
   int cpu_numberOfCells[BOX_TOTAL];
+  int cpu_startOfBoxCellList[BOX_TOTAL];
 
 };
 #endif

@@ -25,7 +25,8 @@ __global__ void MapParticlesToCellKernel(int atomNumber,
                     int* gpu_nonOrth,
                     double *gpu_Invcell_x,
                     double *gpu_Invcell_y,
-                    double *gpu_Invcell_z);
+                    double *gpu_Invcell_z,
+                    const int b);
 
 __global__ void CalculateCellDegreesKernel(int atomNumber,
                                             int* gpu_mapParticleToCellSorted,
@@ -37,7 +38,6 @@ class CellListGPU {
     void GridBox(VariablesCUDA * cv,
                         XYZArray const &coords,
                         XYZArray const &axes,
-                        int numberOfCells,
                         const int buffer_index,
                         const uint b);
     void GridAll(VariablesCUDA * cv,
@@ -48,13 +48,16 @@ class CellListGPU {
     void CopyGPUMemoryToToHost(int * deviceMemory,
                                     int size,
                                     std::vector<int> & hostMemory);
+
     void MapParticlesToCell(VariablesCUDA * cv,
                                     double * x,
                                     double * y,
                                     double * z,
                                     int * mp2c,
-                                    XYZArray const &coords,
-                                    XYZArray const &axes);
+                                    int atomNumber,
+                                    XYZArray const &axes,
+                                    const int b = 0);
+
     void SortMappedParticles(VariablesCUDA * cv,
                                     int * mp2c,
                                     int * cellVec,

@@ -233,19 +233,27 @@ void InitGPUCellList(VariablesCUDA *vars,
                     const std::vector<double> &cellSize)
 {
   std::memcpy(vars->cpu_numberOfCells, &numberOfCells[0], sizeof(int)*numberOfCells.size());
+  std::memcpy(vars->cpu_startOfBoxCellList, &startOfBoxCellList[0], sizeof(int)*startOfBoxCellList.size());
 
+  // Access a given box' cell list by the following convention
+  // gpu_neighborList[gpu_startOfBoxCellList[b]]
+  // Launch 1 block per cell in gpu_numberOfCells[b]
+  // This is currently a flattened neighbor list for both boxes.
   CUMALLOC((void**) &vars->gpu_neighborList,  neighborList.size() * sizeof(int));
+  
+  // These are both currently for both boxes.
   CUMALLOC((void**) &vars->gpu_numberOfCells,  numberOfCells.size() * sizeof(int));
   CUMALLOC((void**) &vars->gpu_startOfBoxCellList, startOfBoxCellList.size() * sizeof(int));
+
   CUMALLOC((void**) &vars->gpu_cellSize, BOX_TOTAL * 3 * sizeof(double));
   CUMALLOC((void**) &vars->gpu_edgeCells, BOX_TOTAL * 3 * sizeof(double));
+  // This is currently a flattened neighbor list for both boxes.
   CUMALLOC((void**) &vars->gpu_cellDegrees, (neighborList.size()+1) * sizeof(int));
   CUMALLOC((void**) &vars->gpu_CellDegreeSanityCheck, neighborList.size() * sizeof(int));
   CUMALLOC((void**) &vars->gpu_IterationsReq, 1 * sizeof(int));
 
   //CUMALLOC((void**) &vars->gpu_cellStartIndex, (neighborList.size()+1) * sizeof(int));
   vars->gpu_cellStartIndex = new MultiBuffer<DeviceArray<int>, int, buffers>(neighborList.size()+1);
-
 
   vars->d_temp_storage_sort_vals = NULL;
   vars->d_temp_storage_sort = &(vars->d_temp_storage_sort_vals);

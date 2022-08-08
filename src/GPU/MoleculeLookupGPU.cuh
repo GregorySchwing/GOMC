@@ -27,7 +27,7 @@ class MoleculeLookupGPU {
     uint32_t * gpu_boxAndKindStartLength;
     uint32_t * gpu_boxAndKindSwappableLength;
     uint32_t * gpu_numKinds;
-
+    uint32_t * gpu_mol2Box;
     //array of indices for type Molecule, sorted by box and kind for
     //move selection
     uint32_t* gpu_molLookup;
