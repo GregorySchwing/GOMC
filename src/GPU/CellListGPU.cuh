@@ -62,7 +62,7 @@ class CellListGPU {
                                     XYZArray const &axes,
                                     uint * gpu_numMolsInBox,
                                     uint * gpu_molLookup,
-                                    uint * gpu_startAtomIdx));
+                                    uint * gpu_startAtomIdx);
 
     void SortMappedParticles(VariablesCUDA * cv,
                                     int * mp2c,
