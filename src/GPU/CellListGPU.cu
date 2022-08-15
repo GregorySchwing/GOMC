@@ -299,7 +299,7 @@ __global__ void MapParticlesToCellKernel(int molCount,
     // Optimal alu usage/memory latency will probably be 1 warp/molecule
     uint warpIdx = threadID / warp_size;
     uint laneIdx = threadID % warp_size;
-    if (molIndex >= molCount)
+    if (warpIdx >= molCount)
         return;
     uint molIndex = gpu_molLookup[warpIdx];
     uint b = molIndex < gpu_molBoxCount[0];
