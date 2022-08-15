@@ -302,15 +302,16 @@ __global__ void MapParticlesToCellKernel(int molCount,
     uint laneIdx = threadID % warp_size;
     if (warpIdx >= molCount)
         return;
-    uint molIndex = gpu_molLookup[warpIdx];
-    uint b = molIndex < gpu_molBoxCount[0];
+
     if (threadIdx.x == 0){
         printf("warpIdx %d", warpIdx);
         printf("laneIdx %d", laneIdx);
-        printf("gpu_molBoxCount %d", gpu_molBoxCount[0]);
-        printf("b %d", b);
-        printf("b %d", b);
     }
+    uint molIndex = gpu_molLookup[warpIdx];
+    uint b = molIndex < gpu_molBoxCount[0];
+    printf("gpu_molBoxCount %d", gpu_molBoxCount[0]);
+    printf("molIndex %d", molIndex);
+    printf("b %d", b);
     for (int particleIndex = gpu_startAtomIdx[molIndex] + laneIdx; particleIndex < gpu_startAtomIdx[molIndex + 1]; particleIndex += warp_size ){
         int cell = PositionToCell(particleIndex,
                                 gpu_x,
