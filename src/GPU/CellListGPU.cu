@@ -68,6 +68,7 @@ void CellListGPU::GridAll(VariablesCUDA * cv,
                         int numberOfCells,
                         const int buffer_index){
     GOMC_EVENT_START(1, GomcProfileEvent::GRID_ALL_GPU);
+    printf("GridAll CLGPU\n");
 
     int atomCount = coords.Count();
 

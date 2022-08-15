@@ -12,7 +12,7 @@ MoleculeLookupGPU::MoleculeLookupGPU(
                                     int32_t  *  _fixedMolecule,                                    
                                     uint32_t *  _boxAndKindStart)
 {
-
+    printf("Constructed MLGPU\n");
     CUMALLOC((void**) &gpu_molLookupCount, sizeof(uint32_t));
     CUMALLOC((void**) &gpu_atomCount, sizeof(uint32_t));
     CUMALLOC((void**) &gpu_boxAndKindStartLength, sizeof(uint32_t));
