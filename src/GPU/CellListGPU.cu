@@ -305,7 +305,7 @@ __global__ void MapParticlesToCellKernel(
                             int* gpu_mapParticleToCell,
                             uint* gpu_molLookup,
                             uint * cv_gpu_molLookup,
-                            int* gpu_molBoxCount,
+                            uint* gpu_molBoxCount,
                             int* gpu_startAtomIdx,
                             double *gpu_cellSize,
                             int *gpu_edgeCells,
