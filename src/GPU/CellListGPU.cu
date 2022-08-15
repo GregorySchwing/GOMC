@@ -306,7 +306,7 @@ __global__ void MapParticlesToCellKernel(int molCount,
         return;
     uint mol = gpu_molLookup[molIndex];
     uint b = molIndex < gpu_molBoxCount[0];
-    for (int particleIndex = gpu_startAtomIdx[mol]; particleIndex < gpu_startAtomIdx[mol + 1]; particleIndex += WARP_SIZE){
+    for (int particleIndex = gpu_startAtomIdx[mol]; particleIndex < gpu_startAtomIdx[mol + 1]; particleIndex += WARP_SIZE ){
         int cell = PositionToCell(particleIndex,
                                 gpu_x,
                                 gpu_y,
