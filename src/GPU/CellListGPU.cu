@@ -327,9 +327,9 @@ __global__ void MapParticlesToCellKernel(
     //}
     int molIndex = gpu_molLookup[warpIdx];
     //printf("cv ml[%d] %d mlgpu ml[%d] %d\n", warpIdx, cv_gpu_molLookup[warpIdx], warpIdx, gpu_molLookup[warpIdx]);
-    printf("mlgpu s[%d] %d\n", warpIdx, gpu_startAtomIdx[warpIdx]);
-    printf("mlgpu ml[%d] %d\n", warpIdx, gpu_molLookup[warpIdx]);
-    printf("mlgpu gpu_molBoxCount[%d] %d\n", 0, gpu_molBoxCount[0]);
+    //printf("mlgpu s[%d] %d\n", warpIdx, gpu_startAtomIdx[warpIdx]);
+    //printf("mlgpu ml[%d] %d\n", warpIdx, gpu_molLookup[warpIdx]);
+    //printf("mlgpu gpu_molBoxCount[%d] %d\n", 0, gpu_molBoxCount[0]);
 
     uint b = molIndex < gpu_molBoxCount[0];
     //printf("b %d", b);
