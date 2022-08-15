@@ -111,8 +111,7 @@ void CellListGPU::MapParticlesToCell(VariablesCUDA * cv,
                                     int * mp2c,
                                     int atomNumber,
                                     XYZArray const &axes,
-                                    uint * mol2Box,
-                                    const int b){
+                                    uint * mol2Box){
     // Run the kernel
     int threadsPerBlock = 256;
     int blocksPerGrid = (int)(atomNumber / threadsPerBlock) + 1;

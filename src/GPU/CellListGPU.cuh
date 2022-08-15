@@ -58,7 +58,7 @@ class CellListGPU {
                                     int * mp2c,
                                     int atomNumber,
                                     XYZArray const &axes,
-                                    const int b = 0);
+                                    uint * mol2Box);
 
     void SortMappedParticles(VariablesCUDA * cv,
                                     int * mp2c,
