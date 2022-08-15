@@ -2,7 +2,7 @@
 #include "MoleculeLookupGPU.cuh"
 #include "cub/cub.cuh"
 
-MoleculeLookupGPU::MoleculeLookupGPU(int32_t  & _startAtomIdx,
+MoleculeLookupGPU::MoleculeLookupGPU(int32_t  * _startAtomIdx,
                                     uint32_t  & _molLookupCount,
                                     uint32_t  & _atomCount,
                                     uint32_t  & _boxAndKindStartLength,
@@ -19,7 +19,7 @@ MoleculeLookupGPU::MoleculeLookupGPU(int32_t  & _startAtomIdx,
     CUMALLOC((void**) &gpu_boxAndKindSwappableLength, sizeof(uint32_t));
     CUMALLOC((void**) &gpu_numKinds, sizeof(uint32_t));
     // allocate memory to store molecule start atom index
-    CUMALLOC((void**) &gpu_startAtomIdx, _molLookupCount * sizeof(int));
+    CUMALLOC((void**) &gpu_startAtomIdx, _molLookupCount * sizeof(int32_t));
 
     CUMALLOC((void**) &gpu_molLookup, (_molLookupCount + 1) * sizeof(uint32_t));
     CUMALLOC((void**) &gpu_fixedMolecule, (_molLookupCount) * sizeof(int32_t));
