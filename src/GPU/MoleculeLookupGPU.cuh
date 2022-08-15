@@ -5,6 +5,8 @@
 #include "CUDAMemoryManager.cuh"
 #include "EnsemblePreprocessor.h"
 #include "GOMCEventsProfile.h" // for NVTX profiling
+#include "VariablesCUDA.cuh"
+
 // For cuMemsetD32
 //#include <cuda_runtime.h>
 
