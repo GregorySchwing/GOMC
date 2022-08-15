@@ -60,7 +60,6 @@ class CellListGPU {
                                     double * y,
                                     double * z,
                                     int * mp2c,
-                                    int atomNumber,
                                     XYZArray const &axes,
                                     MoleculeLookup & molLookupRef);
 

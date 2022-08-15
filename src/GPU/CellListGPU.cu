@@ -108,7 +108,6 @@ void CellListGPU::MapParticlesToCell(VariablesCUDA * cv,
                                     double * y,
                                     double * z,
                                     int * mp2c,
-                                    int atomNumber,
                                     XYZArray const &axes,
                                     MoleculeLookup & molLookupRef){
     // Run the kernel
