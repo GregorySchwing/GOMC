@@ -321,9 +321,9 @@ __global__ void MapParticlesToCellKernel(int molCount,
     //printf("warpIdx %d\n", warpIdx);
     //printf("laneIdx %d\n", laneIdx);
 
-    uint molIndex = gpu_molLookup[warpIdx];
+    int molIndex = gpu_molLookup[warpIdx];
     uint b = molIndex < gpu_molBoxCount[0];
-    printf("gpu_molBoxCount %u\n", gpu_molBoxCount[0]);
+    printf("gpu_molBoxCount %d\n", gpu_molBoxCount[0]);
     //printf("molIndex %u", molIndex);
     __syncthreads();
     //printf("b %d", b);
