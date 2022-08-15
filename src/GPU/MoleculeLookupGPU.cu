@@ -13,18 +13,18 @@ MoleculeLookupGPU::MoleculeLookupGPU(
                                     uint32_t *  _boxAndKindStart)
 {
 
-    CUMALLOC((void**) gpu_molLookupCount, sizeof(uint32_t));
-    CUMALLOC((void**) gpu_atomCount, sizeof(uint32_t));
-    CUMALLOC((void**) gpu_boxAndKindStartLength, sizeof(uint32_t));
-    CUMALLOC((void**) gpu_boxAndKindSwappableLength, sizeof(uint32_t));
-    CUMALLOC((void**) gpu_numKinds, sizeof(uint32_t));
+    CUMALLOC((void**) &gpu_molLookupCount, sizeof(uint32_t));
+    CUMALLOC((void**) &gpu_atomCount, sizeof(uint32_t));
+    CUMALLOC((void**) &gpu_boxAndKindStartLength, sizeof(uint32_t));
+    CUMALLOC((void**) &gpu_boxAndKindSwappableLength, sizeof(uint32_t));
+    CUMALLOC((void**) &gpu_numKinds, sizeof(uint32_t));
 
-    CUMALLOC((void**) gpu_molLookup, (_molLookupCount + 1) * sizeof(uint32_t));
-    CUMALLOC((void**) gpu_fixedMolecule, (_molLookupCount) * sizeof(int32_t));
-    CUMALLOC((void**) gpu_boxAndKindStart, (_boxAndKindStartLength) * sizeof(uint32_t));
-    CUMALLOC((void**) gpu_mol2Box, _molLookupCount * sizeof(uint32_t));
-    CUMALLOC((void**) gpu_numMolsInBox, BOX_TOTAL * sizeof(uint32_t));
-    CUMALLOC((void**) gpu_boxMolStartIndex, BOX_TOTAL * sizeof(uint32_t));
+    CUMALLOC((void**) &gpu_molLookup, (_molLookupCount + 1) * sizeof(uint32_t));
+    CUMALLOC((void**) &gpu_fixedMolecule, (_molLookupCount) * sizeof(int32_t));
+    CUMALLOC((void**) &gpu_boxAndKindStart, (_boxAndKindStartLength) * sizeof(uint32_t));
+    CUMALLOC((void**) &gpu_mol2Box, _molLookupCount * sizeof(uint32_t));
+    CUMALLOC((void**) &gpu_numMolsInBox, BOX_TOTAL * sizeof(uint32_t));
+    CUMALLOC((void**) &gpu_boxMolStartIndex, BOX_TOTAL * sizeof(uint32_t));
 
     // copy lambda data
     cudaMemcpy(gpu_molLookupCount, &_molLookupCount, sizeof(uint32_t), cudaMemcpyHostToDevice);
