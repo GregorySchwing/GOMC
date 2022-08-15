@@ -12,7 +12,8 @@
 
 class MoleculeLookupGPU {
   public:
-    MoleculeLookupGPU(uint32_t   * _startAtomIdx,
+    MoleculeLookupGPU(VariablesCUDA * cv,
+                      uint32_t   * _startAtomIdx,
                       uint32_t  & _molLookupCount,
                       uint32_t  & _atomCount,
                       uint32_t  & _boxAndKindStartLength,

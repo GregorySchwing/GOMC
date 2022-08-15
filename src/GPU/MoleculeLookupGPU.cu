@@ -2,7 +2,8 @@
 #include "MoleculeLookupGPU.cuh"
 #include "cub/cub.cuh"
 
-MoleculeLookupGPU::MoleculeLookupGPU(uint32_t  * _startAtomIdx,
+MoleculeLookupGPU::MoleculeLookupGPU(VariablesCUDA * cv,
+                                    uint32_t  * _startAtomIdx,
                                     uint32_t  & _molLookupCount,
                                     uint32_t  & _atomCount,
                                     uint32_t  & _boxAndKindStartLength,
@@ -21,7 +22,7 @@ MoleculeLookupGPU::MoleculeLookupGPU(uint32_t  * _startAtomIdx,
     // allocate memory to store molecule start atom index
     CUMALLOC((void**) &gpu_startAtomIdx, _molLookupCount * sizeof(uint32_t));
 
-    CUMALLOC((void**) &gpu_molLookup, (_molLookupCount + 1) * sizeof(uint32_t));
+    CUMALLOC((void**) &gpu_molLookup, (_molLookupCount + 1) * sizeof(uint));
     CUMALLOC((void**) &gpu_fixedMolecule, (_molLookupCount) * sizeof(int32_t));
     CUMALLOC((void**) &gpu_boxAndKindStart, (_boxAndKindStartLength) * sizeof(uint32_t));
     CUMALLOC((void**) &gpu_numMolsInBox, BOX_TOTAL * sizeof(uint32_t));
@@ -34,7 +35,7 @@ MoleculeLookupGPU::MoleculeLookupGPU(uint32_t  * _startAtomIdx,
     cudaMemcpy(gpu_boxAndKindSwappableLength, &_boxAndKindSwappableLength, sizeof(uint32_t), cudaMemcpyHostToDevice);
     cudaMemcpy(gpu_numKinds, &_numKinds, sizeof(uint32_t), cudaMemcpyHostToDevice);
 
-    cudaMemcpy(gpu_molLookup, _molLookup, (_molLookupCount + 1) * sizeof(uint32_t), cudaMemcpyHostToDevice);
+    cudaMemcpy(gpu_molLookup, _molLookup, (_molLookupCount + 1) * sizeof(uint), cudaMemcpyHostToDevice);
     cudaMemcpy(gpu_fixedMolecule, &_fixedMolecule[0], (_molLookupCount) * sizeof(int32_t), cudaMemcpyHostToDevice);
     cudaMemcpy(gpu_boxAndKindStart, _boxAndKindStart, (_boxAndKindStartLength) * sizeof(uint32_t), cudaMemcpyHostToDevice);
     // copy start atom index
