@@ -3,6 +3,7 @@
 #ifdef GOMC_CUDA
 
 #include "CUDAMemoryManager.cuh"
+#include "EnsemblePreprocessor.h"
 #include "GOMCEventsProfile.h" // for NVTX profiling
 // For cuMemsetD32
 //#include <cuda_runtime.h>

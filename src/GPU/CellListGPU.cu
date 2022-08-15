@@ -129,8 +129,7 @@ void CellListGPU::MapParticlesToCell(VariablesCUDA * cv,
                             cv->gpu_nonOrth,
                             cv->gpu_Invcell_x[b],
                             cv->gpu_Invcell_y[b],
-                            cv->gpu_Invcell_z[b],
-                            b);
+                            cv->gpu_Invcell_z[b]);
     cudaDeviceSynchronize();
     checkLastErrorCUDA(__FILE__, __LINE__);
 
