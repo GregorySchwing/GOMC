@@ -301,12 +301,12 @@ __global__ void MapParticlesToCellKernel(int molCount,
                             double **gpu_Invcell_z){
     int threadID = blockIdx.x * blockDim.x + threadIdx.x;
     // Optimal alu usage/memory latency will probably be 1 warp/molecule
-    uint molIndex = threadID / WARP_SIZE;
+    uint molIndex = threadID / warp_size;
     if (molIndex >= molCount)
         return;
     uint mol = gpu_molLookup[molIndex];
     uint b = molIndex < gpu_molBoxCount[0];
-    for (int particleIndex = gpu_startAtomIdx[mol]; particleIndex < gpu_startAtomIdx[mol + 1]; particleIndex += WARP_SIZE ){
+    for (int particleIndex = gpu_startAtomIdx[mol]; particleIndex < gpu_startAtomIdx[mol + 1]; particleIndex += warp_size ){
         int cell = PositionToCell(particleIndex,
                                 gpu_x,
                                 gpu_y,

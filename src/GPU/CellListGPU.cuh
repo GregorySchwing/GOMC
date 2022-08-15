@@ -13,7 +13,7 @@
 #include "GOMCEventsProfile.h" // for NVTX profiling
 
 
-#define WARP_SIZE 16;
+static const int warp_size = 32; 
 // For cuMemsetD32
 //#include <cuda_runtime.h>
 
