@@ -122,8 +122,8 @@ void CellListGPU::MapParticlesToCell(VariablesCUDA * cv,
     int testva3 = 0;
 
     cudaMemcpy(&testval, molLookupRef.molLookupGPU->gpu_numMolsInBox, 1 * sizeof(int), cudaMemcpyDeviceToHost);
-    cudaMemcpy(&testval2, molLookupRef.molLookupGPU->gpu_molLookup[1], 1 * sizeof(int), cudaMemcpyDeviceToHost);
-    cudaMemcpy(&testva3, molLookupRef.molLookupGPU->gpu_startAtomIdx[1], 1 * sizeof(int), cudaMemcpyDeviceToHost);
+    cudaMemcpy(&testval2, &molLookupRef.molLookupGPU->gpu_molLookup[1], 1 * sizeof(int), cudaMemcpyDeviceToHost);
+    cudaMemcpy(&testva3, &molLookupRef.molLookupGPU->gpu_startAtomIdx[1], 1 * sizeof(int), cudaMemcpyDeviceToHost);
 
     printf("testval %d\n", testval);
     printf("testval2 %d\n", testval2);
