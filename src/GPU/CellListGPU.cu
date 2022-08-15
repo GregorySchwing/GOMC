@@ -113,22 +113,8 @@ void CellListGPU::MapParticlesToCell(VariablesCUDA * cv,
     // Run the kernel
     int threadsPerBlock = 256;
     int molCount = molLookupRef.molLookupCount;
-    printf("molcount %d\n", molCount);
     int blocksPerGrid = (int)((molCount * warp_size) / threadsPerBlock) + 1;
 
-    int testval = 0;
-    int testval2 = 0;
-    int testva3 = 0;
-
-    cudaMemcpy(&testval, molLookupRef.molLookupGPU->gpu_numMolsInBox, 1 * sizeof(int), cudaMemcpyDeviceToHost);
-    cudaMemcpy(&testval2, &molLookupRef.molLookupGPU->gpu_molLookup[1], 1 * sizeof(int), cudaMemcpyDeviceToHost);
-    cudaMemcpy(&testva3, &molLookupRef.molLookupGPU->gpu_startAtomIdx[1], 1 * sizeof(int), cudaMemcpyDeviceToHost);
-
-    printf("testval %d\n", testval);
-    printf("testval2 %d\n", testval2);
-    printf("testva3 %d\n", testva3);
-
-    
     MapParticlesToCellKernel<<< blocksPerGrid, threadsPerBlock>>>(
                             molCount,
                             x,
