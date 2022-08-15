@@ -136,7 +136,7 @@ void CellListGPU::MapParticlesToCell(VariablesCUDA * cv,
                             z,                               
                             mp2c,
                             molLookupRef.molLookupGPU->gpu_numMolsInBox,
-                            molLookupRef.molLookupGPU->gpu_molLookup,
+                            cv->gpu_startAtomIdx,
                             molLookupRef.molLookupGPU->gpu_startAtomIdx,
                             cv->gpu_cellSize,
                             cv->gpu_edgeCells,
@@ -303,7 +303,7 @@ __global__ void MapParticlesToCellKernel(
                             double* gpu_z,                                
                             int* gpu_mapParticleToCell,
                             uint* gpu_molLookup,
-                            uint* gpu_molBoxCount,
+                            int* gpu_molBoxCount,
                             int* gpu_startAtomIdx,
                             double *gpu_cellSize,
                             int *gpu_edgeCells,
@@ -327,7 +327,8 @@ __global__ void MapParticlesToCellKernel(
     //}
     __syncthreads();
     int molIndex = gpu_molLookup[warpIdx];
-    printf("gpu_molLookup[%d] %d\n", warpIdx, molIndex);
+    printf("cv s[%d] %d\n", warpIdx, gpu_molBoxCount[warpIdx]);
+    printf("mlgpu s[%d] %d\n", warpIdx, gpu_startAtomIdx[warpIdx]);
     uint b = molIndex < gpu_molBoxCount[0];
     return;
 

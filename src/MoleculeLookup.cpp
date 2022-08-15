@@ -137,7 +137,8 @@ void MoleculeLookup::Init(const Molecules& mols,
   // copy fixed flag
   cudaMemcpy(cudaVars->gpu_moleculeFixed, &fixedMolecule[0], numMol * sizeof(int), cudaMemcpyHostToDevice);
 
-  molLookupGPU = new MoleculeLookupGPU(cudaVars,mols.start,
+  molLookupGPU = new MoleculeLookupGPU(cudaVars,
+                                      mols.start,
                                       molLookupCount,
                                       atomCount,
                                       boxAndKindStartLength,
