@@ -53,6 +53,8 @@ class MoleculeLookupGPU {
 
     int32_t * gpu_startAtomIdx;
     friend class CellListGPU;
+    friend class MoleculeLookup;
+
 };
 
 #endif
