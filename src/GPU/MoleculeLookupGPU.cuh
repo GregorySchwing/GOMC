@@ -50,7 +50,7 @@ class MoleculeLookupGPU {
     int32_t * gpu_canMoveKind; //Kinds that can move intra box only
 
     int32_t * gpu_startAtomIdx;
-
+    friend class CellListGPU;
 };
 
 #endif

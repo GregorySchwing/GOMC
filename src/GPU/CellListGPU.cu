@@ -85,7 +85,6 @@ void CellListGPU::GridAll(VariablesCUDA * cv,
     BufferAccess<DeviceArray<double>, double, buffers> coords_x_view(*(cv->gpu_coords_x), buffer_index);
     BufferAccess<DeviceArray<double>, double, buffers> coords_y_view(*(cv->gpu_coords_y), buffer_index);
     BufferAccess<DeviceArray<double>, double, buffers> coords_z_view(*(cv->gpu_coords_z), buffer_index);
-    uint * mol2Box;
     MapParticlesToCell(cv,
                     coords_x_view->get(),
                     coords_y_view->get(),
@@ -118,7 +117,7 @@ void CellListGPU::MapParticlesToCell(VariablesCUDA * cv,
     int blocksPerGrid = (int)((molCount * warp_size) / threadsPerBlock) + 1;
 
     MapParticlesToCellKernel<<< blocksPerGrid, threadsPerBlock>>>(
-                            atomNumber,
+                            molCount,
                             x,
                             y,
                             z,                               
