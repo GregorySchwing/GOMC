@@ -12,10 +12,12 @@
 #include "CUDAMemoryManager.cuh"
 #include "GOMCEventsProfile.h" // for NVTX profiling
 
+
+#define WARP_SIZE 16;
 // For cuMemsetD32
 //#include <cuda_runtime.h>
 
-__global__ void MapParticlesToCellKernel(int atomNumber,
+__global__ void MapParticlesToCellKernel(int molCount,
                     double* gpu_x,
                     double* gpu_y,
                     double* gpu_z,                                

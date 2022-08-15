@@ -111,7 +111,9 @@ void CellListGPU::MapParticlesToCell(VariablesCUDA * cv,
                                     int * mp2c,
                                     int atomNumber,
                                     XYZArray const &axes,
-                                    uint * mol2Box){
+                                    uint * mol2Box,
+                                    uint * gpu_molLookup,
+                                    uint * gpu_startAtomIdx){
     // Run the kernel
     int threadsPerBlock = 256;
     int blocksPerGrid = (int)(atomNumber / threadsPerBlock) + 1;
@@ -281,12 +283,13 @@ __device__ int PositionToCell(int atomIndex,
     return x * gpu_edgeCells[1] * gpu_edgeCells[2] + y * gpu_edgeCells[2] + z;
 }
 
-__global__ void MapParticlesToCellKernel(int atomNumber,
+__global__ void MapParticlesToCellKernel(int molCount,
                             double* gpu_x,
                             double* gpu_y,
                             double* gpu_z,                                
                             int* gpu_mapParticleToCell,
-                            uint* gpu_mol2Box,
+                            uint* gpu_molLookup,
+                            uint* gpu_molBoxCount,
                             double *gpu_cellSize,
                             int *gpu_edgeCells,
                             int* gpu_nonOrth,
@@ -294,22 +297,25 @@ __global__ void MapParticlesToCellKernel(int atomNumber,
                             double **gpu_Invcell_y,
                             double **gpu_Invcell_z){
     int threadID = blockIdx.x * blockDim.x + threadIdx.x;
-    if (threadID >= atomNumber)
-        return;
     // Optimal alu usage/memory latency will probably be 1 warp/molecule
-    uint b = gpu_mol2Box[threadID];
-    int cell = PositionToCell(threadID,
-                            gpu_x,
-                            gpu_y,
-                            gpu_z,
-                            gpu_cellSize,
-                            gpu_edgeCells,
-                            gpu_nonOrth,
-                            gpu_Invcell_x[b],
-                            gpu_Invcell_y[b],
-                            gpu_Invcell_z[b]);
-    gpu_mapParticleToCell[threadID] = cell;
-
+    int molIndex = threadID / WARP_SIZE;
+    if (molIndex >= atomNumber)
+        return;
+    uint mol = gpu_molLookup[molIndex];
+    uint b = molIndex < gpu_molBoxCount;
+    for (int particleIndex = gpu_startAtomIdx[mol]; particleIndex < gpu_startAtomIdx[mol + 1]; particleIndex += WARP_SIZE){
+        int cell = PositionToCell(particleIndex,
+                                gpu_x,
+                                gpu_y,
+                                gpu_z,
+                                gpu_cellSize,
+                                gpu_edgeCells,
+                                gpu_nonOrth,
+                                gpu_Invcell_x[b],
+                                gpu_Invcell_y[b],
+                                gpu_Invcell_z[b]);
+        gpu_mapParticleToCell[particleIndex] = cell;
+    }
 }
 
 
