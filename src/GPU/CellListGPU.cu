@@ -93,9 +93,7 @@ void CellListGPU::GridAll(VariablesCUDA * cv,
                     mapParticleToCell_view->get(),  
                     atomCount,
                     axes,
-                    mol2Box,
-                    mol2Box,
-                    mol2Box);
+                    molLookRef);
     SortMappedParticles(cv,
                         mapParticleToCell_view->get(),  
                         cellVector_view->get(),  
@@ -113,20 +111,21 @@ void CellListGPU::MapParticlesToCell(VariablesCUDA * cv,
                                     int * mp2c,
                                     int atomNumber,
                                     XYZArray const &axes,
-                                    uint * gpu_numMolsInBox,
-                                    uint * gpu_molLookup,
-                                    uint * gpu_startAtomIdx){
+                                    MoleculeLookup & molLookupRef){
     // Run the kernel
     int threadsPerBlock = 256;
-    int blocksPerGrid = (int)(atomNumber / threadsPerBlock) + 1;
-    uint * mol2Box;
+    int molCount = molLookupRef.molLookupCount;
+    int blocksPerGrid = (int)((molCount * warp_size) / threadsPerBlock) + 1;
+
     MapParticlesToCellKernel<<< blocksPerGrid, threadsPerBlock>>>(
                             atomNumber,
                             x,
                             y,
                             z,                               
                             mp2c,
-                            mol2Box,mol2Box,mol2Box,
+                            molLookupRef.molLookupGPU->gpu_numMolsInBox,
+                            molLookupRef.molLookupGPU->gpu_molLookup,
+                            molLookupRef.molLookupGPU->gpu_startAtomIdx,
                             cv->gpu_cellSize,
                             cv->gpu_edgeCells,
                             cv->gpu_nonOrth,
