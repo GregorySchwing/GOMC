@@ -10,15 +10,15 @@
 
 class MoleculeLookupGPU {
   public:
-    MoleculeLookupGPU(
-                                    uint32_t  & _molLookupCount,
-                                    uint32_t  & _atomCount,
-                                    uint32_t  & _boxAndKindStartLength,
-                                    uint32_t  & _boxAndKindSwappableLength,
-                                    uint32_t  & _numKinds,
-                                    uint32_t *  _molLookup,  
-                                    int32_t *  _fixedMolecule,                                    
-                                    uint32_t *  _boxAndKindStart);
+    MoleculeLookupGPU(VariablesCUDA * cudaVars,
+                      uint32_t  & _molLookupCount,
+                      uint32_t  & _atomCount,
+                      uint32_t  & _boxAndKindStartLength,
+                      uint32_t  & _boxAndKindSwappableLength,
+                      uint32_t  & _numKinds,
+                      uint32_t  * _molLookup,  
+                      int32_t   * _fixedMolecule,                                    
+                      uint32_t  * _boxAndKindStart);
     ~MoleculeLookupGPU();
 
   private:

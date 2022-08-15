@@ -2,7 +2,7 @@
 #include "MoleculeLookupGPU.cuh"
 #include "cub/cub.cuh"
 
-MoleculeLookupGPU::MoleculeLookupGPU(
+MoleculeLookupGPU::MoleculeLookupGPU(VariablesCUDA *cudaVars,
                                     uint32_t  & _molLookupCount,
                                     uint32_t  & _atomCount,
                                     uint32_t  & _boxAndKindStartLength,
