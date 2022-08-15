@@ -303,10 +303,9 @@ __global__ void MapParticlesToCellKernel(int molCount,
     if (warpIdx >= molCount)
         return;
 
-    if (threadIdx.x == 0){
-        printf("warpIdx %d", warpIdx);
-        printf("laneIdx %d", laneIdx);
-    }
+    printf("warpIdx %d", warpIdx);
+    printf("laneIdx %d", laneIdx);
+    
     uint molIndex = gpu_molLookup[warpIdx];
     uint b = molIndex < gpu_molBoxCount[0];
     printf("gpu_molBoxCount %d", gpu_molBoxCount[0]);
