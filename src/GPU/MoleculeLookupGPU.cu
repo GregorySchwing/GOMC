@@ -42,8 +42,8 @@ MoleculeLookupGPU::MoleculeLookupGPU(
     for (int box = 0; box < BOX_TOTAL; ++box){
          molBoxCount = boxAndKindStart[(box + 1) * numKinds]
          - boxAndKindStart[box * numKinds];
-        cudaMemcpy(&gpu_molsInBox[b], &molBoxCount, 1 * sizeof(uint32_t), cudaMemcpyHostToDevice);
-        cudaMemcpy(&gpu_boxMolStartIndex[b], &molBoxStartIndex, 1 * sizeof(uint32_t), cudaMemcpyHostToDevice);
+        cudaMemcpy(&gpu_molsInBox[box], &molBoxCount, 1 * sizeof(uint32_t), cudaMemcpyHostToDevice);
+        cudaMemcpy(&gpu_boxMolStartIndex[box], &molBoxStartIndex, 1 * sizeof(uint32_t), cudaMemcpyHostToDevice);
         molBoxStartIndex += molBoxCount;
     }
 
