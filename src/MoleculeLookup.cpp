@@ -146,6 +146,9 @@ void MoleculeLookup::Init(const Molecules& mols,
                                       molLookup,  
                                       &fixedMolecule[0],                                    
                                       boxAndKindStart);
+    int testval = 0;
+    cudaMemcpy(&testval, molLookupGPU->gpu_numMolsInBox, 1 * sizeof(int), cudaMemcpyDeviceToHost);
+    printf("testval in ml %d\n", testval);
 
 
 #endif
