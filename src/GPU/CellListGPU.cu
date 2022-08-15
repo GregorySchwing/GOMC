@@ -117,8 +117,7 @@ void CellListGPU::MapParticlesToCell(VariablesCUDA * cv,
     int blocksPerGrid = (int)((molCount * warp_size) / threadsPerBlock) + 1;
 
     int testval = 0;
-        int testval2 = 0;
-
+    int testval2 = 0;
     int testva3 = 0;
 
     cudaMemcpy(&testval, molLookupRef.molLookupGPU->gpu_numMolsInBox, 1 * sizeof(int), cudaMemcpyDeviceToHost);
@@ -324,8 +323,11 @@ __global__ void MapParticlesToCellKernel(
 
     int molIndex = gpu_molLookup[warpIdx];
     uint b = molIndex < gpu_molBoxCount[0];
-    printf("gpu_molBoxCount %d\n", gpu_molBoxCount[0]);
-    printf("molIndex %d\n", molIndex);
+    if (threadID == 0){
+        printf("gpu_molBoxCount %d\n", gpu_molBoxCount[0]);
+        printf("gpu_molLookup %d\n", gpu_molLookup[1]);
+        printf("gpu_startAtomIdx %d\n", gpu_startAtomIdx[1]);
+    }
     __syncthreads();
     //printf("b %d", b);
     for (int particleIndex = gpu_startAtomIdx[molIndex] + laneIdx; particleIndex < gpu_startAtomIdx[molIndex + 1]; particleIndex += warp_size ){
