@@ -24,9 +24,9 @@ __global__ void MapParticlesToCellKernel(int atomNumber,
                     double *gpu_cellSize,
                     int *gpu_edgeCells,
                     int* gpu_nonOrth,
-                    double *gpu_Invcell_x,
-                    double *gpu_Invcell_y,
-                    double *gpu_Invcell_z);
+                    double **gpu_Invcell_x,
+                    double **gpu_Invcell_y,
+                    double **gpu_Invcell_z);
 
 __global__ void CalculateCellDegreesKernel(int atomNumber,
                                             int* gpu_mapParticleToCellSorted,

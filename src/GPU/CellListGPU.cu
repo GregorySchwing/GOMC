@@ -126,9 +126,9 @@ void CellListGPU::MapParticlesToCell(VariablesCUDA * cv,
                             cv->gpu_cellSize,
                             cv->gpu_edgeCells,
                             cv->gpu_nonOrth,
-                            cv->gpu_Invcell_x[b],
-                            cv->gpu_Invcell_y[b],
-                            cv->gpu_Invcell_z[b]);
+                            cv->gpu_Invcell_x,
+                            cv->gpu_Invcell_y,
+                            cv->gpu_Invcell_z);
     cudaDeviceSynchronize();
     checkLastErrorCUDA(__FILE__, __LINE__);
 
@@ -290,12 +290,14 @@ __global__ void MapParticlesToCellKernel(int atomNumber,
                             double *gpu_cellSize,
                             int *gpu_edgeCells,
                             int* gpu_nonOrth,
-                            double *gpu_Invcell_x,
-                            double *gpu_Invcell_y,
-                            double *gpu_Invcell_z){
+                            double **gpu_Invcell_x,
+                            double **gpu_Invcell_y,
+                            double **gpu_Invcell_z){
     int threadID = blockIdx.x * blockDim.x + threadIdx.x;
     if (threadID >= atomNumber)
         return;
+    // Optimal alu usage/memory latency will probably be 1 warp/molecule
+    uint b = gpu_mol2Box[threadID];
     int cell = PositionToCell(threadID,
                             gpu_x,
                             gpu_y,
@@ -303,9 +305,9 @@ __global__ void MapParticlesToCellKernel(int atomNumber,
                             gpu_cellSize,
                             gpu_edgeCells,
                             gpu_nonOrth,
-                            gpu_Invcell_x,
-                            gpu_Invcell_y,
-                            gpu_Invcell_z);
+                            gpu_Invcell_x[b],
+                            gpu_Invcell_y[b],
+                            gpu_Invcell_z[b]);
     gpu_mapParticleToCell[threadID] = cell;
 
 }
