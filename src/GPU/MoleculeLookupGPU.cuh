@@ -24,6 +24,8 @@ class MoleculeLookupGPU {
 
     uint32_t * gpu_molLookupCount;
     uint32_t * gpu_atomCount;
+    uint32_t * gpu_boxMolStartIndex;
+    uint32_t * gpu_molsInBox;
     uint32_t * gpu_boxAndKindStartLength;
     uint32_t * gpu_boxAndKindSwappableLength;
     uint32_t * gpu_numKinds;

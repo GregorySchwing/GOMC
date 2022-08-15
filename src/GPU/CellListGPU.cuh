@@ -20,13 +20,13 @@ __global__ void MapParticlesToCellKernel(int atomNumber,
                     double* gpu_y,
                     double* gpu_z,                                
                     int* gpu_mapParticleToCell,
+                    uint* gpu_mol2Box,
                     double *gpu_cellSize,
                     int *gpu_edgeCells,
                     int* gpu_nonOrth,
                     double *gpu_Invcell_x,
                     double *gpu_Invcell_y,
-                    double *gpu_Invcell_z,
-                    const int b);
+                    double *gpu_Invcell_z);
 
 __global__ void CalculateCellDegreesKernel(int atomNumber,
                                             int* gpu_mapParticleToCellSorted,
@@ -35,11 +35,13 @@ __global__ void CalculateCellDegreesKernel(int atomNumber,
 class CellListGPU {
   public:
     CellListGPU(VariablesCUDA * cv, int atomCount, MoleculeLookup & molLookup);
+/*
     void GridBox(VariablesCUDA * cv,
                         XYZArray const &coords,
                         XYZArray const &axes,
                         const int buffer_index,
                         const uint b);
+*/
     void GridAll(VariablesCUDA * cv,
                   XYZArray const &coords,
                   XYZArray const &axes,

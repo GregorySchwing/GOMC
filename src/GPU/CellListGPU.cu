@@ -16,7 +16,7 @@ atomNumber(_atomNumber), molLookRef(molLookup)
     cudaMemcpy(cv->gpu_Ones, thrust::raw_pointer_cast(&ones[0]), atomNumber * sizeof(int), cudaMemcpyDeviceToDevice);
     cudaMemcpy(cv->gpu_particleIndices, thrust::raw_pointer_cast(&pI[0]), atomNumber * sizeof(int), cudaMemcpyDeviceToDevice);
 }
-
+/*
 void CellListGPU::GridBox(VariablesCUDA * cv,
                         XYZArray const &coords,
                         XYZArray const &axes,
@@ -61,7 +61,7 @@ void CellListGPU::GridBox(VariablesCUDA * cv,
     PrefixScanCellDegrees(cv, cellStartIndex_view->get(), cv->cpu_numberOfCells[b]);
     GOMC_EVENT_STOP(1, GomcProfileEvent::GRID_ALL_GPU);
 }
-
+*/
 void CellListGPU::GridAll(VariablesCUDA * cv,
                         XYZArray const &coords,
                         XYZArray const &axes,
@@ -85,14 +85,15 @@ void CellListGPU::GridAll(VariablesCUDA * cv,
     BufferAccess<DeviceArray<double>, double, buffers> coords_x_view(*(cv->gpu_coords_x), buffer_index);
     BufferAccess<DeviceArray<double>, double, buffers> coords_y_view(*(cv->gpu_coords_y), buffer_index);
     BufferAccess<DeviceArray<double>, double, buffers> coords_z_view(*(cv->gpu_coords_z), buffer_index);
-
+    uint * mol2Box,
     MapParticlesToCell(cv,
                     coords_x_view->get(),
                     coords_y_view->get(),
                     coords_z_view->get(),  
                     mapParticleToCell_view->get(),  
                     atomCount,
-                    axes);
+                    axes,
+                    mol2Box);
     SortMappedParticles(cv,
                         mapParticleToCell_view->get(),  
                         cellVector_view->get(),  
@@ -110,6 +111,7 @@ void CellListGPU::MapParticlesToCell(VariablesCUDA * cv,
                                     int * mp2c,
                                     int atomNumber,
                                     XYZArray const &axes,
+                                    uint * mol2Box,
                                     const int b){
     // Run the kernel
     int threadsPerBlock = 256;
@@ -121,6 +123,7 @@ void CellListGPU::MapParticlesToCell(VariablesCUDA * cv,
                             y,
                             z,                               
                             mp2c,
+                            mol2Box,
                             cv->gpu_cellSize,
                             cv->gpu_edgeCells,
                             cv->gpu_nonOrth,
@@ -285,13 +288,13 @@ __global__ void MapParticlesToCellKernel(int atomNumber,
                             double* gpu_y,
                             double* gpu_z,                                
                             int* gpu_mapParticleToCell,
+                            uint* gpu_mol2Box,
                             double *gpu_cellSize,
                             int *gpu_edgeCells,
                             int* gpu_nonOrth,
                             double *gpu_Invcell_x,
                             double *gpu_Invcell_y,
-                            double *gpu_Invcell_z,
-                            const int b){
+                            double *gpu_Invcell_z){
     int threadID = blockIdx.x * blockDim.x + threadIdx.x;
     if (threadID >= atomNumber)
         return;
