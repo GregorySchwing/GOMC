@@ -11,45 +11,45 @@
 class MoleculeLookupGPU {
   public:
     MoleculeLookupGPU(
-                                    uint32_t  & _molLookupCount,
-                                    uint32_t  & _atomCount,
-                                    uint32_t  & _boxAndKindStartLength,
-                                    uint32_t  & _boxAndKindSwappableLength,
-                                    uint32_t  & _numKinds,
-                                    uint32_t *  _molLookup,  
-                                    int32_t *  _fixedMolecule,                                    
-                                    uint32_t *  _boxAndKindStart);
+                                    uint  & _molLookupCount,
+                                    uint  & _atomCount,
+                                    uint  & _boxAndKindStartLength,
+                                    uint  & _boxAndKindSwappableLength,
+                                    uint  & _numKinds,
+                                    uint *  _molLookup,  
+                                    int *  _fixedMolecule,                                    
+                                    uint *  _boxAndKindStart);
     ~MoleculeLookupGPU();
 
   private:
 
-    uint32_t * gpu_molLookupCount;
-    uint32_t * gpu_atomCount;
-    uint32_t * gpu_boxMolStartIndex;
-    uint32_t * gpu_numMolsInBox;
-    uint32_t * gpu_boxAndKindStartLength;
-    uint32_t * gpu_boxAndKindSwappableLength;
-    uint32_t * gpu_numKinds;
-    uint32_t * gpu_mol2Box;
+    uint * gpu_molLookupCount;
+    uint * gpu_atomCount;
+    uint * gpu_boxMolStartIndex;
+    uint * gpu_numMolsInBox;
+    uint * gpu_boxAndKindStartLength;
+    uint * gpu_boxAndKindSwappableLength;
+    uint * gpu_numKinds;
+    uint * gpu_mol2Box;
     //array of indices for type Molecule, sorted by box and kind for
     //move selection
-    uint32_t* gpu_molLookup;
+    uint* gpu_molLookup;
 
     //index [BOX_TOTAL * kind + box] is the first element of that kind/box in
     //molLookup
     //index [BOX_TOTAL * kind + box + 1] is the element after the end
     //of that kind/box
-    uint32_t* gpu_boxAndKindStart;
-    uint32_t* gpu_boxAndKindSwappableCounts;
+    uint* gpu_boxAndKindStart;
+    uint* gpu_boxAndKindSwappableCounts;
 
-    int32_t *gpu_molIndex; // stores the molecule index for global atom index
-    int32_t *gpu_atomIndex; // stores the local atom index for global atom index
+    int *gpu_molIndex; // stores the molecule index for global atom index
+    int *gpu_atomIndex; // stores the local atom index for global atom index
 
-    int32_t * gpu_fixedMolecule; //Molecules that can't move 
-    int32_t * gpu_canSwapKind; //Kinds that can move intra and inter box
-    int32_t * gpu_canMoveKind; //Kinds that can move intra box only
+    int * gpu_fixedMolecule; //Molecules that can't move 
+    int * gpu_canSwapKind; //Kinds that can move intra and inter box
+    int * gpu_canMoveKind; //Kinds that can move intra box only
 
-    int32_t * gpu_startAtomIdx;
+    int * gpu_startAtomIdx;
     friend class CellListGPU;
 };
 
