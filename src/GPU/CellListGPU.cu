@@ -318,13 +318,13 @@ __global__ void MapParticlesToCellKernel(int molCount,
     if (warpIdx >= molCount)
         return;
 
-    printf("warpIdx %d\n", warpIdx);
-    printf("laneIdx %d\n", laneIdx);
+    //printf("warpIdx %d\n", warpIdx);
+    //printf("laneIdx %d\n", laneIdx);
 
     uint molIndex = gpu_molLookup[warpIdx];
     uint b = molIndex < gpu_molBoxCount[0];
-    //printf("gpu_molBoxCount %d\n", gpu_molBoxCount[0]);
-    //printf("molIndex %d", molIndex);
+    printf("gpu_molBoxCount %d\n", gpu_molBoxCount[0]);
+    printf("molIndex %d", molIndex);
     //printf("b %d", b);
     for (int particleIndex = gpu_startAtomIdx[molIndex] + laneIdx; particleIndex < gpu_startAtomIdx[molIndex + 1]; particleIndex += warp_size ){
         int cell = PositionToCell(particleIndex,
