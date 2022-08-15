@@ -12,7 +12,7 @@
 
 class MoleculeLookupGPU {
   public:
-    MoleculeLookupGPU(VariablesCUDA * cudaVars,
+    MoleculeLookupGPU(int32_t   & _startAtomIdx,
                       uint32_t  & _molLookupCount,
                       uint32_t  & _atomCount,
                       uint32_t  & _boxAndKindStartLength,
@@ -32,7 +32,6 @@ class MoleculeLookupGPU {
     uint32_t * gpu_boxAndKindStartLength;
     uint32_t * gpu_boxAndKindSwappableLength;
     uint32_t * gpu_numKinds;
-    uint32_t * gpu_mol2Box;
     //array of indices for type Molecule, sorted by box and kind for
     //move selection
     uint32_t* gpu_molLookup;
