@@ -105,7 +105,6 @@ public:
     gpu_lambdaVDW = NULL;
     gpu_lambdaCoulomb = NULL;
     gpu_isFraction = NULL;
-    gpu_molLookup = NULL;
   }
   double *gpu_sigmaSq;
   double *gpu_epsilon_Cn;
@@ -150,7 +149,7 @@ public:
   double *gpu_mp_coefficient;
   // Currently means translation or rotate MP. Will eventually mean any move.
   int* gpu_move_type;
-  uint* gpu_molLookup;
+
   MultiBuffer< DeviceArray<double>, double, buffers > * gpu_LJEn;
   MultiBuffer< DeviceArray<double>, double, buffers > * gpu_REn;
   // a flag to prevent translation/rotation of fixed molecules
