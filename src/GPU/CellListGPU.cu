@@ -90,7 +90,6 @@ void CellListGPU::GridAll(VariablesCUDA * cv,
                     coords_y_view->get(),
                     coords_z_view->get(),  
                     mapParticleToCell_view->get(),  
-                    atomCount,
                     axes,
                     molLookRef);
     SortMappedParticles(cv,
