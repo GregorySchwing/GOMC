@@ -64,8 +64,8 @@ public:
     if (boxAndKindSwappableCounts != NULL)
       delete[] boxAndKindSwappableCounts;
   #ifdef GOMC_CUDA
-    if (molLookupGPU != NULL)
-      delete molLookupGPU;
+    //if (molLookupGPU != NULL)
+      //delete molLookupGPU;
   #endif
   }
 
