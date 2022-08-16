@@ -256,15 +256,11 @@ void Simulation::GetGPUCellList(std::vector<int> & cellVector,
                                 std::vector< std::vector<int> > & neighborList,
                                 std::vector<int> & Pinds){
 
-  system->cellListGPU->MapParticlesToCell(staticValues->forcefield.particles->getCUDAVars(),
-                                          system->coordinates,
-                                          system->boxDimRef.axis);
-  system->cellListGPU->SortMappedParticles(staticValues->forcefield.particles->getCUDAVars(),
-                                          system->coordinates);
-  system->cellListGPU->CalculateCellDegrees(staticValues->forcefield.particles->getCUDAVars(),
-                                          system->coordinates);
-  system->cellListGPU->PrefixScanCellDegrees(staticValues->forcefield.particles->getCUDAVars(),
-                                          system->cellList.CellsInBox(0));
+  system->cellListGPU->GridAll(staticValues->forcefield.particles->getCUDAVars(),
+                              system->coordinates,
+                              system->boxDimRef.axis,
+                              system->cellList.CellsInBox(0),
+                              0);                                        
 
   system->cellListGPU->CopyGPUMemoryToToHost(staticValues->forcefield.particles->getCUDAVars()->gpu_mapParticleToCell,
                                                     system->coordinates.Count(),
