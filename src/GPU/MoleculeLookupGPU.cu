@@ -39,7 +39,7 @@ MoleculeLookupGPU::MoleculeLookupGPU(VariablesCUDA * cv,
     cudaMemcpy(gpu_fixedMolecule, &_fixedMolecule[0], (_molLookupCount) * sizeof(int32_t), cudaMemcpyHostToDevice);
     cudaMemcpy(gpu_boxAndKindStart, _boxAndKindStart, (_boxAndKindStartLength) * sizeof(uint32_t), cudaMemcpyHostToDevice);
     // copy start atom index
-    cudaMemcpy(gpu_startAtomIdx, _startAtomIdx, _molLookupCount * sizeof(uint32_t), cudaMemcpyHostToDevice);
+    cudaMemcpy(gpu_startAtomIdx, _startAtomIdx, (_molLookupCount + 1) * sizeof(uint32_t), cudaMemcpyHostToDevice);
 
     uint32_t molBoxStartIndex = 0;
     uint32_t molBoxCount = 0;
