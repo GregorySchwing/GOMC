@@ -28,6 +28,7 @@ TEST(CellListGPU, CheckMETHANOL) {
         if(mapParticleToCell[i] != mapParticleToCellGPU[i])
             printf("%d %d\n", mapParticleToCell[i], mapParticleToCellGPU[i]);
     }
+    /*
     for (int i = 0; cellStartIndex.size(); ++i){
         if(cellStartIndex[i] != cellStartIndexGPU[i])
             printf("%d %d\n", cellStartIndex[i], cellStartIndexGPU[i]);
@@ -36,7 +37,7 @@ TEST(CellListGPU, CheckMETHANOL) {
         if(cellVector[i] != cellVectorGPU[i])
             printf("%d %d\n", cellVector[i], cellVectorGPU[i]);
     }
-
+    */
     EXPECT_EQ(mapParticleToCell, mapParticleToCellGPU);
     EXPECT_EQ(cellStartIndex, cellStartIndexGPU);
     EXPECT_EQ(cellVector, cellVectorGPU);
