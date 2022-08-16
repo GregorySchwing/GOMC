@@ -317,7 +317,8 @@ __global__ void MapParticlesToCellKernel(
                                 gpu_nonOrth,
                                 gpu_Invcell_x[b],
                                 gpu_Invcell_y[b],
-                                gpu_Invcell_z[b]);
+                                gpu_Invcell_z[b],
+                                b);
         gpu_mapParticleToCell[particleIndex] = cell;
     }
 }
