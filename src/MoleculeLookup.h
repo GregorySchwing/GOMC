@@ -12,7 +12,6 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #include "algorithm"
 #include <vector>
 #include <cstring>
-#include "GOMC_Config.h"
 
 #include <cereal/access.hpp>
 #include <cereal/types/vector.hpp>
