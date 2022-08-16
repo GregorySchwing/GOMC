@@ -37,7 +37,11 @@ class MoleculeLookup
 public:
 
   MoleculeLookup(): molLookup(NULL), boxAndKindStart(NULL), boxAndKindSwappableCounts(NULL),
-   molIndex(NULL), atomIndex(NULL), molKind(NULL), atomKind(NULL), atomCharge(NULL) {}
+   molIndex(NULL), atomIndex(NULL), molKind(NULL), atomKind(NULL), atomCharge(NULL)
+  #ifdef GOMC_CUDA
+   , molLookupGPU(NULL)
+  #endif
+  {}
 
   ~MoleculeLookup()
   {
@@ -60,7 +64,8 @@ public:
     if (boxAndKindSwappableCounts != NULL)
       delete[] boxAndKindSwappableCounts;
   #ifdef GOMC_CUDA
-    delete molLookupGPU;
+    if (molLookupGPU != NULL)
+      delete molLookupGPU;
   #endif
   }
 
