@@ -112,7 +112,7 @@ void CellListGPU::MapParticlesToCell(VariablesCUDA * cv,
                                     MoleculeLookup & molLookupRef){
     // Run the kernel
     int threadsPerBlock = 256;
-    int molCount = molLookupRef.molLookupCount + 1;
+    int molCount = molLookupRef.molLookupCount;
     int blocksPerGrid = (int)((molCount * warp_size) / threadsPerBlock) + 1;
 
     MapParticlesToCellKernel<<< blocksPerGrid, threadsPerBlock>>>(
