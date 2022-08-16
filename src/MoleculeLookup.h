@@ -37,7 +37,7 @@ class MoleculeLookup
 public:
 
   MoleculeLookup(): molLookup(NULL), boxAndKindStart(NULL), boxAndKindSwappableCounts(NULL),
-   molIndex(NULL), atomIndex(NULL), molKind(NULL), atomKind(NULL), atomCharge(NULL)
+   molIndex(NULL), atomIndex(NULL), molKind(NULL), atomKind(NULL), atomCharge(NULL), atomsPerKind(NULL)
   #ifdef GOMC_CUDA
    , molLookupGPU(NULL)
   #endif
