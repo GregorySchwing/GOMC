@@ -24,12 +24,13 @@ TEST(CellListGPU, CheckMETHANOL) {
                         mapParticleToCellGPU,
                         neighborListGPU,
                         particleIndices);
+    printf("mapParticleToCell.size() %d\n", mapParticleToCell.size());
+    printf("mapParticleToCellGPU.size() %d\n", mapParticleToCellGPU.size());
     for (int i = 0; mapParticleToCell.size(); ++i){
         if(mapParticleToCell[i] != mapParticleToCellGPU[i])
             printf("%d %d x\n", mapParticleToCell[i], mapParticleToCellGPU[i]);
         else
             printf("%d %d\n", mapParticleToCell[i], mapParticleToCellGPU[i]);
-    
     }
     /*
     for (int i = 0; cellStartIndex.size(); ++i){
