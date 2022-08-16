@@ -51,7 +51,7 @@ class CellListGPU {
                   XYZArray const &axes,
                   int numberOfCells,
                   const int buffer_index = 0);
-    void CopyGPUMemoryToToHost(BufferAccess<DeviceArray<int>, int, buffers> * deviceMemory,
+    void CopyGPUMemoryToToHost(MultiBuffer< DeviceArray<int>, int, buffers > * deviceMemory,
                                     int size,
                                     std::vector<int> & hostMemory);
 

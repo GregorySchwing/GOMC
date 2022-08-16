@@ -240,7 +240,7 @@ void CellListGPU::PrefixScanCellDegrees(VariablesCUDA * cv,
     checkLastErrorCUDA(__FILE__, __LINE__);
 }
 
-void CellListGPU::CopyGPUMemoryToToHost(BufferAccess<DeviceArray<int>, int, buffers> * deviceMemory,
+void CellListGPU::CopyGPUMemoryToToHost(MultiBuffer< DeviceArray<int>, int, buffers > * deviceMemory,
                                     int size,
                                     std::vector<int> & hostMemory){
 
