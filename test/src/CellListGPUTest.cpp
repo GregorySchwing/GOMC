@@ -26,9 +26,9 @@ TEST(CellListGPU, CheckMETHANOL) {
                         particleIndices);
     for (int i = 0; mapParticleToCell.size(); ++i){
         if(mapParticleToCell[i] != mapParticleToCellGPU[i])
-            printf("%d %d\n", mapParticleToCell[i], mapParticleToCellGPU[i]);
-        else
             printf("%d %d x\n", mapParticleToCell[i], mapParticleToCellGPU[i]);
+        else
+            printf("%d %d\n", mapParticleToCell[i], mapParticleToCellGPU[i]);
     
     }
     /*
