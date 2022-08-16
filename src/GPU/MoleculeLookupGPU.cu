@@ -20,7 +20,7 @@ MoleculeLookupGPU::MoleculeLookupGPU(VariablesCUDA * cv,
     CUMALLOC((void**) &gpu_boxAndKindSwappableLength, sizeof(uint32_t));
     CUMALLOC((void**) &gpu_numKinds, sizeof(uint32_t));
     // allocate memory to store molecule start atom index
-    CUMALLOC((void**) &gpu_startAtomIdx, _molLookupCount * sizeof(uint32_t));
+    CUMALLOC((void**) &gpu_startAtomIdx, (_molLookupCount + 1) * sizeof(uint32_t));
 
     CUMALLOC((void**) &gpu_molLookup, (_molLookupCount + 1) * sizeof(uint));
     CUMALLOC((void**) &gpu_fixedMolecule, (_molLookupCount) * sizeof(int32_t));
