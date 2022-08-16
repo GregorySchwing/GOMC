@@ -240,12 +240,15 @@ void CellListGPU::PrefixScanCellDegrees(VariablesCUDA * cv,
     checkLastErrorCUDA(__FILE__, __LINE__);
 }
 
-void CellListGPU::CopyGPUMemoryToToHost(int * deviceMemory,
+void CellListGPU::CopyGPUMemoryToToHost(BufferAccess<DeviceArray<int>, int, buffers> * deviceMemory,
                                     int size,
                                     std::vector<int> & hostMemory){
+
+    BufferAccess<DeviceArray<int>, int, buffers> deviceMemory_view(*deviceMemory, 0);
+
     hostMemory.clear();
     hostMemory.resize(size);
-    cudaMemcpy(&hostMemory[0], deviceMemory, size * sizeof(int), cudaMemcpyDeviceToHost);
+    cudaMemcpy(&hostMemory[0], deviceMemory_view->get(), size * sizeof(int), cudaMemcpyDeviceToHost);
     cudaDeviceSynchronize();
     checkLastErrorCUDA(__FILE__, __LINE__);
 }
