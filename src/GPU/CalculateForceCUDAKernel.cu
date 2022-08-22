@@ -907,12 +907,6 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
 
         double lambdaVDW = DeviceGetLambdaVDW(mA, mB, box, gpu_isFraction,
                                               gpu_molIndex, gpu_lambdaVDW);
-        printf("%d %d : %f\n", currentParticle, neighborParticle, CalcEnGPU(distSq, kA, kB, gpu_sigmaSq, gpu_n,
-                          gpu_epsilon_Cn, gpu_VDW_Kind[0],
-                          gpu_isMartini[0], gpu_rCut[0],
-                          gpu_rOn[0], gpu_count[0], lambdaVDW,
-                          sc_sigma_6, sc_alpha, sc_power,
-                          gpu_rMin, gpu_rMaxSq, gpu_expConst));
         LJEn += CalcEnGPU(distSq, kA, kB, gpu_sigmaSq, gpu_n,
                           gpu_epsilon_Cn, gpu_VDW_Kind[0],
                           gpu_isMartini[0], gpu_rCut[0],
