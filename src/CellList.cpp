@@ -66,7 +66,7 @@ void CellList::FlattenNeighborList(){
   startOfBoxCellList.clear();
   numberOfCells.clear();
 
-  int totalCells = 0; 
+  totalCells = 0; 
   std::vector < std::vector<std::vector<int> > > neighborList;
   for (int b = 0; b < BOX_TOTAL; ++b){
     startOfBoxCellList.push_back(totalCells);

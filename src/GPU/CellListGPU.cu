@@ -117,6 +117,7 @@ void CellListGPU::MapParticlesToCell(VariablesCUDA * cv,
 
     MapParticlesToCellKernel<<< blocksPerGrid, threadsPerBlock>>>(
                             molCount,
+                            cv->cpu_numberOfCells[0],
                             x,
                             y,
                             z,                               
@@ -168,7 +169,7 @@ void CellListGPU::CalculateCellDegrees(VariablesCUDA * cv,
                                                                 cv->gpu_mapParticleToCellSorted,
                                                                 cv->gpu_cellDegrees);
     */
- CalculateCellDegreesKernel<<< blocksPerGrid, 
+    CalculateCellDegreesKernel<<< blocksPerGrid, 
                                 threadsPerBlock>>>(atomNumber,
                                                     cv->gpu_mapParticleToCellSorted,
                                                     cv->gpu_cellDegrees);
@@ -287,6 +288,7 @@ __device__ int PositionToCell(int atomIndex,
 
 __global__ void MapParticlesToCellKernel(
                             int molCount,
+                            int box0CellCount,
                             double* gpu_x,
                             double* gpu_y,
                             double* gpu_z,                                
@@ -308,10 +310,16 @@ __global__ void MapParticlesToCellKernel(
         return;
 
     int molIndex = gpu_molLookup[warpIdx];
-    uint b = molIndex >= gpu_molBoxCount[0];
+    uint b = warpIdx >= gpu_molBoxCount[0];
     //printf("b %d", b);
     for (int particleIndex = gpu_startAtomIdx[molIndex] + laneIdx; particleIndex < gpu_startAtomIdx[molIndex + 1]; particleIndex += warp_size ){
-        int cell = PositionToCell(particleIndex,
+        // It is likely nearly free to calculate PTC for all particles instead of
+        // just the box of interest. So, shift the domain of box 1's cell to be separable
+        // from box 0's domain for sorting purposes.
+        // 
+        // Domain of box 0 cells : [0,box0CellCount)
+        // Domain of box 1 cells : [box0CellCount, box1CellCount)
+        int cell = b*box0CellCount + PositionToCell(particleIndex,
                                 gpu_x,
                                 gpu_y,
                                 gpu_z,
@@ -327,6 +335,16 @@ __global__ void MapParticlesToCellKernel(
 }
 
 
+
+// 2 approaches to generating box 0 and box 1 cell lists
+// 1: Call CalculateNewRowOffsets twice, once for each box.
+//  - Necessary to split box 0 and box 1 cell lists into different data structures
+// 2: Call CalculateNewRowOffsets once, and subtract box0MolCount from all cells in box 1.
+//  - Necessary to store box 0 and box 1 cell lists in one array
+
+// Since the work to generate a single box cell list is nearly the same
+// to generate both box's cell lists, it is free to generate both box's cell lists. 
+// The current approach is to store them in one array.
 
 // Make sure a zero element is padded onto the end.
 // https://github.com/NVIDIA/cub/issues/367

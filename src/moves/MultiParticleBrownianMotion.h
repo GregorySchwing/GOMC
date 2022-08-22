@@ -356,7 +356,7 @@ inline void MultiParticleBrownian::CalcEn()
   // reference values in Accept() function
   //cellList.GridAll(boxDimRef, newMolsPos, molLookup);
   #if GOMC_CUDA
-  cellListGPU->GridAll(cudaVars, coordCurrRef, boxDimRef.axis, cellList.CellsInBox(0), nextStateBufferIndex);
+  cellListGPU->GridAll(cudaVars, coordCurrRef, boxDimRef.axis, cellList.totalCells, nextStateBufferIndex);
   #else
   cellList.GridBox(boxDimRef, newMolsPos, molLookup, bPick);
   #endif
@@ -492,7 +492,7 @@ inline void MultiParticleBrownian::Accept(const uint rejectState, const ulong st
       velocity.UpdateBoxVelocity(bPick);
   // No longer necessary since both states are retained.
   //} else {
-  //  cellListGPU->GridAll(cudaVars, coordCurrRef, boxDimRef.axis, cellList.CellsInBox(0));
+  //  cellListGPU->GridAll(cudaVars, coordCurrRef, boxDimRef.axis, cellList.totalCells);
   //  calcEwald->exgMolCache();
   } else {
       printf("Rejected %s move\n", moveType ? "ROT" : "TRANS");

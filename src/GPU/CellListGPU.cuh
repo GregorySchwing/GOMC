@@ -18,6 +18,7 @@ static const int warp_size = 32;
 //#include <cuda_runtime.h>
 
 __global__ void MapParticlesToCellKernel(int molCount,
+                    int box0CellCount,
                     double* gpu_x,
                     double* gpu_y,
                     double* gpu_z,                                

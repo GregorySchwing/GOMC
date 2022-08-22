@@ -93,6 +93,7 @@ private:
   double cutoff[BOX_TOTAL];
   bool isBuilt;
   #ifdef GOMC_CUDA
+  int totalCells;
   std::vector<int> neighborlist1D;
   std::vector<int> numberOfCells;
   std::vector<int> startOfBoxCellList;

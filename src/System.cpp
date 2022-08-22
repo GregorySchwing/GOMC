@@ -156,7 +156,7 @@ void System::Init(Setup & set)
   // but before SystemTotal()
   cellList.CopyNeighborListToGPU(statV.forcefield.particles->getCUDAVars());
   cellListGPU = new CellListGPU(statV.forcefield.particles->getCUDAVars(), coordinates.Count(), molLookupRef);
-  cellListGPU->GridAll(statV.forcefield.particles->getCUDAVars(), coordinates, boxDimRef.axis, cellList.CellsInBox(0));
+  cellListGPU->GridAll(statV.forcefield.particles->getCUDAVars(), coordinates, boxDimRef.axis, cellList.totalCells);
   #endif
   potential = calcEnergy.SystemTotal();
   InitMoves(set);
