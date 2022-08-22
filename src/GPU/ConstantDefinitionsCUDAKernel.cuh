@@ -60,6 +60,7 @@ void DestroyCUDAVars(VariablesCUDA *vars);
 void InitExp6Variables(VariablesCUDA *vars, double *rMin, double *expConst,
                        double *rMaxSq, uint size);
 void InitGPUCellList(VariablesCUDA *vars, 
+                    int & totalCells,
                     const std::vector<int> &neighborList,
                     const std::vector<int> &numberOfCells,
                     const std::vector<int> &startOfBoxCellList,

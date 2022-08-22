@@ -61,6 +61,10 @@ CellList::CellList(const CellList & other) : mols(other.mols)
 }
 
 #ifdef GOMC_CUDA
+int CellList::GetTotalCells(){
+  return totalCells;
+}
+
 void CellList::FlattenNeighborList(){
   int NUMBER_OF_NEIGHBOR_CELL = 27;
   startOfBoxCellList.clear();
@@ -102,6 +106,7 @@ void CellList::CopyNeighborListToGPU(VariablesCUDA *cudaVars){
   FlattenNeighborList();
   FlattenCellDetails();
   InitGPUCellList(cudaVars, 
+                  totalCells,
                   neighborlist1D, 
                   numberOfCells, 
                   startOfBoxCellList,

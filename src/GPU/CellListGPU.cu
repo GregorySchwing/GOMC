@@ -341,6 +341,11 @@ __global__ void MapParticlesToCellKernel(
 //  - Necessary to split box 0 and box 1 cell lists into different data structures
 // 2: Call CalculateNewRowOffsets once, and subtract box0MolCount from all cells in box 1.
 //  - Necessary to store box 0 and box 1 cell lists in one array
+//  - logic to create the cell list of box 1 is done in every kernel call
+//      The atomCountBox0*box term is subtracted from the start and end of the each cell
+//      When launching force kernel on a single box, the number of cells in that box is used to
+//      configure the kernel, and the cell index is blockId.x + cellCountBox0*box
+
 
 // Since the work to generate a single box cell list is nearly the same
 // to generate both box's cell lists, it is free to generate both box's cell lists. 

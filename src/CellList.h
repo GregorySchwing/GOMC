@@ -75,7 +75,9 @@ public:
   std::vector<int> list;
   std::vector<std::vector<int> > neighbors[BOX_TOTAL];
   std::vector<int> head[BOX_TOTAL];
-
+  #ifdef GOMC_CUDA
+  int GetTotalCells();
+  #endif
 private:
   static const int END_CELL = -1;
 

@@ -259,7 +259,7 @@ void Simulation::GetGPUCellList(std::vector<int> & cellVector,
   system->cellListGPU->GridAll(staticValues->forcefield.particles->getCUDAVars(),
                               system->coordinates,
                               system->boxDimRef.axis,
-                              system->cellList.totalCells,
+                              system->cellList.GetTotalCells(),
                               0);                                        
 
   system->cellListGPU->CopyGPUMemoryToToHost(staticValues->forcefield.particles->getCUDAVars()->gpu_mapParticleToCell,
@@ -269,7 +269,7 @@ void Simulation::GetGPUCellList(std::vector<int> & cellVector,
                                                     system->coordinates.Count(),
                                                     cellVector);
   system->cellListGPU->CopyGPUMemoryToToHost(staticValues->forcefield.particles->getCUDAVars()->gpu_cellStartIndex,
-                                                    system->cellList.totalCells+1,
+                                                    system->cellList.GetTotalCells()+1,
                                                     cellStartIndex);                                                    
 
 }
