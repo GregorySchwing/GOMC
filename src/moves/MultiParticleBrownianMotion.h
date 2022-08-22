@@ -612,6 +612,8 @@ inline void MultiParticleBrownian::RotateForceBiased(uint molIndex)
   // Copy the range into temporary array
   XYZArray temp(len);
   newMolsPos.CopyRange(temp, start, 0, len);
+    printf("mol %d old pos %f %f %f\n",molIndex , temp.x[0], temp.y[0], temp.z[0]);
+
   boxDimRef.UnwrapPBC(temp, bPick, center);
 
   // Do Rotation
@@ -623,6 +625,7 @@ inline void MultiParticleBrownian::RotateForceBiased(uint molIndex)
   boxDimRef.WrapPBC(temp, bPick);
   // Copy back the result
   temp.CopyRange(newMolsPos, 0, start, len);
+  printf("mol %d new pos %f %f %f\n",molIndex , temp.x[0], temp.y[0], temp.z[0]);
 }
 
 inline void MultiParticleBrownian::TranslateForceBiased(uint molIndex)
@@ -647,6 +650,8 @@ inline void MultiParticleBrownian::TranslateForceBiased(uint molIndex)
   // Copy the range into temporary array
   XYZArray temp(len);
   newMolsPos.CopyRange(temp, start, 0, len);
+    printf("mol %d old pos %f %f %f\n",molIndex , temp.x[0], temp.y[0], temp.z[0]);
+
   //Shift the coordinate and COM
   temp.AddAll(shift);
   newcom += shift;
@@ -656,6 +661,8 @@ inline void MultiParticleBrownian::TranslateForceBiased(uint molIndex)
   //set the new coordinate
   temp.CopyRange(newMolsPos, 0, start, len);
   newCOMs.Set(molIndex, newcom);
+  printf("mol %d new pos %f %f %f\n",molIndex , temp.x[0], temp.y[0], temp.z[0]);
+
 }
 
 #endif

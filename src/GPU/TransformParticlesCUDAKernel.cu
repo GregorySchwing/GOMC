@@ -1091,7 +1091,7 @@ __global__ void BrownianMotionRotateKernel(
   int endIdx = startAtomIdx[mol + 1];
   bool molIsBox0 = molIndex < gpu_molBoxCount[0]; 
   bool molIsBox1 = molIndex >= gpu_molBoxCount[0]; 
-  bool moveMol = (molIsBox0 && !box) || (molIsBox1 && box); 
+  bool moveMol = (molIsBox0 && box == 0) || (molIsBox1 && box == 1); 
   int atomIdx;
 
   __shared__ double matrix[3][3];
@@ -1161,7 +1161,12 @@ __global__ void BrownianMotionRotateKernel(
   // each thread handles one atom rotation
   for(atomIdx = startIdx + threadIdx.x; atomIdx < endIdx; atomIdx += blockDim.x) {
     double3 coor = make_double3(gpu_old_x[atomIdx], gpu_old_y[atomIdx], gpu_old_z[atomIdx]);
+    if (threadIdx.x == 0)
+    printf("mol %d old pos %f %f %f\n",mol , coor.x, coor.y, coor.z);
+
     // unwrap molecule
+    //printf("atomIdx %d old coords %f %f %f\n",atomIdx , coor.x, coor.y, coor.z);
+
     if(isOrthogonal)
       UnwrapPBC3(coor, com, axis, halfAx);
     else
@@ -1193,6 +1198,9 @@ __global__ void BrownianMotionRotateKernel(
     gpu_new_x[atomIdx] = coor.x;
     gpu_new_y[atomIdx] = coor.y;
     gpu_new_z[atomIdx] = coor.z;
+    if (threadIdx.x == 0)
+    printf("mol %d new pos %f %f %f\n",mol , coor.x, coor.y, coor.z);
+    //printf("atomIdx %d new coords %f %f %f\n",atomIdx , coor.x, coor.y, coor.z);
   }
 }
 
@@ -1474,6 +1482,9 @@ __global__ void BrownianMotionTranslateKernel(
   // each thread handles one atom translation
   for(atomIdx = startIdx + threadIdx.x; atomIdx < endIdx; atomIdx += blockDim.x) {
     double3 coor = make_double3(gpu_old_x[atomIdx], gpu_old_y[atomIdx], gpu_old_z[atomIdx]);
+        if (threadIdx.x == 0)
+    printf("mol %d old pos %f %f %f\n",mol , coor.x, coor.y, coor.z);
+    //printf("atomIdx %d old coords %f %f %f\n",atomIdx , coor.x, coor.y, coor.z);
 
     // translate the atom
     coor.x += shift.x * moveMol;
@@ -1489,7 +1500,10 @@ __global__ void BrownianMotionTranslateKernel(
     // update the new position
     gpu_new_x[atomIdx] = coor.x;
     gpu_new_y[atomIdx] = coor.y;
-    gpu_new_z[atomIdx] = coor.z;
+    gpu_new_z[atomIdx] = coor.z;    
+  
+    if (moveMol && threadIdx.x == 0)
+    printf("mol %d new pos %f %f %f\n",mol , coor.x, coor.y, coor.z);
   }
 }
 
