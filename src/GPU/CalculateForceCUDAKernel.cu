@@ -311,7 +311,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
                      uint const buffer_index)
 {
   int atomNumber = coords.Count();
-  int numberOfCells = vars->cpu_numberOfCells[0] + vars->cpu_numberOfCells[1];
+  int numberOfCells = vars->cpu_numberOfCells[box];
   int blocksPerGrid, threadsPerBlock;
 
   threadsPerBlock = 256;
