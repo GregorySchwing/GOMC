@@ -290,6 +290,8 @@ inline uint MultiParticleBrownian::Transform()
     double r_max = moveSetRef.GetRMAX(bPick);
     BrownianMotionRotateParticlesGPU(
       cudaVars,
+      molLookup.molLookupGPU->GetMolLookup(),
+      molLookup.molLookupGPU->GetNumMolsInBox(),
       moleculeIndex,
       molTorqueRef,
       newMolsPos, 
@@ -308,6 +310,8 @@ inline uint MultiParticleBrownian::Transform()
     double t_max = moveSetRef.GetTMAX(bPick);
     BrownianMotionTranslateParticlesGPU(
       cudaVars,
+      molLookup.molLookupGPU->GetMolLookup(),
+      molLookup.molLookupGPU->GetNumMolsInBox(),
       moleculeIndex,
       molForceRef,
       molForceRecRef,

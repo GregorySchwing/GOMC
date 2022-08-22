@@ -23,6 +23,8 @@ class MoleculeLookupGPU {
                       int32_t   * _fixedMolecule,                                    
                       uint32_t  * _boxAndKindStart);
     ~MoleculeLookupGPU();
+    uint32_t * GetNumMolsInBox();
+    uint32_t * GetMolLookup();
 
   private:
 

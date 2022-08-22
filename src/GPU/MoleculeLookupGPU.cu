@@ -71,5 +71,10 @@ MoleculeLookupGPU::~MoleculeLookupGPU(){
 
 }
 
-
+uint32_t * MoleculeLookupGPU::GetNumMolsInBox(){
+    return gpu_numMolsInBox;
+}
+uint32_t * MoleculeLookupGPU::GetMolLookup(){
+    return gpu_molLookup;   
+}
 #endif

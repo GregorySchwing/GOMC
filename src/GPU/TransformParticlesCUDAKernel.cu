@@ -880,6 +880,8 @@ __global__ void RotateMolKernel(
 
 void BrownianMotionRotateParticlesGPU(
   VariablesCUDA *vars,
+  uint* gpu_molLookup,
+  uint* gpu_molBoxCount,
   const std::vector<unsigned int> &moleculeInvolved,
   XYZArray &mTorque,
   XYZArray &newMolPos,
@@ -949,8 +951,10 @@ void BrownianMotionRotateParticlesGPU(
   double3 halfAx = make_double3(boxAxes.x * 0.5, boxAxes.y * 0.5, boxAxes.z * 0.5);
 
   if (isOrthogonal){
-    BrownianMotionRotateKernel<true><<< blocksPerGrid, threadsPerBlock>>>(
+    BrownianMotionRotateKernel<true><<< molCount, threadsPerBlock>>>(
       vars->gpu_startAtomIdx,
+      gpu_molLookup,
+      gpu_molBoxCount,
       old_coords_x->get(),
       old_coords_y->get(),
       old_coords_z->get(),
@@ -981,10 +985,13 @@ void BrownianMotionRotateParticlesGPU(
       key,
       seed,
       BETA,
+      box,
       kill);
   } else {
-      BrownianMotionRotateKernel<true><<< blocksPerGrid, threadsPerBlock>>>(
+      BrownianMotionRotateKernel<true><<< molCount, threadsPerBlock>>>(
       vars->gpu_startAtomIdx,
+      gpu_molLookup,
+      gpu_molBoxCount,
       old_coords_x->get(),
       old_coords_y->get(),
       old_coords_z->get(),
@@ -1015,6 +1022,7 @@ void BrownianMotionRotateParticlesGPU(
       key,
       seed,
       BETA,
+      box,
       kill);
   }
   cudaDeviceSynchronize();
@@ -1041,6 +1049,8 @@ void BrownianMotionRotateParticlesGPU(
 template<const bool isOrthogonal>
 __global__ void BrownianMotionRotateKernel(
   int *startAtomIdx,
+  uint* gpu_molLookup,
+  uint* gpu_molBoxCount,
   double *gpu_old_x,
   double *gpu_old_y,
   double *gpu_old_z,
@@ -1071,13 +1081,17 @@ __global__ void BrownianMotionRotateKernel(
   unsigned int key,
   ulong seed,
   double BETA,
+  const int box, 
   int *kill)
 {
   //Each block takes care of one molecule
   int molIndex = blockIdx.x;
-  //int molIndex = moleculeInvolved[blockIdx.x];
-  int startIdx = startAtomIdx[molIndex];
-  int endIdx = startAtomIdx[molIndex + 1];
+  int mol = gpu_molLookup[molIndex];
+  int startIdx = startAtomIdx[mol];
+  int endIdx = startAtomIdx[mol + 1];
+  bool molIsBox0 = molIndex < gpu_molBoxCount[0]; 
+  bool molIsBox1 = molIndex >= gpu_molBoxCount[0]; 
+  bool moveMol = (molIsBox0 && !box) || (molIsBox1 && box); 
   int atomIdx;
 
   __shared__ double matrix[3][3];
@@ -1085,21 +1099,21 @@ __global__ void BrownianMotionRotateKernel(
 
   // thread 0 will set up the matrix and update the gpu_r_k
   if(threadIdx.x == 0) {
-    com = make_double3(gpu_comx[molIndex], gpu_comy[molIndex], gpu_comz[molIndex]);
+    com = make_double3(gpu_comx[mol], gpu_comy[mol], gpu_comz[mol]);
     // This section calculates the amount of rotation
     double stdDev = sqrt(2.0 * r_max);
-    double btm_x = molTorquex[molIndex] * BETA * r_max;
-    double btm_y = molTorquey[molIndex] * BETA * r_max;
-    double btm_z = molTorquez[molIndex] * BETA * r_max;
+    double btm_x = molTorquex[mol] * BETA * r_max;
+    double btm_y = molTorquey[mol] * BETA * r_max;
+    double btm_z = molTorquez[mol] * BETA * r_max;
 
-    double3 randnums = randomGaussianCoordsGPU(molIndex, key, step, seed, 0.0, stdDev);
+    double3 randnums = randomGaussianCoordsGPU(mol, key, step, seed, 0.0, stdDev);
     double rot_x = btm_x + randnums.x;
     double rot_y = btm_y + randnums.y;
     double rot_z = btm_z + randnums.z;
     // update the trial torque
-    gpu_r_k_x[molIndex] = rot_x;
-    gpu_r_k_y[molIndex] = rot_y;
-    gpu_r_k_z[molIndex] = rot_z;
+    gpu_r_k_x[mol] = rot_x;
+    gpu_r_k_y[mol] = rot_y;
+    gpu_r_k_z[mol] = rot_z;
     //check for bad configuration
     if(!isfinite(rot_x + rot_y + rot_z)) {
       atomicAdd(kill, 1);
@@ -1164,9 +1178,9 @@ __global__ void BrownianMotionRotateKernel(
     double newz = matrix[2][0] * coor.x + matrix[2][1] * coor.y + matrix[2][2] * coor.z;
 
     // move back to com
-    coor.x = newx + com.x;
-    coor.y = newy + com.y;
-    coor.z = newz + com.z;
+    coor.x = newx * moveMol + com.x;
+    coor.y = newy * moveMol + com.y;
+    coor.z = newz * moveMol + com.z;
 
     // wrap again
     if(isOrthogonal)
@@ -1184,6 +1198,8 @@ __global__ void BrownianMotionRotateKernel(
 
 void BrownianMotionTranslateParticlesGPU(
   VariablesCUDA *vars,
+  uint* gpu_molLookup,
+  uint* gpu_molBoxCount,
   const std::vector<unsigned int> &moleculeInvolved,
   XYZArray &mForce,
   XYZArray &mForceRec,
@@ -1250,8 +1266,10 @@ void BrownianMotionTranslateParticlesGPU(
   double3 halfAx = make_double3(boxAxes.x * 0.5, boxAxes.y * 0.5, boxAxes.z * 0.5);
 
   if (isOrthogonal){
-    BrownianMotionTranslateKernel<true><<< blocksPerGrid, threadsPerBlock>>>(
+    BrownianMotionTranslateKernel<true><<< molCount, threadsPerBlock>>>(
       vars->gpu_startAtomIdx,
+      gpu_molLookup,
+      gpu_molBoxCount,
       old_coords_x->get(),
       old_coords_y->get(),
       old_coords_z->get(),
@@ -1288,10 +1306,13 @@ void BrownianMotionTranslateParticlesGPU(
       key,
       seed,
       BETA,
+      box,
       kill);
   } else {
-    BrownianMotionTranslateKernel<false><<< blocksPerGrid, threadsPerBlock>>>(
+    BrownianMotionTranslateKernel<false><<< molCount, threadsPerBlock>>>(
       vars->gpu_startAtomIdx,
+      gpu_molLookup,
+      gpu_molBoxCount,
       old_coords_x->get(),
       old_coords_y->get(),
       old_coords_z->get(),
@@ -1328,6 +1349,7 @@ void BrownianMotionTranslateParticlesGPU(
       key,
       seed,
       BETA,
+      box,
       kill);
   }
   cudaDeviceSynchronize();
@@ -1354,6 +1376,8 @@ void BrownianMotionTranslateParticlesGPU(
 template<const bool isOrthogonal>
 __global__ void BrownianMotionTranslateKernel(
   int *startAtomIdx,
+  uint* gpu_molLookup,
+  uint* gpu_molBoxCount,
   double *gpu_old_x,
   double *gpu_old_y,
   double *gpu_old_z,
@@ -1390,37 +1414,42 @@ __global__ void BrownianMotionTranslateKernel(
   unsigned int key,
   ulong seed,
   double BETA,
+  const int box, 
   int *kill)
 {
   //Each block takes care of one molecule
   int molIndex = blockIdx.x;
-  int startIdx = startAtomIdx[molIndex];
-  int endIdx = startAtomIdx[molIndex + 1];
+  int mol = gpu_molLookup[molIndex];
+  int startIdx = startAtomIdx[mol];
+  int endIdx = startAtomIdx[mol + 1];
+  bool molIsBox0 = molIndex < gpu_molBoxCount[0]; 
+  bool molIsBox1 = molIndex >= gpu_molBoxCount[0]; 
+  bool moveMol = (molIsBox0 && !box) || (molIsBox1 && box); 
   int atomIdx;
 
   __shared__ double3 shift;
 
   // thread 0 will calculate the shift vector and update COM and gpu_t_k
   if(threadIdx.x == 0) {
-    double3 com = make_double3(gpu_old_comx[molIndex], gpu_old_comy[molIndex], gpu_old_comz[molIndex]);
+    double3 com = make_double3(gpu_old_comx[mol], gpu_old_comy[mol], gpu_old_comz[mol]);
     // This section calculates the amount of shift
     double stdDev = sqrt(2.0 * t_max);
-    double bfm_x = (molForcex[molIndex] + molForceRecx[molIndex]) * BETA * t_max;
-    double bfm_y = (molForcey[molIndex] + molForceRecy[molIndex]) * BETA * t_max;
-    double bfm_z = (molForcez[molIndex] + molForceRecz[molIndex]) * BETA * t_max;
+    double bfm_x = (molForcex[mol] + molForceRecx[mol]) * BETA * t_max;
+    double bfm_y = (molForcey[mol] + molForceRecy[mol]) * BETA * t_max;
+    double bfm_z = (molForcez[mol] + molForceRecz[mol]) * BETA * t_max;
 
-    double3 randnums = randomGaussianCoordsGPU(molIndex, key, step, seed, 0.0, stdDev);
+    double3 randnums = randomGaussianCoordsGPU(mol, key, step, seed, 0.0, stdDev);
     shift.x = bfm_x + randnums.x;
     shift.y = bfm_y + randnums.y;
     shift.z = bfm_z + randnums.z;
     // update the trial translate
-    gpu_t_k_x[molIndex] = shift.x;
-    gpu_t_k_y[molIndex] = shift.y;
-    gpu_t_k_z[molIndex] = shift.z;
+    gpu_t_k_x[mol] = shift.x;
+    gpu_t_k_y[mol] = shift.y;
+    gpu_t_k_z[mol] = shift.z;
     // shift COM
-    com.x += shift.x;
-    com.y += shift.y;
-    com.z += shift.z;
+    com.x += shift.x * moveMol;
+    com.y += shift.y * moveMol;
+    com.z += shift.z * moveMol;
     // wrap COM
     if(isOrthogonal)
       WrapPBC3(com, axis);
@@ -1429,9 +1458,9 @@ __global__ void BrownianMotionTranslateKernel(
                       gpu_Invcell_x, gpu_Invcell_y, gpu_Invcell_z);
 
     //update COM
-    gpu_new_comx[molIndex] = com.x;
-    gpu_new_comy[molIndex] = com.y;
-    gpu_new_comz[molIndex] = com.z;
+    gpu_new_comx[mol] = com.x;
+    gpu_new_comy[mol] = com.y;
+    gpu_new_comz[mol] = com.z;
     //check for bad configuration
     if(!isfinite(shift.x + shift.y + shift.z)) {
       atomicAdd(kill, 1);
@@ -1447,9 +1476,9 @@ __global__ void BrownianMotionTranslateKernel(
     double3 coor = make_double3(gpu_old_x[atomIdx], gpu_old_y[atomIdx], gpu_old_z[atomIdx]);
 
     // translate the atom
-    coor.x += shift.x;
-    coor.y += shift.y;
-    coor.z += shift.z;
+    coor.x += shift.x * moveMol;
+    coor.y += shift.y * moveMol;
+    coor.z += shift.z * moveMol;
     // wrap coordinate
     if(isOrthogonal)
       WrapPBC3(coor, axis);

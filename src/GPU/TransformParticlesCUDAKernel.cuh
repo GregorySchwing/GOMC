@@ -210,6 +210,8 @@ __global__ void RotateMolKernel(
 // Brownian Motion multiparticle
 void BrownianMotionRotateParticlesGPU(
   VariablesCUDA *vars,
+  uint* gpu_molLookup,
+  uint* gpu_molBoxCount,
   const std::vector<unsigned int> &moleculeInvolved,
   XYZArray &mTorque,
   XYZArray &newMolPos,
@@ -228,6 +230,8 @@ void BrownianMotionRotateParticlesGPU(
 
 void BrownianMotionTranslateParticlesGPU(
   VariablesCUDA *vars,
+  uint* gpu_molLookup,
+  uint* gpu_molBoxCount,
   const std::vector<unsigned int> &moleculeInvolved,
   XYZArray &mForce,
   XYZArray &mForceRec,
@@ -248,6 +252,8 @@ void BrownianMotionTranslateParticlesGPU(
 template<const bool isOrthogonal>
 __global__ void BrownianMotionRotateKernel(
   int *startAtomIdx,
+  uint* gpu_molLookup,
+  uint* gpu_molBoxCount,
   double *gpu_old_x,
   double *gpu_old_y,
   double *gpu_old_z,
@@ -278,12 +284,15 @@ __global__ void BrownianMotionRotateKernel(
   unsigned int key,
   ulong seed,
   double BETA,
+  const int box, 
   int *kill);
 
 
 template<const bool isOrthogonal>
 __global__ void BrownianMotionTranslateKernel(
   int *startAtomIdx,
+  uint* gpu_molLookup,
+  uint* gpu_molBoxCount,
   double *gpu_old_x,
   double *gpu_old_y,
   double *gpu_old_z,
@@ -320,6 +329,7 @@ __global__ void BrownianMotionTranslateKernel(
   unsigned int key,
   ulong seed,
   double BETA,
+  const int box, 
   int *kill);
 
 
