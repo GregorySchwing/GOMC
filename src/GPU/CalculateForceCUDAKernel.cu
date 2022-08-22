@@ -361,7 +361,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   BoxForceGPU <<< blocksPerGrid, threadsPerBlock, 2*threadsPerBlock*sizeof(double)>>>(cellStartIndex_view->get(),
       cellVector_view->get(),
       vars->gpu_neighborList,
-      numberOfCells,
+      vars->cpu_numberOfCells[0],
       atomNumber,
       mapParticleToCell_view->get(),
       coords_x->get(),
@@ -804,7 +804,7 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
 __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                             int *gpu_cellVector,
                             int *gpu_neighborList,
-                            int numberOfCells,
+                            int numberOfCellsInBox0,
                             int atomNumber,
                             int *gpu_mapParticleToCell,
                             double *gpu_x,
@@ -869,12 +869,17 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
   double REn = 0.0, LJEn = 0.0;
   double cutoff = fmax(gpu_rCut[0], gpu_rCutCoulomb[box]);
 
-  int currentCell = blockIdx.x / NUMBER_OF_NEIGHBOR_CELLS;
-  int nCellIndex = blockIdx.x;
-  int neighborCell = gpu_neighborList[nCellIndex];
+  // This is neccessary to calculate the forces on only 1 box.
+  // An alternative kernel can be written which doesn't pass box, it calculates
+  // which box each cell is in based on the block id.
+  int currentCell = box * (numberOfCellsInBox0 * NUMBER_OF_NEIGHBOR_CELLS) + blockIdx.x / NUMBER_OF_NEIGHBOR_CELLS;
+  int nCellIndex = box * (numberOfCellsInBox0 * NUMBER_OF_NEIGHBOR_CELLS) + blockIdx.x;
+
+  int neighborCell = box * numberOfCellsInBox0 + gpu_neighborList[nCellIndex];
 
   // calculate number of particles inside neighbor Cell
   int particlesInsideCurrentCell, particlesInsideNeighboringCell;
+  // gpu_cellStartIndex contains both cell list start vectors in one array
   int endIndex = gpu_cellStartIndex[neighborCell + 1];
   particlesInsideNeighboringCell = endIndex - gpu_cellStartIndex[neighborCell];
 
