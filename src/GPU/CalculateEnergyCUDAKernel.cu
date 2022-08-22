@@ -14,7 +14,7 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #include "CalculateEnergyCUDAKernel.cuh"
 #include "CUDAMemoryManager.cuh"
 #include <vector>
-#define NUMBER_OF_NEIGHBOR_CELL 27
+#define NUMBER_OF_NEIGHBOR_CELLS 27
 
 using namespace cub;
 
@@ -46,7 +46,7 @@ void CallMolInterGPU(VariablesCUDA *vars,
                      uint const box){
   int atomNumber = currentCoords.Count();
   int newCoordsNumber = moleculeLength;
-  int neighborListCount = neighborList.size() * NUMBER_OF_NEIGHBOR_CELL;
+  int neighborListCount = neighborList.size() * NUMBER_OF_NEIGHBOR_CELLS;
   int numberOfCells = neighborList.size();
   int *gpu_particleKind, *gpu_particleMol;
   int *gpu_neighborList, *gpu_cellStartIndex;
@@ -60,14 +60,14 @@ void CallMolInterGPU(VariablesCUDA *vars,
 
   // Run the kernel
   threadsPerBlock = 256;
-  blocksPerGrid = newCoordsNumber * NUMBER_OF_NEIGHBOR_CELL;
+  blocksPerGrid = newCoordsNumber * NUMBER_OF_NEIGHBOR_CELLS;
   energyVectorLen = blocksPerGrid * threadsPerBlock;
 
   // Convert neighbor list to 1D array
   std::vector<int> neighborlist1D(neighborListCount);
   for(int i = 0; i < neighborList.size(); i++) {
-    for(int j = 0; j < NUMBER_OF_NEIGHBOR_CELL; j++) {
-      neighborlist1D[i * NUMBER_OF_NEIGHBOR_CELL + j] = neighborList[i][j];
+    for(int j = 0; j < NUMBER_OF_NEIGHBOR_CELLS; j++) {
+      neighborlist1D[i * NUMBER_OF_NEIGHBOR_CELLS + j] = neighborList[i][j];
     }
   }
 
@@ -357,7 +357,7 @@ void CallMolInterSummationGPU(VariablesCUDA *vars,
                      uint const box)
 {
   int atomNumber = coords.Count();
-  int neighborListCount = neighborList.size() * NUMBER_OF_NEIGHBOR_CELL;
+  int neighborListCount = neighborList.size() * NUMBER_OF_NEIGHBOR_CELLS;
   int numberOfCells = neighborList.size();
   int *gpu_particleKind, *gpu_particleMol;
   int *gpu_neighborList, *gpu_cellStartIndex;
@@ -369,14 +369,14 @@ void CallMolInterSummationGPU(VariablesCUDA *vars,
 
   // Run the kernel
   threadsPerBlock = 256;
-  blocksPerGrid = moleculeLength * NUMBER_OF_NEIGHBOR_CELL;
+  blocksPerGrid = moleculeLength * NUMBER_OF_NEIGHBOR_CELLS;
   energyVectorLen = blocksPerGrid * threadsPerBlock;
 
   // Convert neighbor list to 1D array
   std::vector<int> neighborlist1D(neighborListCount);
   for(int i = 0; i < neighborList.size(); i++) {
-    for(int j = 0; j < NUMBER_OF_NEIGHBOR_CELL; j++) {
-      neighborlist1D[i * NUMBER_OF_NEIGHBOR_CELL + j] = neighborList[i][j];
+    for(int j = 0; j < NUMBER_OF_NEIGHBOR_CELLS; j++) {
+      neighborlist1D[i * NUMBER_OF_NEIGHBOR_CELLS + j] = neighborList[i][j];
     }
   }
 
@@ -525,13 +525,16 @@ void CallBoxInterGPU(VariablesCUDA *vars,
                      double sc_sigma_6,
                      double sc_alpha,
                      uint sc_power,
-                     uint const box)
+                     uint const box,
+                     int buffer_index)
 {
-    cudaDeviceSynchronize();
+  cudaDeviceSynchronize();
   checkLastErrorCUDA(__FILE__, __LINE__);
   int atomNumber = coords.Count();
-  int neighborListCount = neighborList.size() * NUMBER_OF_NEIGHBOR_CELL;
-  int numberOfCells = neighborList.size();
+  //int neighborListCount = neighborList.size() * NUMBER_OF_NEIGHBOR_CELLS;
+  //int numberOfCells = neighborList.size();
+  int numberOfCells = vars->cpu_numberOfCells[box];
+  printf("box %d numberOfCells %d\n", box, numberOfCells);
   //int *gpu_particleKind, *gpu_particleMol;
   //int *gpu_neighborList, *gpu_cellStartIndex;
   int blocksPerGrid, threadsPerBlock;
@@ -542,15 +545,21 @@ void CallBoxInterGPU(VariablesCUDA *vars,
 
   // Run the kernel
   threadsPerBlock = 256;
-  blocksPerGrid = numberOfCells * NUMBER_OF_NEIGHBOR_CELL;
+  blocksPerGrid = numberOfCells * NUMBER_OF_NEIGHBOR_CELLS;
+
+  // This same function is used to calculate old and new..
+  // Will need to separate the old calculation from the new coordinates.
+  // Could use the singleMoveAccepted boolean, though this will only handle 2 buffers.
+//  BufferAccess<DeviceArray<double>, double, buffers> gpu_LJEn(*(vars->gpu_LJEn), buffer_index);
+//  BufferAccess<DeviceArray<double>, double, buffers> gpu_REn(*(vars->gpu_REn), buffer_index);
   energyVectorLen = blocksPerGrid * threadsPerBlock;
 
   // Convert neighbor list to 1D array
   /*
   std::vector<int> neighborlist1D(neighborListCount);
   for(int i = 0; i < neighborList.size(); i++) {
-    for(int j = 0; j < NUMBER_OF_NEIGHBOR_CELL; j++) {
-      neighborlist1D[i * NUMBER_OF_NEIGHBOR_CELL + j] = neighborList[i][j];
+    for(int j = 0; j < NUMBER_OF_NEIGHBOR_CELLS; j++) {
+      neighborlist1D[i * NUMBER_OF_NEIGHBOR_CELLS + j] = neighborList[i][j];
     }
   }
 */
@@ -587,13 +596,13 @@ void CallBoxInterGPU(VariablesCUDA *vars,
                                 boxAxes.GetAxis(box).y * 0.5,
                                 boxAxes.GetAxis(box).z * 0.5);
 
-  BufferAccess<DeviceArray<double>, double, buffers> coords_x(*(vars->gpu_coords_x), 0);
-  BufferAccess<DeviceArray<double>, double, buffers> coords_y(*(vars->gpu_coords_y), 0);
-  BufferAccess<DeviceArray<double>, double, buffers> coords_z(*(vars->gpu_coords_z), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> coords_x(*(vars->gpu_coords_x), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> coords_y(*(vars->gpu_coords_y), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> coords_z(*(vars->gpu_coords_z), buffer_index);
 
   //BufferAccess<DeviceArray<int>, int, buffers> mapParticleToCell_view(*(vars->gpu_mapParticleToCell), 0);
-  BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(vars->gpu_cellVector), 0);
-  BufferAccess<DeviceArray<int>, int, buffers> cellStartIndex_view(*(vars->gpu_cellStartIndex), 0);
+  BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(vars->gpu_cellVector), buffer_index);
+  BufferAccess<DeviceArray<int>, int, buffers> cellStartIndex_view(*(vars->gpu_cellStartIndex), buffer_index);
 
   BoxInterGPU <<< blocksPerGrid, threadsPerBlock>>>(cellStartIndex_view->get(),
       cellVector_view->get(),
@@ -685,7 +694,7 @@ void CallBoxInterGPU(VariablesCUDA *vars,
 __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                             int *gpu_cellVector,
                             int *gpu_neighborList,
-                            int numberOfCells,
+                            int numberOfCellsInBox0,
                             double *gpu_x,
                             double *gpu_y,
                             double *gpu_z,
@@ -734,23 +743,28 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
   double REn = 0.0, LJEn = 0.0;
   double cutoff = fmax(gpu_rCut[0], gpu_rCutCoulomb[box]);
 
-  int currentCell = blockIdx.x / NUMBER_OF_NEIGHBOR_CELL;
-  int nCellIndex = blockIdx.x;
-  int neighborCell = gpu_neighborList[nCellIndex];
+  // This is neccessary to calculate the forces on only 1 box.
+  // An alternative kernel can be written which doesn't pass box, it calculates
+  // which box each cell is in based on the block id.
+  int currentCell = box * numberOfCellsInBox0 + blockIdx.x / NUMBER_OF_NEIGHBOR_CELLS;
+  int nCellIndex = box * (numberOfCellsInBox0 * NUMBER_OF_NEIGHBOR_CELLS) + blockIdx.x;
+  int neighborCell = box * numberOfCellsInBox0 + gpu_neighborList[nCellIndex];
   // calculate number of particles inside neighbor Cell
-  int particlesInsideCurrentCell, particlesInsideNeighboringCells;
+  int particlesInsideCurrentCell, particlesInsideNeighboringCell;
+  // gpu_cellStartIndex contains both cell list start vectors in one array
   int endIndex = gpu_cellStartIndex[neighborCell + 1];
-  particlesInsideNeighboringCells = endIndex - gpu_cellStartIndex[neighborCell];
+  particlesInsideNeighboringCell = endIndex - gpu_cellStartIndex[neighborCell];
 
   // Calculate number of particles inside current Cell
   endIndex = gpu_cellStartIndex[currentCell + 1];
   particlesInsideCurrentCell = endIndex - gpu_cellStartIndex[currentCell];
 
   // total number of pairs
-  int numberOfPairs = particlesInsideCurrentCell * particlesInsideNeighboringCells;
+  int numberOfPairs = particlesInsideCurrentCell * particlesInsideNeighboringCell;
   for(int pairIndex = threadIdx.x; pairIndex < numberOfPairs; pairIndex += blockDim.x) {
     int neighborParticleIndex = pairIndex / particlesInsideCurrentCell;
     int currentParticleIndex = pairIndex % particlesInsideCurrentCell;
+    printf("currentCell %d neighborCell %d particlesInsideNeighboringCell %d particlesInsideCurrentCell%d\n",currentCell, neighborCell, particlesInsideNeighboringCell, particlesInsideCurrentCell);
 
     int currentParticle = gpu_cellVector[gpu_cellStartIndex[currentCell] + currentParticleIndex];
     int neighborParticle = gpu_cellVector[gpu_cellStartIndex[neighborCell] + neighborParticleIndex];
@@ -860,10 +874,10 @@ __global__ void MolInterGPU(int gpu_moleculeStart,
   double REn = 0.0, LJEn = 0.0;
   double cutoff = fmax(gpu_rCut[0], gpu_rCutCoulomb[box]);
 
-  int currentParticleIndex = blockIdx.x / NUMBER_OF_NEIGHBOR_CELL;
+  int currentParticleIndex = blockIdx.x / NUMBER_OF_NEIGHBOR_CELLS;
   int currentCell = gpu_mapMoleculeToCell[currentParticleIndex];
 
-  int neighborCell = gpu_neighborList[currentCell*NUMBER_OF_NEIGHBOR_CELL + blockIdx.x % NUMBER_OF_NEIGHBOR_CELL];
+  int neighborCell = gpu_neighborList[currentCell*NUMBER_OF_NEIGHBOR_CELLS + blockIdx.x % NUMBER_OF_NEIGHBOR_CELLS];
   // calculate number of particles inside neighbor Cell
   int endIndex = gpu_cellStartIndex[neighborCell + 1];
   int particlesInsideNeighboringCells = endIndex - gpu_cellStartIndex[neighborCell];
@@ -977,12 +991,12 @@ __global__ void MolInterSummationKernelGPU(int gpu_moleculeStart,
   double REn = 0.0, LJEn = 0.0;
   double cutoff = fmax(gpu_rCut[0], gpu_rCutCoulomb[box]);
 
-  int currentParticleIndex = blockIdx.x / NUMBER_OF_NEIGHBOR_CELL;
+  int currentParticleIndex = blockIdx.x / NUMBER_OF_NEIGHBOR_CELLS;
   int currentCell = gpu_mapParticleToCell[gpu_moleculeStart + currentParticleIndex];
 
-  //int currentCell = blockIdx.x / NUMBER_OF_NEIGHBOR_CELL;
+  //int currentCell = blockIdx.x / NUMBER_OF_NEIGHBOR_CELLS;
   //int nCellIndex = blockIdx.x;
-  int neighborCell = gpu_neighborList[currentCell*NUMBER_OF_NEIGHBOR_CELL + blockIdx.x % NUMBER_OF_NEIGHBOR_CELL];
+  int neighborCell = gpu_neighborList[currentCell*NUMBER_OF_NEIGHBOR_CELLS + blockIdx.x % NUMBER_OF_NEIGHBOR_CELLS];
   // calculate number of particles inside neighbor Cell
   int particlesInsideNeighboringCells;
   int endIndex = gpu_cellStartIndex[neighborCell + 1];

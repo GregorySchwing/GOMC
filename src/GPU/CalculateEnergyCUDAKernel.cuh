@@ -29,7 +29,8 @@ void CallBoxInterGPU(VariablesCUDA *vars,
                      double sc_sigma_6,
                      double sc_alpha,
                      uint sc_power,
-                     uint const box);
+                     uint const box,
+                     int buffer_index = 0);
 
 void CallMolInterGPU(VariablesCUDA *vars,
                     int moleculeStart,
@@ -62,7 +63,7 @@ void CallMolInterGPU(VariablesCUDA *vars,
 __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                             int *gpu_cellVector,
                             int *gpu_neighborList,
-                            int numberOfCells,
+                            int numberOfCellsInBox0,
                             double *gpu_x,
                             double *gpu_y,
                             double *gpu_z,

@@ -311,7 +311,7 @@ void CallBoxForceGPU(VariablesCUDA *vars,
                      uint const buffer_index)
 {
   int atomNumber = coords.Count();
-  int numberOfCells = vars->cpu_numberOfCells[box];
+  int numberOfCells = vars->cpu_numberOfCells[0] + vars->cpu_numberOfCells[1];
   int blocksPerGrid, threadsPerBlock;
 
   threadsPerBlock = 256;
@@ -872,17 +872,15 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
   // This is neccessary to calculate the forces on only 1 box.
   // An alternative kernel can be written which doesn't pass box, it calculates
   // which box each cell is in based on the block id.
-  int currentCell = box * (numberOfCellsInBox0 * NUMBER_OF_NEIGHBOR_CELLS) + blockIdx.x / NUMBER_OF_NEIGHBOR_CELLS;
+  int currentCell = box * numberOfCellsInBox0 + blockIdx.x / NUMBER_OF_NEIGHBOR_CELLS;
   int nCellIndex = box * (numberOfCellsInBox0 * NUMBER_OF_NEIGHBOR_CELLS) + blockIdx.x;
-
   int neighborCell = box * numberOfCellsInBox0 + gpu_neighborList[nCellIndex];
-
   // calculate number of particles inside neighbor Cell
   int particlesInsideCurrentCell, particlesInsideNeighboringCell;
   // gpu_cellStartIndex contains both cell list start vectors in one array
   int endIndex = gpu_cellStartIndex[neighborCell + 1];
   particlesInsideNeighboringCell = endIndex - gpu_cellStartIndex[neighborCell];
-
+  
   // Calculate number of particles inside current Cell
   endIndex = gpu_cellStartIndex[currentCell + 1];
   particlesInsideCurrentCell = endIndex - gpu_cellStartIndex[currentCell];
@@ -894,8 +892,7 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
     int currentParticleIndex = pairIndex % particlesInsideCurrentCell;
 
     int currentParticle = gpu_cellVector[gpu_cellStartIndex[currentCell] + currentParticleIndex];
-    int neighborParticle = gpu_cellVector[gpu_cellStartIndex[neighborCell] + neighborParticleIndex];
-    
+    int neighborParticle = gpu_cellVector[gpu_cellStartIndex[neighborCell] + neighborParticleIndex];   
 
     if(currentParticle < neighborParticle && gpu_particleMol[currentParticle] != gpu_particleMol[neighborParticle]) {
       if(InRcutGPU(distSq, virComponents, gpu_x, gpu_y, gpu_z,
