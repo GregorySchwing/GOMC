@@ -612,8 +612,9 @@ inline void MultiParticleBrownian::RotateForceBiased(uint molIndex)
   // Copy the range into temporary array
   XYZArray temp(len);
   newMolsPos.CopyRange(temp, start, 0, len);
-    printf("mol %d old pos %f %f %f\n",molIndex , temp.x[0], temp.y[0], temp.z[0]);
-
+  printf("mol %d old pos %f %f %f\n",molIndex , temp.x[0], temp.y[0], temp.z[0]);
+  printf("mol %d r_k %f %f %f\n",molIndex , rot.x, rot.y, rot.z);
+        
   boxDimRef.UnwrapPBC(temp, bPick, center);
 
   // Do Rotation

@@ -139,7 +139,7 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                             bool *gpu_isFraction,
                             int box);
 
-__global__ void BoxTorqueGPU(
+__global__ void BoxTorqueGPU(int numberOfCellsInBox0,
                             int *gpu_cellStartIndex,
                             int *gpu_cellVector,
                             double *gpu_coord_x,
@@ -164,7 +164,8 @@ __global__ void BoxTorqueGPU(
                             double *gpu_cell_z,
                             double *gpu_Invcell_x,
                             double *gpu_Invcell_y,
-                            double *gpu_Invcell_z);
+                            double *gpu_Invcell_z,
+                            const int box);
 
 __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
                                  int *gpu_cellVector,

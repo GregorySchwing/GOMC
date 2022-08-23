@@ -479,7 +479,8 @@ void CallBoxTorqueGPU(VariablesCUDA *vars,
   BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(vars->gpu_cellVector), buffer_index);
   BufferAccess<DeviceArray<int>, int, buffers> cellStartIndex_view(*(vars->gpu_cellStartIndex), buffer_index);
 
-BoxTorqueGPU <<< blocksPerGrid, threadsPerBlock>>>(cellStartIndex_view->get(),
+BoxTorqueGPU <<< blocksPerGrid, threadsPerBlock>>>(vars->cpu_numberOfCells[0],
+                            cellStartIndex_view->get(),
                             cellVector_view->get(),
                             coords_x->get(),
                             coords_y->get(),
@@ -503,7 +504,8 @@ BoxTorqueGPU <<< blocksPerGrid, threadsPerBlock>>>(cellStartIndex_view->get(),
                             vars->gpu_cell_z[box],
                             vars->gpu_Invcell_x[box],
                             vars->gpu_Invcell_y[box],
-                            vars->gpu_Invcell_z[box]);
+                            vars->gpu_Invcell_z[box],
+                            box);
 
   cudaDeviceSynchronize();
   checkLastErrorCUDA(__FILE__, __LINE__);
@@ -994,7 +996,7 @@ __global__ void BoxForceGPU(int *gpu_cellStartIndex,
   if (threadIdx.x == 0) atomicAdd(&gpu_REn[0], temp[blockDim.x + threadID]);
 }
 
-__global__ void BoxTorqueGPU(
+__global__ void BoxTorqueGPU(int numberOfCellsInBox0,
                             int *gpu_cellStartIndex,
                             int *gpu_cellVector,
                             double *gpu_coord_x,
@@ -1019,12 +1021,13 @@ __global__ void BoxTorqueGPU(
                             double *gpu_cell_z,
                             double *gpu_Invcell_x,
                             double *gpu_Invcell_y,
-                            double *gpu_Invcell_z)
+                            double *gpu_Invcell_z,
+                            const int box)
 {
   double3 aT, diff_com;
   //aT = make_double3(0.0, 0.0, 0.0);
   diff_com = make_double3(0.0, 0.0, 0.0);
-  int currentCell = blockIdx.x;
+  int currentCell = numberOfCellsInBox0 * box + blockIdx.x;
   // Calculate number of particles inside current Cell
   int endIndex = gpu_cellStartIndex[currentCell + 1];
   int particlesInsideCurrentCell = endIndex - gpu_cellStartIndex[currentCell];

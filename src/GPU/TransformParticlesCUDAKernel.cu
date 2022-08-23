@@ -1114,6 +1114,16 @@ __global__ void BrownianMotionRotateKernel(
     gpu_r_k_x[mol] = rot_x;
     gpu_r_k_y[mol] = rot_y;
     gpu_r_k_z[mol] = rot_z;
+    if (threadIdx.x == 0){
+      printf("mol %d box %d moveMol%d \n",mol , box, moveMol);
+      printf("mol %d com %f %f %f\n",mol , com.x, com.y, com.z);
+
+      //printf("mol %d randnums %f %f %f\n",mol , randnums.x, randnums.y, randnums.z);
+      //printf("mol %d molTorquex[molIndex] %f \n",molIndex , molTorquex[molIndex]);
+      //printf("mol %d molTorquex[mol] %f \n",mol , molTorquex[mol]);
+      //printf("mol %d rot %f %f %f\n",mol , rot_x, rot_y, rot_z);
+
+    }
     //check for bad configuration
     if(!isfinite(rot_x + rot_y + rot_z)) {
       atomicAdd(kill, 1);
@@ -1174,18 +1184,30 @@ __global__ void BrownianMotionRotateKernel(
                         gpu_Invcell_x, gpu_Invcell_y, gpu_Invcell_z);
 
     // move COM of molecule to zero
-    coor.x -= com.x;
-    coor.y -= com.y;
-    coor.z -= com.z;
+    double coor_x_com_zero = coor.x - com.x;
+    double coor_y_com_zero = coor.y - com.y;
+    double coor_z_com_zero = coor.z - com.z;
+
+    //coor.x -= com.x;
+    //coor.y -= com.y;
+    //coor.z -= com.z;
     // rotate
-    double newx = matrix[0][0] * coor.x + matrix[0][1] * coor.y + matrix[0][2] * coor.z;
-    double newy = matrix[1][0] * coor.x + matrix[1][1] * coor.y + matrix[1][2] * coor.z;
-    double newz = matrix[2][0] * coor.x + matrix[2][1] * coor.y + matrix[2][2] * coor.z;
+
+    //  old way used coor.x, coor.y, coor.z
+    double newx = matrix[0][0] * coor_x_com_zero + 
+                  matrix[0][1] * coor_y_com_zero + 
+                  matrix[0][2] * coor_z_com_zero;
+    double newy = matrix[1][0] * coor_x_com_zero + 
+                  matrix[1][1] * coor_y_com_zero + 
+                  matrix[1][2] * coor_z_com_zero;
+    double newz = matrix[2][0] * coor_x_com_zero + 
+                  matrix[2][1] * coor_y_com_zero + 
+                  matrix[2][2] * coor_z_com_zero;
 
     // move back to com
-    coor.x = newx * moveMol + com.x;
-    coor.y = newy * moveMol + com.y;
-    coor.z = newz * moveMol + com.z;
+    coor.x = moveMol * (newx + com.x) + !moveMol * coor.x;
+    coor.y = moveMol * (newy + com.y) + !moveMol * coor.y;
+    coor.z = moveMol * (newz + com.z) + !moveMol * coor.z;
 
     // wrap again
     if(isOrthogonal)
@@ -1436,7 +1458,8 @@ __global__ void BrownianMotionTranslateKernel(
   int atomIdx;
 
   __shared__ double3 shift;
-
+      if (threadIdx.x == 0)
+        printf("mol %d box %d moveMol%d \n",mol , box, moveMol);
   // thread 0 will calculate the shift vector and update COM and gpu_t_k
   if(threadIdx.x == 0) {
     double3 com = make_double3(gpu_old_comx[mol], gpu_old_comy[mol], gpu_old_comz[mol]);
@@ -1502,8 +1525,9 @@ __global__ void BrownianMotionTranslateKernel(
     gpu_new_y[atomIdx] = coor.y;
     gpu_new_z[atomIdx] = coor.z;    
   
-    if (moveMol && threadIdx.x == 0)
+    if (moveMol && threadIdx.x == 0){
     printf("mol %d new pos %f %f %f\n",mol , coor.x, coor.y, coor.z);
+    }
   }
 }
 
