@@ -245,7 +245,7 @@ void Simulation::GetCPUCellList(uint box,
                                 std::vector<int> & cellStartIndex, 
                                 std::vector<int> & mapParticleToCell,
                                 std::vector< std::vector<int> > & neighborList){
-  system->cellList.GetCellListNeighbor(box, system->coordinates.Count(),
+  system->cellList.GetCellListNeighbor(system->coordinates.Count(),
                                 cellVector, cellStartIndex, mapParticleToCell);
   neighborList = system->cellList.GetNeighborList(box);
 }
@@ -268,6 +268,7 @@ void Simulation::GetGPUCellList(std::vector<int> & cellVector,
   system->cellListGPU->CopyGPUMemoryToToHost(staticValues->forcefield.particles->getCUDAVars()->gpu_cellVector,
                                                     system->coordinates.Count(),
                                                     cellVector);
+  printf("system->cellList.GetTotalCells()+1 %d\n", system->cellList.GetTotalCells()+1);
   system->cellListGPU->CopyGPUMemoryToToHost(staticValues->forcefield.particles->getCUDAVars()->gpu_cellStartIndex,
                                                     system->cellList.GetTotalCells()+1,
                                                     cellStartIndex);                                                    

@@ -75,12 +75,12 @@ void CellList::FlattenNeighborList(){
   for (int b = 0; b < BOX_TOTAL; ++b){
     startOfBoxCellList.push_back(totalCells);
     neighborList.push_back(GetNeighborList(b));
-    totalCells += neighborList[b].size()*NUMBER_OF_NEIGHBOR_CELL;
+    totalCells += neighborList[b].size();
     numberOfCells.push_back(neighborList[b].size());
   }
   // Convert neighbor list to 1D array
   neighborlist1D.clear();
-  neighborlist1D.resize(totalCells);
+  neighborlist1D.resize(totalCells*NUMBER_OF_NEIGHBOR_CELL);
   for (int b = 0; b < BOX_TOTAL; ++b){
     for(int i = 0; i < neighborList[b].size(); i++) {
       for(int j = 0; j < NUMBER_OF_NEIGHBOR_CELL; j++) {
@@ -443,4 +443,40 @@ void CellList::PrintList()
   }
 
 
+}
+
+void CellList::GetCellListNeighbor(int coordinateSize,
+                                   std::vector<int> &cellVector, std::vector<int> &cellStartIndex,
+                                   std::vector<int> &mapParticleToCell) const
+{
+  int numCells = 0;
+  for (uint box = 0; box < BOX_TOTAL; ++box){
+    numCells += head[box].size(); 
+  }
+
+  int numberOfCellsInBox0 = head[0].size();
+
+  cellVector.resize(coordinateSize);
+  cellStartIndex.resize(numCells);
+  mapParticleToCell.resize(coordinateSize);
+  int vector_index = 0;
+  for (uint box = 0; box < BOX_TOTAL; ++box){
+    for(size_t cell = 0; cell < head[box].size(); cell++) {
+      cellStartIndex[cell + numberOfCellsInBox0 * box] = vector_index;
+      int particleIndex = head[box][cell];
+      while(particleIndex != END_CELL) {
+        cellVector[vector_index] = particleIndex;
+        mapParticleToCell[particleIndex] = box*numberOfCellsInBox0 + cell;
+        vector_index++;
+        particleIndex = list[particleIndex];
+      }
+      // we are going to sort particles in each cell for better memory access
+      std::sort(cellVector.begin() + cellStartIndex[cell + numberOfCellsInBox0 * box], cellVector.begin() + vector_index);
+    }
+  }
+  // push one last cellStartIndex for the last cell
+  cellStartIndex.push_back(vector_index);
+
+  // in case there are two boxes we need to remove the extra space allocated here
+  cellVector.resize(vector_index);
 }
