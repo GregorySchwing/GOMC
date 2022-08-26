@@ -145,9 +145,9 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
                                 boxAxes.GetAxis(box).y / 2.0,
                                 boxAxes.GetAxis(box).z / 2.0);
 
-  BufferAccess<DeviceArray<int>, int, buffers> mapParticleToCell_view(*(vars->gpu_mapParticleToCell), 0);
-  BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(vars->gpu_cellVector), 0);
-  BufferAccess<DeviceArray<int>, int, buffers> cellStartIndex_view(*(vars->gpu_cellStartIndex), 0);
+  BufferAccess<DeviceArray<int>, int, buffers> mapParticleToCell_view(*(vars->gpu_mapParticleToCell[box]), 0);
+  BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(vars->gpu_cellVector[box]), 0);
+  BufferAccess<DeviceArray<int>, int, buffers> cellStartIndex_view(*(vars->gpu_cellStartIndex[box]), 0);
 
   BoxInterForceGPU <<< blocksPerGrid, threadsPerBlock>>>(cellStartIndex_view->get(),
       cellVector_view->get(),
@@ -329,12 +329,12 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   BufferAccess<DeviceArray<double>, double, buffers> coords_x(*(vars->gpu_coords_x), buffer_index);
   BufferAccess<DeviceArray<double>, double, buffers> coords_y(*(vars->gpu_coords_y), buffer_index);
   BufferAccess<DeviceArray<double>, double, buffers> coords_z(*(vars->gpu_coords_z), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> aFx(*(vars->gpu_aFx), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> aFy(*(vars->gpu_aFy), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> aFz(*(vars->gpu_aFz), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> mFx(*(vars->gpu_mFx), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> mFy(*(vars->gpu_mFy), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> mFz(*(vars->gpu_mFz), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> aFx(*(vars->gpu_aFx[box]), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> aFy(*(vars->gpu_aFy[box]), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> aFz(*(vars->gpu_aFz[box]), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> mFx(*(vars->gpu_mFx[box]), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> mFy(*(vars->gpu_mFy[box]), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> mFz(*(vars->gpu_mFz[box]), buffer_index);
 
   cudaMemset(aFx->get(), 0.0, atomCount * sizeof(double));
   cudaMemset(aFy->get(), 0.0, atomCount * sizeof(double));
@@ -353,9 +353,9 @@ void CallBoxForceGPU(VariablesCUDA *vars,
                                 boxAxes.GetAxis(box).y * 0.5,
                                 boxAxes.GetAxis(box).z * 0.5);
 
-  BufferAccess<DeviceArray<int>, int, buffers> mapParticleToCell_view(*(vars->gpu_mapParticleToCell), buffer_index);
-  BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(vars->gpu_cellVector), buffer_index);
-  BufferAccess<DeviceArray<int>, int, buffers> cellStartIndex_view(*(vars->gpu_cellStartIndex), buffer_index);
+  BufferAccess<DeviceArray<int>, int, buffers> mapParticleToCell_view(*(vars->gpu_mapParticleToCell[box]), buffer_index);
+  BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(vars->gpu_cellVector[box]), buffer_index);
+  BufferAccess<DeviceArray<int>, int, buffers> cellStartIndex_view(*(vars->gpu_cellStartIndex[box]), buffer_index);
 
 
   BoxForceGPU <<< blocksPerGrid, threadsPerBlock, 2*threadsPerBlock*sizeof(double)>>>(cellStartIndex_view->get(),
@@ -456,13 +456,13 @@ void CallBoxTorqueGPU(VariablesCUDA *vars,
   BufferAccess<DeviceArray<double>, double, buffers> com_y(*(vars->gpu_com_y), com_index);
   BufferAccess<DeviceArray<double>, double, buffers> com_z(*(vars->gpu_com_z), com_index);
   
-  BufferAccess<DeviceArray<double>, double, buffers> aFx(*(vars->gpu_aFx), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> aFy(*(vars->gpu_aFy), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> aFz(*(vars->gpu_aFz), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> aFx(*(vars->gpu_aFx[box]), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> aFy(*(vars->gpu_aFy[box]), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> aFz(*(vars->gpu_aFz[box]), buffer_index);
 
-  BufferAccess<DeviceArray<double>, double, buffers> mTx(*(vars->gpu_mTx), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> mTy(*(vars->gpu_mTy), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> mTz(*(vars->gpu_mTz), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> mTx(*(vars->gpu_mTx[box]), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> mTy(*(vars->gpu_mTy[box]), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> mTz(*(vars->gpu_mTz[box]), buffer_index);
 
   cudaMemset(mTx->get(), 0.0, molCount * sizeof(double));
   cudaMemset(mTy->get(), 0.0, molCount * sizeof(double));
@@ -476,8 +476,8 @@ void CallBoxTorqueGPU(VariablesCUDA *vars,
                                 boxAxes.GetAxis(box).y * 0.5,
                                 boxAxes.GetAxis(box).z * 0.5);
 
-  BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(vars->gpu_cellVector), buffer_index);
-  BufferAccess<DeviceArray<int>, int, buffers> cellStartIndex_view(*(vars->gpu_cellStartIndex), buffer_index);
+  BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(vars->gpu_cellVector[box]), buffer_index);
+  BufferAccess<DeviceArray<int>, int, buffers> cellStartIndex_view(*(vars->gpu_cellStartIndex[box]), buffer_index);
 
 BoxTorqueGPU <<< blocksPerGrid, threadsPerBlock>>>(vars->cpu_numberOfCells[0],
                             cellStartIndex_view->get(),

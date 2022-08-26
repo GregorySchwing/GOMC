@@ -78,12 +78,25 @@ public:
     gpu_ewald = NULL;
     gpu_diElectric_1 = NULL;
     
-    gpu_aFx = NULL;
-    gpu_aFy = NULL;
-    gpu_aFz = NULL;
-    gpu_mFx = NULL;
-    gpu_mFy = NULL;
-    gpu_mFz = NULL;
+    gpu_aFx_box0 = NULL;
+    gpu_aFy_box0 = NULL;
+    gpu_aFz_box0 = NULL;
+    gpu_mFx_box0 = NULL;
+    gpu_mFy_box0 = NULL;
+    gpu_mFz_box0 = NULL;
+    gpu_mTx_box0 = NULL;
+    gpu_mTy_box0 = NULL;
+    gpu_mTz_box0 = NULL;
+
+    gpu_aFx_box1 = NULL;
+    gpu_aFy_box1 = NULL;
+    gpu_aFz_box1 = NULL;
+    gpu_mFx_box1 = NULL;
+    gpu_mFy_box1 = NULL;
+    gpu_mFz_box1 = NULL;
+    gpu_mTx_box1 = NULL;
+    gpu_mTy_box1 = NULL;
+    gpu_mTz_box1 = NULL;
 
     gpu_aForcex = NULL;
     gpu_aForcey = NULL;
@@ -162,17 +175,43 @@ public:
   MultiBuffer< DeviceArray<double>, double, buffers > * gpu_com_y;
   MultiBuffer< DeviceArray<double>, double, buffers > * gpu_com_z;
 
-  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_aFx;
-  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_aFy;
-  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_aFz;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_aFx_box0;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_aFy_box0;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_aFz_box0;
 
-  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mFx;
-  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mFy;
-  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mFz;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mFx_box0;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mFy_box0;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mFz_box0;
   
-  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mTx;
-  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mTy;
-  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mTz;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mTx_box0;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mTy_box0;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mTz_box0;
+
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_aFx_box1;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_aFy_box1;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_aFz_box1;
+
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mFx_box1;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mFy_box1;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mFz_box1;
+  
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mTx_box1;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mTy_box1;
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mTz_box1;
+
+
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_aFx[BOX_TOTAL];
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_aFy[BOX_TOTAL];
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_aFz[BOX_TOTAL];
+
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mFx[BOX_TOTAL];
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mFy[BOX_TOTAL];
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mFz[BOX_TOTAL];
+
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mTx[BOX_TOTAL];
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mTy[BOX_TOTAL];
+  MultiBuffer< DeviceArray<double>, double, buffers > * gpu_mTz[BOX_TOTAL];
+
 
   double *gpu_aForcex_buffer, *gpu_aForcey_buffer, *gpu_aForcez_buffer;
   double *gpu_mForcex_buffer, *gpu_mForcey_buffer, *gpu_mForcez_buffer;
@@ -202,9 +241,18 @@ public:
   // To keep molinter working till I port that also
   //int *gpu_cellVector, *gpu_mapParticleToCell, *gpu_cellStartIndex;
   // new pair interaction calculation done on GPU
-  MultiBuffer< DeviceArray<int>, int, buffers > * gpu_cellVector;
-  MultiBuffer< DeviceArray<int>, int, buffers > * gpu_mapParticleToCell;
-  MultiBuffer< DeviceArray<int>, int, buffers > * gpu_cellStartIndex;
+  MultiBuffer< DeviceArray<int>, int, buffers > * gpu_cellVector_box0;
+  MultiBuffer< DeviceArray<int>, int, buffers > * gpu_mapParticleToCell_box0;
+  MultiBuffer< DeviceArray<int>, int, buffers > * gpu_cellStartIndex_box0;
+
+  MultiBuffer< DeviceArray<int>, int, buffers > * gpu_cellVector_box1;
+  MultiBuffer< DeviceArray<int>, int, buffers > * gpu_mapParticleToCell_box1;
+  MultiBuffer< DeviceArray<int>, int, buffers > * gpu_cellStartIndex_box1;
+  
+  MultiBuffer< DeviceArray<int>, int, buffers > * gpu_cellVector[BOX_TOTAL];
+  MultiBuffer< DeviceArray<int>, int, buffers > * gpu_mapParticleToCell[BOX_TOTAL];
+  MultiBuffer< DeviceArray<int>, int, buffers > * gpu_cellStartIndex[BOX_TOTAL];
+
   // Fixed as long as volume doesnt change
   // Regenerate after volume moves.
   int *gpu_neighborList;

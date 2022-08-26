@@ -78,10 +78,10 @@ void CellListGPU::GridAll(VariablesCUDA * cv,
     //cuMemsetD32(reinterpret_cast<CUdeviceptr>(cv->gpu_cellDegrees),  0, size_t(numberOfCells));
     cudaMemset(cv->gpu_cellDegrees, 0, numberOfCells*sizeof(int));
 
-
-    BufferAccess<DeviceArray<int>, int, buffers> mapParticleToCell_view(*(cv->gpu_mapParticleToCell), buffer_index);
-    BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(cv->gpu_cellVector), buffer_index);
-    BufferAccess<DeviceArray<int>, int, buffers> cellStartIndex_view(*(cv->gpu_cellStartIndex), buffer_index);
+    int box = 0;
+    BufferAccess<DeviceArray<int>, int, buffers> mapParticleToCell_view(*(cv->gpu_mapParticleToCell[box]), buffer_index);
+    BufferAccess<DeviceArray<int>, int, buffers> cellVector_view(*(cv->gpu_cellVector[box]), buffer_index);
+    BufferAccess<DeviceArray<int>, int, buffers> cellStartIndex_view(*(cv->gpu_cellStartIndex[box]), buffer_index);
 
     BufferAccess<DeviceArray<double>, double, buffers> coords_x_view(*(cv->gpu_coords_x), buffer_index);
     BufferAccess<DeviceArray<double>, double, buffers> coords_y_view(*(cv->gpu_coords_y), buffer_index);

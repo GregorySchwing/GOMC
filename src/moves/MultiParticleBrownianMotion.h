@@ -460,7 +460,7 @@ inline void MultiParticleBrownian::Accept(const uint rejectState, const ulong st
 
   #if GOMC_CUDA
   double MPCoeff = 0.0;
-  CallGetCoeff(cudaVars, moveType, comCurrRef.Count(), &MPCoeff);
+  CallGetCoeff(cudaVars, moveType, comCurrRef.Count(), &MPCoeff, bPick);
   // Need to update sysPots
   double accept = exp(-BETA * (sysPotNew.Total() - sysPotRef.Total()) + MPCoeff);
   bool result = (rejectState == mv::fail_state::NO_FAIL) && prng() < accept;
@@ -478,17 +478,17 @@ inline void MultiParticleBrownian::Accept(const uint rejectState, const ulong st
       cudaVars->gpu_com_y->ChangeBuffers();
       cudaVars->gpu_com_z->ChangeBuffers();
     }
-    cudaVars->gpu_aFx->ChangeBuffers();
-    cudaVars->gpu_aFy->ChangeBuffers();
-    cudaVars->gpu_aFz->ChangeBuffers();
+    cudaVars->gpu_aFx[bPick]->ChangeBuffers();
+    cudaVars->gpu_aFy[bPick]->ChangeBuffers();
+    cudaVars->gpu_aFz[bPick]->ChangeBuffers();
 
-    cudaVars->gpu_mFx->ChangeBuffers();
-    cudaVars->gpu_mFy->ChangeBuffers();
-    cudaVars->gpu_mFz->ChangeBuffers();
+    cudaVars->gpu_mFx[bPick]->ChangeBuffers();
+    cudaVars->gpu_mFy[bPick]->ChangeBuffers();
+    cudaVars->gpu_mFz[bPick]->ChangeBuffers();
 
-    cudaVars->gpu_mTx->ChangeBuffers();
-    cudaVars->gpu_mTy->ChangeBuffers();
-    cudaVars->gpu_mTz->ChangeBuffers();
+    cudaVars->gpu_mTx[bPick]->ChangeBuffers();
+    cudaVars->gpu_mTy[bPick]->ChangeBuffers();
+    cudaVars->gpu_mTz[bPick]->ChangeBuffers();
   //    swap(molForceRecRef, molForceRecNew);
   //    swap(atomForceRecRef, atomForceRecNew);
   //    swap(molTorqueRef, molTorqueNew);

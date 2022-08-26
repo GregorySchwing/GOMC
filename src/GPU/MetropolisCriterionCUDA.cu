@@ -15,7 +15,8 @@ const int next_state = 1;
 void CallGetCoeff(VariablesCUDA *vars,
                     int moveType,
                     int molCount,
-                    double * MPCoeff){
+                    double * MPCoeff,
+                    const int box){
 
     // Zeroes value.
     cudaMemcpy(vars->gpu_mp_coefficient, MPCoeff, 1 * sizeof(double),
@@ -25,13 +26,13 @@ void CallGetCoeff(VariablesCUDA *vars,
     int blocksPerGrid = (int)(molCount / threadsPerBlock) + 1;
 
     if (moveType == MPROTATE){
-        BufferAccess<DeviceArray<double>, double, buffers> mTxRef(*(vars->gpu_mTx), curr_state);
-        BufferAccess<DeviceArray<double>, double, buffers> mTyRef(*(vars->gpu_mTy), curr_state);
-        BufferAccess<DeviceArray<double>, double, buffers> mTzRef(*(vars->gpu_mTz), curr_state);
+        BufferAccess<DeviceArray<double>, double, buffers> mTxRef(*(vars->gpu_mTx[box]), curr_state);
+        BufferAccess<DeviceArray<double>, double, buffers> mTyRef(*(vars->gpu_mTy[box]), curr_state);
+        BufferAccess<DeviceArray<double>, double, buffers> mTzRef(*(vars->gpu_mTz[box]), curr_state);
 
-        BufferAccess<DeviceArray<double>, double, buffers> mTxNew(*(vars->gpu_mTx), next_state);
-        BufferAccess<DeviceArray<double>, double, buffers> mTyNew(*(vars->gpu_mTy), next_state);
-        BufferAccess<DeviceArray<double>, double, buffers> mTzNew(*(vars->gpu_mTz), next_state);
+        BufferAccess<DeviceArray<double>, double, buffers> mTxNew(*(vars->gpu_mTx[box]), next_state);
+        BufferAccess<DeviceArray<double>, double, buffers> mTyNew(*(vars->gpu_mTy[box]), next_state);
+        BufferAccess<DeviceArray<double>, double, buffers> mTzNew(*(vars->gpu_mTz[box]), next_state);
 
         GetCoeffRotation<<< blocksPerGrid, threadsPerBlock>>>(molCount,
                                                                 vars->gpu_r_max,
@@ -47,13 +48,13 @@ void CallGetCoeff(VariablesCUDA *vars,
                                                                 mTyNew->get(),
                                                                 mTzNew->get());
     } else {
-        BufferAccess<DeviceArray<double>, double, buffers> mFxRef(*(vars->gpu_mFx), curr_state);
-        BufferAccess<DeviceArray<double>, double, buffers> mFyRef(*(vars->gpu_mFy), curr_state);
-        BufferAccess<DeviceArray<double>, double, buffers> mFzRef(*(vars->gpu_mFz), curr_state);
+        BufferAccess<DeviceArray<double>, double, buffers> mFxRef(*(vars->gpu_mFx[box]), curr_state);
+        BufferAccess<DeviceArray<double>, double, buffers> mFyRef(*(vars->gpu_mFy[box]), curr_state);
+        BufferAccess<DeviceArray<double>, double, buffers> mFzRef(*(vars->gpu_mFz[box]), curr_state);
 
-        BufferAccess<DeviceArray<double>, double, buffers> mFxNew(*(vars->gpu_mFx), next_state);
-        BufferAccess<DeviceArray<double>, double, buffers> mFyNew(*(vars->gpu_mFy), next_state);
-        BufferAccess<DeviceArray<double>, double, buffers> mFzNew(*(vars->gpu_mFz), next_state);
+        BufferAccess<DeviceArray<double>, double, buffers> mFxNew(*(vars->gpu_mFx[box]), next_state);
+        BufferAccess<DeviceArray<double>, double, buffers> mFyNew(*(vars->gpu_mFy[box]), next_state);
+        BufferAccess<DeviceArray<double>, double, buffers> mFzNew(*(vars->gpu_mFz[box]), next_state);
 
         GetCoeffTranslation<<< blocksPerGrid, threadsPerBlock>>>(molCount,
                                                                 vars->gpu_t_max,

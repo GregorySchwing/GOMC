@@ -909,9 +909,9 @@ void BrownianMotionRotateParticlesGPU(
   //cudaMemcpy(vars->gpu_mTorquex, mTorque.x, molCount * sizeof(double), cudaMemcpyHostToDevice);
   //cudaMemcpy(vars->gpu_mTorquey, mTorque.y, molCount * sizeof(double), cudaMemcpyHostToDevice);
   //cudaMemcpy(vars->gpu_mTorquez, mTorque.z, molCount * sizeof(double), cudaMemcpyHostToDevice);
-  BufferAccess<DeviceArray<double>, double, buffers> mTx(*(vars->gpu_mTx), 0);
-  BufferAccess<DeviceArray<double>, double, buffers> mTy(*(vars->gpu_mTy), 0);
-  BufferAccess<DeviceArray<double>, double, buffers> mTz(*(vars->gpu_mTz), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> mTx(*(vars->gpu_mTx[box]), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> mTy(*(vars->gpu_mTy[box]), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> mTz(*(vars->gpu_mTz[box]), 0);
 
   // We were modifying the gpu_x,y,z array to convert old -> new.
   // Not anymore, now we'll pass both the kernel
@@ -1287,9 +1287,9 @@ void BrownianMotionTranslateParticlesGPU(
   BufferAccess<DeviceArray<double>, double, buffers> new_com_y(*(vars->gpu_com_y), 1);
   BufferAccess<DeviceArray<double>, double, buffers> new_com_z(*(vars->gpu_com_z), 1);
 
-  BufferAccess<DeviceArray<double>, double, buffers> mFx(*(vars->gpu_mFx), 0);
-  BufferAccess<DeviceArray<double>, double, buffers> mFy(*(vars->gpu_mFy), 0);
-  BufferAccess<DeviceArray<double>, double, buffers> mFz(*(vars->gpu_mFz), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> mFx(*(vars->gpu_mFx[box]), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> mFy(*(vars->gpu_mFy[box]), 0);
+  BufferAccess<DeviceArray<double>, double, buffers> mFz(*(vars->gpu_mFz[box]), 0);
 
 
   double3 axis = make_double3(boxAxes.x, boxAxes.y, boxAxes.z);
