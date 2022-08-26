@@ -100,13 +100,14 @@ void CellListGPU::GridAll(VariablesCUDA * cv,
     CalculateCellDegrees(cv,coords);
     PrefixScanCellDegrees(cv, cellStartIndex_view->get(), numberOfCells);
     GOMC_EVENT_STOP(1, GomcProfileEvent::GRID_ALL_GPU);
-    // DEBUG
+    // Make sure CLGPU creates the same CL as CLCPU
+    #ifndef NDEBUG
     cudaMemcpy(coords.x, coords_x_view->get(), atomNumber * sizeof(double), cudaMemcpyDeviceToHost);
     cudaMemcpy(coords.y, coords_y_view->get(), atomNumber * sizeof(double), cudaMemcpyDeviceToHost);
     cudaMemcpy(coords.z, coords_z_view->get(), atomNumber * sizeof(double), cudaMemcpyDeviceToHost);
     cudaDeviceSynchronize();
-    
-    // DEBUG
+    #endif
+
 
 }
 
@@ -352,24 +353,7 @@ __global__ void MapParticlesToCellKernel(
                                 gpu_Invcell_x[b],
                                 gpu_Invcell_y[b],
                                 gpu_Invcell_z[b],
-                                b);
-    if (particleIndex == 27){
-    printf("BOX %d\n", b);
-        printf("b*box0CellCount %d\n", b*box0CellCount);
-        printf("GPU POS %f %f %f\n", gpu_x[particleIndex], gpu_y[particleIndex], gpu_z[particleIndex]);
-        int x = (int)(gpu_x[particleIndex] / gpu_cellSize[3*b + 0]);
-        int y = (int)(gpu_y[particleIndex] / gpu_cellSize[3*b + 1]);
-        int z = (int)(gpu_z[particleIndex] / gpu_cellSize[3*b + 2]);
-        x -= (x == gpu_edgeCells[3*b + 0] ?  1 : 0);
-        y -= (y == gpu_edgeCells[3*b + 1] ?  1 : 0);
-        z -= (z == gpu_edgeCells[3*b + 2] ?  1 : 0);
-        printf("GPU CELL %d %d %d = %d \n", x, y, z, cell);
-        printf("GPU EDGECELLS %d %d %d\n",gpu_edgeCells[3*b + 0], gpu_edgeCells[3*b + 1], gpu_edgeCells[3*b + 2]);
-        printf("GPU gpu_cellSize %f %f %f\n", gpu_cellSize[3*b + 0], gpu_cellSize[3*b + 1], gpu_cellSize[3*b + 2]);
-        printf("GPU CELL %d\n", x * gpu_edgeCells[3*b + 1] * gpu_edgeCells[3*b + 2] + y * gpu_edgeCells[3*b + 2] + z);
-    }
-    
-
+                                b);  
 
         gpu_mapParticleToCell[particleIndex] = cell;
     }

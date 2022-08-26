@@ -336,12 +336,6 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   BufferAccess<DeviceArray<double>, double, buffers> mFy(*(vars->gpu_mFy), buffer_index);
   BufferAccess<DeviceArray<double>, double, buffers> mFz(*(vars->gpu_mFz), buffer_index);
 
-  // DEBUG
-  cudaMemcpy(coords.x, coords_x->get(), atomNumber * sizeof(double), cudaMemcpyDeviceToHost);
-  cudaMemcpy(coords.y, coords_y->get(), atomNumber * sizeof(double), cudaMemcpyDeviceToHost);
-  cudaMemcpy(coords.z, coords_z->get(), atomNumber * sizeof(double), cudaMemcpyDeviceToHost);
-  // DEBUG
-
   cudaMemset(aFx->get(), 0.0, atomCount * sizeof(double));
   cudaMemset(aFy->get(), 0.0, atomCount * sizeof(double));
   cudaMemset(aFz->get(), 0.0, atomCount * sizeof(double));

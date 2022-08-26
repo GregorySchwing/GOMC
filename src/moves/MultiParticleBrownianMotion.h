@@ -363,12 +363,10 @@ inline void MultiParticleBrownian::CalcEn()
   GOMC_EVENT_START(1, GomcProfileEvent::CALC_EN_MULTIPARTICLE_BM);
   // Calculate the new force and energy and we will compare that to the
   // reference values in Accept() function
-  //cellList.GridAll(boxDimRef, newMolsPos, molLookup);
   #if GOMC_CUDA
   cellListGPU->GridAll(cudaVars, newMolsPos, boxDimRef.axis, cellList.GetTotalCells(), nextStateBufferIndex);
-  //cellListGPU->GridAll(cudaVars, newMolsPosGPU, boxDimRef.axis, cellList.GetTotalCells(), nextStateBufferIndex);
-  // DEBUG
-  //cellList.GridAll(boxDimRef, newMolsPosGPU, molLookup);
+  // Make sure CLGPU creates the same CL as CLCPU
+  #ifndef NDEBUG
   cellList.GridAll(boxDimRef, newMolsPos, molLookup);
 
   std::vector<int> cellVector, cellStartIndex, mapParticleToCell;
@@ -402,30 +400,27 @@ inline void MultiParticleBrownian::CalcEn()
       neighborList.insert(neighborList.end(), v.begin(), v.end()); 
   }
 
-    assert(mapParticleToCell == mapParticleToCellGPU);
-    assert(cellStartIndex == cellStartIndexGPU);
-    assert(cellVector == cellVectorGPU);
-    assert(neighborList == neighborListGPU);
-    if(mapParticleToCell != mapParticleToCellGPU){
-          printf("mapParticleToCell != mapParticleToCellGPU\n");
-          printf("mapParticleToCell.size() %ld\n", mapParticleToCell.size());
-          printf("mapParticleToCellGPU.size() %ld\n", mapParticleToCellGPU.size());
-          for (int i = 0; i < mapParticleToCell.size(); ++i){
-            if (mapParticleToCell[i] != mapParticleToCellGPU[i])
-              printf("atom %d mapParticleToCell %d != mapParticleToCellGPU %d \n", i, mapParticleToCell[i] , mapParticleToCellGPU[i]);
-          }
-    }
-    if(cellStartIndex != cellStartIndexGPU)
-          printf("cellStartIndex != cellStartIndexGPU\n");
-    if(cellVector != cellVectorGPU)
-          printf("cellVector != cellVectorGPU\n");
-    if(neighborList != neighborListGPU)
-          printf("neighborList != neighborListGPU\n");
-    if(mapParticleToCell != mapParticleToCellGPU || cellStartIndex != cellStartIndexGPU ||
-        cellVector != cellVectorGPU || neighborList != neighborListGPU){
-          exit(1);
-    }    
-  // DEBUG
+
+  if(mapParticleToCell != mapParticleToCellGPU){
+        printf("mapParticleToCell != mapParticleToCellGPU\n");
+        printf("mapParticleToCell.size() %ld\n", mapParticleToCell.size());
+        printf("mapParticleToCellGPU.size() %ld\n", mapParticleToCellGPU.size());
+        for (int i = 0; i < mapParticleToCell.size(); ++i){
+          if (mapParticleToCell[i] != mapParticleToCellGPU[i])
+            printf("atom %d mapParticleToCell %d != mapParticleToCellGPU %d \n", i, mapParticleToCell[i] , mapParticleToCellGPU[i]);
+        }
+  }
+  if(cellStartIndex != cellStartIndexGPU)
+        printf("cellStartIndex != cellStartIndexGPU\n");
+  if(cellVector != cellVectorGPU)
+        printf("cellVector != cellVectorGPU\n");
+  if(neighborList != neighborListGPU)
+        printf("neighborList != neighborListGPU\n");
+  if(mapParticleToCell != mapParticleToCellGPU || cellStartIndex != cellStartIndexGPU ||
+      cellVector != cellVectorGPU || neighborList != neighborListGPU){
+        exit(1);
+  }    
+  #endif
 
   #else
   cellList.GridBox(boxDimRef, newMolsPos, molLookup, bPick);
