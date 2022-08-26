@@ -32,7 +32,7 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #endif
 #include "GOMCEventsProfile.h"
 #define NUMBER_OF_NEIGHBOR_CELL 27
-
+#include <assert.h>     /* assert */
 //
 //    CalculateEnergy.cpp
 //    Energy Calculation functions for Monte Carlo simulation
@@ -297,10 +297,14 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   GOMC_EVENT_START(1, GomcProfileEvent::EN_BOX_FORCE);
 
   double tempREn = 0.0, tempLJEn = 0.0;
+  double tempREnGPU = 0.0, tempLJEnGPU = 0.0;
+
   int atomCount = atomForce.Count();
   int molCount = molForce.Count();
 
 #ifdef GOMC_CUDA
+    XYZArray atomForceGPU;
+    XYZArray molForceGPU;
   //update unitcell in GPU
   UpdateCellBasisCUDA(forcefield.particles->getCUDAVars(), box,
                       boxAxes.cellBasis[box].x, boxAxes.cellBasis[box].y,
@@ -317,12 +321,12 @@ SystemPotential CalculateEnergy::BoxForce(SystemPotential potential,
   }
 
   CallBoxForceGPU(forcefield.particles->getCUDAVars(),
-                  coords, boxAxes, electrostatic, tempREn, tempLJEn,
+                  coords, boxAxes, electrostatic, tempREnGPU, tempLJEnGPU,
                   atomCount, molCount, forcefield.sc_coul,
                   forcefield.sc_sigma_6, forcefield.sc_alpha,
                   forcefield.sc_power, box, buffer_index);
 
-#else
+//#else
 // make a pointer to atom force and mol force for OpenMP
 double *aForcex = atomForce.x;
 double *aForcey = atomForce.y;
@@ -404,8 +408,16 @@ reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
       }
     }
   }
+  printf("interGPU %f realGPU %f\n", tempLJEnGPU, tempREnGPU);
+  printf("inter %f real %f\n", tempLJEn, tempREn);
+
+  if(tempLJEnGPU != tempLJEn || tempREnGPU != tempREn){
+    //exit(1);
+  }
+
 #endif
   printf("inter %f real %f\n", tempLJEn, tempREn);
+
   // setting energy and virial of LJ interaction
   potential.boxEnergy[box].inter = tempLJEn;
   // setting energy and virial of coulomb interaction

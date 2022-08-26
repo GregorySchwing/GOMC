@@ -104,6 +104,8 @@ void CellListGPU::GridAll(VariablesCUDA * cv,
     cudaMemcpy(coords.x, coords_x_view->get(), atomNumber * sizeof(double), cudaMemcpyDeviceToHost);
     cudaMemcpy(coords.y, coords_y_view->get(), atomNumber * sizeof(double), cudaMemcpyDeviceToHost);
     cudaMemcpy(coords.z, coords_z_view->get(), atomNumber * sizeof(double), cudaMemcpyDeviceToHost);
+    cudaDeviceSynchronize();
+    
     // DEBUG
 
 }

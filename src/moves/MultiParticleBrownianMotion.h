@@ -53,6 +53,7 @@ private:
   XYZArray t_k;
   XYZArray r_k;
   Coordinates newMolsPos;
+  Coordinates newMolsPosGPU;
   COM newCOMs;
   int moveType;
   std::vector<uint> moleculeIndex;
@@ -78,6 +79,7 @@ private:
 
 inline MultiParticleBrownian::MultiParticleBrownian(System &sys, StaticVals const &statV) :
   MoveBase(sys, statV),
+  newMolsPosGPU(sys.boxDimRef, newCOMs, sys.molLookupRef, sys.prng, statV.mol, sys.r123Wrapper),
   newMolsPos(sys.boxDimRef, newCOMs, sys.molLookupRef, sys.prng, statV.mol, sys.r123Wrapper),
   newCOMs(sys.boxDimRef, newMolsPos, sys.molLookupRef, statV.mol),
   molLookup(sys.molLookup), r123Wrapper(sys.r123Wrapper)
@@ -90,6 +92,7 @@ inline MultiParticleBrownian::MultiParticleBrownian(System &sys, StaticVals cons
   t_k.Init(sys.com.Count());
   r_k.Init(sys.com.Count());
   newMolsPos.Init(sys.coordinates.Count());
+  newMolsPosGPU.Init(sys.coordinates.Count());
   newCOMs.Init(sys.com.Count());
 
   initMol = false;
@@ -346,7 +349,7 @@ inline uint MultiParticleBrownian::Transform()
               << "Brownian Motion move." << std::endl << std::endl;
     exit(EXIT_FAILURE);
 } 
-#else
+//#else
   // Calculate trial translate and rotate
   // move particles according to force and torque and store them in the new pos
   CalculateTrialDistRot();
@@ -362,9 +365,10 @@ inline void MultiParticleBrownian::CalcEn()
   // reference values in Accept() function
   //cellList.GridAll(boxDimRef, newMolsPos, molLookup);
   #if GOMC_CUDA
-
   cellListGPU->GridAll(cudaVars, newMolsPos, boxDimRef.axis, cellList.GetTotalCells(), nextStateBufferIndex);
+  //cellListGPU->GridAll(cudaVars, newMolsPosGPU, boxDimRef.axis, cellList.GetTotalCells(), nextStateBufferIndex);
   // DEBUG
+  //cellList.GridAll(boxDimRef, newMolsPosGPU, molLookup);
   cellList.GridAll(boxDimRef, newMolsPos, molLookup);
 
   std::vector<int> cellVector, cellStartIndex, mapParticleToCell;
@@ -374,14 +378,14 @@ inline void MultiParticleBrownian::CalcEn()
 
   cellListGPU->CopyGPUMemoryToToHost(cudaVars->gpu_mapParticleToCell,
                                                     newMolsPos.Count(),
-                                                    mapParticleToCell);
+                                                    mapParticleToCellGPU);
   cellListGPU->CopyGPUMemoryToToHost(cudaVars->gpu_cellVector,
                                                     newMolsPos.Count(),
-                                                    cellVector);
+                                                    cellVectorGPU);
   printf("cellList.GetTotalCells()+1 %d\n", cellList.GetTotalCells()+1);
   cellListGPU->CopyGPUMemoryToToHost(cudaVars->gpu_cellStartIndex,
                                                     cellList.GetTotalCells()+1,
-                                                    cellStartIndex);     
+                                                    cellStartIndexGPU);     
 
   cellListGPU->CopyGPUMemoryToToHost(cudaVars->gpu_neighborList,
                                                     cellList.GetTotalCells()*27,
@@ -399,6 +403,25 @@ inline void MultiParticleBrownian::CalcEn()
     assert(cellStartIndex == cellStartIndexGPU);
     assert(cellVector == cellVectorGPU);
     assert(neighborList == neighborListGPU);
+    if(mapParticleToCell != mapParticleToCellGPU){
+          printf("mapParticleToCell != mapParticleToCellGPU\n");
+          printf("mapParticleToCell.size() %ld\n", mapParticleToCell.size());
+          printf("mapParticleToCellGPU.size() %ld\n", mapParticleToCellGPU.size());
+          for (int i = 0; i < mapParticleToCell.size(); ++i){
+            if (mapParticleToCell[i] != mapParticleToCellGPU[i])
+              printf("atom %d mapParticleToCell %d != mapParticleToCellGPU %d \n", i, mapParticleToCell[i] , mapParticleToCellGPU[i]);
+          }
+    }
+    if(cellStartIndex != cellStartIndexGPU)
+          printf("cellStartIndex != cellStartIndexGPU\n");
+    if(cellVector != cellVectorGPU)
+          printf("cellVector != cellVectorGPU\n");
+    if(neighborList != neighborListGPU)
+          printf("neighborList != neighborListGPU\n");
+    if(mapParticleToCell != mapParticleToCellGPU || cellStartIndex != cellStartIndexGPU ||
+        cellVector != cellVectorGPU || neighborList != neighborListGPU){
+          exit(1);
+    }    
   // DEBUG
 
   #else

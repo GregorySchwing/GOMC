@@ -127,6 +127,8 @@ protected:
   uint pStart, pLen;
   //Position
   XYZArray newMolPos;
+  XYZArray newMolPosGPU;
+  
 };
 
 inline uint MolTransformBase::GetBoxAndMol(PRNG & prng, Molecules const& molRef,
