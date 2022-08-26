@@ -16,6 +16,7 @@ const int MPROTATE = 1;
 void CallGetCoeff(VariablesCUDA *vars,
                     int moveType,
                     int molCount,
+                    const int box,
                     double * MPCoeff);
 
 __global__ void GetCoeffTranslation(   

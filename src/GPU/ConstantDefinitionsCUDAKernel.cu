@@ -165,16 +165,50 @@ void InitCoordinatesCUDA(VariablesCUDA *vars, uint atomNumber,
   vars->gpu_com_x = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
   vars->gpu_com_y = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
   vars->gpu_com_z = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
-  vars->gpu_aFx = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
-  vars->gpu_aFy = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
-  vars->gpu_aFz = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
-  vars->gpu_mFx = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
-  vars->gpu_mFy = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
-  vars->gpu_mFz = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
 
-  vars->gpu_mTx = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
-  vars->gpu_mTy = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
-  vars->gpu_mTz = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
+  vars->gpu_aFx_box0 = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
+  vars->gpu_aFy_box0 = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
+  vars->gpu_aFz_box0 = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
+  vars->gpu_mFx_box0 = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
+  vars->gpu_mFy_box0 = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
+  vars->gpu_mFz_box0 = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
+
+  vars->gpu_mTx_box0 = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
+  vars->gpu_mTy_box0 = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
+  vars->gpu_mTz_box0 = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
+
+  vars->gpu_aFx[0] =  vars->gpu_aFx_box0;
+  vars->gpu_aFy[0] =  vars->gpu_aFy_box0;
+  vars->gpu_aFz[0] =  vars->gpu_aFz_box0;
+  vars->gpu_mFx[0] =  vars->gpu_mFx_box0;
+  vars->gpu_mFy[0] =  vars->gpu_mFy_box0;
+  vars->gpu_mFz[0] =  vars->gpu_mFz_box0;
+
+  vars->gpu_mTx[0] =  vars->gpu_mTx_box0;
+  vars->gpu_mTy[0] =  vars->gpu_mTy_box0;
+  vars->gpu_mTz[0] =  vars->gpu_mTz_box0;
+
+  vars->gpu_aFx_box1 = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
+  vars->gpu_aFy_box1 = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
+  vars->gpu_aFz_box1 = new MultiBuffer<DeviceArray<double>, double, buffers>(atomNumber);
+  vars->gpu_mFx_box1 = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
+  vars->gpu_mFy_box1 = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
+  vars->gpu_mFz_box1 = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
+
+  vars->gpu_mTx_box1 = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
+  vars->gpu_mTy_box1 = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
+  vars->gpu_mTz_box1 = new MultiBuffer<DeviceArray<double>, double, buffers>(maxMolNumber);
+
+  vars->gpu_aFx[1] =  vars->gpu_aFx_box1;
+  vars->gpu_aFy[1] =  vars->gpu_aFy_box1;
+  vars->gpu_aFz[1] =  vars->gpu_aFz_box1;
+  vars->gpu_mFx[1] =  vars->gpu_mFx_box1;
+  vars->gpu_mFy[1] =  vars->gpu_mFy_box1;
+  vars->gpu_mFz[1] =  vars->gpu_mFz_box1;
+
+  vars->gpu_mTx[1] =  vars->gpu_mTx_box1;
+  vars->gpu_mTy[1] =  vars->gpu_mTy_box1;
+  vars->gpu_mTz[1] =  vars->gpu_mTz_box1;
 
   // Access 0-index buffer of multi-buffer
   BufferAccess<DeviceArray<double>, double, buffers> coords_x_view(*(vars->gpu_coords_x), 0);

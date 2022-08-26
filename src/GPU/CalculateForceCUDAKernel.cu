@@ -326,15 +326,15 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   BufferAccess<DeviceArray<double>, double, buffers> gpu_LJEn(*(vars->gpu_LJEn), buffer_index);
   BufferAccess<DeviceArray<double>, double, buffers> gpu_REn(*(vars->gpu_REn), buffer_index);
 
-  BufferAccess<DeviceArray<double>, double, buffers> coords_x(*(vars->gpu_coords_x), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> coords_y(*(vars->gpu_coords_y), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> coords_z(*(vars->gpu_coords_z), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> aFx(*(vars->gpu_aFx), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> aFy(*(vars->gpu_aFy), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> aFz(*(vars->gpu_aFz), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> mFx(*(vars->gpu_mFx), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> mFy(*(vars->gpu_mFy), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> mFz(*(vars->gpu_mFz), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> coords_x(*(vars->gpu_coords_x[box]), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> coords_y(*(vars->gpu_coords_y[box]), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> coords_z(*(vars->gpu_coords_z[box]), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> aFx(*(vars->gpu_aFx[box]), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> aFy(*(vars->gpu_aFy[box]), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> aFz(*(vars->gpu_aFz[box]), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> mFx(*(vars->gpu_mFx[box]), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> mFy(*(vars->gpu_mFy[box]), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> mFz(*(vars->gpu_mFz[box]), buffer_index);
 
   cudaMemset(aFx->get(), 0.0, atomCount * sizeof(double));
   cudaMemset(aFy->get(), 0.0, atomCount * sizeof(double));
@@ -456,13 +456,13 @@ void CallBoxTorqueGPU(VariablesCUDA *vars,
   BufferAccess<DeviceArray<double>, double, buffers> com_y(*(vars->gpu_com_y), com_index);
   BufferAccess<DeviceArray<double>, double, buffers> com_z(*(vars->gpu_com_z), com_index);
   
-  BufferAccess<DeviceArray<double>, double, buffers> aFx(*(vars->gpu_aFx), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> aFy(*(vars->gpu_aFy), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> aFz(*(vars->gpu_aFz), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> aFx(*(vars->gpu_aFx[box]), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> aFy(*(vars->gpu_aFy[box]), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> aFz(*(vars->gpu_aFz[box]), buffer_index);
 
-  BufferAccess<DeviceArray<double>, double, buffers> mTx(*(vars->gpu_mTx), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> mTy(*(vars->gpu_mTy), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> mTz(*(vars->gpu_mTz), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> mTx(*(vars->gpu_mTx[box]), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> mTy(*(vars->gpu_mTy[box]), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> mTz(*(vars->gpu_mTz[box]), buffer_index);
 
   cudaMemset(mTx->get(), 0.0, molCount * sizeof(double));
   cudaMemset(mTy->get(), 0.0, molCount * sizeof(double));
