@@ -192,7 +192,7 @@ inline uint MultiParticleBrownian::Prep(const double subDraw, const double movPe
   //current system if any other moves, besides other MP moves, have been accepted.
   //Or, if this is the first MP move, which is handled with the same flag.
   //if(moveSetRef.GetSingleMoveAccepted(bPick)) {
-  if(true) {
+  if(moveSetRef.GetSingleMoveAccepted(bPick)) {
     GOMC_EVENT_START(1, GomcProfileEvent::CALC_EN_MULTIPARTICLE_BM);
     printf("entered SMA box % d\n", bPick);
     //Copy ref reciprocal terms to new for calculation with old positions
@@ -250,7 +250,7 @@ inline uint MultiParticleBrownian::PrepNEMTMC(const uint box, const uint midx, c
   //current system if any other moves, besides other MP moves, have been accepted.
   //Or, if this is the first MP move, which is handled with the same flag.
   // if(moveSetRef.GetSingleMoveAccepted(bPick)) {
-  if(true) {
+  if(moveSetRef.GetSingleMoveAccepted(bPick)) {
     printf("entered SMA\n");
     //Copy ref reciprocal terms to new for calculation with old positions
     calcEwald->CopyRecip(bPick);
