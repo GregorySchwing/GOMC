@@ -534,7 +534,6 @@ void CallBoxInterGPU(VariablesCUDA *vars,
   //int neighborListCount = neighborList.size() * NUMBER_OF_NEIGHBOR_CELLS;
   //int numberOfCells = neighborList.size();
   int numberOfCells = vars->cpu_numberOfCells[box];
-  printf("box %d numberOfCells %d\n", box, numberOfCells);
   //int *gpu_particleKind, *gpu_particleMol;
   //int *gpu_neighborList, *gpu_cellStartIndex;
   int blocksPerGrid, threadsPerBlock;
