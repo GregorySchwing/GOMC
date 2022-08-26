@@ -48,6 +48,7 @@ public:
 
   // Index of cell containing position
   int PositionToCell(const XYZ& posRef, int box) const;
+  int PositionToCell(const XYZ& posRef, int box, int atomIndex) const;
 
   // Iterates over all particles in a cell
   class Cell;
@@ -124,6 +125,37 @@ inline int CellList::PositionToCell(const XYZ& posRef, int box) const
   x -= (x == edgeCells[box][0] ?  1 : 0);
   y -= (y == edgeCells[box][1] ?  1 : 0);
   z -= (z == edgeCells[box][2] ?  1 : 0);
+
+  printf("POS %f %f %f\n", pos.x, pos.y, pos.z);
+  printf("CELL %d %d %d = %d\n", x, y, z, x * edgeCells[box][1] * edgeCells[box][2] + y * edgeCells[box][2] + z);
+  printf("cellSize %f %f %f\n", cellSize[box].x, cellSize[box].y, cellSize[box].z);
+
+  return x * edgeCells[box][1] * edgeCells[box][2] + y * edgeCells[box][2] + z;
+}
+
+
+inline int CellList::PositionToCell(const XYZ& posRef, int box, int atomIndex) const
+{
+  //Transfer to unslant coordinate to find the neighbor
+  XYZ pos = dimensions->TransformUnSlant(posRef, box);
+  int x = (int)(pos.x / cellSize[box].x);
+  int y = (int)(pos.y / cellSize[box].y);
+  int z = (int)(pos.z / cellSize[box].z);
+  //Check the cell number to avoid segfaults for coordinates close to axis
+  //x, y, and z should never be equal or greater than number of cells in x, y,
+  // and z axis, respectively.
+  x -= (x == edgeCells[box][0] ?  1 : 0);
+  y -= (y == edgeCells[box][1] ?  1 : 0);
+  z -= (z == edgeCells[box][2] ?  1 : 0);
+
+  if (atomIndex == 27){
+    printf("BOX %d\n", box);
+  printf("POS %f %f %f\n", pos.x, pos.y, pos.z);
+  printf("CELL %d %d %d = %d\n", x, y, z, x * edgeCells[box][1] * edgeCells[box][2] + y * edgeCells[box][2] + z);
+    printf("EDGECELLS %d %d %d\n",edgeCells[box][0], edgeCells[box][1], edgeCells[box][2]);
+
+  printf("cellSize %f %f %f\n", cellSize[box].x, cellSize[box].y, cellSize[box].z);
+  }
   return x * edgeCells[box][1] * edgeCells[box][2] + y * edgeCells[box][2] + z;
 }
 

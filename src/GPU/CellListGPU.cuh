@@ -54,7 +54,8 @@ class CellListGPU {
                   const int buffer_index = 0);
     void CopyGPUMemoryToToHost(MultiBuffer< DeviceArray<int>, int, buffers > * deviceMemory,
                                     int size,
-                                    std::vector<int> & hostMemory);
+                                    std::vector<int> & hostMemory,
+                                    int bufferIndex = 0);
     void CopyGPUMemoryToToHost(int * deviceMemory,
                                     int size,
                                     std::vector<int> & hostMemory);

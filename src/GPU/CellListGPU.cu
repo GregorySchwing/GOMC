@@ -251,9 +251,10 @@ void CellListGPU::PrefixScanCellDegrees(VariablesCUDA * cv,
 
 void CellListGPU::CopyGPUMemoryToToHost(MultiBuffer< DeviceArray<int>, int, buffers > * deviceMemory,
                                     int size,
-                                    std::vector<int> & hostMemory){
+                                    std::vector<int> & hostMemory,
+                                    int bufferIndex){
 
-    BufferAccess<DeviceArray<int>, int, buffers> deviceMemory_view(*deviceMemory, 0);
+    BufferAccess<DeviceArray<int>, int, buffers> deviceMemory_view(*deviceMemory, bufferIndex);
 
     hostMemory.clear();
     hostMemory.resize(size);
@@ -296,13 +297,16 @@ __device__ int PositionToCell(int atomIndex,
     int x = (int)(pos.x / gpu_cellSize[3*b + 0]);
     int y = (int)(pos.y / gpu_cellSize[3*b + 1]);
     int z = (int)(pos.z / gpu_cellSize[3*b + 2]);
+
+
     //Check the cell number to avoid segfaults for coordinates close to axis
     //x, y, and z should never be equal or greater than number of cells in x, y,
     // and z axis, respectively.
     x -= (x == gpu_edgeCells[3*b + 0] ?  1 : 0);
     y -= (y == gpu_edgeCells[3*b + 1] ?  1 : 0);
     z -= (z == gpu_edgeCells[3*b + 2] ?  1 : 0);
-    return x * gpu_edgeCells[1] * gpu_edgeCells[2] + y * gpu_edgeCells[2] + z;
+
+    return x * gpu_edgeCells[3*b + 1] * gpu_edgeCells[3*b + 2] + y * gpu_edgeCells[3*b + 2] + z;
 }
 
 __global__ void MapParticlesToCellKernel(
@@ -349,6 +353,24 @@ __global__ void MapParticlesToCellKernel(
                                 gpu_Invcell_y[b],
                                 gpu_Invcell_z[b],
                                 b);
+    if (particleIndex == 27){
+    printf("BOX %d\n", b);
+        printf("b*box0CellCount %d\n", b*box0CellCount);
+        printf("GPU POS %f %f %f\n", gpu_x[particleIndex], gpu_y[particleIndex], gpu_z[particleIndex]);
+        int x = (int)(gpu_x[particleIndex] / gpu_cellSize[3*b + 0]);
+        int y = (int)(gpu_y[particleIndex] / gpu_cellSize[3*b + 1]);
+        int z = (int)(gpu_z[particleIndex] / gpu_cellSize[3*b + 2]);
+        x -= (x == gpu_edgeCells[3*b + 0] ?  1 : 0);
+        y -= (y == gpu_edgeCells[3*b + 1] ?  1 : 0);
+        z -= (z == gpu_edgeCells[3*b + 2] ?  1 : 0);
+        printf("GPU CELL %d %d %d = %d \n", x, y, z, cell);
+        printf("GPU EDGECELLS %d %d %d\n",gpu_edgeCells[3*b + 0], gpu_edgeCells[3*b + 1], gpu_edgeCells[3*b + 2]);
+        printf("GPU gpu_cellSize %f %f %f\n", gpu_cellSize[3*b + 0], gpu_cellSize[3*b + 1], gpu_cellSize[3*b + 2]);
+        printf("GPU CELL %d\n", x * gpu_edgeCells[3*b + 1] * gpu_edgeCells[3*b + 2] + y * gpu_edgeCells[3*b + 2] + z);
+    }
+    
+
+
         gpu_mapParticleToCell[particleIndex] = cell;
     }
 }

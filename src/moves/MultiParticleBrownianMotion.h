@@ -378,14 +378,17 @@ inline void MultiParticleBrownian::CalcEn()
 
   cellListGPU->CopyGPUMemoryToToHost(cudaVars->gpu_mapParticleToCell,
                                                     newMolsPos.Count(),
-                                                    mapParticleToCellGPU);
+                                                    mapParticleToCellGPU,
+                                                    nextStateBufferIndex);
   cellListGPU->CopyGPUMemoryToToHost(cudaVars->gpu_cellVector,
                                                     newMolsPos.Count(),
-                                                    cellVectorGPU);
+                                                    cellVectorGPU,
+                                                    nextStateBufferIndex);
   printf("cellList.GetTotalCells()+1 %d\n", cellList.GetTotalCells()+1);
   cellListGPU->CopyGPUMemoryToToHost(cudaVars->gpu_cellStartIndex,
                                                     cellList.GetTotalCells()+1,
-                                                    cellStartIndexGPU);     
+                                                    cellStartIndexGPU,
+                                                    nextStateBufferIndex);     
 
   cellListGPU->CopyGPUMemoryToToHost(cudaVars->gpu_neighborList,
                                                     cellList.GetTotalCells()*27,
@@ -550,6 +553,10 @@ inline void MultiParticleBrownian::Accept(const uint rejectState, const ulong st
     cudaVars->gpu_mTx->ChangeBuffers();
     cudaVars->gpu_mTy->ChangeBuffers();
     cudaVars->gpu_mTz->ChangeBuffers();
+
+    cudaVars->gpu_mapParticleToCell->ChangeBuffers();
+    cudaVars->gpu_cellVector->ChangeBuffers();
+    cudaVars->gpu_cellStartIndex->ChangeBuffers();
   //    swap(molForceRecRef, molForceRecNew);
   //    swap(atomForceRecRef, atomForceRecNew);
   //    swap(molTorqueRef, molTorqueNew);
