@@ -12,9 +12,9 @@ TEST(CellListGPU, CheckMETHANOL) {
     std::vector<int> cellVector, cellStartIndex, mapParticleToCell;
     std::vector< std::vector<int> > neighborList;
     std::vector<int> cellVectorGPU, cellStartIndexGPU, mapParticleToCellGPU;
-    std::vector< std::vector<int> > neighborListGPU;
+    std::vector<int> neighborListGPU;
     uint box = 0;
-    base.GetCPUCellList(box,
+    base.GetCPUCellList(
                         cellVector,
                         cellStartIndex,
                         mapParticleToCell,
@@ -57,12 +57,12 @@ TEST(CellListGPU, CheckPEN_HEX) {
     Simulation base("in.conf");
     std::vector<int> cellVector, cellStartIndex, mapParticleToCell;
 
-    std::vector< std::vector<int> > neighborList;
+    std::vector<int> neighborList;
 
     std::vector<int> cellVectorGPU, cellStartIndexGPU, mapParticleToCellGPU;
-    std::vector< std::vector<int> > neighborListGPU;
+    std::vector<int> neighborListGPU;
 
-    base.GetCPUCellList(0,cellVector,
+    base.GetCPUCellList(cellVector,
                         cellStartIndex,
                         mapParticleToCell,
                         neighborList);
@@ -83,7 +83,7 @@ TEST(CellListGPU, CheckPEN_HEX) {
         else
             printf("mol index %d %d %d\n", i, mapParticleToCell[i], mapParticleToCellGPU[i]);
     }
- */
+
     printf("cellStartIndex.size() %d\n", cellStartIndex.size());
     printf("cellStartIndex.size() %d\n", cellStartIndexGPU.size());
 
@@ -93,15 +93,26 @@ TEST(CellListGPU, CheckPEN_HEX) {
         else 
             printf("EQ %d %d\n", cellStartIndex[i], cellStartIndexGPU[i]);
     }
-    /*
+
     for (int i = 0; cellVector.size(); ++i){
         if(cellVector[i] != cellVectorGPU[i])
             printf("%d %d\n", cellVector[i], cellVectorGPU[i]);
     }
     */
+
+
+
+    printf("neighborList.size() %d\n", neighborList.size());
+    printf("neighborListGPU.size() %d\n", neighborListGPU.size());
+
+    for (int i = 0; i < neighborList.size(); ++i){
+        if(neighborList[i] != neighborListGPU[i])
+            printf("%d %d\n", neighborList[i], neighborListGPU[i]);
+    }
     EXPECT_EQ(mapParticleToCell, mapParticleToCellGPU);
     EXPECT_EQ(cellStartIndex, cellStartIndexGPU);
     EXPECT_EQ(cellVector, cellVectorGPU);
+    EXPECT_EQ(neighborList, neighborListGPU);
 
 }
 #endif

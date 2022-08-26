@@ -35,15 +35,15 @@ public:
     SystemPotential & GetSystemEnergy(void);
     PRNG & GetPRNG();
     Molecules & GetMolecules();
-    void GetCPUCellList(uint box,
+    void GetCPUCellList(
                         std::vector<int> & cellVector, 
                         std::vector<int> & cellStartIndex, 
                         std::vector<int> & mapParticleToCell,
-                        std::vector< std::vector<int> > & neighborList);
+                        std::vector<int> & neighborList);
     void GetGPUCellList(std::vector<int> & cellVector, 
                                 std::vector<int> & cellStartIndex, 
                                 std::vector<int> & mapParticleToCell,
-                                std::vector< std::vector<int> > & neighborList,
+                                std::vector<int> & neighborList,
                                 std::vector<int> & Pinds);
 
   #endif

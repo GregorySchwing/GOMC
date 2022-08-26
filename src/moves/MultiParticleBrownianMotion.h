@@ -191,7 +191,7 @@ inline uint MultiParticleBrownian::Prep(const double subDraw, const double movPe
   //if(moveSetRef.GetSingleMoveAccepted(bPick)) {
   if(true) {
     GOMC_EVENT_START(1, GomcProfileEvent::CALC_EN_MULTIPARTICLE_BM);
-    printf("entered SMA\n");
+    printf("entered SMA box % d\n", bPick);
     //Copy ref reciprocal terms to new for calculation with old positions
     calcEwald->CopyRecip(bPick);
 
@@ -614,8 +614,8 @@ inline void MultiParticleBrownian::RotateForceBiased(uint molIndex)
   // Copy the range into temporary array
   XYZArray temp(len);
   newMolsPos.CopyRange(temp, start, 0, len);
-  printf("mol %d old pos %f %f %f\n",molIndex , temp.x[0], temp.y[0], temp.z[0]);
-  printf("mol %d r_k %f %f %f\n",molIndex , rot.x, rot.y, rot.z);
+  //printf("mol %d old pos %f %f %f\n",molIndex , temp.x[0], temp.y[0], temp.z[0]);
+  //printf("mol %d r_k %f %f %f\n",molIndex , rot.x, rot.y, rot.z);
         
   boxDimRef.UnwrapPBC(temp, bPick, center);
 
@@ -628,7 +628,7 @@ inline void MultiParticleBrownian::RotateForceBiased(uint molIndex)
   boxDimRef.WrapPBC(temp, bPick);
   // Copy back the result
   temp.CopyRange(newMolsPos, 0, start, len);
-  printf("mol %d new pos %f %f %f\n",molIndex , temp.x[0], temp.y[0], temp.z[0]);
+  //printf("mol %d new pos %f %f %f\n",molIndex , temp.x[0], temp.y[0], temp.z[0]);
 }
 
 inline void MultiParticleBrownian::TranslateForceBiased(uint molIndex)
@@ -653,7 +653,7 @@ inline void MultiParticleBrownian::TranslateForceBiased(uint molIndex)
   // Copy the range into temporary array
   XYZArray temp(len);
   newMolsPos.CopyRange(temp, start, 0, len);
-    printf("mol %d old pos %f %f %f\n",molIndex , temp.x[0], temp.y[0], temp.z[0]);
+    //printf("mol %d old pos %f %f %f\n",molIndex , temp.x[0], temp.y[0], temp.z[0]);
 
   //Shift the coordinate and COM
   temp.AddAll(shift);
@@ -664,7 +664,7 @@ inline void MultiParticleBrownian::TranslateForceBiased(uint molIndex)
   //set the new coordinate
   temp.CopyRange(newMolsPos, 0, start, len);
   newCOMs.Set(molIndex, newcom);
-  printf("mol %d new pos %f %f %f\n",molIndex , temp.x[0], temp.y[0], temp.z[0]);
+  //printf("mol %d new pos %f %f %f\n",molIndex , temp.x[0], temp.y[0], temp.z[0]);
 
 }
 

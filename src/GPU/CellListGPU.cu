@@ -254,6 +254,17 @@ void CellListGPU::CopyGPUMemoryToToHost(MultiBuffer< DeviceArray<int>, int, buff
     checkLastErrorCUDA(__FILE__, __LINE__);
 }
 
+void CellListGPU::CopyGPUMemoryToToHost(int * deviceMemory,
+                                    int size,
+                                    std::vector<int> & hostMemory){
+
+
+    hostMemory.clear();
+    hostMemory.resize(size);
+    cudaMemcpy(&hostMemory[0], deviceMemory, size * sizeof(int), cudaMemcpyDeviceToHost);
+    cudaDeviceSynchronize();
+    checkLastErrorCUDA(__FILE__, __LINE__);
+}
 __device__ int PositionToCell(int atomIndex,
                             double* gpu_x,
                             double* gpu_y,

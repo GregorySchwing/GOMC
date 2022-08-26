@@ -607,7 +607,7 @@ void CallBoxInterGPU(VariablesCUDA *vars,
   BoxInterGPU <<< blocksPerGrid, threadsPerBlock>>>(cellStartIndex_view->get(),
       cellVector_view->get(),
       vars->gpu_neighborList,
-      numberOfCells,
+      vars->cpu_numberOfCells[0],
       coords_x->get(),
       coords_y->get(),
       coords_z->get(),
@@ -758,16 +758,25 @@ __global__ void BoxInterGPU(int *gpu_cellStartIndex,
   // Calculate number of particles inside current Cell
   endIndex = gpu_cellStartIndex[currentCell + 1];
   particlesInsideCurrentCell = endIndex - gpu_cellStartIndex[currentCell];
-
+    //if (threadIdx.x == 0 && box == 1){
+    //  printf("particlesInsideCurrentCell %d\n",particlesInsideCurrentCell);
+    //  printf("particlesInsideNeighboringCell %d\n",particlesInsideNeighboringCell);
+    //}
   // total number of pairs
   int numberOfPairs = particlesInsideCurrentCell * particlesInsideNeighboringCell;
   for(int pairIndex = threadIdx.x; pairIndex < numberOfPairs; pairIndex += blockDim.x) {
+
     int neighborParticleIndex = pairIndex / particlesInsideCurrentCell;
     int currentParticleIndex = pairIndex % particlesInsideCurrentCell;
 
     int currentParticle = gpu_cellVector[gpu_cellStartIndex[currentCell] + currentParticleIndex];
     int neighborParticle = gpu_cellVector[gpu_cellStartIndex[neighborCell] + neighborParticleIndex];
-
+    //if (box == 1){
+    //  printf("neighborParticleIndex %d\n",neighborParticleIndex);
+    //  printf("currentParticleIndex %d\n",currentParticleIndex);
+    //  printf("currentParticle %d\n",currentParticle);
+    //  printf("neighborParticle %d\n",neighborParticle);
+    //}
     if(currentParticle < neighborParticle && gpu_particleMol[currentParticle] != gpu_particleMol[neighborParticle]) {
       // Check if they are within rcut
       double distSq = 0.0;

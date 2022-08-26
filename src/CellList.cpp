@@ -71,24 +71,16 @@ void CellList::FlattenNeighborList(){
   numberOfCells.clear();
 
   totalCells = 0; 
-  std::vector < std::vector<std::vector<int> > > neighborList;
   for (int b = 0; b < BOX_TOTAL; ++b){
     startOfBoxCellList.push_back(totalCells);
-    neighborList.push_back(GetNeighborList(b));
-    totalCells += neighborList[b].size();
-    numberOfCells.push_back(neighborList[b].size());
-  }
-  // Convert neighbor list to 1D array
-  neighborlist1D.clear();
-  neighborlist1D.resize(totalCells*NUMBER_OF_NEIGHBOR_CELL);
-  for (int b = 0; b < BOX_TOTAL; ++b){
-    for(int i = 0; i < neighborList[b].size(); i++) {
-      for(int j = 0; j < NUMBER_OF_NEIGHBOR_CELL; j++) {
-        neighborlist1D[startOfBoxCellList[b] + i * NUMBER_OF_NEIGHBOR_CELL + j] = neighborList[b][i][j];
-      }
-    }
+    std::vector< std::vector<int> > neighborList_for_a_box = GetNeighborList(b);
+    for(const auto &v: neighborList_for_a_box)
+      neighborlist1D.insert(neighborlist1D.end(), v.begin(), v.end()); 
+    totalCells += neighborList_for_a_box.size();
+    numberOfCells.push_back(neighborList_for_a_box.size());
   }
 }
+
 void CellList::FlattenCellDetails(){
   cellSizeVec.clear();
   edgeCellsVec.clear();

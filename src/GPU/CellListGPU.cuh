@@ -55,7 +55,9 @@ class CellListGPU {
     void CopyGPUMemoryToToHost(MultiBuffer< DeviceArray<int>, int, buffers > * deviceMemory,
                                     int size,
                                     std::vector<int> & hostMemory);
-
+    void CopyGPUMemoryToToHost(int * deviceMemory,
+                                    int size,
+                                    std::vector<int> & hostMemory);
     void MapParticlesToCell(VariablesCUDA * cv,
                                     double * x,
                                     double * y,
