@@ -100,6 +100,12 @@ void CellListGPU::GridAll(VariablesCUDA * cv,
     CalculateCellDegrees(cv,coords);
     PrefixScanCellDegrees(cv, cellStartIndex_view->get(), numberOfCells);
     GOMC_EVENT_STOP(1, GomcProfileEvent::GRID_ALL_GPU);
+    // DEBUG
+    cudaMemcpy(coords.x, coords_x_view->get(), atomNumber * sizeof(double), cudaMemcpyDeviceToHost);
+    cudaMemcpy(coords.y, coords_y_view->get(), atomNumber * sizeof(double), cudaMemcpyDeviceToHost);
+    cudaMemcpy(coords.z, coords_z_view->get(), atomNumber * sizeof(double), cudaMemcpyDeviceToHost);
+    // DEBUG
+
 }
 
 

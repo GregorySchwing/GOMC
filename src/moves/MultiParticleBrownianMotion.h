@@ -362,7 +362,45 @@ inline void MultiParticleBrownian::CalcEn()
   // reference values in Accept() function
   //cellList.GridAll(boxDimRef, newMolsPos, molLookup);
   #if GOMC_CUDA
-  cellListGPU->GridAll(cudaVars, coordCurrRef, boxDimRef.axis, cellList.GetTotalCells(), nextStateBufferIndex);
+
+  cellListGPU->GridAll(cudaVars, newMolsPos, boxDimRef.axis, cellList.GetTotalCells(), nextStateBufferIndex);
+  // DEBUG
+  cellList.GridAll(boxDimRef, newMolsPos, molLookup);
+
+  std::vector<int> cellVector, cellStartIndex, mapParticleToCell;
+  std::vector<int> neighborList;
+  std::vector<int> cellVectorGPU, cellStartIndexGPU, mapParticleToCellGPU;
+  std::vector<int> neighborListGPU;
+
+  cellListGPU->CopyGPUMemoryToToHost(cudaVars->gpu_mapParticleToCell,
+                                                    newMolsPos.Count(),
+                                                    mapParticleToCell);
+  cellListGPU->CopyGPUMemoryToToHost(cudaVars->gpu_cellVector,
+                                                    newMolsPos.Count(),
+                                                    cellVector);
+  printf("cellList.GetTotalCells()+1 %d\n", cellList.GetTotalCells()+1);
+  cellListGPU->CopyGPUMemoryToToHost(cudaVars->gpu_cellStartIndex,
+                                                    cellList.GetTotalCells()+1,
+                                                    cellStartIndex);     
+
+  cellListGPU->CopyGPUMemoryToToHost(cudaVars->gpu_neighborList,
+                                                    cellList.GetTotalCells()*27,
+                                                    neighborListGPU);    
+
+  cellList.GetCellListNeighbor(newMolsPos.Count(),
+                                cellVector, cellStartIndex, mapParticleToCell);
+  for (int box = 0; box < BOX_TOTAL; ++box){
+    std::vector< std::vector<int> > neighborList_for_a_box = cellList.GetNeighborList(box);
+    for(const auto &v: neighborList_for_a_box)
+      neighborList.insert(neighborList.end(), v.begin(), v.end()); 
+  }
+
+    assert(mapParticleToCell == mapParticleToCellGPU);
+    assert(cellStartIndex == cellStartIndexGPU);
+    assert(cellVector == cellVectorGPU);
+    assert(neighborList == neighborListGPU);
+  // DEBUG
+
   #else
   cellList.GridBox(boxDimRef, newMolsPos, molLookup, bPick);
   #endif
