@@ -253,7 +253,7 @@ void Simulation::GetCPUCellList(
       neighborList.insert(neighborList.end(), v.begin(), v.end()); 
   }
 }
-#if GOMC_CUDA
+#ifdef GOMC_CUDA
 void Simulation::GetGPUCellList(std::vector<int> & cellVector, 
                                 std::vector<int> & cellStartIndex, 
                                 std::vector<int> & mapParticleToCell,

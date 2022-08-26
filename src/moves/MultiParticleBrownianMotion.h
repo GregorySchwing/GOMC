@@ -349,7 +349,7 @@ inline uint MultiParticleBrownian::Transform()
               << "Brownian Motion move." << std::endl << std::endl;
     exit(EXIT_FAILURE);
 } 
-//#else
+#else
   // Calculate trial translate and rotate
   // move particles according to force and torque and store them in the new pos
   CalculateTrialDistRot();
@@ -363,7 +363,7 @@ inline void MultiParticleBrownian::CalcEn()
   GOMC_EVENT_START(1, GomcProfileEvent::CALC_EN_MULTIPARTICLE_BM);
   // Calculate the new force and energy and we will compare that to the
   // reference values in Accept() function
-  #if GOMC_CUDA
+  #ifdef GOMC_CUDA
   cellListGPU->GridAll(cudaVars, newMolsPos, boxDimRef.axis, cellList.GetTotalCells(), nextStateBufferIndex);
   // Make sure CLGPU creates the same CL as CLCPU
   #ifndef NDEBUG
@@ -517,7 +517,7 @@ inline void MultiParticleBrownian::Accept(const uint rejectState, const ulong st
   // Here we compare the values of reference and trial and decide whether to
   // accept or reject the move
 
-  #if GOMC_CUDA
+  #ifdef GOMC_CUDA
   double MPCoeff = 0.0;
   CallGetCoeff(cudaVars, moveType, comCurrRef.Count(), &MPCoeff);
   // Need to update sysPots
