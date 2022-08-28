@@ -193,8 +193,8 @@ inline uint MultiParticleBrownian::Prep(const double subDraw, const double movPe
   //We don't use forces for non-MP moves, so we need to calculate them for the
   //current system if any other moves, besides other MP moves, have been accepted.
   //Or, if this is the first MP move, which is handled with the same flag.
-  //if(moveSetRef.GetSingleMoveAccepted(bPick)) {
-  if(true) {
+  if(moveSetRef.GetSingleMoveAccepted(bPick)) {
+  //if(true) {
     GOMC_EVENT_START(1, GomcProfileEvent::CALC_EN_MULTIPARTICLE_BM);
     printf("entered SMA box % d\n", bPick);
     //Copy ref reciprocal terms to new for calculation with old positions
@@ -214,12 +214,15 @@ inline uint MultiParticleBrownian::Prep(const double subDraw, const double movPe
                      coordCurrRef,
                      molLookup,
                      currentStateBufferIndex,
-                     0);
+                     bPick);
+
+    /*
         CUDAMemoryUtils::CallZeroBoxForces(cudaVars,
                      coordCurrRef,
                      molLookup,
                      currentStateBufferIndex,
                      1);
+    */
   #endif
 
 
@@ -271,8 +274,8 @@ inline uint MultiParticleBrownian::PrepNEMTMC(const uint box, const uint midx, c
   //We don't use forces for non-MP moves, so we need to calculate them for the
   //current system if any other moves, besides other MP moves, have been accepted.
   //Or, if this is the first MP move, which is handled with the same flag.
-  // if(moveSetRef.GetSingleMoveAccepted(bPick)) {
-  if(true) {
+ if(moveSetRef.GetSingleMoveAccepted(bPick)) {
+  //if(true) {
     printf("entered SMA\n");
     //Copy ref reciprocal terms to new for calculation with old positions
     calcEwald->CopyRecip(bPick);
@@ -292,12 +295,15 @@ inline uint MultiParticleBrownian::PrepNEMTMC(const uint box, const uint midx, c
                      coordCurrRef,
                      molLookup,
                      currentStateBufferIndex,
-                     0);
+                     bPick);
+
+    /*
         CUDAMemoryUtils::CallZeroBoxForces(cudaVars,
                      coordCurrRef,
                      molLookup,
                      currentStateBufferIndex,
                      1);
+    */
     #endif
 
     //Calculate short range energy and force for old positions
@@ -577,6 +583,15 @@ inline void MultiParticleBrownian::Accept(const uint rejectState, const ulong st
   if(result) {
     printf("Accepted %s move\n", moveType ? "ROT" : "TRANS");
     sysPotRef = sysPotNew;
+
+    // If the other box has valid force values, copy them to the new buffer
+    if(!moveSetRef.GetSingleMoveAccepted((bPick+1)%2)){
+      CUDAMemoryUtils::CallCopyBoxForces(cudaVars,
+                     coordCurrRef,
+                     molLookup,
+                     currentStateBufferIndex,
+                     (bPick+1)%2);
+    }
 
     cudaVars->gpu_coords_x->ChangeBuffers();
     cudaVars->gpu_coords_y->ChangeBuffers();

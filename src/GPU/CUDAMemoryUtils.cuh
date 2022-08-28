@@ -74,5 +74,8 @@ static void CallCopyBoxForces(VariablesCUDA *vars,
                      const MoleculeLookup& molLookup,
                      uint const buffer_index,
                      uint const box);
+    private:
+    static const int currentStateBufferIndex = 0;
+    static const int nextStateBufferIndex = 1;
 };
 #endif

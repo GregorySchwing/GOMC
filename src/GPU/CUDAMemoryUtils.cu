@@ -137,28 +137,25 @@ void CUDAMemoryUtils::CallCopyBoxForces(VariablesCUDA *vars,
                      uint const buffer_index,
                      uint const box){
 
-  BufferAccess<DeviceArray<double>, double, buffers> aFx_old(*(vars->gpu_aFx), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> aFy_old(*(vars->gpu_aFy), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> aFz_old(*(vars->gpu_aFz), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> mFx_old(*(vars->gpu_mFx), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> mFy_old(*(vars->gpu_mFy), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> mFz_old(*(vars->gpu_mFz), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> mTx_old(*(vars->gpu_mTx), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> mTy_old(*(vars->gpu_mTy), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> mTz_old(*(vars->gpu_mTz), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> aFx_old(*(vars->gpu_aFx), currentStateBufferIndex);
+  BufferAccess<DeviceArray<double>, double, buffers> aFy_old(*(vars->gpu_aFy), currentStateBufferIndex);
+  BufferAccess<DeviceArray<double>, double, buffers> aFz_old(*(vars->gpu_aFz), currentStateBufferIndex);
+  BufferAccess<DeviceArray<double>, double, buffers> mFx_old(*(vars->gpu_mFx), currentStateBufferIndex);
+  BufferAccess<DeviceArray<double>, double, buffers> mFy_old(*(vars->gpu_mFy), currentStateBufferIndex);
+  BufferAccess<DeviceArray<double>, double, buffers> mFz_old(*(vars->gpu_mFz), currentStateBufferIndex);
+  BufferAccess<DeviceArray<double>, double, buffers> mTx_old(*(vars->gpu_mTx), currentStateBufferIndex);
+  BufferAccess<DeviceArray<double>, double, buffers> mTy_old(*(vars->gpu_mTy), currentStateBufferIndex);
+  BufferAccess<DeviceArray<double>, double, buffers> mTz_old(*(vars->gpu_mTz), currentStateBufferIndex);
 
-  BufferAccess<DeviceArray<double>, double, buffers> aFx_new(*(vars->gpu_aFx), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> aFy_new(*(vars->gpu_aFy), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> aFz_new(*(vars->gpu_aFz), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> mFx_new(*(vars->gpu_mFx), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> mFy_new(*(vars->gpu_mFy), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> mFz_new(*(vars->gpu_mFz), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> mTx_new(*(vars->gpu_mTx), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> mTy_new(*(vars->gpu_mTy), buffer_index);
-  BufferAccess<DeviceArray<double>, double, buffers> mTz_new(*(vars->gpu_mTz), buffer_index);
-
-
-
+  BufferAccess<DeviceArray<double>, double, buffers> aFx_new(*(vars->gpu_aFx), nextStateBufferIndex);
+  BufferAccess<DeviceArray<double>, double, buffers> aFy_new(*(vars->gpu_aFy), nextStateBufferIndex);
+  BufferAccess<DeviceArray<double>, double, buffers> aFz_new(*(vars->gpu_aFz), nextStateBufferIndex);
+  BufferAccess<DeviceArray<double>, double, buffers> mFx_new(*(vars->gpu_mFx), nextStateBufferIndex);
+  BufferAccess<DeviceArray<double>, double, buffers> mFy_new(*(vars->gpu_mFy), nextStateBufferIndex);
+  BufferAccess<DeviceArray<double>, double, buffers> mFz_new(*(vars->gpu_mFz), nextStateBufferIndex);
+  BufferAccess<DeviceArray<double>, double, buffers> mTx_new(*(vars->gpu_mTx), nextStateBufferIndex);
+  BufferAccess<DeviceArray<double>, double, buffers> mTy_new(*(vars->gpu_mTy), nextStateBufferIndex);
+  BufferAccess<DeviceArray<double>, double, buffers> mTz_new(*(vars->gpu_mTz), nextStateBufferIndex);
 
   int atomCount = coords.Count();
   int molCount = molLookup.NumInBox(box);
