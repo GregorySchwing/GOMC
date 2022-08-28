@@ -14,10 +14,15 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #include "VariablesCUDA.cuh"
 #include "ConstantDefinitionsCUDAKernel.cuh"
 #include "CalculateMinImageCUDAKernel.cuh"
+#include "MoleculeLookup.h"
+
+//static const int warp_size = 32; 
+
 
 void CallBoxForceGPU(VariablesCUDA *vars,
                      XYZArray const &coords,
                      BoxDimensions const &boxAxes,
+                     const MoleculeLookup& molLookupRef,
                      bool electrostatic,
                      double &REn,
                      double &LJEn,
@@ -82,6 +87,36 @@ void CallVirialReciprocalGPU(VariablesCUDA *vars,
                              uint imageSize,
                              double constVal,
                              uint box);
+
+__global__ void CopyBoxCoordsCOMForcesGPU(
+                            int box,
+                            uint* gpu_molLookup,
+                            uint* gpu_molBoxCount,
+                            int* gpu_startAtomIdx,
+                            double *gpu_aForcex_old,
+                            double *gpu_aForcey_old,
+                            double *gpu_aForcez_old,
+                            double *gpu_mForcex_old,
+                            double *gpu_mForcey_old,
+                            double *gpu_mForcez_old,
+                            double *gpu_aForcex_new,
+                            double *gpu_aForcey_new,
+                            double *gpu_aForcez_new,
+                            double *gpu_mForcex_new,
+                            double *gpu_mForcey_new,
+                            double *gpu_mForcez_new,
+                            double *gpu_coor_x_old,
+                            double *gpu_coor_y_old,
+                            double *gpu_coor_z_old,
+                            double *gpu_coor_x_new,
+                            double *gpu_coor_y_new,
+                            double *gpu_coor_z_new,
+                            double *gpu_com_x_old,
+                            double *gpu_com_y_old,
+                            double *gpu_com_z_old,
+                            double *gpu_com_x_new,
+                            double *gpu_com_y_new,
+                            double *gpu_com_z_new);
 
 __global__ void BoxForceGPU(int *gpu_cellStartIndex,
                             int *gpu_cellVector,

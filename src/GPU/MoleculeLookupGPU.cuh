@@ -25,6 +25,7 @@ class MoleculeLookupGPU {
     ~MoleculeLookupGPU();
     uint32_t * GetNumMolsInBox();
     uint32_t * GetMolLookup();
+    int32_t * GetStartAtomIdx();
 
   private:
 

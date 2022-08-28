@@ -44,6 +44,7 @@ public:
 
 private:
   uint bPick;
+  uint prevMoveBPick;
   bool initMol;
   SystemPotential sysPotNew;
   XYZArray molTorqueRef;

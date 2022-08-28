@@ -298,6 +298,7 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
 void CallBoxForceGPU(VariablesCUDA *vars,
                      XYZArray const &coords,
                      BoxDimensions const &boxAxes,
+                     const MoleculeLookup& molLookupRef,
                      bool electrostatic,
                      double &REn,
                      double &LJEn,
@@ -336,12 +337,74 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   BufferAccess<DeviceArray<double>, double, buffers> mFy(*(vars->gpu_mFy), buffer_index);
   BufferAccess<DeviceArray<double>, double, buffers> mFz(*(vars->gpu_mFz), buffer_index);
 
+  // Since we only calculate forces for 1 box in GEMC
+  // Selectively zero the current box's forces
   cudaMemset(aFx->get(), 0.0, atomCount * sizeof(double));
   cudaMemset(aFy->get(), 0.0, atomCount * sizeof(double));
   cudaMemset(aFz->get(), 0.0, atomCount * sizeof(double));
   cudaMemset(mFx->get(), 0.0, molCount * sizeof(double));
   cudaMemset(mFy->get(), 0.0, molCount * sizeof(double));
   cudaMemset(mFz->get(), 0.0, molCount * sizeof(double));
+  #if ENSEMBLE == GEMC
+  if (buffer_index == 1){
+    int threadsPerBlockZero = 256;
+    int otherBox = (box + 1) % 2;
+  //  blocksPerGrid = numberOfCells;
+  //  energyVectorLen = numberOfCells * threadsPerBlock;
+    BufferAccess<DeviceArray<double>, double, buffers> aFx_old(*(vars->gpu_aFx), 0);
+    BufferAccess<DeviceArray<double>, double, buffers> aFy_old(*(vars->gpu_aFy), 0);
+    BufferAccess<DeviceArray<double>, double, buffers> aFz_old(*(vars->gpu_aFz), 0);
+
+    BufferAccess<DeviceArray<double>, double, buffers> mFx_old(*(vars->gpu_mFx), 0);
+    BufferAccess<DeviceArray<double>, double, buffers> mFy_old(*(vars->gpu_mFy), 0);
+    BufferAccess<DeviceArray<double>, double, buffers> mFz_old(*(vars->gpu_mFz), 0);
+
+    BufferAccess<DeviceArray<double>, double, buffers> coords_x_old(*(vars->gpu_coords_x), 0);
+    BufferAccess<DeviceArray<double>, double, buffers> coords_y_old(*(vars->gpu_coords_y), 0);
+    BufferAccess<DeviceArray<double>, double, buffers> coords_z_old(*(vars->gpu_coords_z), 0);
+
+    BufferAccess<DeviceArray<double>, double, buffers> com_x_old(*(vars->gpu_com_x), 0);
+    BufferAccess<DeviceArray<double>, double, buffers> com_y_old(*(vars->gpu_com_y), 0);
+    BufferAccess<DeviceArray<double>, double, buffers> com_z_old(*(vars->gpu_com_z), 0);
+
+    BufferAccess<DeviceArray<double>, double, buffers> com_x_new(*(vars->gpu_com_x), 1);
+    BufferAccess<DeviceArray<double>, double, buffers> com_y_new(*(vars->gpu_com_y), 1);
+    BufferAccess<DeviceArray<double>, double, buffers> com_z_new(*(vars->gpu_com_z), 1);
+
+    int blocksPerGridZero = (int)((molLookupRef.NumInBox(otherBox) * warp_size) / threadsPerBlockZero) + 1;
+    CopyBoxCoordsCOMForcesGPU<<< blocksPerGridZero, threadsPerBlockZero>>>(
+                              otherBox,
+                              molLookupRef.molLookupGPU->GetMolLookup(),
+                              molLookupRef.molLookupGPU->GetNumMolsInBox(),
+                              molLookupRef.molLookupGPU->GetStartAtomIdx(),
+                              aFx_old->get(),
+                              aFy_old->get(),
+                              aFz_old->get(),
+                              mFx_old->get(),
+                              mFy_old->get(),
+                              mFz_old->get(),
+                              aFx->get(),
+                              aFy->get(),
+                              aFz->get(),
+                              mFx->get(),
+                              mFy->get(),
+                              mFz->get(),
+                              coords_x_old->get(),
+                              coords_y_old->get(),
+                              coords_z_old->get(),
+                              coords_x->get(),
+                              coords_y->get(),
+                              coords_z->get(),
+                              com_x_old->get(),
+                              com_y_old->get(),
+                              com_z_old->get(),
+                              com_x_new->get(),
+                              com_y_new->get(),
+                              com_z_new->get());
+  }
+  #endif
+
+
   cudaMemset(gpu_LJEn->get(), 0.0, 1 * sizeof(double));
   cudaMemset(gpu_REn->get(), 0.0, 1 * sizeof(double));
 
@@ -801,6 +864,69 @@ __global__ void BoxInterForceGPU(int *gpu_cellStartIndex,
       }
     }
   }
+}
+
+__global__ void CopyBoxCoordsCOMForcesGPU(
+                            int box,
+                            uint* gpu_molLookup,
+                            uint* gpu_molBoxCount,
+                            int* gpu_startAtomIdx,
+                            double *gpu_aForcex_old,
+                            double *gpu_aForcey_old,
+                            double *gpu_aForcez_old,
+                            double *gpu_mForcex_old,
+                            double *gpu_mForcey_old,
+                            double *gpu_mForcez_old,
+                            double *gpu_aForcex_new,
+                            double *gpu_aForcey_new,
+                            double *gpu_aForcez_new,
+                            double *gpu_mForcex_new,
+                            double *gpu_mForcey_new,
+                            double *gpu_mForcez_new,
+                            double *gpu_coor_x_old,
+                            double *gpu_coor_y_old,
+                            double *gpu_coor_z_old,
+                            double *gpu_coor_x_new,
+                            double *gpu_coor_y_new,
+                            double *gpu_coor_z_new,
+                            double *gpu_com_x_old,
+                            double *gpu_com_y_old,
+                            double *gpu_com_z_old,
+                            double *gpu_com_x_new,
+                            double *gpu_com_y_new,
+                            double *gpu_com_z_new){
+    int threadID = blockIdx.x * blockDim.x + threadIdx.x;
+    // Optimal alu usage/memory latency will probably be 1 warp/molecule
+    uint warpIdx = threadID / warp_size;
+    uint laneIdx = threadID % warp_size;
+    int molCount = gpu_molBoxCount[box];
+    if (warpIdx >= molCount)
+        return;
+
+    // If box 0, no prefix M*0 = 0
+    // If box 1, add prefix M*1 = M
+    int molIndex = gpu_molLookup[gpu_molBoxCount[0] * box + warpIdx];
+    //printf("b %d", b);
+    int particleIndex = gpu_startAtomIdx[molIndex];
+    // Not sure if this write is faster if 1 thread does it
+    // or all the threads in the warp.
+    //if (laneIdx == 0){
+      gpu_mForcex_new[molIndex] = gpu_mForcex_old[molIndex];
+      gpu_mForcey_new[molIndex] = gpu_mForcey_old[molIndex];
+      gpu_mForcez_new[molIndex] = gpu_mForcez_old[molIndex];     
+      gpu_com_x_new[molIndex] = gpu_com_x_old[molIndex];
+      gpu_com_y_new[molIndex] = gpu_com_y_old[molIndex];
+      gpu_com_z_new[molIndex] = gpu_com_z_old[molIndex];       
+    //}
+    for (particleIndex += laneIdx; particleIndex < gpu_startAtomIdx[molIndex + 1]; particleIndex += warp_size ){
+      gpu_aForcex_new[particleIndex] = gpu_aForcex_old[particleIndex];
+      gpu_aForcey_new[particleIndex] = gpu_aForcey_old[particleIndex];
+      gpu_aForcez_new[particleIndex] = gpu_aForcez_old[particleIndex];
+
+      gpu_coor_x_new[particleIndex] = gpu_coor_x_old[particleIndex];
+      gpu_coor_y_new[particleIndex] = gpu_coor_y_old[particleIndex];
+      gpu_coor_z_new[particleIndex] = gpu_coor_z_old[particleIndex];
+    }
 }
 
 __global__ void BoxForceGPU(int *gpu_cellStartIndex,
