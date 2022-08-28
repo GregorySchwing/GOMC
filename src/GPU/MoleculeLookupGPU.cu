@@ -77,4 +77,7 @@ uint32_t * MoleculeLookupGPU::GetNumMolsInBox(){
 uint32_t * MoleculeLookupGPU::GetMolLookup(){
     return gpu_molLookup;   
 }
+int32_t * MoleculeLookupGPU::GetStartAtomIdx(){
+    return gpu_startAtomIdx;   
+}
 #endif

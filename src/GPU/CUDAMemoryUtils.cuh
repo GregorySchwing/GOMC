@@ -14,13 +14,35 @@ along with this program, also can be found at <https://opensource.org/licenses/M
 #include "MoleculeLookup.h"
 #include "XYZArray.h"
 
+__global__ void ZeroBoxForceGPUKernel(int molCount,
+                            int molsInBox0,
+                            int box,
+                            uint* gpu_molLookup,
+                            uint* gpu_molBoxCount,
+                            int* gpu_startAtomIdx,
+                            double *gpu_aForcex,
+                            double *gpu_aForcey,
+                            double *gpu_aForcez,
+                            double *gpu_mForcex,
+                            double *gpu_mForcey,
+                            double *gpu_mForcez,
+                            double *gpu_mTorquex,
+                            double *gpu_mTorquey,
+                            double *gpu_mTorquez);
+
+
 class CUDAMemoryUtils
 {
 public:
+
 static void ZeroForces(VariablesCUDA *vars,
                      XYZArray const &coords,
                      const MoleculeLookup& molLookup,
                      uint const buffer_index);
-
+static void CallZeroBoxForces(VariablesCUDA *vars,
+                     XYZArray const &coords,
+                     const MoleculeLookup& molLookup,
+                     uint const buffer_index,
+                     uint const box);
 };
 #endif
