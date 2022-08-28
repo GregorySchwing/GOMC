@@ -343,10 +343,10 @@ void CallBoxForceGPU(VariablesCUDA *vars,
   cudaMemset(mFx->get(), 0.0, molCount * sizeof(double));
   cudaMemset(mFy->get(), 0.0, molCount * sizeof(double));
   cudaMemset(mFz->get(), 0.0, molCount * sizeof(double));
-  */
+
   cudaMemset(gpu_LJEn->get(), 0.0, 1 * sizeof(double));
   cudaMemset(gpu_REn->get(), 0.0, 1 * sizeof(double));
-
+  */
   double3 axis = make_double3(boxAxes.GetAxis(box).x,
                               boxAxes.GetAxis(box).y,
                               boxAxes.GetAxis(box).z);
@@ -466,10 +466,11 @@ void CallBoxTorqueGPU(VariablesCUDA *vars,
   BufferAccess<DeviceArray<double>, double, buffers> mTy(*(vars->gpu_mTy), buffer_index);
   BufferAccess<DeviceArray<double>, double, buffers> mTz(*(vars->gpu_mTz), buffer_index);
 
+  /*
   cudaMemset(mTx->get(), 0.0, molCount * sizeof(double));
   cudaMemset(mTy->get(), 0.0, molCount * sizeof(double));
   cudaMemset(mTz->get(), 0.0, molCount * sizeof(double));
-
+  */
   double3 axis = make_double3(boxAxes.GetAxis(box).x,
                               boxAxes.GetAxis(box).y,
                               boxAxes.GetAxis(box).z);

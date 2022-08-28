@@ -214,6 +214,7 @@ set(cudaHeaders
     src/GPU/CalculateEwaldCUDAKernel.cuh
     src/GPU/CellListGPU.cuh
     src/GPU/CUDAMemoryManager.cuh
+    src/GPU/CUDAMemoryUtils.cuh
     src/GPU/DoubleBuffer.cuh
     src/GPU/MetropolisCriterionCUDA.cuh
     src/GPU/MoleculeLookupGPU.cuh
@@ -227,6 +228,7 @@ set(cudaSources
     src/GPU/CellListGPU.cu
     src/GPU/ConstantDefinitionsCUDAKernel.cu
     src/GPU/CUDAMemoryManager.cu
+    src/GPU/CUDAMemoryUtils.cu
     src/GPU/MetropolisCriterionCUDA.cu
     src/GPU/MoleculeLookupGPU.cu
     src/GPU/TransformParticlesCUDAKernel.cu)

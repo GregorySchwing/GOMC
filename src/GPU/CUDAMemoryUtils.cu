@@ -7,6 +7,8 @@ void CUDAMemoryUtils::ZeroForces(VariablesCUDA *vars,
 
   int atomCount = coords.Count();
   int molCount = molLookup.molLookupCount;
+  BufferAccess<DeviceArray<double>, double, buffers> gpu_LJEn(*(vars->gpu_LJEn), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> gpu_REn(*(vars->gpu_REn), buffer_index);
 
   BufferAccess<DeviceArray<double>, double, buffers> aFx(*(vars->gpu_aFx), buffer_index);
   BufferAccess<DeviceArray<double>, double, buffers> aFy(*(vars->gpu_aFy), buffer_index);
@@ -22,4 +24,14 @@ void CUDAMemoryUtils::ZeroForces(VariablesCUDA *vars,
   cudaMemset(mFx->get(), 0.0, molCount * sizeof(double));
   cudaMemset(mFy->get(), 0.0, molCount * sizeof(double));
   cudaMemset(mFz->get(), 0.0, molCount * sizeof(double));
+  cudaMemset(gpu_LJEn->get(), 0.0, 1 * sizeof(double));
+  cudaMemset(gpu_REn->get(), 0.0, 1 * sizeof(double));
+
+  BufferAccess<DeviceArray<double>, double, buffers> mTx(*(vars->gpu_mTx), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> mTy(*(vars->gpu_mTy), buffer_index);
+  BufferAccess<DeviceArray<double>, double, buffers> mTz(*(vars->gpu_mTz), buffer_index);
+
+  cudaMemset(mTx->get(), 0.0, molCount * sizeof(double));
+  cudaMemset(mTy->get(), 0.0, molCount * sizeof(double));
+  cudaMemset(mTz->get(), 0.0, molCount * sizeof(double));
 }
