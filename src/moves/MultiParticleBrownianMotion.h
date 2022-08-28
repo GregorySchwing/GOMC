@@ -19,6 +19,8 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "TransformParticlesCUDAKernel.cuh"
 #include "VariablesCUDA.cuh"
 #include "MetropolisCriterionCUDA.cuh"
+#include "CUDAMemoryUtils.cuh"
+
 #endif
 
 class MultiParticleBrownian : public MoveBase
@@ -192,7 +194,7 @@ inline uint MultiParticleBrownian::Prep(const double subDraw, const double movPe
   //current system if any other moves, besides other MP moves, have been accepted.
   //Or, if this is the first MP move, which is handled with the same flag.
   //if(moveSetRef.GetSingleMoveAccepted(bPick)) {
-  if(moveSetRef.GetSingleMoveAccepted(bPick)) {
+  if(true) {
     GOMC_EVENT_START(1, GomcProfileEvent::CALC_EN_MULTIPARTICLE_BM);
     printf("entered SMA box % d\n", bPick);
     //Copy ref reciprocal terms to new for calculation with old positions
@@ -200,6 +202,14 @@ inline uint MultiParticleBrownian::Prep(const double subDraw, const double movPe
 
     //Calculate force for long range electrostatic using old position
     calcEwald->BoxForceReciprocal(coordCurrRef, atomForceRecRef, molForceRecRef, bPick);
+
+  #ifdef GOMC_CUDA
+  CUDAMemoryUtils::ZeroForces(cudaVars,
+                     coordCurrRef,
+                     molLookup,
+                     currentStateBufferIndex);
+  #endif
+
 
     //calculate short range energy and force for old positions
     calcEnRef.BoxForce(sysPotRef, coordCurrRef, atomForceRef, molForceRef,
@@ -250,13 +260,21 @@ inline uint MultiParticleBrownian::PrepNEMTMC(const uint box, const uint midx, c
   //current system if any other moves, besides other MP moves, have been accepted.
   //Or, if this is the first MP move, which is handled with the same flag.
   // if(moveSetRef.GetSingleMoveAccepted(bPick)) {
-  if(moveSetRef.GetSingleMoveAccepted(bPick)) {
+  if(true) {
     printf("entered SMA\n");
     //Copy ref reciprocal terms to new for calculation with old positions
     calcEwald->CopyRecip(bPick);
 
     //Calculate long range electrostatic force for old positions
     calcEwald->BoxForceReciprocal(coordCurrRef, atomForceRecRef, molForceRecRef, bPick);
+
+
+  #ifdef GOMC_CUDA
+  CUDAMemoryUtils::ZeroForces(cudaVars,
+                     coordCurrRef,
+                     molLookup,
+                     currentStateBufferIndex);
+  #endif
 
     //Calculate short range energy and force for old positions
     calcEnRef.BoxForce(sysPotRef, coordCurrRef, atomForceRef, molForceRef,
@@ -435,6 +453,14 @@ inline void MultiParticleBrownian::CalcEn()
   sysPotNew = sysPotRef;
   printf("Entered CalcEn\n");
   //calculate short range energy and force
+
+  #ifdef GOMC_CUDA
+  CUDAMemoryUtils::ZeroForces(cudaVars,
+                     coordCurrRef,
+                     molLookup,
+                     nextStateBufferIndex);
+  #endif
+
   sysPotNew = calcEnRef.BoxForce(sysPotNew, newMolsPos, atomForceNew,
                                  molForceNew, boxDimRef, bPick, nextStateBufferIndex);
   //calculate long range of new electrostatic energy
