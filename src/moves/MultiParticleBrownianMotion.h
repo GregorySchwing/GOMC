@@ -204,10 +204,22 @@ inline uint MultiParticleBrownian::Prep(const double subDraw, const double movPe
     calcEwald->BoxForceReciprocal(coordCurrRef, atomForceRecRef, molForceRecRef, bPick);
 
   #ifdef GOMC_CUDA
-  CUDAMemoryUtils::ZeroForces(cudaVars,
+    /*
+    CUDAMemoryUtils::ZeroForces(cudaVars,
                      coordCurrRef,
                      molLookup,
                      currentStateBufferIndex);
+    */
+        CUDAMemoryUtils::CallZeroBoxForces(cudaVars,
+                     coordCurrRef,
+                     molLookup,
+                     currentStateBufferIndex,
+                     0);
+        CUDAMemoryUtils::CallZeroBoxForces(cudaVars,
+                     coordCurrRef,
+                     molLookup,
+                     currentStateBufferIndex,
+                     1);
   #endif
 
 
@@ -270,11 +282,23 @@ inline uint MultiParticleBrownian::PrepNEMTMC(const uint box, const uint midx, c
 
 
   #ifdef GOMC_CUDA
-  CUDAMemoryUtils::ZeroForces(cudaVars,
+    /*
+    CUDAMemoryUtils::ZeroForces(cudaVars,
                      coordCurrRef,
                      molLookup,
                      currentStateBufferIndex);
-  #endif
+    */
+        CUDAMemoryUtils::CallZeroBoxForces(cudaVars,
+                     coordCurrRef,
+                     molLookup,
+                     currentStateBufferIndex,
+                     0);
+        CUDAMemoryUtils::CallZeroBoxForces(cudaVars,
+                     coordCurrRef,
+                     molLookup,
+                     currentStateBufferIndex,
+                     1);
+    #endif
 
     //Calculate short range energy and force for old positions
     calcEnRef.BoxForce(sysPotRef, coordCurrRef, atomForceRef, molForceRef,
