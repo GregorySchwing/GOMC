@@ -575,7 +575,11 @@ inline void MultiParticleBrownian::Accept(const uint rejectState, const ulong st
 
   #ifdef GOMC_CUDA
   double MPCoeff = 0.0;
+  #if ENSEMBLE == NVT || ENSEMBLE == NPT
   CallGetCoeff(cudaVars, moveType, comCurrRef.Count(), &MPCoeff);
+  #else
+  CallGetCoeffBox(cudaVars, moveType, bPick, molLookup, &MPCoeff);
+  #endif
   // Need to update sysPots
   double accept = exp(-BETA * (sysPotNew.Total() - sysPotRef.Total()) + MPCoeff);
   bool result = (rejectState == mv::fail_state::NO_FAIL) && prng() < accept;

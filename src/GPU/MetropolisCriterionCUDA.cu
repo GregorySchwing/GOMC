@@ -81,7 +81,7 @@ void CallGetCoeff(VariablesCUDA *vars,
               cudaMemcpyDeviceToHost);
 }
 
-void CallGetCoeff(VariablesCUDA *vars,
+void CallGetCoeffBox(VariablesCUDA *vars,
                     int moveType,
                     int box,
                     const MoleculeLookup& molLookup,
@@ -108,6 +108,9 @@ void CallGetCoeff(VariablesCUDA *vars,
         BufferAccess<DeviceArray<double>, double, buffers> mTzNew(*(vars->gpu_mTz), next_state);
 
         GetCoeffRotationBox<<< blocksPerGrid, threadsPerBlock>>>(molCount,
+                                                                molLookup.NumInBox(0),
+                                                                box,
+                                                                molLookup.molLookupGPU->GetMolLookup(),
                                                                 vars->gpu_r_max,
                                                                 vars->gpu_BETA,
                                                                 vars->gpu_mp_coefficient,
@@ -130,6 +133,9 @@ void CallGetCoeff(VariablesCUDA *vars,
         BufferAccess<DeviceArray<double>, double, buffers> mFzNew(*(vars->gpu_mFz), next_state);
 
         GetCoeffTranslationBox<<< blocksPerGrid, threadsPerBlock>>>(molCount,
+                                                                molLookup.NumInBox(0),
+                                                                box,
+                                                                molLookup.molLookupGPU->GetMolLookup(),
                                                                 vars->gpu_t_max,
                                                                 vars->gpu_BETA,
                                                                 vars->gpu_mp_coefficient,
@@ -156,7 +162,10 @@ void CallGetCoeff(VariablesCUDA *vars,
 }
 
 __global__ void GetCoeffRotationBox(   
-                            int numberOfMolecules,
+                            int numberOfMoleculesInBox,
+                            int molsInBox0,
+                            int box,
+                            uint * gpu_molLookup,
                             double * r_max,
                             double * BETA,
                             double * mp_coefficient,
@@ -170,6 +179,29 @@ __global__ void GetCoeffRotationBox(
                             double * molTorqueNewY,
                             double * molTorqueNewZ){
 
+
+    int threadID = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (threadID >= numberOfMoleculesInBox)
+        return;
+
+    int molIndex = gpu_molLookup[box*molsInBox0 + threadID];
+
+    double r_max4 = r_max[0]*4;
+    double w_ratio = 0.0;
+    // bf_ = BETA * torque * maxTorque
+    double3 bf_old = make_double3   (molTorqueRefX[molIndex] * BETA[0] * r_max[0],
+                                    molTorqueRefY[molIndex]  * BETA[0] * r_max[0],
+                                    molTorqueRefZ[molIndex]  * BETA[0] * r_max[0]);
+    double3 bf_new = make_double3   (molTorqueNewX[molIndex] * BETA[0] * r_max[0],
+                                    molTorqueNewY[molIndex]  * BETA[0] * r_max[0],
+                                    molTorqueNewZ[molIndex]  * BETA[0] * r_max[0]);             
+
+    double3 k = make_double3   (r_k_x[molIndex],r_k_y[molIndex],r_k_z[molIndex]);
+
+    w_ratio += CalculateWRatio(bf_new, bf_old, k, r_max4);
+
+    atomicAdd(&mp_coefficient[0], w_ratio);
 }
 
 __global__ void GetCoeffRotation(   
@@ -209,7 +241,10 @@ __global__ void GetCoeffRotation(
 }
 
 __global__ void GetCoeffTranslationBox(   
-                            int numberOfMolecules,
+                            int numberOfMoleculesInBox,
+                            int molsInBox0,
+                            int box,
+                            uint * gpu_molLookup,
                             double * t_max,
                             double * BETA,
                             double * mp_coefficient,
@@ -228,6 +263,30 @@ __global__ void GetCoeffTranslationBox(
                             double * molForceRecNewX,
                             double * molForceRecNewY,
                             double * molForceRecNewZ){
+
+
+    int threadID = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (threadID >= numberOfMoleculesInBox)
+        return;
+
+    int molIndex = gpu_molLookup[box*molsInBox0 + threadID];
+
+    double t_max4 = t_max[0]*4;
+    double w_ratio = 0.0;
+    // bf_ = BETA * torque * maxTorque
+    double3 bf_old = make_double3   ((molForceRefX[molIndex] + molForceRecRefX[molIndex]) * BETA[0] * t_max[0],
+                                    (molForceRefY[molIndex] + molForceRecRefY[molIndex])  * BETA[0] * t_max[0],
+                                    (molForceRefZ[molIndex] + molForceRecRefZ[molIndex])  * BETA[0] * t_max[0]);
+    double3 bf_new = make_double3   ((molForceNewX[molIndex] + molForceRecNewX[molIndex]) * BETA[0] * t_max[0],
+                                    (molForceNewY[molIndex] + molForceRecNewY[molIndex])  * BETA[0] * t_max[0],
+                                    (molForceNewZ[molIndex] + molForceRecNewZ[molIndex])  * BETA[0] * t_max[0]);             
+
+    double3 k = make_double3   (t_k_x[molIndex],t_k_y[molIndex],t_k_z[molIndex]);
+
+    w_ratio += CalculateWRatio(bf_new, bf_old, k, t_max4);
+
+    atomicAdd(&mp_coefficient[0], w_ratio);
 
 }
 

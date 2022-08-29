@@ -19,7 +19,7 @@ void CallGetCoeff(VariablesCUDA *vars,
                     int molCount,
                     double * MPCoeff);
 
-void CallGetCoeff(VariablesCUDA *vars,
+void CallGetCoeffBox(VariablesCUDA *vars,
                     int moveType,
                     int box,
                     const MoleculeLookup& molLookup,
@@ -48,7 +48,10 @@ __global__ void GetCoeffTranslation(
 
 
 __global__ void GetCoeffTranslationBox(   
-                            int numberOfMolecules,
+                            int numberOfMoleculesInBox,
+                            int molsInBox0,
+                            int box,
+                            uint * gpu_molLookup,
                             double * t_max,
                             double * BETA,
                             double * mp_coefficient,
@@ -69,7 +72,10 @@ __global__ void GetCoeffTranslationBox(
                             double * molForceRecNewZ);
 
 __global__ void GetCoeffRotationBox(   
-                            int numberOfMolecules,
+                            int numberOfMoleculesInBox,
+                            int molsInBox0,
+                            int box,
+                            uint * gpu_molLookup,
                             double * r_max,
                             double * BETA,
                             double * mp_coefficient,
