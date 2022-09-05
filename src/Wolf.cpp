@@ -576,26 +576,41 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
 //It's called in free energy calculation to calculate the change in
 // self energy in all lambda states
 void Wolf::ChangeSelf(Energy *energyDiff, Energy &dUdL_Coul,
+                          const std::vector<double> &lambda_Coul,
+                          const uint iState, const uint molIndex,
+                          const uint box) const{
+  ChangeSelf(energyDiff, dUdL_Coul, lambda_Coul, iState, molIndex,
+              box, ffRef.wolfFactor1[box], ffRef.wolfAlpha[box]);
+}
+
+//It's called in free energy calculation to calculate the change in
+// self energy in all lambda states
+void Wolf::ChangeSelf(Energy *energyDiff, Energy &dUdL_Coul,
                          const std::vector<double> &lambda_Coul,
                          const uint iState, const uint molIndex,
                          const uint box,
                           double wolfFactor1,
                           double wolfAlpha) const
 {
-    uint lambdaSize = lambda_Coul.size();
-    double coefDiff, en_self = 0.0;
-    //Load the self energy with lambda = 1
-    en_self = molSelfEnergies[molIndex];
-    
     //Vlugt
     //en_self *= ((wolfAlpha * M_2_SQRTPI) +  wolfFactor1 );
     // We eliminate the alpha/root(pi) using Wolf,mod
+
+    uint atomSize = mols.GetKind(molIndex).NumAtoms();
+    uint start = mols.MolStart(molIndex);
+    uint lambdaSize = lambda_Coul.size();
+    double coefDiff, en_self = 0.0;
+    //Calculate the self energy with lambda = 1
+    for (uint i = 0; i < atomSize; i++) {
+      en_self += (particleCharge[i + start] * particleCharge[i + start]);
+    }
     if (isVlugtWolf || isVlugtWithIntraCutoffWolf){
       en_self *= -0.5 * ((wolfAlpha * M_2_SQRTPI) + wolfFactor1) * num::qqFact;
     } else {
       // we eliminate the alpha/root(pi) using Wolf,mod from Gross et al
       en_self *= -0.5 * wolfFactor1 * num::qqFact;
     }
+
     //Calculate the energy difference for each lambda state
     for (uint s = 0; s < lambdaSize; s++) {
       coefDiff = lambda_Coul[s] - lambda_Coul[iState];

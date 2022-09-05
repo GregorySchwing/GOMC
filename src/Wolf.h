@@ -117,12 +117,19 @@ public:
 
   //It's called in free energy calculation to calculate the change in
   // self energy in all lambda states
-  virtual void ChangeSelf(Energy *energyDiff, Energy &dUdL_Coul,
+  void ChangeSelf(Energy *energyDiff, Energy &dUdL_Coul,
                           const std::vector<double> &lambda_Coul,
                           const uint iState, const uint molIndex,
                           const uint box,
                           double wolfFactor1,
                           double wolfAlpha) const;
+
+  //It's called in free energy calculation to calculate the change in
+  // self energy in all lambda states
+  virtual void ChangeSelf(Energy *energyDiff, Energy &dUdL_Coul,
+                          const std::vector<double> &lambda_Coul,
+                          const uint iState, const uint molIndex,
+                          const uint box) const;
 
   virtual void ChangeCorrection(Energy *energyDiff, Energy &dUdL_Coul,
                               const std::vector<double> &lambda_Coul,
