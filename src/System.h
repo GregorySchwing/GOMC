@@ -150,6 +150,7 @@ private:
   double moveTime[mv::MOVE_KINDS_TOTAL];
   MoveBase * moves[mv::MOVE_KINDS_TOTAL];
   Clock time;
+  bool ewald, wolf, wolfCalibration;
 };
 
 #endif /*SYSTEM_H*/

@@ -73,7 +73,7 @@ System::~System()
     delete boxDimensions;
   if (calcEwald != NULL)
     delete calcEwald;
-  if (refEwald != NULL)
+  if (refEwald != NULL && wolfCalibration)
     delete refEwald;
   delete moves[mv::DISPLACE];
   delete moves[mv::ROTATE];
@@ -142,9 +142,9 @@ void System::Init(Setup & set)
   cellList.GridAll(boxDimRef, coordinates, molLookupRef);
 
   //check if we have to use cached version of Ewald or not.
-  bool ewald = set.config.sys.elect.ewald;
-  bool wolf = set.config.sys.elect.wolf;
-  bool wolfCalibration = set.config.out.wolfCalibration.settings.enable;
+  ewald = set.config.sys.elect.ewald;
+  wolf = set.config.sys.elect.wolf;
+  wolfCalibration = set.config.out.wolfCalibration.settings.enable;
 
 #ifdef GOMC_CUDA
   if(ewald)
