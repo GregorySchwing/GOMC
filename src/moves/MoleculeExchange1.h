@@ -589,16 +589,16 @@ inline void MoleculeExchange1::CalcEn()
 
   if(!overlap) {
     for(uint n = 0; n < numInCavA; n++) {
-      correct_newA += calcEwald->SwapCorrection(newMolA[n], molIndex);
-      correct_oldA += calcEwald->SwapCorrection(oldMolA[n], molIndex);
+      correct_newA += calcEwald->SwapCorrection(newMolA[n]);
+      correct_oldA += calcEwald->SwapCorrection(oldMolA[n]);
       self_newA += calcEwald->SwapSelf(newMolA[n]);
       self_oldA += calcEwald->SwapSelf(oldMolA[n]);
     }
     recipDest = calcEwald->MolExchangeReciprocal(newMolA, oldMolB, molIndexA, molIndexB, true);
 
     for(uint n = 0; n < numInCavB; n++) {
-      correct_newB += calcEwald->SwapCorrection(newMolB[n], molIndex);
-      correct_oldB += calcEwald->SwapCorrection(oldMolB[n], molIndex);
+      correct_newB += calcEwald->SwapCorrection(newMolB[n]);
+      correct_oldB += calcEwald->SwapCorrection(oldMolB[n]);
       self_newB += calcEwald->SwapSelf(newMolB[n]);
       self_oldB += calcEwald->SwapSelf(oldMolB[n]);
     }
