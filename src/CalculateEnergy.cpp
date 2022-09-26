@@ -506,11 +506,11 @@ Virial CalculateEnergy::VirialCalc(const uint box,
 #ifdef _OPENMP
 #if GCC_VERSION >= 90000
   #pragma omp parallel for default(none) shared(cellStartIndex, cellVector, \
-  mapParticleToCell, neighborList, box, rCutCoulomb, wolfAlpha) \
+  mapParticleToCell, neighborList, box, rCutCoulomb, rCutCoulombSq, wolfFactor2, wolfFactor3, wolfAlpha) \
 reduction(+:vT11, vT12, vT13, vT22, vT23, vT33, rT11, rT12, rT13, rT22, rT23, rT33)
 #else
   #pragma omp parallel for default(none) shared(cellStartIndex, cellVector, \
-  mapParticleToCell, neighborList, rCutCoulomb, wolfAlpha) \
+  mapParticleToCell, neighborList, rCutCoulomb, rCutCoulombSq, wolfFactor2, wolfFactor3, wolfAlpha) \
 reduction(+:vT11, vT12, vT13, vT22, vT23, vT33, rT11, rT12, rT13, rT22, rT23, rT33)
 #endif
 #endif
