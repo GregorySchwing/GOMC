@@ -149,11 +149,11 @@ void System::Init(Setup & set)
 #ifdef GOMC_CUDA
   if(ewald)
     calcEwald = new Ewald(statV, *this);
-  else if (wolf)
-    calcEwald = new Wolf(statV, *this);
   else if (wolfCalibration){
     calcEwald = new Wolf(statV, *this);
     refEwald =  new Ewald(statV, *this);
+  } else if (wolf){
+    calcEwald = new Wolf(statV, *this);
   }else
     calcEwald = new NoEwald(statV, *this);
 #else
