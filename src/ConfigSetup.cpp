@@ -1813,7 +1813,7 @@ void ConfigSetup::verifyInputs(void)
 
   if(out.wolfCalibration.settings.enable){
     bool readAllRequired = true;
-    for(i = 0 ; i < BOX_TOTAL ; i++) {
+    for(i = 0 ; i < BOXES_WITH_U_NB ; i++) {
       readAllRequired &= sys.wolfCal.wolfAlphaRangeRead[i];
       readAllRequired &= sys.wolfCal.wolfCutoffCoulombRangeRead[i];
     }
