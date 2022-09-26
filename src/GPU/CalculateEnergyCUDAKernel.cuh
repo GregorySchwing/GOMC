@@ -30,7 +30,13 @@ void CallBoxInterGPU(VariablesCUDA *vars,
                      double sc_alpha,
                      double qqFact,
                      uint sc_power,
-                     uint const box);
+                     uint const box,
+                     bool wolfCalibration,
+                     double rCutCoulomb,
+                     double rCutCoulombSq,    
+                     double wolfFactor1,
+                     double wolfFactor2,                                         
+                     double wolfAlpha);
 
 __global__ void BoxInterGPU(int *gpu_cellStartIndex,
                             int *gpu_cellVector,

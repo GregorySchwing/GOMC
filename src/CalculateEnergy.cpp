@@ -130,7 +130,10 @@ SystemPotential CalculateEnergy::SystemTotal()
 
     GOMC_EVENT_STOP(1, GomcProfileEvent::EN_BOX_INTRA);
     //Calculate Virial
-    pot.boxVirial[b] = VirialCalc(b, forcefield.rCutCoulombSq[b], forcefield.wolfAlpha[b]);
+    pot.boxVirial[b] = VirialCalc(b, forcefield.rCutCoulombSq[b], 
+                                     forcefield.wolfFactor2[b],
+                                     forcefield.wolfFactor3[b],
+                                     forcefield.wolfAlpha[b]);
   }
 
   pot.Total();
@@ -217,7 +220,13 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
                   neighborList, coords, boxAxes, electrostatic, particleCharge,
                   particleKind, particleMol, tempREn, tempLJEn, forcefield.sc_coul,
                   forcefield.sc_sigma_6, forcefield.sc_alpha, num::qqFact,
-                  forcefield.sc_power, box);
+                  forcefield.sc_power, box,
+                  forcefield.wolfCalibration,
+                  rCutCoulomb,
+                  rCutCoulombSq,    
+                  wolfFactor1,
+                  wolfFactor2,                                         
+                  wolfAlpha);
 #else
 #ifdef _OPENMP
 #if GCC_VERSION >= 90000
@@ -442,7 +451,9 @@ reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
 // required for pressure and surface tension calculation. So, they have been
 // commented out. If you need to calculate them, uncomment them.
 Virial CalculateEnergy::VirialCalc(const uint box,
-                                  double rCutCoulomb,
+                                  double rCutCoulombSq,
+                                  double wolfFactor2,
+                                  double wolfFactor3,
                                   double wolfAlpha)
 {
   //store virial and energy of reference and modify the virial
@@ -537,10 +548,10 @@ reduction(+:vT11, vT12, vT13, vT22, vT23, vT33, rT11, rT12, rT13, rT22, rT23, rT
               if (qi_qj != 0.0) {
                 double pRF = forcefield.particles->CalcCoulombVir(distSq, particleKind[currParticle],
                              particleKind[nParticle], qi_qj, lambdaCoulomb, box, 
-                             forcefield.rCutCoulombSq[box], 
-                             forcefield.wolfFactor2[box],
-                             forcefield.wolfFactor3[box],
-                             forcefield.wolfAlpha[box]);
+                             rCutCoulombSq, 
+                             wolfFactor2,
+                             wolfFactor3,
+                             wolfAlpha);
                 //calculate the top diagonal of pressure tensor
                 rT11 += pRF * (virC.x * comC.x);
                 //rT12 += pRF * (0.5 * (virC.x * comC.y + virC.y * comC.x));
@@ -1979,7 +1990,9 @@ void CalculateEnergy::WolfCalibrationEnergy(double * electrostaticEnergies){
                                         wolfCalRef.GetWolfFactor1(b, indexForRcut, indexForAlpha), 
                                         wolfCalRef.GetWolfFactor2(b, indexForRcut, indexForAlpha), 
                                         wolfCalRef.GetAlpha(b, indexForAlpha));
-            storagePotential.boxVirial[b] = VirialCalc(b, wolfCalRef.GetRCut(b, indexForRcut), 
+            storagePotential.boxVirial[b] = VirialCalc(b, wolfCalRef.GetRCutSq(b, indexForRcut),
+                                                          wolfCalRef.GetWolfFactor2(b, indexForRcut, indexForAlpha), 
+                                                          wolfCalRef.GetWolfFactor3(b, indexForRcut, indexForAlpha), 
                                                           wolfCalRef.GetAlpha(b, indexForAlpha));
             for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
               calcEwald->SetWolfKind(wolfKind);

@@ -78,7 +78,9 @@ public:
 
   //! Calculate force and virial for the box
   Virial VirialCalc(const uint box,
-                    double rCutCoulomb,
+                    double rCutCoulombSq,
+                    double wolfFactor2,
+                    double wolfFactor3,
                     double wolfAlpha);
 
   //! Set the force for atom and mol to zero for box
