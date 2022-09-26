@@ -130,7 +130,8 @@ SystemPotential CalculateEnergy::SystemTotal()
 
     GOMC_EVENT_STOP(1, GomcProfileEvent::EN_BOX_INTRA);
     //Calculate Virial
-    pot.boxVirial[b] = VirialCalc(b, forcefield.rCutCoulombSq[b], 
+    pot.boxVirial[b] = VirialCalc(b, forcefield.rCutCoulomb[b], 
+                                     forcefield.rCutCoulombSq[b], 
                                      forcefield.wolfFactor2[b],
                                      forcefield.wolfFactor3[b],
                                      forcefield.wolfAlpha[b]);
@@ -451,6 +452,7 @@ reduction(+:tempREn, tempLJEn, aForcex[:atomCount], aForcey[:atomCount], \
 // required for pressure and surface tension calculation. So, they have been
 // commented out. If you need to calculate them, uncomment them.
 Virial CalculateEnergy::VirialCalc(const uint box,
+                                  double rCutCoulomb,
                                   double rCutCoulombSq,
                                   double wolfFactor2,
                                   double wolfFactor3,
@@ -501,7 +503,13 @@ Virial CalculateEnergy::VirialCalc(const uint box,
                        vT11, vT12, vT13, vT22, vT23, vT33,
                        forcefield.sc_coul,
                        forcefield.sc_sigma_6, forcefield.sc_alpha,
-                       forcefield.sc_power, box);
+                       forcefield.sc_power, box,
+                       forcefield.wolfCalibration,
+                       rCutCoulomb,
+                       rCutCoulombSq,    
+                       wolfFactor2,
+                       wolfFactor3,                                         
+                       wolfAlpha);
 #else
 #ifdef _OPENMP
 #if GCC_VERSION >= 90000
@@ -1990,7 +1998,8 @@ void CalculateEnergy::WolfCalibrationEnergy(double * electrostaticEnergies){
                                         wolfCalRef.GetWolfFactor1(b, indexForRcut, indexForAlpha), 
                                         wolfCalRef.GetWolfFactor2(b, indexForRcut, indexForAlpha), 
                                         wolfCalRef.GetAlpha(b, indexForAlpha));
-            storagePotential.boxVirial[b] = VirialCalc(b, wolfCalRef.GetRCutSq(b, indexForRcut),
+            storagePotential.boxVirial[b] = VirialCalc(b, wolfCalRef.GetRCut(b, indexForRcut),
+                                                          wolfCalRef.GetRCutSq(b, indexForRcut),
                                                           wolfCalRef.GetWolfFactor2(b, indexForRcut, indexForAlpha), 
                                                           wolfCalRef.GetWolfFactor3(b, indexForRcut, indexForAlpha), 
                                                           wolfCalRef.GetAlpha(b, indexForAlpha));

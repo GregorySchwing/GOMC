@@ -118,7 +118,8 @@ void OutputVars::CalcAndConvert(ulong step)
     if (pressureCalc) {
       if((step + 1) % pCalcFreq == 0 || step == 0) {
         if(step != 0) {
-          virialRef[b] = calc.VirialCalc(b, ffRef.rCutCoulombSq[b], 
+          virialRef[b] = calc.VirialCalc(b, ffRef.rCutCoulomb[b], 
+                                            ffRef.rCutCoulombSq[b], 
                                             ffRef.wolfFactor2[b],
                                             ffRef.wolfFactor3[b],
                                             ffRef.wolfAlpha[b]);

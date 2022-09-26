@@ -71,7 +71,13 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
                           double sc_sigma_6,
                           double sc_alpha,
                           uint sc_power,
-                          uint const box);
+                          uint const box,
+                          bool wolfCalibration,
+                          double rCutCoulomb,
+                          double rCutCoulombSq,    
+                          double wolfFactor2,
+                          double wolfFactor3,                                         
+                          double wolfAlpha);
 
 void CallVirialReciprocalGPU(VariablesCUDA *vars,
                              XYZArray const &currentCoords,

@@ -78,6 +78,7 @@ public:
 
   //! Calculate force and virial for the box
   Virial VirialCalc(const uint box,
+                    double rCutCoulomb,
                     double rCutCoulombSq,
                     double wolfFactor2,
                     double wolfFactor3,

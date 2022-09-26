@@ -47,7 +47,13 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
                           double sc_sigma_6,
                           double sc_alpha,
                           uint sc_power,
-                          uint const box)
+                          uint const box,
+                          bool wolfCalibration,
+                          double rCutCoulomb,
+                          double rCutCoulombSq,    
+                          double wolfFactor2,
+                          double wolfFactor3,                                         
+                          double wolfAlpha)
 {
   int atomNumber = currentCoords.Count();
   int molNumber = currentCOM.Count();
@@ -131,6 +137,14 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
   cudaMemcpy(gpu_particleMol, &particleMol[0],
              particleMol.size() * sizeof(int),
              cudaMemcpyHostToDevice);
+
+  if(wolfCalibration){
+    cudaMemcpy(vars->gpu_rCutCoulomb, &rCutCoulomb, sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(vars->gpu_rCutCoulombSq, &rCutCoulombSq, sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(vars->gpu_wolfFactor2, &wolfFactor2, sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(vars->gpu_wolfFactor3, &wolfFactor3, sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(vars->gpu_wolfAlpha, &wolfAlpha, sizeof(double), cudaMemcpyHostToDevice);
+  }
 
   double3 axis = make_double3(boxAxes.GetAxis(box).x,
                               boxAxes.GetAxis(box).y,
