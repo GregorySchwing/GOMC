@@ -28,7 +28,7 @@ int WolfCalibration::GetTotalNumWolfFactors(){return totalNumWolfFactors;}
 int WolfCalibration::GetStartOfWolfFactors(int box){return startOfWolfFactor[box];}
 
 void WolfCalibration::InitWolfCalibration(config_setup::WolfCalibration const& wolfCal){
-  for(uint b = 0 ; b < BOX_TOTAL; b++) {
+  for(uint b = 0 ; b < BOXES_WITH_U_NB; b++) {
     for(uint r = 0; r < numberOfRCuts[b]; r++) {
       rCutCoulomb[startOfNumRCuts[b]+r] = wolfCal.wolfCutoffCoulombStart[b] + r*wolfCal.wolfCutoffCoulombDelta[b];
       rCutCoulombSq[startOfNumRCuts[b]+r] = rCutCoulomb[startOfNumRCuts[b]+r] * rCutCoulomb[startOfNumRCuts[b]+r];
@@ -55,14 +55,14 @@ void WolfCalibration::InitWolfCalibration(config_setup::WolfCalibration const& w
 void WolfCalibration::CalculateWolfCalibrationMemoryUsage(config_setup::WolfCalibration const& wolfCal){
   // Calculate the number of calibration points from the ranges provided
   // If delta is not a common multiple of the (End - Start) explicitly add the End.
-  for (uint b = 0; b < BOX_TOTAL; ++b) {
+  for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
     numberOfRCuts[b] = (int)((wolfCal.wolfCutoffCoulombEnd[b] - wolfCal.wolfCutoffCoulombStart[b]) / wolfCal.wolfCutoffCoulombDelta[b]) + 1;
     numberOfAlphas[b] = (int)((wolfCal.wolfAlphaEnd[b] - wolfCal.wolfAlphaStart[b]) / wolfCal.wolfAlphaDelta[b]) + 1;
   }
   totalNumAlphas = 0;
   totalNumRCuts = 0;
   totalNumWolfFactors = 0;
-  for (uint b = 0; b < BOX_TOTAL; ++b) {
+  for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
     startOfNumAlphas[b] = totalNumAlphas;
     startOfNumRCuts[b] = totalNumRCuts;
     startOfWolfFactor[b] = totalNumWolfFactors;
