@@ -24,7 +24,7 @@ WolfCalibrationOutput::~WolfCalibrationOutput()
 
 void WolfCalibrationOutput::Init(pdb_setup::Atoms const& atoms,
                             config_setup::Output const& output) {
-      for (int b = 0; b < BOX_TOTAL; ++b){
+      for (int b = 0; b < BOXES_WITH_U_NB; ++b){
             numberOfRCuts[b] = wolfCalRef.GetNumberOfRCuts(b);
             numberOfAlphas[b] = wolfCalRef.GetNumberOfAlphas(b);
             startOfWolfFactor[b] = wolfCalRef.GetStartOfWolfFactors(b);
@@ -32,10 +32,10 @@ void WolfCalibrationOutput::Init(pdb_setup::Atoms const& atoms,
       stepsPerSample = output.wolfCalibration.settings.frequency;
       stepsPerOut = output.wolfCalibration.settings.frequency;
       enableOut = output.wolfCalibration.settings.enable;
-      electrostaticEnergies.resize(BOX_TOTAL*WOLF_TOTAL_KINDS*COUL_TOTAL_KINDS*wolfCalRef.GetTotalNumWolfFactors());
-      electrostaticEnergies.assign(BOX_TOTAL*WOLF_TOTAL_KINDS*COUL_TOTAL_KINDS*wolfCalRef.GetTotalNumWolfFactors(), 0.0);
+      electrostaticEnergies.resize(BOXES_WITH_U_NB*WOLF_TOTAL_KINDS*COUL_TOTAL_KINDS*wolfCalRef.GetTotalNumWolfFactors());
+      electrostaticEnergies.assign(BOXES_WITH_U_NB*WOLF_TOTAL_KINDS*COUL_TOTAL_KINDS*wolfCalRef.GetTotalNumWolfFactors(), 0.0);
       if(enableOut) {
-            for (uint b = 0; b < BOX_TOTAL; ++b) {
+            for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
                   for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
                         for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){
                               std::stringstream sstrm;
@@ -156,7 +156,7 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
       row += GetString(step);
       row += "\t";
       
-      for (uint box = 0; box < BOX_TOTAL; ++box) {       
+      for (uint box = 0; box < BOXES_WITH_U_NB; ++box) {       
             for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
                   for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){  
                         std::string row = "";
