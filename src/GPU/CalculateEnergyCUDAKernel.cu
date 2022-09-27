@@ -92,16 +92,37 @@ void CallBoxInterGPU(VariablesCUDA *vars,
   cudaMemcpy(vars->gpu_y, coords.y, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_z, coords.z, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
   
-  bool isEwald = !isWolf;
-  if(wolfCalibration){
-    cudaMemcpy(vars->gpu_wolf, &isWolf, sizeof(bool), cudaMemcpyHostToDevice);
-    cudaMemcpy(vars->gpu_ewald, &isEwald, sizeof(bool), cudaMemcpyHostToDevice);
+  // To avoid needing to reset the ewald, wolf, rCC, and rCC2
+  // vars after calibration energies calculated
+  // maintain 2 variables in GPU memory,
+  // one holding the originals, and one holding the cal vals 
+
+  // Since Coul kind, alpha, and wolf factors
+  // arent used in Ewald, and Ewald drives the calibraiton runs
+  // we dont have to worry about making sure they are the original values          
+  int * ewald_ptr;
+  int * wolf_ptr;
+  double * rCutCoulomb_ptr;
+  double * rCutCoulombSq_ptr;
+  if(wolfCalibration && isWolf){
+    ewald_ptr = vars->gpu_ewaldCalibration;
+    wolf_ptr = vars->gpu_wolfCalibration;
+    rCutCoulomb_ptr = &vars->gpu_rCutCoulombCalibration[box];
+    rCutCoulombSq_ptr = &vars->gpu_rCutCoulombSqCalibration[box];    
+    bool isEwald = !isWolf;
+    cudaMemcpy(wolf_ptr, &isWolf, sizeof(bool), cudaMemcpyHostToDevice);
+    cudaMemcpy(ewald_ptr, &isEwald, sizeof(bool), cudaMemcpyHostToDevice);
     cudaMemcpy(vars->gpu_coulKind, &coulKind, sizeof(uint), cudaMemcpyHostToDevice);
-    cudaMemcpy(&vars->gpu_rCutCoulomb[box], &rCutCoulomb, sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpy(&vars->gpu_rCutCoulombSq[box], &rCutCoulombSq, sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(rCutCoulomb_ptr, &rCutCoulomb, sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(rCutCoulombSq_ptr, &rCutCoulombSq, sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(&vars->gpu_wolfFactor1[box], &wolfFactor1, sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(&vars->gpu_wolfFactor2[box], &wolfFactor2, sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(&vars->gpu_wolfAlpha[box], &wolfAlpha, sizeof(double), cudaMemcpyHostToDevice);
+  } else {
+    ewald_ptr = vars->gpu_ewald;
+    wolf_ptr = vars->gpu_wolf;
+    rCutCoulomb_ptr = &vars->gpu_rCutCoulomb[box];
+    rCutCoulombSq_ptr = &vars->gpu_rCutCoulombSq[box];    
   }
 
   double3 axis = make_double3(boxAxes.GetAxis(box).x,
@@ -134,12 +155,12 @@ void CallBoxInterGPU(VariablesCUDA *vars,
       vars->gpu_isMartini,
       vars->gpu_count,
       vars->gpu_rCut,
-      vars->gpu_rCutCoulomb,
-      vars->gpu_rCutCoulombSq,
+      rCutCoulomb_ptr,
+      rCutCoulombSq_ptr,
       vars->gpu_rCutLow,
       vars->gpu_rOn,
       vars->gpu_alpha,
-      vars->gpu_ewald,
+      ewald_ptr,
       vars->gpu_diElectric_1,
       vars->gpu_nonOrth,
       vars->gpu_cell_x[box],
@@ -161,7 +182,7 @@ void CallBoxInterGPU(VariablesCUDA *vars,
       vars->gpu_lambdaCoulomb,
       vars->gpu_isFraction,
       box,
-      vars->gpu_wolf,
+      wolf_ptr,
       vars->gpu_coulKind,
       vars->gpu_wolfAlpha,
       vars->gpu_wolfFactor1,

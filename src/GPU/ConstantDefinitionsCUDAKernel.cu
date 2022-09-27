@@ -51,10 +51,13 @@ void InitGPUForceField(VariablesCUDA &vars, double const *sigmaSq,
   CUMALLOC((void**) &vars.gpu_rCut, sizeof(double));
   CUMALLOC((void**) &vars.gpu_rCutCoulomb, BOX_TOTAL * sizeof(double));
   CUMALLOC((void**) &vars.gpu_rCutCoulombSq, BOX_TOTAL * sizeof(double));
+  CUMALLOC((void**) &vars.gpu_rCutCoulombCalibration, BOX_TOTAL * sizeof(double));
+  CUMALLOC((void**) &vars.gpu_rCutCoulombSqCalibration, BOX_TOTAL * sizeof(double));
   CUMALLOC((void**) &vars.gpu_rCutLow, sizeof(double));
   CUMALLOC((void**) &vars.gpu_rOn, sizeof(double));
   CUMALLOC((void**) &vars.gpu_alpha, BOX_TOTAL * sizeof(double));
   CUMALLOC((void**) &vars.gpu_ewald, sizeof(int));
+  CUMALLOC((void**) &vars.gpu_ewaldCalibration, sizeof(int));
   CUMALLOC((void**) &vars.gpu_diElectric_1, sizeof(double));
 
   // allocate gpu memory for lambda variables
@@ -65,6 +68,7 @@ void InitGPUForceField(VariablesCUDA &vars, double const *sigmaSq,
 
   // allocate gpu memory for wolf variables
   CUMALLOC((void**) &vars.gpu_wolf, sizeof(int));
+  CUMALLOC((void**) &vars.gpu_wolfCalibration, sizeof(int));
   CUMALLOC((void**) &vars.gpu_coulKind, sizeof(int));
   CUMALLOC((void**) &vars.gpu_wolfAlpha, (int)BOX_TOTAL * sizeof(double));
   CUMALLOC((void**) &vars.gpu_wolfFactor1, (int)BOX_TOTAL * sizeof(double));
@@ -360,10 +364,16 @@ void DestroyCUDAVars(VariablesCUDA *vars)
   CUFREE(vars->gpu_count);
   CUFREE(vars->gpu_rCut);
   CUFREE(vars->gpu_rCutCoulomb);
+  CUFREE(vars->gpu_rCutCoulombSq);
   CUFREE(vars->gpu_rCutLow);
+  CUFREE(vars->gpu_rCutCoulombCalibration);
+  CUFREE(vars->gpu_rCutCoulombSqCalibration);
   CUFREE(vars->gpu_rOn);
   CUFREE(vars->gpu_alpha);
   CUFREE(vars->gpu_ewald);
+  CUFREE(vars->gpu_ewaldCalibration);
+  CUFREE(vars->gpu_wolf);
+  CUFREE(vars->gpu_wolfCalibration);
   CUFREE(vars->gpu_diElectric_1);
   CUFREE(vars->gpu_x);
   CUFREE(vars->gpu_y);

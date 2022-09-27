@@ -65,7 +65,10 @@ public:
     gpu_alpha = NULL;
     gpu_rCutCoulomb = NULL;
     gpu_rCutCoulombSq = NULL;
+    gpu_rCutCoulombCalibration = NULL;
+    gpu_rCutCoulombSqCalibration = NULL;
     gpu_ewald = NULL;
+    gpu_ewaldCalibration = NULL;
     gpu_diElectric_1 = NULL;
     gpu_aForcex = NULL;
     gpu_aForcey = NULL;
@@ -83,6 +86,7 @@ public:
 
     // set wolf variables to null
     gpu_wolf = NULL;
+    gpu_wolfCalibration = NULL;
     gpu_coulKind = NULL;
     gpu_wolfAlpha = NULL;
     gpu_wolfFactor1 = NULL;
@@ -99,10 +103,13 @@ public:
   double *gpu_rCut;
   double *gpu_rCutCoulomb;
   double *gpu_rCutCoulombSq;
+  double *gpu_rCutCoulombCalibration;
+  double *gpu_rCutCoulombSqCalibration;
   double *gpu_rCutLow;
   double *gpu_rOn;
   double *gpu_alpha;
   int *gpu_ewald;
+  int *gpu_ewaldCalibration;
   double *gpu_diElectric_1;
   double *gpu_x, *gpu_y, *gpu_z;
   double *gpu_nx, *gpu_ny, *gpu_nz;
@@ -139,7 +146,7 @@ public:
   int *gpu_cellVector, *gpu_mapParticleToCell;
 
   // Wolf Variables
-  int *gpu_wolf;
+  int *gpu_wolf, *gpu_wolfCalibration;
   int *gpu_coulKind;
   double * gpu_wolfAlpha;
   double * gpu_wolfFactor1;
