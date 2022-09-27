@@ -201,6 +201,8 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
                                cellVector, cellStartIndex, mapParticleToCell);
   neighborList = cellList.GetNeighborList(box);
 
+  // Since Wolf Cal uses a dynamic rCutCoulombSq
+  double cutoff = max(rCutCoulombSq, currentAxes.rCutSq[box]);
 #ifdef GOMC_CUDA
   //update unitcell in GPU
   UpdateCellBasisCUDA(forcefield.particles->getCUDAVars(), box,
@@ -222,7 +224,9 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
                   particleKind, particleMol, tempREn, tempLJEn, forcefield.sc_coul,
                   forcefield.sc_sigma_6, forcefield.sc_alpha, num::qqFact,
                   forcefield.sc_power, box,
+                  forcefield.wolf,
                   forcefield.wolfCalibration,
+                  forcefield.coulKind,
                   rCutCoulomb,
                   rCutCoulombSq,    
                   wolfFactor1,
@@ -233,12 +237,12 @@ SystemPotential CalculateEnergy::BoxInter(SystemPotential potential,
 #if GCC_VERSION >= 90000
   #pragma omp parallel for default(none) shared(boxAxes, cellStartIndex, \
   cellVector, coords, mapParticleToCell, box, neighborList, rCutCoulomb, rCutCoulombSq, \
-  wolfFactor1, wolfFactor2, wolfAlpha) \
+  wolfFactor1, wolfFactor2, wolfAlpha, cutoff) \
 reduction(+:tempREn, tempLJEn)
 #else
   #pragma omp parallel for default(none) shared(boxAxes, cellStartIndex, \
   cellVector, coords, mapParticleToCell, neighborList, rCutCoulomb, rCutCoulombSq, \
-  wolfFactor1, wolfFactor2, wolfAlpha) \
+  wolfFactor1, wolfFactor2, wolfAlpha, cutoff) \
 reduction(+:tempREn, tempLJEn)
 #endif
 #endif
@@ -264,7 +268,7 @@ reduction(+:tempREn, tempLJEn)
         if(currParticle < nParticle && particleMol[currParticle] != particleMol[nParticle]) {
           double distSq;
           XYZ virComponents;
-          if(boxAxes.InRcut(distSq, virComponents, coords, currParticle, nParticle, box)) {
+          if(boxAxes.InRcut(distSq, cutoff, virComponents, coords, currParticle, nParticle, box)) {
             double lambdaVDW = GetLambdaVDW(particleMol[currParticle], particleMol[nParticle], box);
             if (electrostatic) {
               double lambdaCoulomb = GetLambdaCoulomb(particleMol[currParticle],
@@ -477,7 +481,8 @@ Virial CalculateEnergy::VirialCalc(const uint box,
   cellList.GetCellListNeighbor(box, currentCoords.Count(), cellVector,
                                cellStartIndex, mapParticleToCell);
   neighborList = cellList.GetNeighborList(box);
-
+  // Since Wolf Cal uses a dynamic rCutCoulombSq
+  double cutoff = max(rCutCoulombSq, currentAxes.rCutSq[box]);
 #ifdef GOMC_CUDA
   //update unitcell in GPU
   UpdateCellBasisCUDA(forcefield.particles->getCUDAVars(), box,
@@ -504,7 +509,9 @@ Virial CalculateEnergy::VirialCalc(const uint box,
                        forcefield.sc_coul,
                        forcefield.sc_sigma_6, forcefield.sc_alpha,
                        forcefield.sc_power, box,
+                       forcefield.wolf,
                        forcefield.wolfCalibration,
+                       forcefield.coulKind,
                        rCutCoulomb,
                        rCutCoulombSq,    
                        wolfFactor2,
@@ -514,11 +521,11 @@ Virial CalculateEnergy::VirialCalc(const uint box,
 #ifdef _OPENMP
 #if GCC_VERSION >= 90000
   #pragma omp parallel for default(none) shared(cellStartIndex, cellVector, \
-  mapParticleToCell, neighborList, box, rCutCoulomb, rCutCoulombSq, wolfFactor2, wolfFactor3, wolfAlpha) \
+  mapParticleToCell, neighborList, box, rCutCoulomb, rCutCoulombSq, wolfFactor2, wolfFactor3, wolfAlpha, cutoff) \
 reduction(+:vT11, vT12, vT13, vT22, vT23, vT33, rT11, rT12, rT13, rT22, rT23, rT33)
 #else
   #pragma omp parallel for default(none) shared(cellStartIndex, cellVector, \
-  mapParticleToCell, neighborList, rCutCoulomb, rCutCoulombSq, wolfFactor2, wolfFactor3, wolfAlpha) \
+  mapParticleToCell, neighborList, rCutCoulomb, rCutCoulombSq, wolfFactor2, wolfFactor3, wolfAlpha, cutoff) \
 reduction(+:vT11, vT12, vT13, vT22, vT23, vT33, rT11, rT12, rT13, rT22, rT23, rT33)
 #endif
 #endif
@@ -538,7 +545,7 @@ reduction(+:vT11, vT12, vT13, vT22, vT23, vT33, rT11, rT12, rT13, rT22, rT23, rT
         if(currParticle < nParticle && particleMol[currParticle] != particleMol[nParticle]) {
           double distSq;
           XYZ virC;
-          if (currentAxes.InRcut(distSq, virC, currentCoords, currParticle,
+          if (currentAxes.InRcut(distSq, cutoff, virC, currentCoords, currParticle,
                                  nParticle, box)) {
 
             //calculate the distance between com of two molecules
@@ -1957,6 +1964,7 @@ void CalculateEnergy::WolfCalibrationEnergy(double * electrostaticEnergies){
     SystemPotential summationPotential = SystemPotential();
 
     for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
+
       MoleculeLookup::box_iterator thisMol = molLookup.BoxBegin(b);
       MoleculeLookup::box_iterator end = molLookup.BoxEnd(b);
       std::vector<uint> molID;
@@ -1974,6 +1982,7 @@ void CalculateEnergy::WolfCalibrationEnergy(double * electrostaticEnergies){
         nonbondEn = 0.0;
         double rCutCoul =  wolfCalRef.GetRCut(b, indexForRcut);
         double rCutCoulombSq =  wolfCalRef.GetRCutSq(b, indexForRcut);
+        
 
         #ifdef _OPENMP
         #pragma omp parallel for default(none) private(bondEnergy) shared(b, molID, rCutCoulombSq) \

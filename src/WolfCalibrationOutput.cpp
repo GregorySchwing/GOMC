@@ -124,7 +124,9 @@ void WolfCalibrationOutput::WriteGraceParFile(uint b, uint wolfKind, uint coulKi
 }
 
 void WolfCalibrationOutput::DoOutput(const ulong step) {
-      
+      // Wolf driven GOMC cal
+      // Buggy for NPT
+      /*
       uint wolfKindOrig = sysRef.calcEwald->GetWolfKind();
       uint coulKindOrig = sysRef.calcEwald->GetCoulKind();
       calcEn.WolfCalibrationEnergy(&electrostaticEnergies[0]);
@@ -132,19 +134,27 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
       // Calc reference epot
       sysRef.SwapWolfAndEwaldPointers();
       
-      statValRef.forcefield.ewald = true;
-      statValRef.forcefield.wolf = false;
+      bool tmp = statValRef.forcefield.ewald;
+      statValRef.forcefield.ewald = statValRef.forcefield.wolf;
+      statValRef.forcefield.wolf = tmp;
+      //statValRef.forcefield.ewald != statValRef.forcefield.ewald;
+      //statValRef.forcefield.wolf != statValRef.forcefield.wolf;
+      
       // Set isVlugtWolf == false
       // Since ewald and wolf share a ff object
       statValRef.forcefield.SetWolfKind(0);
+      // Ewald K Vectors may be not up to date with box dims
+      // Since Wolf drives the simulation.
+      //calcEn.ReInitKVectors();
       SystemPotential ewaldRef = calcEn.SystemTotal();
       ewaldRef.Total();
       sysRef.SwapWolfAndEwaldPointers();
 
       // Restore original wolf settings
-      statValRef.forcefield.ewald = false;
-      statValRef.forcefield.wolf = true;
-      
+      tmp = statValRef.forcefield.ewald;
+      statValRef.forcefield.ewald = statValRef.forcefield.wolf;
+      statValRef.forcefield.wolf = tmp;
+
       // Restore inter wolf settings
       statValRef.forcefield.SetWolfKind(wolfKindOrig);
       statValRef.forcefield.SetCoulKind(coulKindOrig);
@@ -152,6 +162,27 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
       // Restore intra wolf settings
       sysRef.calcEwald->SetWolfKind(wolfKindOrig);
       sysRef.calcEwald->SetCoulKind(coulKindOrig);
+
+      */
+
+      // Ewald driven GOMC cal
+      
+      SystemPotential ewaldRef = calcEn.SystemTotal();
+      ewaldRef.Total();
+
+      // Calc wolfcal epots
+      sysRef.SwapWolfAndEwaldPointers();
+      bool tmp = statValRef.forcefield.ewald;
+      statValRef.forcefield.ewald = statValRef.forcefield.wolf;
+      statValRef.forcefield.wolf = tmp;
+
+      calcEn.WolfCalibrationEnergy(&electrostaticEnergies[0]);
+
+      sysRef.SwapWolfAndEwaldPointers();
+      tmp = statValRef.forcefield.ewald;
+      statValRef.forcefield.ewald = statValRef.forcefield.wolf;
+      statValRef.forcefield.wolf = tmp;
+    
       std::string row = "";
       row += GetString(step);
       row += "\t";

@@ -130,6 +130,10 @@ public:
   bool InRcut(double & distSq, XYZArray const& arr1,
               const uint i, XYZArray const& arr2, const uint j,
               const uint b) const;
+  
+  bool InRcut(double & distSq, double cutoff, XYZ & dist,
+                                  XYZArray const& arr, const uint i,
+                                  const uint j, const uint b) const;
   /*
     bool InRcut(double distSq) const
     {
@@ -247,6 +251,14 @@ inline bool BoxDimensions::InRcut(double & distSq, XYZ & dist,
   return (rCutSq[b] > distSq);
 }
 
+inline bool BoxDimensions::InRcut(double & distSq, double cutoff, XYZ & dist,
+                                  XYZArray const& arr, const uint i,
+                                  const uint j, const uint b) const
+{
+  dist = MinImage(arr.Difference(i, j), b);
+  distSq = dist.x * dist.x + dist.y * dist.y + dist.z * dist.z;
+  return (cutoff > distSq);
+}
 
 inline bool BoxDimensions::InRcut(double & distSq, XYZ & dist,
                                   XYZArray const& arr1, const uint i,

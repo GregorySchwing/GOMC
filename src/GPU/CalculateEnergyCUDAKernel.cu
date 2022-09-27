@@ -36,7 +36,9 @@ void CallBoxInterGPU(VariablesCUDA *vars,
                      double qqFact,
                      uint sc_power,
                      uint const box,
+                     bool isWolf,
                      bool wolfCalibration,
+                     uint coulKind,
                      double rCutCoulomb,
                      double rCutCoulombSq,    
                      double wolfFactor1,
@@ -89,13 +91,17 @@ void CallBoxInterGPU(VariablesCUDA *vars,
   cudaMemcpy(vars->gpu_x, coords.x, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_y, coords.y, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars->gpu_z, coords.z, atomNumber * sizeof(double), cudaMemcpyHostToDevice);
-
+  
+  bool isEwald = !isWolf;
   if(wolfCalibration){
-    cudaMemcpy(vars->gpu_rCutCoulomb, &rCutCoulomb, sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpy(vars->gpu_rCutCoulombSq, &rCutCoulombSq, sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpy(vars->gpu_wolfFactor1, &wolfFactor1, sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpy(vars->gpu_wolfFactor2, &wolfFactor2, sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpy(vars->gpu_wolfAlpha, &wolfAlpha, sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(vars->gpu_wolf, &isWolf, sizeof(bool), cudaMemcpyHostToDevice);
+    cudaMemcpy(vars->gpu_ewald, &isEwald, sizeof(bool), cudaMemcpyHostToDevice);
+    cudaMemcpy(vars->gpu_coulKind, &coulKind, sizeof(uint), cudaMemcpyHostToDevice);
+    cudaMemcpy(&vars->gpu_rCutCoulomb[box], &rCutCoulomb, sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(&vars->gpu_rCutCoulombSq[box], &rCutCoulombSq, sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(&vars->gpu_wolfFactor1[box], &wolfFactor1, sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(&vars->gpu_wolfFactor2[box], &wolfFactor2, sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(&vars->gpu_wolfAlpha[box], &wolfAlpha, sizeof(double), cudaMemcpyHostToDevice);
   }
 
   double3 axis = make_double3(boxAxes.GetAxis(box).x,

@@ -61,6 +61,7 @@ System::System(StaticVals& statics, Setup const& set,
 
 {
   calcEwald = NULL;
+  wolfCalibrator = NULL;
 #if GOMC_LIB_MPI
   if(ms->parallelTemperingEnabled)
     prngParallelTemp = new PRNG(molLookupRef);
@@ -73,8 +74,8 @@ System::~System()
     delete boxDimensions;
   if (calcEwald != NULL)
     delete calcEwald;
-  if (refEwald != NULL && wolfCalibration)
-    delete refEwald;
+  if (wolfCalibrator != NULL && wolfCalibration)
+    delete wolfCalibrator;
   delete moves[mv::DISPLACE];
   delete moves[mv::ROTATE];
   delete moves[mv::MULTIPARTICLE];
@@ -147,25 +148,25 @@ void System::Init(Setup & set)
   wolfCalibration = set.config.out.wolfCalibration.settings.enable;
 
 #ifdef GOMC_CUDA
-  if(ewald)
+  if (wolfCalibration){
     calcEwald = new Ewald(statV, *this);
-  else if (wolfCalibration){
+    wolfCalibrator = new Wolf(statV, *this);
+  } else if(ewald) {
+    calcEwald = new Ewald(statV, *this);
+   } else if (wolf) {
     calcEwald = new Wolf(statV, *this);
-    refEwald =  new Ewald(statV, *this);
-  } else if (wolf){
-    calcEwald = new Wolf(statV, *this);
-  }else
+  } else
     calcEwald = new NoEwald(statV, *this);
 #else
   bool cached = set.config.sys.elect.cache;
-  if (ewald && cached)
+  if (wolfCalibration){
+      calcEwald  = new Ewald(statV, *this);
+      wolfCalibrator =  new Wolf(statV, *this);
+  } else if (ewald && cached)
     calcEwald = new EwaldCached(statV, *this);
   else if (ewald && !cached)
     calcEwald = new Ewald(statV, *this);
-  else if (wolfCalibration){
-      calcEwald = new Wolf(statV, *this);
-      refEwald =  new Ewald(statV, *this);
-  } else if (wolf)
+  else if (wolf)
     calcEwald = new Wolf(statV, *this);
   else
     calcEwald = new NoEwald(statV, *this);
@@ -176,7 +177,7 @@ void System::Init(Setup & set)
   calcEnergy.Init(*this);
   calcEwald->Init();
   if (wolfCalibration){
-    refEwald->Init();
+    wolfCalibrator->Init();
   }
   potential = calcEnergy.SystemTotal();
   InitMoves(set);
@@ -389,6 +390,6 @@ void System::PrintTime()
 }
 
 void System::SwapWolfAndEwaldPointers(){
-  std::swap(calcEwald, refEwald);
+  std::swap(calcEwald, wolfCalibrator);
   calcEnergy.UpdatePointer(*this);
 }
