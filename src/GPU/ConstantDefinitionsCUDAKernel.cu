@@ -374,6 +374,11 @@ void DestroyCUDAVars(VariablesCUDA *vars)
   CUFREE(vars->gpu_ewaldCalibration);
   CUFREE(vars->gpu_wolf);
   CUFREE(vars->gpu_wolfCalibration);
+  CUFREE(vars->gpu_coulKind);
+  CUFREE(vars->gpu_wolfAlpha);
+  CUFREE(vars->gpu_wolfFactor1);
+  CUFREE(vars->gpu_wolfFactor2);
+  CUFREE(vars->gpu_wolfFactor3);
   CUFREE(vars->gpu_diElectric_1);
   CUFREE(vars->gpu_x);
   CUFREE(vars->gpu_y);
