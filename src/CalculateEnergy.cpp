@@ -2040,7 +2040,7 @@ void CalculateEnergy::WolfCalibrationEnergy(double * electrostaticEnergies){
               summationPotential.boxEnergy[b].self = calcEwald->BoxSelf(b, wolfCalRef.GetWolfFactor1(b, indexForRcut, indexForAlpha), 
                                                                     wolfCalRef.GetAlpha(b, indexForAlpha));
               summationPotential.Total();
-              electrostaticEnergies[wolfCalRef.GetIndex(b, wolfKind, coulKind, indexForRcut, indexForAlpha)] = summationPotential.boxEnergy[b].total;
+              electrostaticEnergies[wolfCalRef.GetIndex(b, wolfKind, coulKind, indexForRcut, indexForAlpha)] = summationPotential.boxEnergy[b].TotalElect();
             }
           }
         } 

@@ -199,7 +199,7 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
                         for (int r = 0; r < wolfCalRef.numberOfRCuts[box]; ++r){
                               for (int a = 0; a < wolfCalRef.numberOfAlphas[box]; ++a){
                                     // If you dont use std::abs, double is converted to int 
-                                    row += GetString((std::abs(ewaldRef.boxEnergy[box].total) -  std::abs(electrostaticEnergies[wolfCalRef.GetIndex(box, wolfKind, coulKind, r, a)]))/ std::abs(ewaldRef.boxEnergy[box].total), 8);
+                                    row += GetString((std::abs(ewaldRef.boxEnergy[box].TotalElect()) -  std::abs(electrostaticEnergies[wolfCalRef.GetIndex(box, wolfKind, coulKind, r, a)]))/ std::abs(ewaldRef.boxEnergy[box].TotalElect()), 16);
                                     row += "\t";
                               }
                         }
