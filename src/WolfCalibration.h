@@ -42,7 +42,7 @@ private:
   int numberOfRCuts[BOX_TOTAL];
   int numberOfAlphas[BOX_TOTAL];
   //std::string wolfKindStrings[4] = {"HYBRID", "VLUGT", "GROSS", "VLUGTWINTRACUTOFF"};
-  std::string wolfKindStrings[4] = {"VLUGT", "GROSS", "VLUGTWINTRACUTOFF"};
+  std::string wolfKindStrings[3] = {"VLUGT", "GROSS", "VLUGTWINTRACUTOFF"};
   std::string coulKindStrings[2] = {"DSP", "DSF"};
   // Wolf Calibration
 };
