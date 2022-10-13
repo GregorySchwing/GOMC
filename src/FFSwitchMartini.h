@@ -280,8 +280,7 @@ inline void FF_SWITCH_MARTINI::CalcCoulombAdd_1_4(double& en,
     const bool NB, const uint box,
     double rCutCoulombSq) const
 {
-  //if(rCutCoulombSq < distSq && !forcefield.isVlugtWolf)
-  if(rCutCoulombSq < distSq)
+  if(rCutCoulombSq < distSq && !forcefield.isVlugtWolf)
     return;
 
   double dist = sqrt(distSq);
