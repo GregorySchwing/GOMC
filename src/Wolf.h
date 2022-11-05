@@ -81,6 +81,9 @@ public:
                                 const uint molIndex) const;
 
   //calculate self term after swap move
+  virtual double SwapSelf(const cbmc::TrialMol& trialMol) const;
+  
+  //calculate self term after swap move
   virtual double SwapSelf(const cbmc::TrialMol& trialMol,
                                 double wolfFactor1,
                                 double wolfAlpha) const;

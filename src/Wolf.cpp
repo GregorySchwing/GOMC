@@ -406,6 +406,12 @@ double Wolf::MolExchangeReciprocal(const std::vector<cbmc::TrialMol> &newMol,
   return 0.0;
 }
 
+double Wolf::SwapSelf(const cbmc::TrialMol& trialMol) const{
+  uint box = trialMol.GetBox();
+  return SwapSelf(trialMol,
+                      ffRef.wolfFactor1[box],
+                      ffRef.wolfAlpha[box]);
+}
 
 //calculate self term after swap move
 double Wolf::SwapSelf(const cbmc::TrialMol& trialMol,
