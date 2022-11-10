@@ -169,8 +169,8 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
   } else {
     ewald_ptr = vars->gpu_ewald;
     wolf_ptr = vars->gpu_wolf;
-    rCutCoulomb_ptr = &vars->gpu_rCutCoulomb[box];
-    rCutCoulombSq_ptr = &vars->gpu_rCutCoulombSq[box];    
+    rCutCoulomb_ptr = vars->gpu_rCutCoulomb;
+    rCutCoulombSq_ptr = vars->gpu_rCutCoulombSq;    
   }
 
   double3 axis = make_double3(boxAxes.GetAxis(box).x,
