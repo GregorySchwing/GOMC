@@ -154,15 +154,15 @@ void CallBoxInterForceGPU(VariablesCUDA *vars,
   double * rCutCoulombSq_ptr;
   if(wolfCalibration && isWolf){
     ewald_ptr = vars->gpu_ewaldCalibration;
-    wolf_ptr = vars->gpu_wolfCalibration;
-    rCutCoulomb_ptr = &vars->gpu_rCutCoulombCalibration[box];
-    rCutCoulombSq_ptr = &vars->gpu_rCutCoulombSqCalibration[box];    
+    wolf_ptr = vars->gpu_wolfCalibration;  
+    rCutCoulomb_ptr = vars->gpu_rCutCoulombCalibration;
+    rCutCoulombSq_ptr = vars->gpu_rCutCoulombSqCalibration;    
     bool isEwald = !isWolf;
     cudaMemcpy(wolf_ptr, &isWolf, sizeof(bool), cudaMemcpyHostToDevice);
     cudaMemcpy(ewald_ptr, &isEwald, sizeof(bool), cudaMemcpyHostToDevice);
     cudaMemcpy(vars->gpu_coulKind, &coulKind, sizeof(uint), cudaMemcpyHostToDevice);
-    cudaMemcpy(rCutCoulomb_ptr, &rCutCoulomb, sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpy(rCutCoulombSq_ptr, &rCutCoulombSq, sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(&rCutCoulomb_ptr[box], &rCutCoulomb, sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(&rCutCoulombSq_ptr[box], &rCutCoulombSq, sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(&vars->gpu_wolfFactor2[box], &wolfFactor2, sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(&vars->gpu_wolfFactor3[box], &wolfFactor3, sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(&vars->gpu_wolfAlpha[box], &wolfAlpha, sizeof(double), cudaMemcpyHostToDevice);
