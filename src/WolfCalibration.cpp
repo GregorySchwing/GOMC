@@ -100,6 +100,6 @@ int WolfCalibration::GetIndex(int box, int wolfKind, int coulKind, int r, int a)
                   // skip coul kind entries
                   + coulKind*numberOfRCuts[box]*numberOfAlphas[box]
                   // Within a file (WOLFKIND_COULKIND_BOX)
-                  + startOfWolfFactor[box] + r*numberOfAlphas[box] + a;
+                  + r*numberOfAlphas[box] + a;
       return index;
 }
