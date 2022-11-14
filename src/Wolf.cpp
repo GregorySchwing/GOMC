@@ -429,10 +429,10 @@ double Wolf::SwapSelf(const cbmc::TrialMol& trialMol,
 
   GOMC_EVENT_STOP(1, GomcProfileEvent::SELF_SWAP);
   if (isVlugtWolf || isVlugtWithIntraCutoffWolf){
-    return en_self *= (((wolfAlpha * M_2_SQRTPI) + wolfFactor1) * -0.5);
+    en_self *= (((wolfAlpha * M_2_SQRTPI) + wolfFactor1) * -0.5);
   } else {
     // we eliminate the alpha/root(pi) using Wolf,mod from Gross et al
-    return en_self *= (wolfFactor1 * -0.5);
+    en_self *= (wolfFactor1 * -0.5);
   }
   return en_self  * num::qqFact;
 }
