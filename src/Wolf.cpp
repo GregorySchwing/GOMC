@@ -290,7 +290,7 @@ double Wolf::MolCorrection(uint molIndex, uint box,
       dampenedCorr = 0.0;
       if(distSq < rCutCoulombSq){
         // All methods have this constant term.
-        dampenedCorr -= wolfFactor1 * 0.5;
+        dampenedCorr -= wolfFactor1;
         if (isVlugtWolf || isVlugtWithIntraCutoffWolf){
           dist = sqrt(distSq);
           dampenedCorr += -1.0*erf(wolfAlpha * dist)/dist;   
@@ -490,7 +490,7 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
       dampenedCorr = 0.0;
       if(distSq < rCutCoulombSq){
         // All methods have this constant term.
-        dampenedCorr -= wolfFactor1 * 0.5;
+        dampenedCorr -= wolfFactor1;
         if (isVlugtWolf || isVlugtWithIntraCutoffWolf){
           dist = sqrt(distSq);
           dampenedCorr += -1.0*erf(wolfAlpha * dist)/dist;   
@@ -667,7 +667,7 @@ void Wolf::ChangeCorrection(Energy *energyDiff, Energy &dUdL_Coul,
       dampenedCorr = 0.0;
       if(distSq < rCutCoulombSq){
         // All methods have this constant term.
-        dampenedCorr -= wolfFactor1 * 0.5;
+        dampenedCorr -= wolfFactor1;
         if (isVlugtWolf || isVlugtWithIntraCutoffWolf){
           dist = sqrt(distSq);
           dampenedCorr += -1.0*erf(wolfAlpha * dist)/dist;   
