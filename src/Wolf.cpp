@@ -234,14 +234,14 @@ double Wolf::BoxSelf(uint box,
           }
         }
         if (isVlugtWolf || isVlugtWithIntraCutoffWolf){
-          self *= ((wolfAlpha * M_2_SQRTPI) + wolfFactor1) * 0.5;
+          self *= -0.5 * ((wolfAlpha * M_2_SQRTPI) + wolfFactor1);
         } else {
           // we eliminate the alpha/root(pi) using Wolf,mod from Gross et al
-          self *= wolfFactor1 * 0.5;
+          self *= -0.5 * wolfFactor1;
         }
 
         GOMC_EVENT_STOP(1, GomcProfileEvent::SELF_BOX);
-        return -1.0 * self * num::qqFact;
+        return self * num::qqFact;
     }
 }
 
@@ -429,11 +429,12 @@ double Wolf::SwapSelf(const cbmc::TrialMol& trialMol,
 
   GOMC_EVENT_STOP(1, GomcProfileEvent::SELF_SWAP);
   if (isVlugtWolf || isVlugtWithIntraCutoffWolf){
-    return (en_self *= -0.5 * ((wolfAlpha * M_2_SQRTPI) + wolfFactor1) * num::qqFact) ;
+    return en_self *= (((wolfAlpha * M_2_SQRTPI) + wolfFactor1) * -0.5);
   } else {
     // we eliminate the alpha/root(pi) using Wolf,mod from Gross et al
-    return (en_self *= -0.5 * wolfFactor1 * num::qqFact);
+    return en_self *= (wolfFactor1 * -0.5);
   }
+  return en_self  * num::qqFact;
 }
 
 //calculate correction term for a molecule with system lambda
