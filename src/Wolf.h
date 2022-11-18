@@ -81,6 +81,9 @@ public:
                                 const uint molIndex) const;
 
   //calculate self term after swap move
+  virtual double SwapCorrection(const cbmc::TrialMol& trialMol) const;
+
+  //calculate self term after swap move
   virtual double SwapSelf(const cbmc::TrialMol& trialMol) const;
   
   //calculate self term after swap move
@@ -99,6 +102,14 @@ public:
                           double wolfFactor2,
                           double wolfAlpha) const;
 
+  //calculate correction term after swap move
+  virtual double SwapCorrection(const cbmc::TrialMol& trialMol,
+                          uint box,
+                          double rCutCoulomb,
+                          double rCutCoulombSq,
+                          double wolfFactor1,
+                          double wolfFactor2,
+                          double wolfAlpha) const;
   //calculate reciprocal term in destination box for swap move
   virtual double SwapDestRecip(const cbmc::TrialMol &newMol, const uint box,
                                const int molIndex);

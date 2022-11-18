@@ -437,6 +437,19 @@ double Wolf::SwapSelf(const cbmc::TrialMol& trialMol,
   return en_self  * num::qqFact;
 }
 
+
+//calculate correction term for a molecule with system lambda
+//It's called when the molecule configuration changes, regrowth, crankshaft, IntraSwap, IntraMEMC ...
+double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol) const {
+  uint box = trialMol.GetBox();
+  return SwapCorrection(trialMol,
+                        box, ffRef.rCutCoulomb[box], 
+                        ffRef.rCutCoulombSq[box],
+                        ffRef.wolfFactor1[box], 
+                        ffRef.wolfFactor2[box], 
+                        ffRef.wolfAlpha[box]);
+}
+
 //calculate correction term for a molecule with system lambda
 //It's called when the molecule configuration changes, regrowth, crankshaft, IntraSwap, IntraMEMC ...
 double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
@@ -575,6 +588,126 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
   GOMC_EVENT_STOP(1, GomcProfileEvent::CORR_SWAP);
   return num::qqFact * correction * lambdaCoef * lambdaCoef;
 }
+
+
+//calculate correction term after swap move
+double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
+                          uint box,
+                          double rCutCoulomb,
+                          double rCutCoulombSq,
+                          double wolfFactor1,
+                          double wolfFactor2,
+                          double wolfAlpha) const
+{
+  if (box >= BOXES_WITH_U_NB)
+    return 0.0;
+
+  GOMC_EVENT_START(1, GomcProfileEvent::CORR_SWAP);
+  double dist, distSq;
+  double correction = 0.0, dampenedCorr = 0.0, undampenedCorr = 0.0;
+  XYZ virComponents;
+
+  const MoleculeKind& thisKind = trialMol.GetKind();
+  uint atomSize = thisKind.NumAtoms();
+
+
+    // This term only needs to be calculated once, if the molecules are rigid
+    // Or of the maximum radius of gyration < RCutCoulomb
+    // Otherwise, parts of the molecule may extend out of range of each other
+    // For now assume the latter.
+  for (uint i = 0; i < atomSize; i++) {
+    for (uint j = i + 1; j < atomSize; j++) {
+      currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
+                         i, j, box);
+      dampenedCorr = 0.0;
+      if(distSq < rCutCoulombSq){
+        // All methods have this constant term.
+        dampenedCorr -= wolfFactor1;
+        if (isVlugtWolf || isVlugtWithIntraCutoffWolf){
+          dist = sqrt(distSq);
+          dampenedCorr += -1.0*erf(wolfAlpha * dist)/dist;   
+          if(ff.coulKind && isVlugtWithIntraCutoffWolf){
+            double distDiff = dist-rCutCoulomb;
+            dampenedCorr += wolfFactor2*distDiff;
+          } 
+        }
+        correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(j) * dampenedCorr;
+      }
+    }
+  }
+  if (isGrossWolf || isHybridWolf){
+    for (uint i = 0; i < atomSize; i++) {
+      if(oneThree){
+        //loop over all 1-3 partners of the particle
+        const uint* partner = thisKind.sortedNB_1_3.Begin(i);
+        const uint* end = thisKind.sortedNB_1_3.End(i);
+        while (partner != end) {
+          // Need to check for cutoff for all kinds
+          currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
+                         i, *partner, box); 
+          if(distSq < rCutCoulombSq){
+            dist = sqrt(distSq);
+            if (isGrossWolf){
+              dampenedCorr = -1.0*erf(wolfAlpha * dist)/dist;  
+              dampenedCorr *= scaling_14;
+            } else if (isHybridWolf) {
+              // Exclude the entire erfc term, psi is 1
+              dampenedCorr = -scaling_14/dist;
+            }
+            correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
+          }
+          ++partner;
+        }
+      }
+      if(oneFour){
+        //loop over all 1-4 partners of the particle
+        const uint* partner = thisKind.sortedNB_1_4.Begin(i);
+        const uint* end = thisKind.sortedNB_1_4.End(i);
+        while (partner != end) {
+          // Need to check for cutoff for all kinds
+          currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
+                         i, *partner, box); 
+          if(distSq < rCutCoulombSq){
+            dist = sqrt(distSq);
+            if (isGrossWolf){
+              dampenedCorr = -1.0*erf(wolfAlpha * dist)/dist;  
+              dampenedCorr *= scaling_14;
+            } else if (isHybridWolf) {
+              // Exclude the entire erfc term, psi is 1
+              dampenedCorr = -scaling_14/dist;
+            } 
+            correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
+          }
+          ++partner;
+        }
+      }
+      //loop over all 1-N partners of the particle
+      const uint* partner = thisKind.sortedNB.Begin(i);
+      const uint* end = thisKind.sortedNB.End(i);
+      while (partner != end) {
+          // Need to check for cutoff for all kinds
+          currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
+                         i, *partner, box); 
+          if(distSq < rCutCoulombSq){
+            dist = sqrt(distSq);
+            if (isGrossWolf){
+              dampenedCorr = -1.0*erf(wolfAlpha * dist)/dist;  
+            } else if (isHybridWolf) {
+              // Exclude the entire erfc term, psi is 1
+              dampenedCorr = -1.0/dist;
+            }
+            correction += thisKind.AtomCharge(i) * thisKind.AtomCharge(*partner) * dampenedCorr;
+        }
+        ++partner;
+      }      
+    } 
+  }
+  
+
+  GOMC_EVENT_STOP(1, GomcProfileEvent::CORR_SWAP);
+  return num::qqFact * correction;
+}
+
 
 //It's called in free energy calculation to calculate the change in
 // self energy in all lambda states
