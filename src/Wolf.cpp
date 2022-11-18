@@ -498,8 +498,8 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
       continue;
     }
     for (uint j = i + 1; j < atomSize; j++) {
-      currentAxes.InRcut(distSq, virComponents, currentCoords,
-                        start + i, start + j, box);
+      currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
+                         i, j, box);
       dampenedCorr = 0.0;
       if(distSq < rCutCoulombSq){
         // All methods have this constant term.
@@ -524,8 +524,8 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
         const uint* end = thisKind.sortedNB_1_3.End(i);
         while (partner != end) {
           // Need to check for cutoff for all kinds
-          currentAxes.InRcut(distSq, virComponents, currentCoords,
-                            start + i, start + (*partner), box); 
+          currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
+                         i, *partner, box);
           if(distSq < rCutCoulombSq){
             dist = sqrt(distSq);
             if (isGrossWolf){
@@ -546,8 +546,8 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
         const uint* end = thisKind.sortedNB_1_4.End(i);
         while (partner != end) {
           // Need to check for cutoff for all kinds
-          currentAxes.InRcut(distSq, virComponents, currentCoords,
-                            start + i, start + (*partner), box); 
+          currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
+                         i, *partner, box);
           if(distSq < rCutCoulombSq){
             dist = sqrt(distSq);
             if (isGrossWolf){
@@ -567,8 +567,8 @@ double Wolf::SwapCorrection(const cbmc::TrialMol& trialMol,
       const uint* end = thisKind.sortedNB.End(i);
       while (partner != end) {
           // Need to check for cutoff for all kinds
-          currentAxes.InRcut(distSq, virComponents, currentCoords,
-                            start + i, start + (*partner), box); 
+          currentAxes.InRcut(distSq, virComponents, trialMol.GetCoords(),
+                         i, *partner, box);
           if(distSq < rCutCoulombSq){
             dist = sqrt(distSq);
             if (isGrossWolf){
