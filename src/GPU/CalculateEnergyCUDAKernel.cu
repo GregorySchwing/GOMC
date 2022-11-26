@@ -38,7 +38,7 @@ void CallBoxInterGPU(VariablesCUDA *vars,
                      uint const box,
                      bool isWolf,
                      bool wolfCalibration,
-                     uint coulKind,
+                     int coulKind,
                      double rCutCoulomb,
                      double rCutCoulombSq,    
                      double wolfFactor1,
@@ -112,7 +112,7 @@ void CallBoxInterGPU(VariablesCUDA *vars,
     bool isEwald = !isWolf;
     cudaMemcpy(wolf_ptr, &isWolf, sizeof(bool), cudaMemcpyHostToDevice);
     cudaMemcpy(ewald_ptr, &isEwald, sizeof(bool), cudaMemcpyHostToDevice);
-    cudaMemcpy(vars->gpu_coulKind, &coulKind, sizeof(uint), cudaMemcpyHostToDevice);
+    cudaMemcpy(vars->gpu_coulKind, &coulKind, sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(&rCutCoulomb_ptr[box], &rCutCoulomb, sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(&rCutCoulombSq_ptr[box], &rCutCoulombSq, sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(&vars->gpu_wolfFactor1[box], &wolfFactor1, sizeof(double), cudaMemcpyHostToDevice);
