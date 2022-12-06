@@ -40,6 +40,7 @@ void Forcefield::Init(const Setup& set)
   dihedrals.Init(set.ff.dih);
   coulKind = set.config.sys.ff.COUL_KIND;
   wolfKind = set.config.sys.ff.WOLF_KIND;
+  wolfCalibration = set.config.out.wolfCalibration.settings.enable;
   // Only Vlugt Wolf alters the FF behavior by removing cutoffs for Intra Undampened
   if (wolfKind == 1){
     isVlugtWolf = true;
