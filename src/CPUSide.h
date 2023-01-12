@@ -30,7 +30,7 @@ class StaticVals;
 class OutputableBase;
 
 struct CPUSide {
-  CPUSide(System &sys, StaticVals &statV, Setup &set);
+  CPUSide(System &sys, StaticVals &statV, Setup &set, ulong & totSteps);
   void Init(PDBSetup const &pdbSet, config_setup::Input const &in,
             config_setup::Output const &out,
             config_setup::SystemVals const &sys, const ulong tillEquil,

@@ -39,7 +39,7 @@ Simulation::Simulation(char const *const configFileName,
   // initialized in system
   staticValues->InitOver(set, *system);
   system->InitOver(set, staticValues->mol);
-  cpu = new CPUSide(*system, *staticValues, set);
+  cpu = new CPUSide(*system, *staticValues, set, totalSteps);
   cpu->Init(set.pdb, set.config.in, set.config.out, set.config.sys,
             set.config.sys.step.equil, totalSteps, startStep);
 

@@ -10,8 +10,11 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "GOMC_Config.h"
 #include <limits>
 
-WolfCalibrationOutput::WolfCalibrationOutput(System & sys, StaticVals & statV, config_setup::SystemVals const &sysVals):
-sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV)
+WolfCalibrationOutput::WolfCalibrationOutput(System & sys, 
+                        StaticVals & statV, 
+                        config_setup::SystemVals const &sysVals,
+                        ulong & totSteps):
+sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV), totStepsRef(totSteps)
 {
       // This is neccessary to check for correctness of single point energy calculations.
       printOnFirstStep = true;
@@ -279,8 +282,10 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
             }
             outF.close();
       }
-      if (numSamples > 1)
-            AdaptiveUpdate();
+      // This will tell GOMC to terminate next step.
+      if (numSamples > 1 && AdaptiveUpdate())
+            totStepsRef = step + 1;
+
 }
 
 bool WolfCalibrationOutput::AdaptiveUpdate(){

@@ -11,11 +11,11 @@ along with this program, also can be found at
 #include "StaticVals.h"
 #include "System.h"
 
-CPUSide::CPUSide(System &sys, StaticVals &statV, Setup &set)
+CPUSide::CPUSide(System &sys, StaticVals &statV, Setup &set, ulong & totSteps)
     : varRef(sys, statV, set.mol.molVars.moleculeKindNames), pdb(sys, statV),
       psf(statV.mol, sys, set), xstBinary(sys, statV), console(varRef),
       block(varRef), hist(varRef), checkpoint(sys, statV, set),
-      wolfCalibration(sys, statV, set.config.sys)
+      wolfCalibration(sys, statV, set.config.sys, totSteps)
 #if ENSEMBLE == GCMC
       ,
       sample_N_E(varRef)

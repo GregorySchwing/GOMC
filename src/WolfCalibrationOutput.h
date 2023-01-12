@@ -37,7 +37,10 @@ const int WOLF_TOTAL_KINDS = 3;
 class WolfCalibrationOutput : public OutputableBase
 {
 public:
-  WolfCalibrationOutput(System & sys, StaticVals & statV, config_setup::SystemVals const &sysVals);
+  WolfCalibrationOutput(System & sys, 
+                        StaticVals & statV, 
+                        config_setup::SystemVals const &sysVals,
+                        ulong & totSteps);
 
   ~WolfCalibrationOutput();
 
@@ -60,6 +63,7 @@ private:
   System & sysRef;
   StaticVals & statValRef;
   CalculateEnergy & calcEn;
+  ulong & totStepsRef;
   uint stepsPerSample;
 
 
