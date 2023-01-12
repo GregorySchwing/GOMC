@@ -55,7 +55,7 @@ private:
 
   void WriteHeader();
   void WriteGraceParFile();
-  bool AdaptiveUpdate();
+  bool IsConverged();
 
   std::string GetString(double a, uint p);
   std::string GetString(ulong step);

@@ -283,27 +283,28 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
             outF.close();
       }
       // This will tell GOMC to terminate next step.
-      if (numSamples > 1 && AdaptiveUpdate())
+      if (numSamples > 1 && IsConverged())
             totStepsRef = step + 1;
 
 }
 
-bool WolfCalibrationOutput::AdaptiveUpdate(){
+bool WolfCalibrationOutput::IsConverged(){
       bool updated = false;
+
       for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
             std::swap(currentWolfAlpha[b], previousWolfAlpha[b]);
             currentWolfAlpha[b] = bestWolfAlpha[b];
             if (currentWolfAlpha[b] != previousWolfAlpha[b]){
                   printf("Adaptively updating box %d wolf alpha from %f to %f\n", b, previousWolfAlpha[b], currentWolfAlpha[b]);
                   statValRef.forcefield.SetWolfAlphaAndWolfFactors(currentWolfAlpha[b], b);
-                  updated = true;
                   convergenceCounter = 0;
+                  updated = true;
             }
       }
       if (!updated){
             printf("Incrementing convergence counter %d (%d to terminate)\n", convergenceCounter++, convergenceThreshold);
       }
-      return updated;
+      return convergenceCounter >= convergenceThreshold;
 }
 
 /*
