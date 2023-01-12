@@ -81,7 +81,6 @@ private:
   Welford<double> ewaldAvg[BOX_TOTAL];
   int numSamples;
   bool ewaldDriven;
-  bool adaptiveAlpha;
 
   int originalWolfKind;
   int originalCoulKind;

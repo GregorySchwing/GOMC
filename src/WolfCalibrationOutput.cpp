@@ -18,7 +18,6 @@ sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV), totStepsRef(totSteps)
 {
       // This is neccessary to check for correctness of single point energy calculations.
       printOnFirstStep = true;
-      adaptiveAlpha = sysVals.wolfCal.adaptiveAlpha;
       convergenceCounter = 0;
       convergenceThreshold = sysVals.wolfCal.convergenceThreshold;
 
@@ -259,18 +258,8 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
                               double best_a = wolfAlphaStart[b] + min_i*wolfAlphaDelta[b];
                               std::string title = WOLF_KINDS[wolfKind] + " " + COUL_KINDS[coulKind];
                               firstRow += title + "\t" + std::to_string(best_a) + "\n";
-                              if (adaptiveAlpha && wolfKind == originalWolfKind && coulKind == originalCoulKind && numSamples > 2){
-                                    std::swap(currentWolfAlpha[b], previousWolfAlpha[b]);
-                                    currentWolfAlpha[b] = best_a;
-                                    if (currentWolfAlpha[b] != previousWolfAlpha[b]){
-                                          printf("Adaptively updating box %d wolf alpha from %f to %f\n", b, previousWolfAlpha[b], currentWolfAlpha[b]);
-                                          statValRef.forcefield.SetWolfAlphaAndWolfFactors(currentWolfAlpha[b], b);
-                                    } else {
-                                          printf("Best alpha for box %d is still %f\n", b, previousWolfAlpha[b]);
-                                          printf("Incrementing convergence counter %d (%d to terminate)\n", convergenceCounter++, convergenceThreshold);
-                                          
-                                    }
-                              }
+                              if (wolfKind == originalWolfKind && coulKind == originalCoulKind)
+                                    bestWolfAlpha[b] = best_a;
                         }
                   }
                   firstRow += "\n";
@@ -292,11 +281,25 @@ bool WolfCalibrationOutput::IsConverged(){
       bool updated = false;
 
       for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
-            std::swap(currentWolfAlpha[b], previousWolfAlpha[b]);
+            previousWolfAlpha[b] = currentWolfAlpha[b];
             currentWolfAlpha[b] = bestWolfAlpha[b];
             if (currentWolfAlpha[b] != previousWolfAlpha[b]){
-                  printf("Adaptively updating box %d wolf alpha from %f to %f\n", b, previousWolfAlpha[b], currentWolfAlpha[b]);
-                  statValRef.forcefield.SetWolfAlphaAndWolfFactors(currentWolfAlpha[b], b);
+                  if (!ewaldDriven){
+                        printf("Adaptively updating box %d wolf alpha from %f to %f\n", b, previousWolfAlpha[b], currentWolfAlpha[b]);
+                        statValRef.forcefield.SetWolfAlphaAndWolfFactors(currentWolfAlpha[b], b);
+                        #ifdef GOMC_CUDA
+                        statValRef.forcefield.particles->updateWolfEwald();
+                        #endif
+                        numSamples = 0;
+                        for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
+                              for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
+                                    for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){
+                                          sumRelativeErrorVec[b][wolfKind][coulKind].clear();
+                                          sumRelativeErrorVec[b][wolfKind][coulKind].resize(alphaSize[b]);
+                                    }
+                              }
+                        }
+                  }
                   convergenceCounter = 0;
                   updated = true;
             }

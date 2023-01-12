@@ -786,8 +786,6 @@ void ConfigSetup::Init(const char *fileName, MultiSim const *const &multisim) {
           exit(EXIT_FAILURE);
 
         }      
-    } else if (CheckString(line[0], "WolfCalibrationAdaptive")){
-      sys.wolfCal.adaptiveAlpha = checkBool(line[1]);
     } else if (CheckString(line[0], "WolfCalibrationThreshold")){
       sys.wolfCal.convergenceThreshold = stringtoi(line[1]);
     } else if (CheckString(line[0], "Tolerance")) {
