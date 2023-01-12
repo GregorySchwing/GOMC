@@ -821,12 +821,16 @@ struct FreeEnergy {
 };
 
 struct WolfCalibration {
+  bool adaptiveAlpha;
+  int convergenceThreshold;
   bool wolfAlphaRangeRead[BOX_TOTAL];
   double wolfAlphaStart[BOX_TOTAL];
   double wolfAlphaEnd[BOX_TOTAL];
   double wolfAlphaDelta[BOX_TOTAL];
   WolfCalibration(void)
   {
+    adaptiveAlpha = true;
+    convergenceThreshold = 2;
     for (uint b = 0; b < BOX_TOTAL; ++b) {
       wolfAlphaRangeRead[b] = false;
       wolfAlphaStart[b] = 0.0;

@@ -52,6 +52,7 @@ private:
 
   void WriteHeader();
   void WriteGraceParFile();
+  bool AdaptiveUpdate();
 
   std::string GetString(double a, uint p);
   std::string GetString(ulong step);
@@ -76,9 +77,16 @@ private:
   Welford<double> ewaldAvg[BOX_TOTAL];
   int numSamples;
   bool ewaldDriven;
-  double orignalWolfAlpha[BOX_TOTAL];
+  bool adaptiveAlpha;
+
   int originalWolfKind;
   int originalCoulKind;
+
+  double currentWolfAlpha[BOX_TOTAL];
+  double previousWolfAlpha[BOX_TOTAL];
+  double bestWolfAlpha[BOX_TOTAL];
+
+  int convergenceCounter, convergenceThreshold;
 
 };
 
