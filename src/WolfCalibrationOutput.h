@@ -69,16 +69,16 @@ private:
   double wolfAlphaEnd[BOX_TOTAL];
   double wolfAlphaDelta[BOX_TOTAL];
   int alphaSize[BOX_TOTAL];
-  std::vector<Welford<double>> sumRelativeErrorVec[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS];
-  //std::vector<std::vector<double>> relativeErrorVec[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS];
-  double *relativeError[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS];
+  std::vector<Welford<double>> sumRelativeErrorVec[BOX_TOTAL];
+  //std::vector<std::vector<double>> relativeErrorVec[BOX_TOTAL];
+  double *relativeError[BOX_TOTAL];
 
   Welford<double> ewaldAvg[BOX_TOTAL];
   int numSamples;
   bool ewaldDriven;
   double orignalWolfAlpha[BOX_TOTAL];
-  int originalWolfKind;
-  int originalCoulKind;
+  int wolfKind;
+  int coulKind;
 
 };
 
