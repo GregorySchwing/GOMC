@@ -49,7 +49,6 @@ public:
 
 private:
   std::string getFileName(int b, int wolfKind, int coulKind, std::string uniqueName);
-
   void WriteHeader();
   void WriteGraceParFile();
 
@@ -65,18 +64,15 @@ private:
   std::ofstream outF;
   std::string name;
   
-  double wolfAlphaStart[BOX_TOTAL];
-  double wolfAlphaEnd[BOX_TOTAL];
-  double wolfAlphaDelta[BOX_TOTAL];
-  int alphaSize[BOX_TOTAL];
-  std::vector<Welford<double>> sumRelativeErrorVec[BOX_TOTAL];
-  //std::vector<std::vector<double>> relativeErrorVec[BOX_TOTAL];
-  double *relativeError[BOX_TOTAL];
+  double wolfAlpha[BOX_TOTAL];
 
+  Welford<double> relativeErrorMean[BOX_TOTAL];
+  double relativeErrorInstantaneous[BOX_TOTAL];
+  Welford<double> wolfAvg[BOX_TOTAL];
   Welford<double> ewaldAvg[BOX_TOTAL];
+
   int numSamples;
   bool ewaldDriven;
-  double orignalWolfAlpha[BOX_TOTAL];
   int wolfKind;
   int coulKind;
 
