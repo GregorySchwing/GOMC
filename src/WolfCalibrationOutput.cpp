@@ -178,13 +178,9 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
                         double a = wolfAlphaStart[b] + i*wolfAlphaDelta[b];
                         std::string firstRow = "";
                         firstRow += std::to_string(a) + "\t";
-                        for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
-                              for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){ 
-                                    double min_err = 100.00*((sumRelativeErrorVec[b][i].mean()-ewaldAvg[b].mean())/ewaldAvg[b].mean());
-                                    firstRow += std::to_string(min_err) + "\t";
-                                    //firstRow += std::to_string(sumRelativeError[b][i]/numSamples) + "\t";
-                              }
-                        }
+                        double min_err = 100.00*((sumRelativeErrorVec[b][i].mean()-ewaldAvg[b].mean())/ewaldAvg[b].mean());
+                        firstRow += std::to_string(min_err) + "\t";
+                        //firstRow += std::to_string(sumRelativeError[b][i]/numSamples) + "\t";
                         firstRow += "\n";
                         outF << firstRow;
                   }
@@ -197,25 +193,21 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
       }
 
       for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
-            for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
-                  for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){
-                        outF.open((getFileName(b, wolfKind, coulKind, uniqueName)+".dat").c_str(), std::ofstream::app);            
-                        if (outF.is_open()) {
-                              std::string row = "";
-                              row += GetString(step);
-                              row += "\t";
-                              for (uint i = 0; i < alphaSize[b]; ++i) {
-                                    row += std::to_string(100.00*relativeError[b][i]);
-                                    row += "\t";
-                              }
-                              outF << row << std::endl;
-                        } else {
-                              std::cerr << "Unable to write to file \"" <<  name << "\" "
-                                          << "(Wolf Calibration file)" << std::endl;
-                        }
-                        outF.close();
+            outF.open((getFileName(b, wolfKind, coulKind, uniqueName)+".dat").c_str(), std::ofstream::app);            
+            if (outF.is_open()) {
+                  std::string row = "";
+                  row += GetString(step);
+                  row += "\t";
+                  for (uint i = 0; i < alphaSize[b]; ++i) {
+                        row += std::to_string(100.00*relativeError[b][i]);
+                        row += "\t";
                   }
+                  outF << row << std::endl;
+            } else {
+                  std::cerr << "Unable to write to file \"" <<  name << "\" "
+                              << "(Wolf Calibration file)" << std::endl;
             }
+            outF.close();
       }
       for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
             outF.open((uniqueName + "_WOLF_CALIBRATION_BOX_" + std::to_string(b) + "_" + WOLF_KINDS[wolfKind] + "_" + COUL_KINDS[coulKind] + "_BEST_ALPHA.csv").c_str(), std::ofstream::out);
