@@ -21,6 +21,7 @@ sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV)
       wolfKind = statV.forcefield.GetWolfKind();
       coulKind = statV.forcefield.GetCoulKind();
       for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
+            printf("WOLF ALPHA %f\n", statV.forcefield.GetWolfAlpha(b));
             wolfAlpha[b] = statV.forcefield.GetWolfAlpha(b);
       }
 }
