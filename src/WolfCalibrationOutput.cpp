@@ -191,7 +191,9 @@ void WolfCalibrationOutput::Sample(const ulong step) {
             ewaldRef = calcEn.WolfCalSystemTotal();
             ewaldRef.Total();
             std::swap(statValRef.forcefield.ewald, statValRef.forcefield.wolf);
-
+            #ifdef GOMC_CUDA
+            statValRef.forcefield.particles->updateWolfEwald();
+            #endif
       }
 
       for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
@@ -207,12 +209,6 @@ void WolfCalibrationOutput::Sample(const ulong step) {
             relativeErrorMean[b].add_value((wolfTot.boxEnergy[b].totalElect-ewaldRef.boxEnergy[b].totalElect)/ewaldRef.boxEnergy[b].totalElect);
             //relativeErrorVec[b][i].push_back((wolfTot.boxEnergy[b].totalElect-ewaldRef.boxEnergy[b].totalElect)/ewaldRef.boxEnergy[b].totalElect);
             relativeErrorInstantaneous[b] = ((wolfTot.boxEnergy[b].totalElect-ewaldRef.boxEnergy[b].totalElect)/ewaldRef.boxEnergy[b].totalElect);
-      }
-      if (ewaldDriven){
-            std::swap(statValRef.forcefield.ewald, statValRef.forcefield.wolf);
-            #ifdef GOMC_CUDA
-            statValRef.forcefield.particles->updateWolfEwald();
-            #endif
       }
 }
 
