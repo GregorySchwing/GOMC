@@ -22,7 +22,10 @@ sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV)
       coulKind = statV.forcefield.GetCoulKind();
       for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
             wolfAlpha[b] = statV.forcefield.GetWolfAlpha(b);
+            // In case of Ewald driven.
+            statV.forcefield.SetWolfAlphaAndWolfFactors(wolfAlpha[b], b);
       }
+
 }
 
 WolfCalibrationOutput::~WolfCalibrationOutput()
@@ -209,6 +212,12 @@ void WolfCalibrationOutput::Sample(const ulong step) {
             relativeErrorMean[b].add_value((wolfTot.boxEnergy[b].totalElect-ewaldRef.boxEnergy[b].totalElect)/ewaldRef.boxEnergy[b].totalElect);
             //relativeErrorVec[b][i].push_back((wolfTot.boxEnergy[b].totalElect-ewaldRef.boxEnergy[b].totalElect)/ewaldRef.boxEnergy[b].totalElect);
             relativeErrorInstantaneous[b] = ((wolfTot.boxEnergy[b].totalElect-ewaldRef.boxEnergy[b].totalElect)/ewaldRef.boxEnergy[b].totalElect);
+      }
+      if (ewaldDriven){
+            std::swap(statValRef.forcefield.ewald, statValRef.forcefield.wolf);
+            #ifdef GOMC_CUDA
+            statValRef.forcefield.particles->updateWolfEwald();
+            #endif
       }
 }
 
