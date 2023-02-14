@@ -76,6 +76,8 @@ private:
   Welford<double> ewaldAvg[BOX_TOTAL];
   int numSamples;
   bool ewaldDriven;
+  bool useEwaldToOBtainInitialAlpha;
+  bool orignalWolfAlphaProvided[BOX_TOTAL];
   double orignalWolfAlpha[BOX_TOTAL];
   int originalWolfKind;
   int originalCoulKind;

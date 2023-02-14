@@ -1907,6 +1907,7 @@ void ConfigSetup::verifyInputs(void) {
   if(out.wolfCalibration.settings.enable){
     bool readAllRequired = true;
     for(i = 0 ; i < BOXES_WITH_U_NB ; i++) {
+      sys.wolfCal.wolfAlphaRead[i] = sys.elect.readWolfAlpha[i];
       readAllRequired &= sys.wolfCal.wolfAlphaRangeRead[i];
     }
     if(!readAllRequired){

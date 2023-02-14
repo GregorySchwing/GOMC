@@ -18,9 +18,12 @@ sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV)
       //printOnFirstStep = false;
       numSamples = 0;
       ewaldDriven = statV.forcefield.ewald;
+      useEwaldToOBtainInitialAlpha = !ewaldDriven;
       originalWolfKind = statV.forcefield.GetWolfKind();
       originalCoulKind = statV.forcefield.GetCoulKind();
       for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
+            orignalWolfAlphaProvided[b] = sysVals.wolfCal.wolfAlphaRead[b];
+            useEwaldToOBtainInitialAlpha &= !sysVals.wolfCal.wolfAlphaRead[b];
             orignalWolfAlpha[b] = statV.forcefield.GetWolfAlpha(b);
             if(sysVals.wolfCal.wolfAlphaRangeRead[b]){
                   wolfAlphaStart[b] = sysVals.wolfCal.wolfAlphaStart[b];
@@ -43,6 +46,7 @@ sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV)
                   }
             }
       }
+
 }
 
 WolfCalibrationOutput::~WolfCalibrationOutput()
