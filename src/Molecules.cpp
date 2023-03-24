@@ -126,12 +126,14 @@ void Molecules::Init(Setup &setup, Forcefield &forcefield, System &sys) {
         }
       }
     }
-
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(8) << netCharge;
+    std::string netChargeString = ss.str();
     if (std::abs(netCharge) > 10E-7) {
       std::cout << "================================================"
                 << std::endl
                 << std::endl
-                << "Warning: Sum of the charge in the system is: " << netCharge
+                << "Warning: Sum of the charge in the system is: " << netChargeString
                 << std::endl
                 << std::endl
                 << "================================================"
