@@ -60,6 +60,7 @@ void PSFOutput::Init(pdb_setup::Atoms const &atoms,
   sstrm::Converter toStr;
   enableRestOut = output.restart.settings.enable || forceOutput;
   stepsRestPerOut = output.restart.settings.frequency;
+  DoOutput(startStep);
   if (enableRestOut) {
     for (uint b = 0; b < BOX_TOTAL; ++b) {
       // Get alias string, based on box #.
