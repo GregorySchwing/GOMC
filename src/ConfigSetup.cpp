@@ -1886,8 +1886,8 @@ void ConfigSetup::verifyInputs(void) {
     }
   }
 
-  if (abs(sys.moves.multiParticle) > 0.0000001 &&
-      abs(sys.moves.multiParticleBrownian) > 0.0000001) {
+  if (std::abs(sys.moves.multiParticle) > 0.0000001 &&
+      std::abs(sys.moves.multiParticleBrownian) > 0.0000001) {
     std::cout << "Error: Both multi-Particle and multi-Particle Brownian! "
               << " cannot be used at the same time!" << std::endl;
     exit(EXIT_FAILURE);
@@ -2253,8 +2253,8 @@ void ConfigSetup::verifyInputs(void) {
   }
 
   if (!sys.volume.hasVolume && !in.restart.enable) {
-    std::cout << "Error: This simulation requires to define " << 3 * BOX_TOTAL
-              << " Cell Basis vectors!" << std::endl;
+    std::cout << "Error: This simulation requires the user define "
+              << 3 * BOX_TOTAL << " Cell Basis vectors!" << std::endl;
     for (uint b = 0; b < BOX_TOTAL; b++) {
       for (uint i = 0; i < 3; i++) {
         if (!sys.volume.readCellBasis[b][i]) {
