@@ -721,7 +721,7 @@ Virial CalculateEnergy::WolfCalVirialCalc(const uint box) {
 reduction(+:vT11, vT12, vT13, vT22, vT23, vT33, rT11, rT12, rT13, rT22, rT23, rT33)
 #else
 #pragma omp parallel for default(none) shared(cellStartIndex, cellVector, \
-  mapParticleToCell, neighborList) \
+  mapParticleToCell, neighborList, box) \
 reduction(+:vT11, vT12, vT13, vT22, vT23, vT33, rT11, rT12, rT13, rT22, rT23, rT33)
 #endif
 #endif
