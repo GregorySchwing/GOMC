@@ -131,7 +131,12 @@ void CallBoxInterForceGPU(
       vars->gpu_Invcell_y[box], vars->gpu_Invcell_z[box], vars->gpu_nonOrth,
       sc_coul, sc_sigma_6, sc_alpha, sc_power, vars->gpu_rMin, vars->gpu_rMaxSq,
       vars->gpu_expConst, vars->gpu_molIndex, vars->gpu_lambdaVDW,
-      vars->gpu_lambdaCoulomb, vars->gpu_isFraction, box);
+      vars->gpu_lambdaCoulomb, vars->gpu_isFraction, box,
+      vars->gpu_wolf,
+      vars->gpu_coulKind,
+      vars->gpu_wolfAlpha,
+      vars->gpu_wolfFactor1,
+      vars->gpu_wolfFactor2);
   checkLastErrorCUDA(__FILE__, __LINE__);
   cudaDeviceSynchronize();
   // ReduceSum // Virial of LJ
@@ -475,7 +480,12 @@ __global__ void BoxInterForceGPU(
     double *gpu_Invcell_z, int *gpu_nonOrth, bool sc_coul, double sc_sigma_6,
     double sc_alpha, uint sc_power, double *gpu_rMin, double *gpu_rMaxSq,
     double *gpu_expConst, int *gpu_molIndex, double *gpu_lambdaVDW,
-    double *gpu_lambdaCoulomb, bool *gpu_isFraction, int box) {
+    double *gpu_lambdaCoulomb, bool *gpu_isFraction, int box,
+    int *gpu_wolf,
+    int *gpu_coulKind,
+    double * gpu_wolfAlpha,
+    double * gpu_wolfFactor1,
+    double * gpu_wolfFactor2) {
   double distSq;
   double3 virComponents;
 
