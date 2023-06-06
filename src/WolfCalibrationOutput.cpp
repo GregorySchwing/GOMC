@@ -20,9 +20,11 @@ sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV)
       ewaldDriven = statV.forcefield.ewald;
       originalWolfKind = statV.forcefield.GetWolfKind();
       originalCoulKind = statV.forcefield.GetCoulKind();
+      for (int i = 0; i < BOXES_WITH_U_NB; ++i)
+            wolfAlphaRangeRead[i]=sysVals.wolfCal.wolfAlphaRangeRead[i];
       for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
             orignalWolfAlpha[b] = statV.forcefield.GetWolfAlpha(b);
-            if(sysVals.wolfCal.wolfAlphaRangeRead[b]){
+            if(wolfAlphaRangeRead[b]){
                   wolfAlphaStart[b] = sysVals.wolfCal.wolfAlphaStart[b];
                   wolfAlphaEnd[b] = sysVals.wolfCal.wolfAlphaEnd[b];
                   wolfAlphaDelta[b] = sysVals.wolfCal.wolfAlphaDelta[b];
@@ -32,28 +34,19 @@ sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV)
                   }
             }
       }
-      for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
-            if(sysVals.wolfCal.wolfAlphaRangeRead[b]){
-                  for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
-                        for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){
-                              sumRelativeErrorVec[b][wolfKind][coulKind].resize(alphaSize[b]);
-                              //relativeErrorVec[b][wolfKind][coulKind].resize(alphaSize[b]);
-                              relativeError[b][wolfKind][coulKind] = new double[alphaSize[b]];
-                        }
-                  }
-            }
-      }
 }
 
 WolfCalibrationOutput::~WolfCalibrationOutput()
 {
+
       for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
-            for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
-                  for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){
-                        if (relativeError[b][wolfKind][coulKind] != NULL)
-                              delete relativeError[b][wolfKind][coulKind];
+            if(wolfAlphaRangeRead[b])
+                  for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
+                        for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){
+                              if (relativeError[b][wolfKind][coulKind] != NULL)
+                                    delete relativeError[b][wolfKind][coulKind];
+                        }
                   }
-            }
       }
 }
 
@@ -66,6 +59,17 @@ void WolfCalibrationOutput::Init(pdb_setup::Atoms const& atoms,
       if(enableOut) {
             WriteHeader();
             WriteGraceParFile();
+            for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
+                  if(wolfAlphaRangeRead[b]){
+                        for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
+                              for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){
+                                    sumRelativeErrorVec[b][wolfKind][coulKind].resize(alphaSize[b]);
+                                    //relativeErrorVec[b][wolfKind][coulKind].resize(alphaSize[b]);
+                                    relativeError[b][wolfKind][coulKind] = new double[alphaSize[b]];
+                              }
+                        }
+                  }
+            }
       }
 }
 
