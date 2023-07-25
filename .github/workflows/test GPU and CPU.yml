@@ -6,7 +6,7 @@ on:
     branches: [ main ]
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: Ubuntu 10.04
     steps:
     - uses: actions/checkout@v2
     # install and cache dependencies
@@ -15,7 +15,7 @@ jobs:
       id: cache-boost
       with:
         path: "~/boost"
-        key: libboost1.65-dev
+        key: libboost1.54-all-dev
     - name: Install boost
       env:
         CACHE_HIT: ${{steps.cache-boost.outputs.cache-hit}}
