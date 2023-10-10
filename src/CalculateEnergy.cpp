@@ -667,7 +667,7 @@ reduction(+:vT11, vT12, vT13, vT22, vT23, vT33, rT11, rT12, rT13, rT22, rT23, rT
 // NOTE: The calculation of W12, W13, and W23 is expensive and would not be
 // required for pressure and surface tension calculation. So, they have been
 // commented out. If you need to calculate them, uncomment them.
-Virial CalculateEnergy::WolfCalVirialCalc(const uint box) {
+Virial CalculateEnergy::WolfCalVirialCalc(uint box) {
   // store virial and energy of reference and modify the virial
   Virial tempVir;
   // no need to calculate the virial for reservoir
