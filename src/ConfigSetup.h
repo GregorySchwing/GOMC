@@ -821,10 +821,17 @@ struct FreeEnergy {
 };
 
 struct WolfCalibration {
+
   bool wolfAlphaRangeRead[BOX_TOTAL];
   double wolfAlphaStart[BOX_TOTAL];
   double wolfAlphaEnd[BOX_TOTAL];
   double wolfAlphaDelta[BOX_TOTAL];
+
+  bool wolfCutoffCoulombRangeRead[BOX_TOTAL];
+  double wolfCutoffCoulombStart[BOX_TOTAL];
+  double wolfCutoffCoulombEnd[BOX_TOTAL];
+  double wolfCutoffCoulombDelta[BOX_TOTAL];
+
   WolfCalibration(void)
   {
     for (uint b = 0; b < BOX_TOTAL; ++b) {
@@ -832,6 +839,11 @@ struct WolfCalibration {
       wolfAlphaStart[b] = 0.0;
       wolfAlphaEnd[b] = 0.0;
       wolfAlphaDelta[b] = 0.0;
+
+      wolfCutoffCoulombRangeRead[b] = false;
+      wolfCutoffCoulombStart[b] = 0.0;
+      wolfCutoffCoulombEnd[b] = 0.0;
+      wolfCutoffCoulombDelta[b] = 0.0;
     }
   }
 };

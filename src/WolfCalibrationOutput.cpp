@@ -20,10 +20,12 @@ sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV)
       ewaldDriven = statV.forcefield.ewald;
       originalWolfKind = statV.forcefield.GetWolfKind();
       originalCoulKind = statV.forcefield.GetCoulKind();
-      for (int i = 0; i < BOXES_WITH_U_NB; ++i)
+      for (int i = 0; i < BOXES_WITH_U_NB; ++i){
             wolfAlphaRangeRead[i]=sysVals.wolfCal.wolfAlphaRangeRead[i];
+            wolfCutoffCoulombRangeRead[i]=sysVals.wolfCal.wolfCutoffCoulombRangeRead[i];
+      }
       for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
-            orignalWolfAlpha[b] = statV.forcefield.GetWolfAlpha(b);
+            originalWolfAlpha[b] = statV.forcefield.GetWolfAlpha(b);
             if(wolfAlphaRangeRead[b]){
                   wolfAlphaStart[b] = sysVals.wolfCal.wolfAlphaStart[b];
                   wolfAlphaEnd[b] = sysVals.wolfCal.wolfAlphaEnd[b];
@@ -31,6 +33,18 @@ sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV)
                   alphaSize[b] = 0;
                   for (double a = wolfAlphaStart[b]; a <= wolfAlphaEnd[b]; a+=wolfAlphaDelta[b]){
                         alphaSize[b] += 1;
+                  }
+            }
+
+            originalCutoffCoulomb[b] = statV.forcefield.GetRCutCoulomb(b);
+            originalCutoffCoulombSq[b] = statV.forcefield.GetRCutCoulombSq(b);
+            if(wolfCutoffCoulombRangeRead[b]){
+                  wolfCutoffCoulombStart[b] = sysVals.wolfCal.wolfCutoffCoulombStart[b];
+                  wolfCutoffCoulombEnd[b] = sysVals.wolfCal.wolfCutoffCoulombEnd[b];
+                  wolfCutoffCoulombDelta[b] = sysVals.wolfCal.wolfCutoffCoulombDelta[b];
+                  cutoffCoulombSize[b] = 0;
+                  for (double a = wolfCutoffCoulombStart[b]; a <= wolfCutoffCoulombEnd[b]; a+=wolfCutoffCoulombDelta[b]){
+                        cutoffCoulombSize[b] += 1;
                   }
             }
       }
@@ -60,10 +74,10 @@ void WolfCalibrationOutput::Init(pdb_setup::Atoms const& atoms,
             WriteHeader();
             WriteGraceParFile();
             for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
-                  if(wolfAlphaRangeRead[b]){
+                  if(wolfAlphaRangeRead[b] && wolfCutoffCoulombRangeRead[b]){
                         for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
                               for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){
-                                    sumRelativeErrorVec[b][wolfKind][coulKind].resize(alphaSize[b]);
+                                    sumRelativeErrorVec[b][wolfKind][coulKind].resize(alphaSize[b]*cutoffCoulombSize[b]);
                                     //relativeErrorVec[b][wolfKind][coulKind].resize(alphaSize[b]);
                                     relativeError[b][wolfKind][coulKind] = new double[alphaSize[b]];
                               }
@@ -335,8 +349,13 @@ void WolfCalibrationOutput::Sample(const ulong step) {
                         statValRef.forcefield.SetCoulKind(coulKind);
                         for (uint i = 0; i < alphaSize[b]; ++i) {
                               double a = wolfAlphaStart[b] + i*wolfAlphaDelta[b];
+                              // Generate a random number (0 or 1)
+                              int randomNum = rand() % 2;
+
+                              // Use a conditional statement to choose between 'a' and 'b'
+                              double newRcut = (randomNum == 0) ? wolfCutoffCoulombStart[b] : wolfCutoffCoulombEnd[b];
                               // Wolf class has references to these forcefield values
-                              statValRef.forcefield.SetWolfAlphaAndWolfFactors(a, b);
+                              statValRef.forcefield.SetWolfAlphaAndWolfFactors(newRcut, a, b);
                               #ifdef GOMC_CUDA
                               statValRef.forcefield.particles->updateWolfEwald();
                               #endif
@@ -363,7 +382,7 @@ void WolfCalibrationOutput::Sample(const ulong step) {
             statValRef.forcefield.SetCoulKind(originalCoulKind);
             statValRef.forcefield.SetWolfKind(originalWolfKind);
             for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
-                  statValRef.forcefield.SetWolfAlphaAndWolfFactors(orignalWolfAlpha[b], b);
+                  statValRef.forcefield.SetWolfAlphaAndWolfFactors(originalCutoffCoulomb[b], originalWolfAlpha[b], b);
             }
             #ifdef GOMC_CUDA
             statValRef.forcefield.particles->updateWolfEwald();
@@ -388,4 +407,9 @@ std::string WolfCalibrationOutput::GetString(ulong step)
       std::stringstream ss;
       ss << step;
       return ss.str();
+}
+
+// One row has a constant alpha and a varying Rcut
+int WolfCalibrationOutput::GetIndex(int RCutIndex, int alphaIndex, int b){
+      return alphaIndex*cutoffCoulombSize[b] + RCutIndex;
 }

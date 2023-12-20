@@ -786,6 +786,20 @@ void ConfigSetup::Init(const char *fileName, MultiSim const *const &multisim) {
           exit(EXIT_FAILURE);
 
         }      
+    } else if (CheckString(line[0], "WolfCutoffCoulombRange")){
+        if(line.size() == 5) {
+          uint b = stringtoi(line[1]);
+          sys.wolfCal.wolfCutoffCoulombRangeRead[b] = true;
+          sys.wolfCal.wolfCutoffCoulombStart[b] = stringtod(line[2]);
+          sys.wolfCal.wolfCutoffCoulombEnd[b] = stringtod(line[3]);
+          sys.wolfCal.wolfCutoffCoulombDelta[b] = stringtod(line[4]);
+          printf("%-40s %d %-8s %-1.3E %-8s %-1.3E %-8s %-1.3E\n", "Info: Wolf Cutoff Coulomb Range Box", b, 
+          "START", sys.wolfCal.wolfCutoffCoulombStart[b], "END", sys.wolfCal.wolfCutoffCoulombEnd[b],  
+          "DELTA", sys.wolfCal.wolfCutoffCoulombDelta[b]);
+        } else {
+          std::cout <<  "Error: WolfCutoffCoulombRange requires 4 arguments!" << std::endl <<
+          "Usage: WolfCutoffCoulombRange\tBOX\tSTART\tEND\tDELTA" << std::endl;
+        }
     } else if (CheckString(line[0], "Tolerance")) {
       sys.elect.tolerance = stringtod(line[1]);
       printf("%-40s %-1.3E \n", "Info: Ewald Summation Tolerance",
@@ -1908,10 +1922,20 @@ void ConfigSetup::verifyInputs(void) {
     bool readAllRequired = true;
     for(i = 0 ; i < BOXES_WITH_U_NB ; i++) {
       readAllRequired &= sys.wolfCal.wolfAlphaRangeRead[i];
+      readAllRequired &= sys.wolfCal.wolfCutoffCoulombRangeRead[i];
     }
     if(!readAllRequired){
-      printf("Error: Wolf Calibration alpha range is not set for all boxes!");
+      printf("Error: Wolf Calibration alpha and Rcut ranges are not set for all boxes!");
       exit(EXIT_FAILURE);
+    }
+    // Make sure I can check smaller RCutCoulombs without missing pairs.
+    for(int b = 0 ; b < BOXES_WITH_U_NB ; b++) {
+
+      if (sys.elect.cutoffCoulomb[b] < sys.wolfCal.wolfCutoffCoulombEnd[b]){
+        printf("%s %-d max(CutoffCoulomb %4.4f A, %4.4f A) = %4.4f A\n", "Warning: Setting Box ", b,
+               sys.elect.cutoffCoulomb[b], sys.wolfCal.wolfCutoffCoulombEnd[b], std::max(sys.elect.cutoffCoulomb[b],sys.wolfCal.wolfCutoffCoulombEnd[b]));
+        sys.elect.cutoffCoulomb[b] = std::max(sys.elect.cutoffCoulomb[b],sys.wolfCal.wolfCutoffCoulombEnd[b]);
+      }
     }
     //if (sys.elect.ewald == false){
     //  printf("Error: Wolf Calibration requires Ewald be true!");

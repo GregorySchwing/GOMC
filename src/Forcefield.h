@@ -40,7 +40,12 @@ public:
   void SetWolfKind(uint);
   void SetCoulKind(uint); 
   void SetWolfAlphaAndWolfFactors(double, uint);
+  void SetWolfAlphaAndWolfFactors(double, double, uint);
+  void SetRCutCoulomb(double, uint);
+
   double GetWolfAlpha(uint);
+  double GetRCutCoulomb(uint);
+  double GetRCutCoulombSq(uint);
   BOX_SIZE_DOUBLE_ARRAY& GetWolfAlpha(void);
   BOX_SIZE_DOUBLE_ARRAY& GetWolfFactor1(void);
   BOX_SIZE_DOUBLE_ARRAY& GetWolfFactor2(void);
