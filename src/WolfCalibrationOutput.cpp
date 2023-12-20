@@ -387,7 +387,7 @@ void WolfCalibrationOutput::Sample(const ulong step) {
                                     double rCutCoulomb = wolfCutoffCoulombStart[b] + RCutIndex*wolfCutoffCoulombDelta[b];
                                     // Wolf class has references to these forcefield values
                                     statValRef.forcefield.SetWolfAlphaAndWolfFactors(rCutCoulomb, alpha, b);
-                                    sysRef.boxDimRef.UpdateRCut(statValRef.forcefield,b);
+                                    //sysRef.boxDimRef.UpdateRCut(statValRef.forcefield,b);
                                     #ifdef GOMC_CUDA
                                     statValRef.forcefield.particles->updateWolfEwald();
                                     #endif
@@ -410,7 +410,7 @@ void WolfCalibrationOutput::Sample(const ulong step) {
             std::swap(statValRef.forcefield.ewald, statValRef.forcefield.wolf);
             for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
                   statValRef.forcefield.SetRCutCoulomb(originalCutoffCoulomb[b], b);
-                  sysRef.boxDimRef.UpdateRCut(statValRef.forcefield,b);
+                  //sysRef.boxDimRef.UpdateRCut(statValRef.forcefield,b);
             }
             #ifdef GOMC_CUDA
             statValRef.forcefield.particles->updateWolfEwald();
@@ -420,7 +420,7 @@ void WolfCalibrationOutput::Sample(const ulong step) {
             statValRef.forcefield.SetWolfKind(originalWolfKind);
             for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
                   statValRef.forcefield.SetWolfAlphaAndWolfFactors(originalCutoffCoulomb[b], originalWolfAlpha[b], b);
-                  sysRef.boxDimRef.UpdateRCut(statValRef.forcefield,b);
+                  //sysRef.boxDimRef.UpdateRCut(statValRef.forcefield,b);
             }
             #ifdef GOMC_CUDA
             statValRef.forcefield.particles->updateWolfEwald();
@@ -449,5 +449,5 @@ std::string WolfCalibrationOutput::GetString(ulong step)
 
 // One row has a constant alpha and a varying Rcut
 int WolfCalibrationOutput::GetIndex(int RCutIndex, int alphaIndex, int b){
-      return alphaIndex*alphaSize[b] + RCutIndex;
+      return alphaIndex*cutoffCoulombSize[b] + RCutIndex;
 }

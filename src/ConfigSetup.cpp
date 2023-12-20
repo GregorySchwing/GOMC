@@ -1928,6 +1928,15 @@ void ConfigSetup::verifyInputs(void) {
       printf("Error: Wolf Calibration alpha and Rcut ranges are not set for all boxes!");
       exit(EXIT_FAILURE);
     }
+    // Make sure I can check smaller RCutCoulombs without missing pairs.
+    for(int b = 0 ; b < BOXES_WITH_U_NB ; b++) {
+
+      if (sys.elect.cutoffCoulomb[b] < sys.wolfCal.wolfCutoffCoulombEnd[b]){
+        printf("%s %-d max(CutoffCoulomb %4.4f A, WolfCutoffCoulombRangeEnd %4.4f A) = %4.4f A\n", "Warning: Setting Box ", b,
+               sys.elect.cutoffCoulomb[b], sys.wolfCal.wolfCutoffCoulombEnd[b], std::max(sys.elect.cutoffCoulomb[b],sys.wolfCal.wolfCutoffCoulombEnd[b]));
+        sys.elect.cutoffCoulomb[b] = std::max(sys.elect.cutoffCoulomb[b],sys.wolfCal.wolfCutoffCoulombEnd[b]);
+      }
+    }
     //if (sys.elect.ewald == false){
     //  printf("Error: Wolf Calibration requires Ewald be true!");
     //  exit(EXIT_FAILURE);
