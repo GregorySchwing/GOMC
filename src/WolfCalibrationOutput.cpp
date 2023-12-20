@@ -20,10 +20,12 @@ sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV)
       ewaldDriven = statV.forcefield.ewald;
       originalWolfKind = statV.forcefield.GetWolfKind();
       originalCoulKind = statV.forcefield.GetCoulKind();
-      for (int i = 0; i < BOXES_WITH_U_NB; ++i)
+      for (int i = 0; i < BOXES_WITH_U_NB; ++i){
             wolfAlphaRangeRead[i]=sysVals.wolfCal.wolfAlphaRangeRead[i];
+            wolfCutoffCoulombRangeRead[i]=sysVals.wolfCal.wolfCutoffCoulombRangeRead[i];
+      }
       for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
-            orignalWolfAlpha[b] = statV.forcefield.GetWolfAlpha(b);
+            originalWolfAlpha[b] = statV.forcefield.GetWolfAlpha(b);
             if(wolfAlphaRangeRead[b]){
                   wolfAlphaStart[b] = sysVals.wolfCal.wolfAlphaStart[b];
                   wolfAlphaEnd[b] = sysVals.wolfCal.wolfAlphaEnd[b];
@@ -31,6 +33,17 @@ sysRef(sys), calcEn(sys.calcEnergy), statValRef(statV)
                   alphaSize[b] = 0;
                   for (double a = wolfAlphaStart[b]; a <= wolfAlphaEnd[b]; a+=wolfAlphaDelta[b]){
                         alphaSize[b] += 1;
+                  }
+            }
+            originalCutoffCoulomb[b] = statV.forcefield.GetRCutCoulomb(b);
+            originalCutoffCoulombSq[b] = statV.forcefield.GetRCutCoulombSq(b);
+            if(wolfCutoffCoulombRangeRead[b]){
+                  wolfCutoffCoulombStart[b] = sysVals.wolfCal.wolfCutoffCoulombStart[b];
+                  wolfCutoffCoulombEnd[b] = sysVals.wolfCal.wolfCutoffCoulombEnd[b];
+                  wolfCutoffCoulombDelta[b] = sysVals.wolfCal.wolfCutoffCoulombDelta[b];
+                  cutoffCoulombSize[b] = 0;
+                  for (double a = wolfCutoffCoulombStart[b]; a <= wolfCutoffCoulombEnd[b]; a+=wolfCutoffCoulombDelta[b]){
+                        cutoffCoulombSize[b] += 1;
                   }
             }
       }
@@ -60,10 +73,10 @@ void WolfCalibrationOutput::Init(pdb_setup::Atoms const& atoms,
             WriteHeader();
             WriteGraceParFile();
             for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
-                  if(wolfAlphaRangeRead[b]){
+                  if(wolfAlphaRangeRead[b] && wolfCutoffCoulombRangeRead[b]){
                         for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
                               for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){
-                                    sumRelativeErrorVec[b][wolfKind][coulKind].resize(alphaSize[b]);
+                                    sumRelativeErrorVec[b][wolfKind][coulKind].resize(alphaSize[b]*cutoffCoulombSize[b]);
                                     //relativeErrorVec[b][wolfKind][coulKind].resize(alphaSize[b]);
                                     relativeError[b][wolfKind][coulKind] = new double[alphaSize[b]];
                               }
@@ -183,6 +196,36 @@ void WolfCalibrationOutput::WriteGraceParFile()
 void WolfCalibrationOutput::DoOutput(const ulong step) {
       if (((step+1) < stepsTillEquil) || !(enableOut && ((step + 1) % stepsPerOut == 0)))
             return;
+
+      for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
+            for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
+                  for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){
+                        outF.open((getFileName(b, wolfKind, coulKind, uniqueName)+".dat").c_str(), std::ofstream::out);            
+                        if (outF.is_open()) {
+                              std::string firstRow = "";
+                              for (uint RCutIndex = 0; RCutIndex < cutoffCoulombSize[b]; ++RCutIndex) {
+                                    firstRow += ",";
+                                    double rCutCoulomb = wolfCutoffCoulombStart[b] + RCutIndex*wolfCutoffCoulombDelta[b];
+                                    firstRow += std::to_string(rCutCoulomb);
+                              }
+                              outF << firstRow << std::endl;
+                              for (uint alphaIndex = 0; alphaIndex < alphaSize[b]; ++alphaIndex) {
+                                    std::string dataRow = "";
+                                    double alpha = wolfAlphaStart[b] + alphaIndex*wolfAlphaDelta[b];
+                                    dataRow += std::to_string(alpha);
+                                    for (uint RCutIndex = 0; RCutIndex < cutoffCoulombSize[b]; ++RCutIndex) {
+                                          dataRow += ",";
+                                          double relativeError = 100.00*((sumRelativeErrorVec[b][wolfKind][coulKind][GetIndex(RCutIndex, alphaIndex, b)].mean()-ewaldAvg[b].mean())/ewaldAvg[b].mean());
+                                          dataRow += std::to_string(relativeError);
+                                    }
+                                    outF << dataRow << std::endl;
+                              }
+                              outF.close();
+                        }
+                  }
+            }
+      }
+      /*
       for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
             outF.open((uniqueName + "_WOLF_CALIBRATION_BOX_" + std::to_string(b) + ".dat").c_str(), std::ofstream::out);
             if (outF.is_open()) {
@@ -207,7 +250,9 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
             }
             outF.close();
       }
+      */
 
+      /*
       for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
             for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
                   for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){
@@ -229,6 +274,8 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
                   }
             }
       }
+      */
+      /*
       for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
             outF.open((uniqueName + "_WOLF_CALIBRATION_BOX_" + std::to_string(b) + "_BEST_ALPHAS.csv").c_str(), std::ofstream::out);
             if (outF.is_open()) {
@@ -269,6 +316,7 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
             }
             outF.close();
       }
+      */
 
 }
 
@@ -333,29 +381,37 @@ void WolfCalibrationOutput::Sample(const ulong step) {
                   statValRef.forcefield.SetWolfKind(wolfKind);
                   for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){
                         statValRef.forcefield.SetCoulKind(coulKind);
-                        for (uint i = 0; i < alphaSize[b]; ++i) {
-                              double a = wolfAlphaStart[b] + i*wolfAlphaDelta[b];
-                              // Wolf class has references to these forcefield values
-                              statValRef.forcefield.SetWolfAlphaAndWolfFactors(a, b);
-                              #ifdef GOMC_CUDA
-                              statValRef.forcefield.particles->updateWolfEwald();
-                              #endif
-                              SystemPotential wolfTot;
-                              if (ewaldDriven) {
-                                    wolfTot = calcEn.WolfCalSystemTotal();
-                              } else {
-                                    wolfTot = calcEn.SystemTotal();
+                        for (uint alphaIndex = 0; alphaIndex < alphaSize[b]; ++alphaIndex) {
+                              double alpha = wolfAlphaStart[b] + alphaIndex*wolfAlphaDelta[b];
+                              for (uint RCutIndex = 0; RCutIndex < cutoffCoulombSize[b]; ++RCutIndex) {
+                                    double rCutCoulomb = wolfCutoffCoulombStart[b] + RCutIndex*wolfCutoffCoulombDelta[b];
+                                    // Wolf class has references to these forcefield values
+                                    statValRef.forcefield.SetWolfAlphaAndWolfFactors(rCutCoulomb, alpha, b);
+                                    sysRef.boxDimRef.UpdateRCut(statValRef.forcefield,b);
+                                    #ifdef GOMC_CUDA
+                                    statValRef.forcefield.particles->updateWolfEwald();
+                                    #endif
+                                    SystemPotential wolfTot;
+                                    if (ewaldDriven) {
+                                          wolfTot = calcEn.WolfCalSystemTotal();
+                                    } else {
+                                          wolfTot = calcEn.SystemTotal();
+                                    }
+                                    //printf("WoAtStep %lu %d %d %f %.*e\n", step, wolfKind, coulKind, a, Digs, wolfTot.boxEnergy[b].totalElect);
+                                    sumRelativeErrorVec[b][wolfKind][coulKind][GetIndex(RCutIndex, alphaIndex, b)].add_value(wolfTot.boxEnergy[b].totalElect);
+                                    //relativeErrorVec[b][wolfKind][coulKind][i].push_back((wolfTot.boxEnergy[b].totalElect-ewaldRef.boxEnergy[b].totalElect)/ewaldRef.boxEnergy[b].totalElect);
+                                    //relativeError[b][wolfKind][coulKind][i] = ((wolfTot.boxEnergy[b].totalElect-ewaldRef.boxEnergy[b].totalElect)/ewaldRef.boxEnergy[b].totalElect);
                               }
-                              //printf("WoAtStep %lu %d %d %f %.*e\n", step, wolfKind, coulKind, a, Digs, wolfTot.boxEnergy[b].totalElect);
-                              sumRelativeErrorVec[b][wolfKind][coulKind][i].add_value(wolfTot.boxEnergy[b].totalElect);
-                              //relativeErrorVec[b][wolfKind][coulKind][i].push_back((wolfTot.boxEnergy[b].totalElect-ewaldRef.boxEnergy[b].totalElect)/ewaldRef.boxEnergy[b].totalElect);
-                              relativeError[b][wolfKind][coulKind][i] = ((wolfTot.boxEnergy[b].totalElect-ewaldRef.boxEnergy[b].totalElect)/ewaldRef.boxEnergy[b].totalElect);
                         }
                   }
             }
       }
       if (ewaldDriven){
             std::swap(statValRef.forcefield.ewald, statValRef.forcefield.wolf);
+            for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
+                  statValRef.forcefield.SetRCutCoulomb(originalCutoffCoulomb[b], b);
+                  sysRef.boxDimRef.UpdateRCut(statValRef.forcefield,b);
+            }
             #ifdef GOMC_CUDA
             statValRef.forcefield.particles->updateWolfEwald();
             #endif
@@ -363,7 +419,8 @@ void WolfCalibrationOutput::Sample(const ulong step) {
             statValRef.forcefield.SetCoulKind(originalCoulKind);
             statValRef.forcefield.SetWolfKind(originalWolfKind);
             for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
-                  statValRef.forcefield.SetWolfAlphaAndWolfFactors(orignalWolfAlpha[b], b);
+                  statValRef.forcefield.SetWolfAlphaAndWolfFactors(originalCutoffCoulomb[b], originalWolfAlpha[b], b);
+                  sysRef.boxDimRef.UpdateRCut(statValRef.forcefield,b);
             }
             #ifdef GOMC_CUDA
             statValRef.forcefield.particles->updateWolfEwald();
@@ -388,4 +445,9 @@ std::string WolfCalibrationOutput::GetString(ulong step)
       std::stringstream ss;
       ss << step;
       return ss.str();
+}
+
+// One row has a constant alpha and a varying Rcut
+int WolfCalibrationOutput::GetIndex(int RCutIndex, int alphaIndex, int b){
+      return alphaIndex*alphaSize[b] + RCutIndex;
 }

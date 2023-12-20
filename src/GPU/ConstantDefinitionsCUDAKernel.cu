@@ -171,6 +171,7 @@ void UpdateGPUWolfEwald(VariablesCUDA &vars,
                        int ewald,
                        int wolf, 
                        int coulKind,
+                       double const * rCutCoulomb,
                        double const * wolfAlpha,
                        double const * wolfFactor1, 
                        double const * wolfFactor2, 
@@ -179,6 +180,9 @@ void UpdateGPUWolfEwald(VariablesCUDA &vars,
   cudaMemcpy(vars.gpu_ewald, &ewald, sizeof(int), cudaMemcpyHostToDevice);
   cudaMemcpy(vars.gpu_wolf, &wolf, sizeof(int), cudaMemcpyHostToDevice);
   cudaMemcpy(vars.gpu_coulKind, &coulKind, sizeof(int), cudaMemcpyHostToDevice);
+  //cudaMemcpy(vars.gpu_rCut, &Rcut, sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(vars.gpu_rCutCoulomb, rCutCoulomb, BOX_TOTAL * sizeof(double),
+             cudaMemcpyHostToDevice);
   cudaMemcpy(vars.gpu_wolfAlpha, wolfAlpha, BOX_TOTAL * sizeof(double),
              cudaMemcpyHostToDevice);
   cudaMemcpy(vars.gpu_wolfFactor1, wolfFactor1, BOX_TOTAL * sizeof(double),
