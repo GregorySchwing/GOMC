@@ -141,9 +141,6 @@ public:
   bool InCavity(XYZ const &arr, XYZ const &center, XYZ const &cavDim,
                 XYZArray const &invCav, const uint b) const;
 
-  // True if arr is inside cavDim with geometric center of center.
-  void UpdateRCut(Forcefield const &ff, uint);
-
   // Transform A to unslant coordinate
   virtual XYZ TransformUnSlant(const XYZ &A, const uint b) const;
 
@@ -281,13 +278,6 @@ inline bool BoxDimensions::InCavity(XYZ const &arr, XYZ const &center,
     return false;
   else
     return true;
-}
-
-inline void BoxDimensions::UpdateRCut(Forcefield const &ff, uint b)
-{
-  rCut[b] = std::max(ff.rCut, ff.rCutCoulomb[b]);
-  rCutSq[b] = rCut[b] * rCut[b];
-  minVol[b] = 8.0 * rCutSq[b] * rCut[b] + 0.001;
 }
 
 // Calculate transform
