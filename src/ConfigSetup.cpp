@@ -1932,7 +1932,7 @@ void ConfigSetup::verifyInputs(void) {
     for(int b = 0 ; b < BOXES_WITH_U_NB ; b++) {
 
       if (sys.elect.cutoffCoulomb[b] < sys.wolfCal.wolfCutoffCoulombEnd[b]){
-        printf("%s %-d max(CutoffCoulomb %4.4f A, %4.4f A) = %4.4f A\n", "Warning: Setting Box ", b,
+        printf("%s %-d max(CutoffCoulomb %4.4f A, WolfCutoffCoulombRangeEnd %4.4f A) = %4.4f A\n", "Warning: Setting Box ", b,
                sys.elect.cutoffCoulomb[b], sys.wolfCal.wolfCutoffCoulombEnd[b], std::max(sys.elect.cutoffCoulomb[b],sys.wolfCal.wolfCutoffCoulombEnd[b]));
         sys.elect.cutoffCoulomb[b] = std::max(sys.elect.cutoffCoulomb[b],sys.wolfCal.wolfCutoffCoulombEnd[b]);
       }
