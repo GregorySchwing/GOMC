@@ -396,7 +396,7 @@ void WolfCalibrationOutput::Sample(const ulong step) {
                                     } else {
                                           wolfTot = calcEn.SystemTotal();
                                     }
-                                    //printf("WoAtStep %lu %d %d %f %.*e\n", step, wolfKind, coulKind, a, Digs, wolfTot.boxEnergy[b].totalElect);
+                                    //printf("WoAtStep %lu %d %d %d %f %f %f\n", step, wolfKind, coulKind, b, alpha, rCutCoulomb, wolfTot.boxEnergy[b].totalElect);
                                     sumRelativeErrorVec[b][wolfKind][coulKind][GetIndex(RCutIndex, alphaIndex, b)].add_value(wolfTot.boxEnergy[b].totalElect);
                                     //relativeErrorVec[b][wolfKind][coulKind][i].push_back((wolfTot.boxEnergy[b].totalElect-ewaldRef.boxEnergy[b].totalElect)/ewaldRef.boxEnergy[b].totalElect);
                                     //relativeError[b][wolfKind][coulKind][i] = ((wolfTot.boxEnergy[b].totalElect-ewaldRef.boxEnergy[b].totalElect)/ewaldRef.boxEnergy[b].totalElect);
