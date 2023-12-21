@@ -70,8 +70,8 @@ void WolfCalibrationOutput::Init(pdb_setup::Atoms const& atoms,
       stepsPerOut = output.wolfCalibration.settings.frequency;
       enableOut = output.wolfCalibration.settings.enable;
       if(enableOut) {
-            WriteHeader();
-            WriteGraceParFile();
+            //WriteHeader();
+            //WriteGraceParFile();
             for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
                   if(wolfAlphaRangeRead[b] && wolfCutoffCoulombRangeRead[b]){
                         for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
@@ -177,6 +177,45 @@ void WolfCalibrationOutput::WriteGraceParFile()
                   for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
                         for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){
                               std::string title = WOLF_KINDS[wolfKind] + " " + COUL_KINDS[coulKind];
+                              firstRow += "\ts";
+                              firstRow += GetString(counter);
+                              firstRow += " legend \"" + title + "\"\n";
+                              counter += 1;
+                        }
+                  }
+                  outF << firstRow;
+                  outF << std::endl;
+            } else {
+                  std::cerr << "Unable to write to file \"" <<  name[b] << "\" "
+                              << "(Wolf Calibration file)" << std::endl;
+            }
+            outF.close();
+      }
+}
+
+
+void WolfCalibrationOutput::WriteGraceParFileWRcut()
+{
+      for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
+            outF.open((uniqueName + "_WOLF_CALIBRATION_BOX_" + std::to_string(b) + ".par").c_str(), std::ofstream::out);
+            if (outF.is_open()) {
+                  int counter = 0;
+                  std::string firstRow = "";
+                  firstRow += "title \"Comparing Wolf Models\"\n";
+                  firstRow += "xaxis label \"Alpha\"\n";
+                  firstRow += "yaxis label \"Relative Error\"\n";
+                  firstRow += "TITLE SIZE 2 \n";
+                  firstRow += "LEGEND .8,.45\n";
+                  firstRow += "with g0\n";
+                  for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
+                        for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){
+                              int min_rcut_index=mapWK_CK_BOX_to_bestRCutIndex[std::make_tuple(wolfKind, coulKind, b)];
+                              double best_rcut = wolfCutoffCoulombStart[b] + min_rcut_index*wolfCutoffCoulombDelta[b];
+                              std::ostringstream oss;
+                              oss << std::fixed << std::setprecision(3) << best_rcut;
+                              std::string result = oss.str();
+                              std::string title = WOLF_KINDS[wolfKind] + ", " + COUL_KINDS[coulKind] + ", RCut " + result;
+                              // Insert values into the map
                               firstRow += "\ts";
                               firstRow += GetString(counter);
                               firstRow += " legend \"" + title + "\"\n";
@@ -330,6 +369,7 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
             }
             outF.close();
       }     
+      WriteGraceParFileWRcut();
 }
 
 /*

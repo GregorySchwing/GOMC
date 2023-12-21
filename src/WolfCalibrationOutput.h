@@ -55,6 +55,7 @@ private:
 
   void WriteHeader();
   void WriteGraceParFile();
+  void WriteGraceParFileWRcut();
 
   std::string GetString(double a, uint p);
   std::string GetString(ulong step);
