@@ -14,6 +14,9 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "System.h"
 #include "CalculateEnergy.h"
 #include "Welford.h"
+#include <map>
+#include <tuple>
+
 
 #include <string.h>
 #ifdef GOMC_CUDA
@@ -81,6 +84,7 @@ private:
   std::vector<Welford<double>> sumRelativeErrorVec[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS];
   //std::vector<std::vector<double>> relativeErrorVec[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS];
   double *relativeError[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS];
+  std::map<std::tuple<int, int, int>, int> mapWK_CK_BOX_to_bestRCutIndex;
 
   Welford<double> ewaldAvg[BOX_TOTAL];
   int numSamples;

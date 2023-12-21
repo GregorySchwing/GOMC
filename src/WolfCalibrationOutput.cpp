@@ -225,32 +225,6 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
                   }
             }
       }
-      /*
-      for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
-            outF.open((uniqueName + "_WOLF_CALIBRATION_BOX_" + std::to_string(b) + ".dat").c_str(), std::ofstream::out);
-            if (outF.is_open()) {
-                  for (uint i = 0; i < alphaSize[b]; ++i) {
-                        double a = wolfAlphaStart[b] + i*wolfAlphaDelta[b];
-                        std::string firstRow = "";
-                        firstRow += std::to_string(a) + "\t";
-                        for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
-                              for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){ 
-                                    double min_err = 100.00*((sumRelativeErrorVec[b][wolfKind][coulKind][i].mean()-ewaldAvg[b].mean())/ewaldAvg[b].mean());
-                                    firstRow += std::to_string(min_err) + "\t";
-                                    //firstRow += std::to_string(sumRelativeError[b][wolfKind][coulKind][i]/numSamples) + "\t";
-                              }
-                        }
-                        firstRow += "\n";
-                        outF << firstRow;
-                  }
-                  outF << std::endl;
-            } else {
-                  std::cerr << "Unable to write to file \"" <<  name << "\" "
-                              << "(Wolf Calibration file)" << std::endl;
-            }
-            outF.close();
-      }
-      */
 
       /*
       for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
@@ -275,36 +249,49 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
             }
       }
       */
-      /*
+      
       for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
             outF.open((uniqueName + "_WOLF_CALIBRATION_BOX_" + std::to_string(b) + "_BEST_ALPHAS.csv").c_str(), std::ofstream::out);
             if (outF.is_open()) {
-                  std::string firstRow = "";
+                  std::string firstRow = "WolfKind,CoulKind,Rcut,Alpha,Error\n";
                   for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
                         for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){ 
                               int min_i = 0;
-                              double min_err = std::numeric_limits<double>::max();
-                              for (uint i = 0; i < alphaSize[b]; ++i) {
-                                    //printf("vec avg %f std %f z %f\n", sumRelativeErrorVec[b][wolfKind][coulKind][i].mean(), sumRelativeErrorVec[b][wolfKind][coulKind][i].sd(), std::abs(sumRelativeErrorVec[b][wolfKind][coulKind][i].mean()/sumRelativeErrorVec[b][wolfKind][coulKind][i].sd()));
-                                    //double err = std::abs(sumRelativeErrorVec[b][wolfKind][coulKind][i].mean()/sumRelativeErrorVec[b][wolfKind][coulKind][i].sd());
-                                    //double err = std::abs(sumRelativeErrorVec[b][wolfKind][coulKind][i].mean()-ewaldAvg[b].mean());
-                                    double mean1 = ewaldAvg[b].mean();
-                                    double sd1 = ewaldAvg[b].sd();
-                                    double n = ewaldAvg[b].count();
+                              int min_a_index = 0;
+                              int min_rcut_index = 0;
+                              double min_err = 0.0;
+                              double min_t_stat = std::numeric_limits<double>::max();
+                              for (uint alphaIndex = 0; alphaIndex < alphaSize[b]; ++alphaIndex) {
+                                    double alpha = wolfAlphaStart[b] + alphaIndex*wolfAlphaDelta[b];
+                                    for (uint RCutIndex = 0; RCutIndex < cutoffCoulombSize[b]; ++RCutIndex) {
+                                          double rCutCoulomb = wolfCutoffCoulombStart[b] + RCutIndex*wolfCutoffCoulombDelta[b];
+                                    //for (uint i = 0; i < alphaSize[b]; ++i) {
+                                          //printf("vec avg %f std %f z %f\n", sumRelativeErrorVec[b][wolfKind][coulKind][i].mean(), sumRelativeErrorVec[b][wolfKind][coulKind][i].sd(), std::abs(sumRelativeErrorVec[b][wolfKind][coulKind][i].mean()/sumRelativeErrorVec[b][wolfKind][coulKind][i].sd()));
+                                          //double err = std::abs(sumRelativeErrorVec[b][wolfKind][coulKind][i].mean()/sumRelativeErrorVec[b][wolfKind][coulKind][i].sd());
+                                          double err = std::abs(sumRelativeErrorVec[b][wolfKind][coulKind][GetIndex(RCutIndex, alphaIndex, b)].mean()-ewaldAvg[b].mean());
+                                          double mean1 = ewaldAvg[b].mean();
+                                          double sd1 = ewaldAvg[b].sd();
+                                          double n = ewaldAvg[b].count();
 
-                                    double mean2 = sumRelativeErrorVec[b][wolfKind][coulKind][i].mean();
-                                    double sd2 = sumRelativeErrorVec[b][wolfKind][coulKind][i].sd();
-                                    double m = sumRelativeErrorVec[b][wolfKind][coulKind][i].count();
+                                          double mean2 = sumRelativeErrorVec[b][wolfKind][coulKind][GetIndex(RCutIndex, alphaIndex, b)].mean();
+                                          double sd2 = sumRelativeErrorVec[b][wolfKind][coulKind][GetIndex(RCutIndex, alphaIndex, b)].sd();
+                                          double m = sumRelativeErrorVec[b][wolfKind][coulKind][GetIndex(RCutIndex, alphaIndex, b)].count();
 
-                                    double t_test = (mean1 - mean2) / sqrt((sd1 * sd1) / n + (sd2 * sd2) / m);
-                                    if (std::abs(t_test) < min_err){
-                                          min_err = std::abs(t_test);
-                                          min_i = i;
+                                          double t_test = (mean1 - mean2) / sqrt((sd1 * sd1) / n + (sd2 * sd2) / m);
+                                          if (std::abs(t_test) < min_t_stat){
+                                                min_t_stat = std::abs(t_test);
+                                                min_err = err;
+                                                min_a_index = alphaIndex;
+                                                min_rcut_index = RCutIndex;
+                                          }
                                     }
                               }
-                              double best_a = wolfAlphaStart[b] + min_i*wolfAlphaDelta[b];
-                              std::string title = WOLF_KINDS[wolfKind] + " " + COUL_KINDS[coulKind];
-                              firstRow += title + "\t" + std::to_string(best_a) + "\n";
+                              double best_a = wolfAlphaStart[b] + min_a_index*wolfAlphaDelta[b];
+                              double best_rcut = wolfCutoffCoulombStart[b] + min_rcut_index*wolfCutoffCoulombDelta[b];
+                              std::string title = WOLF_KINDS[wolfKind] + "," + COUL_KINDS[coulKind];
+                              firstRow += title + "," + std::to_string(best_rcut) + "," + std::to_string(best_a) + "," + std::to_string(min_err) + "\n";
+                              // Insert values into the map
+                              mapWK_CK_BOX_to_bestRCutIndex[std::make_tuple(wolfKind, coulKind, b)] = min_rcut_index;
                         }
                   }
                   firstRow += "\n";
@@ -316,8 +303,33 @@ void WolfCalibrationOutput::DoOutput(const ulong step) {
             }
             outF.close();
       }
-      */
 
+      
+      for (uint b = 0; b < BOXES_WITH_U_NB; ++b) {
+            outF.open((uniqueName + "_WOLF_CALIBRATION_BOX_" + std::to_string(b) + ".dat").c_str(), std::ofstream::out);
+            if (outF.is_open()) {
+                  for (uint alphaIndex = 0; alphaIndex < alphaSize[b]; ++alphaIndex) {
+                        double a = wolfAlphaStart[b] + alphaIndex*wolfAlphaDelta[b];
+                        std::string firstRow = "";
+                        firstRow += std::to_string(a) + "\t";
+                        for (uint wolfKind = 0; wolfKind < WOLF_TOTAL_KINDS; ++wolfKind){
+                              for (uint coulKind = 0; coulKind < COUL_TOTAL_KINDS; ++coulKind){
+                                    int min_rcut_index = mapWK_CK_BOX_to_bestRCutIndex[std::make_tuple(wolfKind, coulKind, b)];
+                                    double min_err = 100.00*((sumRelativeErrorVec[b][wolfKind][coulKind][GetIndex(min_rcut_index, alphaIndex, b)].mean()-ewaldAvg[b].mean())/ewaldAvg[b].mean());
+                                    firstRow += std::to_string(min_err) + "\t";
+                                    //firstRow += std::to_string(sumRelativeError[b][wolfKind][coulKind][i]/numSamples) + "\t";
+                              }
+                        }
+                        firstRow += "\n";
+                        outF << firstRow;
+                  }
+                  outF << std::endl;
+            } else {
+                  std::cerr << "Unable to write to file \"" <<  name << "\" "
+                              << "(Wolf Calibration file)" << std::endl;
+            }
+            outF.close();
+      }     
 }
 
 /*
