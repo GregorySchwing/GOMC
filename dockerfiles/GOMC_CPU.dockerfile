@@ -19,5 +19,8 @@ WORKDIR /gomc
 # Build the code using metamake.sh
 RUN ./metamake.sh
 
+# Add /gomc/bin to the PATH
+ENV PATH="/gomc/bin:${PATH}"
+
 # Command to run when the container starts
 CMD ["bash"]
