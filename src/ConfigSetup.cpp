@@ -1943,6 +1943,14 @@ void ConfigSetup::verifyInputs(void) {
     //}
   }
 
+  if (out.wolfCalibration.settings.enable && sys.elect.ewald == false && sys.elect.wolf == false) {
+    std::cout << "Error: Using WolfCalibration mode with both Ewald and Wolf False!" << std::endl;
+    std::cout << "Error: Either Ewald should be True and Wolf False," << std::endl;
+    std::cout << "Error: Or Ewald should be False and Wolf True!" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+
   if (!sys.elect.enable && sys.elect.oneFourScale != DBL_MAX) {
     printf("Warning: 1-4 Electrostatic scaling set, but will be ignored.\n");
     sys.elect.oneFourScale = 0.0;
