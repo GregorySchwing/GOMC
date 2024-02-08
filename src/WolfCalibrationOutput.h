@@ -14,6 +14,9 @@ along with this program, also can be found at <http://www.gnu.org/licenses/>.
 #include "System.h"
 #include "CalculateEnergy.h"
 #include "Welford.h"
+#include <map>
+#include <tuple>
+
 
 #include <string.h>
 #ifdef GOMC_CUDA
@@ -52,9 +55,12 @@ private:
 
   void WriteHeader();
   void WriteGraceParFile();
+  void WriteGraceParFileWRcut();
 
   std::string GetString(double a, uint p);
   std::string GetString(ulong step);
+  int GetIndex(int RCutIndex, int alphaIndex, int b);
+
 
   System & sysRef;
   StaticVals & statValRef;
@@ -68,16 +74,25 @@ private:
   double wolfAlphaStart[BOX_TOTAL];
   double wolfAlphaEnd[BOX_TOTAL];
   double wolfAlphaDelta[BOX_TOTAL];
+  double wolfCutoffCoulombStart[BOX_TOTAL];
+  double wolfCutoffCoulombEnd[BOX_TOTAL];
+  double wolfCutoffCoulombDelta[BOX_TOTAL];
   int alphaSize[BOX_TOTAL];
+  int cutoffCoulombSize[BOX_TOTAL];
   bool wolfAlphaRangeRead[2];
+  bool wolfCutoffCoulombRangeRead[2];
+
   std::vector<Welford<double>> sumRelativeErrorVec[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS];
   //std::vector<std::vector<double>> relativeErrorVec[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS];
   double *relativeError[BOX_TOTAL][WOLF_TOTAL_KINDS][COUL_TOTAL_KINDS];
+  std::map<std::tuple<int, int, int>, int> mapWK_CK_BOX_to_bestRCutIndex;
 
   Welford<double> ewaldAvg[BOX_TOTAL];
   int numSamples;
   bool ewaldDriven;
-  double orignalWolfAlpha[BOX_TOTAL];
+  double originalWolfAlpha[BOX_TOTAL];
+  double originalCutoffCoulomb[BOX_TOTAL];
+  double originalCutoffCoulombSq[BOX_TOTAL];
   int originalWolfKind;
   int originalCoulKind;
 

@@ -133,7 +133,8 @@ double Wolf::MolCorrection(uint molIndex, uint box) const {
       break;
     // you can have any number of case statements.
     default : //Optional
-      exit(1);
+      std::cout <<  "Error: WolfKind not incorrectly specified!" << std::endl;
+      exit(EXIT_FAILURE);
   }
 
   GOMC_EVENT_STOP(1, GomcProfileEvent::CORR_MOL);

@@ -57,6 +57,7 @@ FFParticle::~FFParticle(void) {
                         forcefield.ewald,
                         forcefield.wolf, 
                         forcefield.coulKind,
+                        forcefield.rCutCoulomb,
                         forcefield.wolfAlpha,
                         forcefield.wolfFactor1, 
                         forcefield.wolfFactor2, 

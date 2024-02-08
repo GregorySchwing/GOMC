@@ -89,13 +89,7 @@ void Forcefield::InitBasicVals(config_setup::SystemVals const &val,
     recip_rcut[b] = -2.0 * log(tolerance) / rCutCoulomb[b];
     recip_rcut_Sq[b] = recip_rcut[b] * recip_rcut[b];
     if (wolf){
-      wolfAlpha[b] = val.elect.wolfAlpha[b];
-      wolfFactor1[b] = erfc(wolfAlpha[b]*rCutCoulomb[b])/rCutCoulomb[b];
-      wolfFactor2[b] = wolfFactor1[b]/rCutCoulomb[b];
-      wolfFactor2[b] += wolfAlpha[b] *  M_2_SQRTPI * 
-                        exp(-1.0*wolfAlpha[b]*wolfAlpha[b]*rCutCoulombSq[b])
-                        /rCutCoulomb[b];
-      wolfFactor3[b] = wolfAlpha[b] *  M_2_SQRTPI;
+      SetWolfAlphaAndWolfFactors(rCutCoulomb[b],val.elect.wolfAlpha[b],b);
     } else {
       wolfAlpha[b] = 0.0;
       wolfFactor1[b] = 0.0;
@@ -149,6 +143,8 @@ void Forcefield::InitBasicVals(config_setup::SystemVals const &val,
 uint Forcefield::GetWolfKind(void) {return wolfKind;}
 uint Forcefield::GetCoulKind(void) {return coulKind;} 
 double Forcefield::GetWolfAlpha(uint b) {return wolfAlpha[b];} 
+double Forcefield::GetRCutCoulomb(uint b) {return rCutCoulomb[b];} 
+double Forcefield::GetRCutCoulombSq(uint b) {return rCutCoulombSq[b];}  
 BOX_SIZE_DOUBLE_ARRAY& Forcefield::GetWolfAlpha(void) {return wolfAlpha;} 
 BOX_SIZE_DOUBLE_ARRAY& Forcefield::GetWolfFactor1(void) {return wolfFactor1;} 
 BOX_SIZE_DOUBLE_ARRAY& Forcefield::GetWolfFactor2(void) {return wolfFactor2;} 
@@ -161,7 +157,9 @@ void Forcefield::SetWolfKind(uint wk){
 void Forcefield::SetCoulKind(uint ck){
   coulKind = ck;
 }
-void Forcefield::SetWolfAlphaAndWolfFactors(double wa, uint b){
+void Forcefield::SetWolfAlphaAndWolfFactors(double rcc, double wa, uint b){
+    rCutCoulomb[b]=rcc;
+    rCutCoulombSq[b]=rcc*rcc;
     wolfAlpha[b] = wa;
     wolfFactor1[b] = erfc(wolfAlpha[b]*rCutCoulomb[b])/rCutCoulomb[b];
     wolfFactor2[b] = wolfFactor1[b]/rCutCoulomb[b];
@@ -169,4 +167,9 @@ void Forcefield::SetWolfAlphaAndWolfFactors(double wa, uint b){
                       exp(-1.0*wolfAlpha[b]*wolfAlpha[b]*rCutCoulombSq[b])
                       /rCutCoulomb[b];
     wolfFactor3[b] = wolfAlpha[b] *  M_2_SQRTPI;
+}
+
+void Forcefield::SetRCutCoulomb(double rcc, uint b){
+    rCutCoulomb[b]=rcc;
+    rCutCoulombSq[b]=rcc*rcc;
 }
