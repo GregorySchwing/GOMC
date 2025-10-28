@@ -661,7 +661,7 @@ struct TargetSwapCollection {
         (std::find(newKind.begin(), newKind.end(), "All") != newKind.end());
     if (selectedAll) {
       if (newKind.size() > 1) {
-        printf("Warning: %lu additional residue kinds were defined for "
+        printf("Warning: %zu additional residue kinds were defined for "
                "subVolume index %d, while using all residues!\n",
                newKind.size() - 1, subVIdx);
         printf(
@@ -775,7 +775,7 @@ public:
 struct MEMCVal {
   bool enable, readVol, readRatio, readSmallBB, readLargeBB;
   bool readSK, readLK;
-  bool MEMC1, MEMC2, MEMC3;
+  bool MEMC1, MEMC2, MEMC3, MEMC2Liq, MEMC3Liq;
   XYZ subVol;
   std::vector<std::string> smallKind, largeKind;
   std::vector<uint> exchangeRatio;
@@ -783,6 +783,7 @@ struct MEMCVal {
   std::vector<std::string> largeBBAtom1, largeBBAtom2;
   MEMCVal(void) {
     MEMC1 = MEMC2 = MEMC3 = false;
+    MEMC2Liq = MEMC3Liq = false;
     readVol = readRatio = readSmallBB = false;
     readLargeBB = readSK = readLK = false;
   }

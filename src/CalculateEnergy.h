@@ -5,8 +5,8 @@ A copy of the MIT License can be found in License.txt
 along with this program, also can be found at
 <https://opensource.org/licenses/MIT>.
 ********************************************************************************/
-#ifndef CALCULATEENERGY_H
-#define CALCULATEENERGY_H
+#ifndef CALCULATE_ENERGY_H
+#define CALCULATE_ENERGY_H
 
 #include <vector>
 
@@ -297,4 +297,4 @@ private:
   const CellList &cellList;
 };
 
-#endif /*ENERGY_H*/
+#endif /*CALCULATE_ENERGY_H*/

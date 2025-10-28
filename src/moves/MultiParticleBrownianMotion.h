@@ -8,8 +8,6 @@ along with this program, also can be found at
 #ifndef MULTIPARTICLEBROWNIANMOTION_H
 #define MULTIPARTICLEBROWNIANMOTION_H
 
-#include <cmath>
-
 #include "MoveBase.h"
 #include "Random123Wrapper.h"
 #include "StaticVals.h"
@@ -301,9 +299,9 @@ inline uint MultiParticleBrownian::ChooseBox() {
     }
   }
   if (multiParticleLiquid)
-      return maxB;
+    return maxB;
   else
-      return minB;
+    return minB;
 }
 
 inline uint MultiParticleBrownian::Transform() {
@@ -445,7 +443,8 @@ inline double MultiParticleBrownian::GetCoeff() {
 
   if (moveType == mp::MPROTATE) { // rotate,
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(r_max, t_max, r_max4, t_max4) reduction(+:w_ratio)
+#pragma omp parallel for default(none) shared(r_max, t_max, r_max4, t_max4)    \
+    reduction(+ : w_ratio)
 #endif
     for (uint m = 0; m < moleculeIndex.size(); m++) {
       uint molNumber = moleculeIndex[m];
@@ -456,7 +455,8 @@ inline double MultiParticleBrownian::GetCoeff() {
     }
   } else { // displace
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(r_max, t_max, r_max4, t_max4) reduction(+:w_ratio)
+#pragma omp parallel for default(none) shared(r_max, t_max, r_max4, t_max4)    \
+    reduction(+ : w_ratio)
 #endif
     for (uint m = 0; m < moleculeIndex.size(); m++) {
       uint molNumber = moleculeIndex[m];

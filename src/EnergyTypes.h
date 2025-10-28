@@ -5,8 +5,8 @@ A copy of the MIT License can be found in License.txt
 along with this program, also can be found at
 <https://opensource.org/licenses/MIT>.
 ********************************************************************************/
-#ifndef ENERGYTYPES_H
-#define ENERGYTYPES_H
+#ifndef ENERGY_TYPES_H
+#define ENERGY_TYPES_H
 
 /*
  *    EnergyTypes.h
@@ -18,9 +18,9 @@ along with this program, also can be found at
 #include "EnsemblePreprocessor.h" //For # box const.
 
 // GJS
-//#ifndef NDEBUG
+// #ifndef NDEBUG
 #include <iostream>
-//#endif
+// #endif
 
 #ifndef BOXES_WITH_U_NB
 #if ENSEMBLE == GCMC || ENSEMBLE == NVT || ENSEMBLE == NPT
@@ -533,10 +533,10 @@ inline std::ostream &operator<<(std::ostream &out, Energy &en) {
   }
 
   // Restore ostream settings to prior value
-  out << std::setprecision(ss);
+  out.precision(ss);
   out.flags(ff);
   return out;
 }
 #endif
 
-#endif
+#endif /*ENERGY_TYPES_H*/

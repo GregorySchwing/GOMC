@@ -8,9 +8,6 @@ along with this program, also can be found at
 #ifndef MULTIPARTICLE_H
 #define MULTIPARTICLE_H
 
-#include <cmath>
-#include <fstream>
-
 #include "MoveBase.h"
 #include "Random123Wrapper.h"
 #include "StaticVals.h"
@@ -19,6 +16,7 @@ along with this program, also can be found at
 #include "TransformParticlesCUDAKernel.cuh"
 #include "VariablesCUDA.cuh"
 #endif
+#include <fstream>
 
 #define MIN_FORCE 1E-12
 #define MAX_FORCE 30
@@ -326,9 +324,9 @@ inline uint MultiParticle::ChooseBox() {
     }
   }
   if (multiParticleLiquid)
-      return maxB;
+    return maxB;
   else
-      return minB;
+    return minB;
 }
 
 inline uint MultiParticle::Transform() {
@@ -470,7 +468,8 @@ inline double MultiParticle::GetCoeff() {
 
   if (moveType == mp::MPROTATE) {
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(lBeta, r_max, t_max) reduction(*:w_ratio)
+#pragma omp parallel for default(none) shared(lBeta, r_max, t_max)             \
+    reduction(* : w_ratio)
 #endif
     for (int m = 0; m < (int)moleculeIndex.size(); m++) {
       uint molNumber = moleculeIndex[m];
@@ -485,7 +484,8 @@ inline double MultiParticle::GetCoeff() {
     }
   } else {
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(lBeta, r_max, t_max) reduction(*:w_ratio)
+#pragma omp parallel for default(none) shared(lBeta, r_max, t_max)             \
+    reduction(* : w_ratio)
 #endif
     for (int m = 0; m < (int)moleculeIndex.size(); m++) {
       uint molNumber = moleculeIndex[m];

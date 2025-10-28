@@ -456,7 +456,7 @@ void ConfigSetup::Init(const char *fileName, MultiSim const *const &multisim) {
         sys.targetedSwapCollection.AddsubVolumeBox(idx, b);
         sys.intraTargetedSwapCollection.AddsubVolumeBox(idx, b);
       } else {
-        printf("%-40s %-lu !\n",
+        printf("%-40s %-zu !\n",
                "ERROR: Expected 2 values for SubVolumeBox, but received",
                line.size() - 1);
         exit(EXIT_FAILURE);
@@ -471,7 +471,7 @@ void ConfigSetup::Init(const char *fileName, MultiSim const *const &multisim) {
         sys.targetedSwapCollection.AddsubVolumeCenter(idx, temp);
         sys.intraTargetedSwapCollection.AddsubVolumeCenter(idx, temp);
       } else {
-        printf("%-40s %-lu !\n",
+        printf("%-40s %-zu !\n",
                "ERROR: Expected 4 values for SubVolumeCenter, but received",
                line.size() - 1);
         exit(EXIT_FAILURE);
@@ -482,7 +482,7 @@ void ConfigSetup::Init(const char *fileName, MultiSim const *const &multisim) {
         sys.targetedSwapCollection.AddsubVolumePBC(idx, line[2]);
         sys.intraTargetedSwapCollection.AddsubVolumePBC(idx, line[2]);
       } else {
-        printf("%-40s %-lu !\n",
+        printf("%-40s %-zu !\n",
                "ERROR: Expected 2 values for SubVolumePBC, but received",
                line.size() - 1);
         exit(EXIT_FAILURE);
@@ -497,7 +497,7 @@ void ConfigSetup::Init(const char *fileName, MultiSim const *const &multisim) {
         sys.targetedSwapCollection.AddsubVolumeAtomList(idx, temp);
         sys.intraTargetedSwapCollection.AddsubVolumeAtomList(idx, temp);
       } else {
-        printf("%-40s %-lu !\n",
+        printf("%-40s %-zu !\n",
                "ERROR: Expected atleast 3 values for SubVolumeCenterList, but "
                "received",
                line.size() - 1);
@@ -513,7 +513,7 @@ void ConfigSetup::Init(const char *fileName, MultiSim const *const &multisim) {
         sys.targetedSwapCollection.AddsubVolumeDimension(idx, temp);
         sys.intraTargetedSwapCollection.AddsubVolumeDimension(idx, temp);
       } else {
-        printf("%-40s %-lu !\n",
+        printf("%-40s %-zu !\n",
                "ERROR: Expected 4 values for SubVolumeDim, but received",
                line.size() - 1);
         exit(EXIT_FAILURE);
@@ -529,7 +529,7 @@ void ConfigSetup::Init(const char *fileName, MultiSim const *const &multisim) {
         sys.targetedSwapCollection.AddsubVolumeResKind(idx, temp);
         sys.intraTargetedSwapCollection.AddsubVolumeResKind(idx, temp);
       } else {
-        printf("%-40s %-lu !\n",
+        printf("%-40s %-zu !\n",
                "ERROR: Expected atleast 2 values for SubVolumeResidueKind, but "
                "received",
                line.size() - 1);
@@ -542,7 +542,7 @@ void ConfigSetup::Init(const char *fileName, MultiSim const *const &multisim) {
         sys.targetedSwapCollection.AddsubVolumeSwapType(idx, isRigid);
         sys.intraTargetedSwapCollection.AddsubVolumeSwapType(idx, isRigid);
       } else {
-        printf("%-40s %-lu !\n",
+        printf("%-40s %-zu !\n",
                "ERROR: Expected 2 values for SubVolumeRigidSwap, but received",
                line.size() - 1);
         exit(EXIT_FAILURE);
@@ -558,7 +558,7 @@ void ConfigSetup::Init(const char *fileName, MultiSim const *const &multisim) {
         sys.targetedSwapCollection.AddsubVolumeChemPot(idx, resName, value,
                                                        isFugacity);
       } else {
-        printf("%-40s %-lu !\n",
+        printf("%-40s %-zu !\n",
                "ERROR: Expected 3 values for SubVolumeChemPot, but received",
                line.size() - 1);
         exit(EXIT_FAILURE);
@@ -572,7 +572,7 @@ void ConfigSetup::Init(const char *fileName, MultiSim const *const &multisim) {
         sys.targetedSwapCollection.AddsubVolumeChemPot(idx, resName, value,
                                                        isFugacity);
       } else {
-        printf("%-40s %-lu !\n",
+        printf("%-40s %-zu !\n",
                "ERROR: Expected 3 values for SubVolumeFugacity, but received",
                line.size() - 1);
         exit(EXIT_FAILURE);
@@ -923,7 +923,7 @@ void ConfigSetup::Init(const char *fileName, MultiSim const *const &multisim) {
     } else if (CheckString(line[0], "IntraMEMC-1Freq")) {
       if (stringtod(line[1]) > 0.0) {
         sys.moves.intraMemc = stringtod(line[1]);
-        printf("%-40s %-4.4f \n", "Info: IntraMEMC-2 move frequency",
+        printf("%-40s %-4.4f \n", "Info: IntraMEMC-1 move frequency",
                sys.moves.intraMemc);
         sys.intraMemcVal.enable = true;
         sys.intraMemcVal.MEMC1 = true;
@@ -990,6 +990,22 @@ void ConfigSetup::Init(const char *fileName, MultiSim const *const &multisim) {
                sys.moves.memc);
         sys.memcVal.enable = true;
         sys.memcVal.MEMC3 = true;
+      }
+    } else if (CheckString(line[0], "MEMC-2-LiqFreq")) {
+      if (stringtod(line[1]) > 0.0) {
+        sys.moves.memc = stringtod(line[1]);
+        printf("%-40s %-4.4f \n", "Info: MEMC-2-Liq move frequency",
+               sys.moves.memc);
+        sys.memcVal.enable = true;
+        sys.memcVal.MEMC2Liq = true;
+      }
+    } else if (CheckString(line[0], "MEMC-3-LiqFreq")) {
+      if (stringtod(line[1]) > 0.0) {
+        sys.moves.memc = stringtod(line[1]);
+        printf("%-40s %-4.4f \n", "Info: MEMC-3-Liq move frequency",
+               sys.moves.memc);
+        sys.memcVal.enable = true;
+        sys.memcVal.MEMC3Liq = true;
       }
     } else if (CheckString(line[0], "TargetedSwapFreq")) {
       sys.moves.targetedSwap = stringtod(line[1]);
@@ -2029,7 +2045,6 @@ void ConfigSetup::verifyInputs(void) {
     std::cout << "ERROR: Impulse Pressure Correction cannot be "
               << "used with LJ long-range corrections." << std::endl;
     exit(EXIT_FAILURE);
-
   }
   if (((sys.ff.VDW_KIND == sys.ff.VDW_SHIFT_KIND) ||
        (sys.ff.VDW_KIND == sys.ff.VDW_SWITCH_KIND)) &&
@@ -2037,7 +2052,6 @@ void ConfigSetup::verifyInputs(void) {
     std::cout << "ERROR: Impulse Pressure Correction is not supported "
               << "for SWITCH or SHIFT potentials." << std::endl;
     exit(EXIT_FAILURE);
-
   }
   if (sys.ff.doImpulsePressureCorr && sys.ff.doTailCorr) {
     std::cout << "ERROR: Both LRC (Long Range Correction) and "
@@ -2236,9 +2250,10 @@ void ConfigSetup::verifyInputs(void) {
     if (in.restart.restartFromBinaryCoorFile) {
       for (i = 0; i < BOX_TOTAL; i++) {
         if (!in.files.binaryCoorInput.defined[i]) {
-          std::cout << "ERROR: Binary coordinate file was not specified for box "
-                       "number "
-                    << i << "!" << std::endl;
+          std::cout
+              << "ERROR: Binary coordinate file was not specified for box "
+                 "number "
+              << i << "!" << std::endl;
           exit(EXIT_FAILURE);
         }
       }
@@ -2306,25 +2321,38 @@ void ConfigSetup::verifyInputs(void) {
     if ((sys.memcVal.MEMC1 && sys.memcVal.MEMC2) ||
         (sys.memcVal.MEMC1 && sys.memcVal.MEMC3) ||
         (sys.memcVal.MEMC2 && sys.memcVal.MEMC3)) {
-      std::cout << "ERROR: Multiple MEMC methods were specified, but only one is allowed!\n";
+      std::cout << "ERROR: Multiple MEMC methods were specified, but only one "
+                   "is allowed!\n";
+      exit(EXIT_FAILURE);
+    }
+    if ((sys.memcVal.MEMC1 && sys.memcVal.MEMC2) ||
+        (sys.memcVal.MEMC1 && sys.memcVal.MEMC3) ||
+        (sys.memcVal.MEMC1 && sys.memcVal.MEMC2Liq) ||
+        (sys.memcVal.MEMC1 && sys.memcVal.MEMC3Liq) ||
+        (sys.memcVal.MEMC2 && sys.memcVal.MEMC3Liq)) {
+      std::cout << "Error: Multiple MEMC methods are specified!\n";
       exit(EXIT_FAILURE);
     }
     if ((sys.intraMemcVal.MEMC1 && sys.intraMemcVal.MEMC2) ||
         (sys.intraMemcVal.MEMC1 && sys.intraMemcVal.MEMC3) ||
         (sys.intraMemcVal.MEMC2 && sys.intraMemcVal.MEMC3)) {
-      std::cout << "ERROR: Multiple Intra-MEMC methods are specified, but only one is allowed!\n";
+      std::cout << "ERROR: Multiple Intra-MEMC methods are specified, but only "
+                   "one is allowed!\n";
       exit(EXIT_FAILURE);
     }
     if (!sys.memcVal.readVol || !sys.intraMemcVal.readVol) {
-      std::cout << "ERROR: In the MEMC method, the Sub-Volume was not specified!\n";
+      std::cout
+          << "ERROR: In the MEMC method, the Sub-Volume was not specified!\n";
       exit(EXIT_FAILURE);
     }
     if (!sys.memcVal.readRatio || !sys.intraMemcVal.readRatio) {
-      std::cout << "ERROR: In the MEMC method, Exchange Ratio was not specified!\n";
+      std::cout
+          << "ERROR: In the MEMC method, Exchange Ratio was not specified!\n";
       exit(EXIT_FAILURE);
     }
     if (sys.memcVal.largeKind.size() != sys.memcVal.exchangeRatio.size()) {
-      std::cout << "ERROR: In the MEMC method, the specified number of Large Kinds was "
+      std::cout << "ERROR: In the MEMC method, the specified number of Large "
+                   "Kinds was "
                 << sys.memcVal.largeKind.size() << ", but "
                 << sys.memcVal.exchangeRatio.size()
                 << " exchange ratio was specified!\n";
@@ -2341,49 +2369,67 @@ void ConfigSetup::verifyInputs(void) {
     if ((sys.memcVal.largeKind.size() != sys.memcVal.smallKind.size()) ||
         (sys.intraMemcVal.largeKind.size() !=
          sys.intraMemcVal.smallKind.size())) {
-      std::cout
-          << "ERROR: In the MEMC method, the specified number of Large Kinds is not "
-          << " equal as specified number of Small Kinds!\n";
+      std::cout << "ERROR: In the MEMC method, the specified number of Large "
+                   "Kinds is not "
+                << " equal as specified number of Small Kinds!\n";
       exit(EXIT_FAILURE);
     }
     if (!sys.memcVal.readLargeBB || !sys.intraMemcVal.readLargeBB) {
-      std::cout
-          << "ERROR: In the MEMC method, Large Kind BackBone was not specified!\n";
+      std::cout << "ERROR: In the MEMC method, Large Kind BackBone was not "
+                   "specified!\n";
       exit(EXIT_FAILURE);
     }
     if (sys.memcVal.largeKind.size() != sys.memcVal.largeBBAtom1.size()) {
-      std::cout << "ERROR: In the MEMC method, the specified number of Large Kinds was "
+      std::cout << "ERROR: In the MEMC method, the specified number of Large "
+                   "Kinds was "
                 << sys.memcVal.largeKind.size() << ", but "
                 << sys.memcVal.largeBBAtom1.size()
                 << " sets of Large Molecule BackBone was specified!\n";
       exit(EXIT_FAILURE);
     }
     if (sys.memcVal.MEMC2 && !sys.memcVal.readSmallBB) {
-      std::cout
-          << "ERROR: In the MEMC-2 method, Small Kind BackBone was not specified!\n";
+      std::cout << "ERROR: In the MEMC-2 method, Small Kind BackBone was not "
+                   "specified!\n";
       exit(EXIT_FAILURE);
     }
 
     if (sys.memcVal.MEMC2 &&
         (sys.memcVal.smallKind.size() != sys.memcVal.smallBBAtom1.size())) {
+      std::cout << "ERROR: In the MEMC-2 method, the specified number of Small "
+                   "Kinds was "
+                << sys.memcVal.smallKind.size() << ", but "
+                << sys.memcVal.smallBBAtom1.size()
+                << " sets of Small Molecule BackBone was specified!\n";
+      exit(EXIT_FAILURE);
+    }
+    if (sys.memcVal.MEMC2Liq && !sys.memcVal.readSmallBB) {
+      std::cout << "Error: In MEMC-2-Liq method, Small Kind BackBone is not "
+                   "specified!\n";
+      exit(EXIT_FAILURE);
+    }
+
+    if (sys.memcVal.MEMC2Liq &&
+        (sys.memcVal.smallKind.size() != sys.memcVal.smallBBAtom1.size())) {
       std::cout
-          << "ERROR: In the MEMC-2 method, the specified number of Small Kinds was "
+          << "Error: In MEMC-2-Liq method, specified number of Small Kinds is "
           << sys.memcVal.smallKind.size() << ", but "
           << sys.memcVal.smallBBAtom1.size()
-          << " sets of Small Molecule BackBone was specified!\n";
+          << " sets of Small Molecule BackBone is specified!\n";
       exit(EXIT_FAILURE);
     }
 
     if (sys.intraMemcVal.MEMC2 && !sys.intraMemcVal.readSmallBB) {
-      std::cout << "ERROR: In the Intra-MEMC-2 method, Small Kind BackBone was not "
-                   "specified!\n";
+      std::cout
+          << "ERROR: In the Intra-MEMC-2 method, Small Kind BackBone was not "
+             "specified!\n";
       exit(EXIT_FAILURE);
     }
     if (sys.memcVal.enable && sys.intraMemcVal.enable) {
       if ((sys.memcVal.MEMC1 && !sys.intraMemcVal.MEMC1) ||
           (sys.memcVal.MEMC2 && !sys.intraMemcVal.MEMC2) ||
           (sys.memcVal.MEMC3 && !sys.intraMemcVal.MEMC3)) {
-        std::cout << "ERROR: The selected intra-MEMC method was not same as the inter-MEMC method!\n";
+        std::cout << "ERROR: The selected intra-MEMC method was not same as "
+                     "the inter-MEMC method!\n";
         exit(EXIT_FAILURE);
       }
     }

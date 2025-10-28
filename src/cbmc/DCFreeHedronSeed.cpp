@@ -5,11 +5,7 @@ A copy of the MIT License can be found in License.txt
 along with this program, also can be found at
 <https://opensource.org/licenses/MIT>.
 ********************************************************************************/
-#define _USE_MATH_DEFINES
 #include "DCFreeHedronSeed.h"
-
-#include <cmath>
-
 #include "DCData.h"
 #include "Forcefield.h"
 #include "MolSetup.h"
@@ -117,9 +113,13 @@ void DCFreeHedronSeed::BuildNew(TrialMol &newMol, uint molIndex) {
   positions[hed.NumBond()].Set(0, newMol.RawRectCoords(anchorBond, 0, 0));
 
   // counting backward to preserve prototype
+  double u1, u2, u3;
   for (uint lj = nLJTrials; lj-- > 0;) {
     // convert chosen torsion to 3D positions
-    RotationMatrix spin = RotationMatrix::UniformRandom(prng(), prng(), prng());
+    u1 = prng();
+    u2 = prng();
+    u3 = prng();
+    RotationMatrix spin = RotationMatrix::UniformRandom(u1, u2, u3);
     for (uint b = 0; b < hed.NumBond() + 1; ++b) {
       // find positions
       positions[b].Set(lj, spin.Apply(positions[b][0]));
@@ -195,9 +195,13 @@ void DCFreeHedronSeed::BuildOld(TrialMol &oldMol, uint molIndex) {
   positions[hed.NumBond()].Add(0, -center);
 
   // counting backward to preserve prototype
+  double u1, u2, u3;
   for (uint lj = nLJTrials; lj-- > 1;) {
     // convert chosen torsion to 3D positions
-    RotationMatrix spin = RotationMatrix::UniformRandom(prng(), prng(), prng());
+    u1 = prng();
+    u2 = prng();
+    u3 = prng();
+    RotationMatrix spin = RotationMatrix::UniformRandom(u1, u2, u3);
     for (uint b = 0; b < hed.NumBond() + 1; ++b) {
       // find positions
       positions[b].Set(lj, spin.Apply(positions[b][0]));

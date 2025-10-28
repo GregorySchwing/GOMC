@@ -48,14 +48,17 @@ void InitGPUForceField(VariablesCUDA &vars, double const *sigmaSq,
   CUMALLOC((void **)&vars.gpu_isMartini, sizeof(int));
   CUMALLOC((void **)&vars.gpu_count, sizeof(int));
   CUMALLOC((void **)&vars.gpu_rCut, sizeof(double));
+  CUMALLOC((void **)&vars.gpu_rCutSq, sizeof(double));
   CUMALLOC((void **)&vars.gpu_rCutCoulomb, BOX_TOTAL * sizeof(double));
+  CUMALLOC((void **)&vars.gpu_rCutCoulombSq, BOX_TOTAL * sizeof(double));
   CUMALLOC((void **)&vars.gpu_rCutLow, sizeof(double));
   CUMALLOC((void **)&vars.gpu_rOn, sizeof(double));
   CUMALLOC((void **)&vars.gpu_alpha, BOX_TOTAL * sizeof(double));
+  CUMALLOC((void **)&vars.gpu_alphaSq, BOX_TOTAL * sizeof(double));
   CUMALLOC((void **)&vars.gpu_ewald, sizeof(int));
   CUMALLOC((void **)&vars.gpu_diElectric_1, sizeof(double));
 
-  // allocate gpu memory for lambda variables
+  // allocate GPU memory for lambda variables
   CUMALLOC((void **)&vars.gpu_molIndex, (int)BOX_TOTAL * sizeof(int));
   CUMALLOC((void **)&vars.gpu_lambdaVDW, (int)BOX_TOTAL * sizeof(double));
   CUMALLOC((void **)&vars.gpu_lambdaCoulomb, (int)BOX_TOTAL * sizeof(double));
@@ -79,12 +82,17 @@ void InitGPUForceField(VariablesCUDA &vars, double const *sigmaSq,
              cudaMemcpyHostToDevice);
   cudaMemcpy(vars.gpu_count, &count, sizeof(int), cudaMemcpyHostToDevice);
   cudaMemcpy(vars.gpu_rCut, &Rcut, sizeof(double), cudaMemcpyHostToDevice);
+  cudaMemcpy(vars.gpu_rCutSq, &RcutSq, sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars.gpu_rCutCoulomb, rCutCoulomb, BOX_TOTAL * sizeof(double),
+             cudaMemcpyHostToDevice);
+  cudaMemcpy(vars.gpu_rCutCoulombSq, rCutCoulombSq, BOX_TOTAL * sizeof(double),
              cudaMemcpyHostToDevice);
   cudaMemcpy(vars.gpu_rCutLow, &RcutLow, sizeof(double),
              cudaMemcpyHostToDevice);
   cudaMemcpy(vars.gpu_rOn, &Ron, sizeof(double), cudaMemcpyHostToDevice);
   cudaMemcpy(vars.gpu_alpha, alpha, BOX_TOTAL * sizeof(double),
+             cudaMemcpyHostToDevice);
+  cudaMemcpy(vars.gpu_alphaSq, alphaSq, BOX_TOTAL * sizeof(double),
              cudaMemcpyHostToDevice);
   cudaMemcpy(vars.gpu_ewald, &ewald, sizeof(int), cudaMemcpyHostToDevice);
   cudaMemcpy(vars.gpu_diElectric_1, &diElectric_1, sizeof(double),
@@ -349,10 +357,13 @@ void DestroyCUDAVars(VariablesCUDA *vars) {
   CUFREE(vars->gpu_isMartini);
   CUFREE(vars->gpu_count);
   CUFREE(vars->gpu_rCut);
+  CUFREE(vars->gpu_rCutSq);
   CUFREE(vars->gpu_rCutCoulomb);
+  CUFREE(vars->gpu_rCutCoulombSq);
   CUFREE(vars->gpu_rCutLow);
   CUFREE(vars->gpu_rOn);
   CUFREE(vars->gpu_alpha);
+  CUFREE(vars->gpu_alphaSq);
   CUFREE(vars->gpu_ewald);
   CUFREE(vars->gpu_wolf);
   CUFREE(vars->gpu_dsf);

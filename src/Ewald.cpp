@@ -394,8 +394,8 @@ double Ewald::BoxReciprocal(uint box, bool isNewVolume) const {
       imageSzVal = static_cast<int>(imageSizeRef[box]);
     }
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(box, imageSzVal, prefactPtr) \
-    reduction(+:energyRecip)
+#pragma omp parallel for default(none) shared(box, imageSzVal, prefactPtr)     \
+    reduction(+ : energyRecip)
 #endif
     for (int i = 0; i < imageSzVal; i++) {
       energyRecip += ((sumRnew[box][i] * sumRnew[box][i] +
@@ -433,9 +433,9 @@ double Ewald::MolReciprocal(XYZArray const &molCoords, const uint molIndex,
                          sumInew[box], energyRecipNew, box);
 #else
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(lambdaCoef, molCoords, \
-    startAtom, thisKind) firstprivate(box, length) \
-reduction(+:energyRecipNew)
+#pragma omp parallel for default(none)                                         \
+    shared(lambdaCoef, molCoords, startAtom, thisKind)                         \
+    firstprivate(box, length) reduction(+ : energyRecipNew)
 #endif
     for (int i = 0; i < (int)imageSizeRef[box]; i++) {
       double sumRealNew = 0.0;
@@ -501,8 +501,8 @@ double Ewald::SwapDestRecip(const cbmc::TrialMol &newMol, const uint box,
 #else
     uint startAtom = mols.MolStart(molIndex);
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(molCoords, thisKind) \
-reduction(+:energyRecipNew) firstprivate(length, box, startAtom)
+#pragma omp parallel for default(none) shared(molCoords, thisKind)             \
+    reduction(+ : energyRecipNew) firstprivate(length, box, startAtom)
 #endif
     for (int i = 0; i < (int)imageSizeRef[box]; i++) {
       double sumRealNew = 0.0;
@@ -558,7 +558,7 @@ double Ewald::ChangeLambdaRecip(XYZArray const &molCoords,
 #else
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(lambdaCoef, molCoords, thisKind) \
-firstprivate(box, length, startAtom) reduction(+:energyRecipNew)
+    firstprivate(box, length, startAtom) reduction(+ : energyRecipNew)
 #endif
     for (int i = 0; i < (int)imageSizeRef[box]; i++) {
       double sumRealNew = 0.0;
@@ -606,9 +606,9 @@ void Ewald::ChangeRecip(Energy *energyDiff, Energy &dUdL_Coul,
   std::fill_n(energyRecip, lambdaSize, 0.0);
 
 #if defined _OPENMP && _OPENMP >= 201511 // check if OpenMP version is 4.5
-#pragma omp parallel for default(none) shared(lambda_Coul) \
-firstprivate(lambdaSize, length, startAtom, box, iState) \
-reduction(+:energyRecip[:lambdaSize])
+#pragma omp parallel for default(none) shared(lambda_Coul)                     \
+    firstprivate(lambdaSize, length, startAtom, box, iState)                   \
+    reduction(+ : energyRecip[ : lambdaSize])
 #endif
   for (int i = 0; i < (int)imageSizeRef[box]; i++) {
     double sumReal = 0.0;
@@ -681,8 +681,8 @@ double Ewald::SwapSourceRecip(const cbmc::TrialMol &oldMol, const uint box,
 #else
     uint startAtom = mols.MolStart(molIndex);
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(molCoords, thisKind) \
-firstprivate(length, box, startAtom) reduction(+:energyRecipNew)
+#pragma omp parallel for default(none) shared(molCoords, thisKind)             \
+    firstprivate(length, box, startAtom) reduction(+ : energyRecipNew)
 #endif
     for (int i = 0; i < (int)imageSizeRef[box]; i++) {
       double sumRealNew = 0.0;
@@ -734,9 +734,10 @@ double Ewald::MolExchangeReciprocal(const std::vector<cbmc::TrialMol> &newMol,
     lengthOld = thisKindOld.NumAtoms();
 
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(box, first_call, lengthNew, lengthOld, \
-    newMol, oldMol, thisKindNew, thisKindOld, molIndexNew, molIndexOld) \
-reduction(+:energyRecipNew)
+#pragma omp parallel for default(none)                                         \
+    shared(box, first_call, lengthNew, lengthOld, newMol, oldMol, thisKindNew, \
+               thisKindOld, molIndexNew, molIndexOld)                          \
+    reduction(+ : energyRecipNew)
 #endif
     for (int i = 0; i < (int)imageSizeRef[box]; i++) {
       double sumRealNew = 0.0;
@@ -1226,7 +1227,8 @@ Virial Ewald::VirialReciprocal(Virial &virial, uint box) const {
                           wT23, wT33, imageSizeRef[box], constVal, box);
 #else
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(box, constVal) reduction(+:wT11, wT22, wT33)
+#pragma omp parallel for default(none) shared(box, constVal)                   \
+    reduction(+ : wT11, wT22, wT33)
 #endif
   for (int i = 0; i < (int)imageSizeRef[box]; i++) {
     double factor = prefactRef[box][i] * (sumRref[box][i] * sumRref[box][i] +
@@ -1263,7 +1265,8 @@ Virial Ewald::VirialReciprocal(Virial &virial, uint box) const {
       double charge = particleCharge[atom] * lambdaCoef;
 
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(atom, box, charge, diffC) reduction(+:wT11, wT22, wT33)
+#pragma omp parallel for default(none) shared(atom, box, charge, diffC)        \
+    reduction(+ : wT11, wT22, wT33)
 #endif
       for (int i = 0; i < (int)imageSizeRef[box]; i++) {
         // compute the dot product of k and r
@@ -1532,8 +1535,7 @@ void Ewald::BoxForceReciprocal(XYZArray const &molCoords,
     CallBoxForceReciprocalGPU(
         ff.particles->getCUDAVars(), atomForceRec, molForceRec, particleCharge,
         particleMol, particleHasNoCharge, particleUsed, startMol, lengthMol,
-        ff.alpha[box], ff.alphaSq[box], constValue, imageSizeRef[box],
-        molCoords, currentAxes, box);
+        constValue, imageSizeRef[box], molCoords, currentAxes, box);
     delete[] particleUsed;
 #else
     // molecule iterator
@@ -1571,7 +1573,8 @@ void Ewald::BoxForceReciprocal(XYZArray const &molCoords,
             }
           }
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(box, lambdaCoef, molCoords, p) reduction(+:X, Y, Z)
+#pragma omp parallel for default(none) shared(box, lambdaCoef, molCoords, p)   \
+    reduction(+ : X, Y, Z)
 #endif
           for (int i = 0; i < (int)imageSizeRef[box]; i++) {
             double dot =

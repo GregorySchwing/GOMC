@@ -308,9 +308,9 @@ void CallBoxForceGPU(VariablesCUDA *vars, const std::vector<int> &cellVector,
       vars->gpu_epsilon_Cn, vars->gpu_n, vars->gpu_VDW_Kind,
       vars->gpu_isMartini, vars->gpu_count, vars->gpu_rCut,
       vars->gpu_rCutCoulomb, vars->gpu_rCutLow, vars->gpu_rOn, vars->gpu_alpha,
-      vars->gpu_ewald, vars->gpu_diElectric_1, vars->gpu_nonOrth,
-      vars->gpu_cell_x[box], vars->gpu_cell_y[box], vars->gpu_cell_z[box],
-      vars->gpu_Invcell_x[box], vars->gpu_Invcell_y[box],
+      vars->gpu_alphaSq, vars->gpu_ewald, vars->gpu_diElectric_1,
+      vars->gpu_nonOrth, vars->gpu_cell_x[box], vars->gpu_cell_y[box],
+      vars->gpu_cell_z[box], vars->gpu_Invcell_x[box], vars->gpu_Invcell_y[box],
       vars->gpu_Invcell_z[box], vars->gpu_aForcex, vars->gpu_aForcey,
       vars->gpu_aForcez, vars->gpu_mForcex, vars->gpu_mForcey,
       vars->gpu_mForcez, sc_coul, sc_sigma_6, sc_alpha, sc_power,
@@ -480,7 +480,7 @@ __global__ void BoxInterForceGPU(
     double *gpu_vT33, double *gpu_sigmaSq, double *gpu_epsilon_Cn,
     double *gpu_n, int *gpu_VDW_Kind, int *gpu_isMartini, int *gpu_count,
     double *gpu_rCut, double *gpu_rCutCoulomb, double *gpu_rCutLow,
-    double *gpu_rOn, double *gpu_alpha, int *gpu_ewald,
+    double *gpu_rOn, double *gpu_alpha, double *gpu_alphaSq, int *gpu_ewald,
     double *gpu_diElectric_1, double *gpu_cell_x, double *gpu_cell_y,
     double *gpu_cell_z, double *gpu_Invcell_x, double *gpu_Invcell_y,
     double *gpu_Invcell_z, int *gpu_nonOrth, bool sc_coul, double sc_sigma_6,
@@ -961,7 +961,7 @@ __device__ double CalcCoulombVirParticleGPU(double distSq, double qi_qj,
   if (gpu_ewald) {
     // M_2_SQRTPI is 2/sqrt(PI)
     double constValue = gpu_alpha * M_2_SQRTPI;
-    double expConstValue = exp(-1.0 * gpu_alpha * gpu_alpha * distSq);
+    double expConstValue = exp(-1.0 * gpu_alphaSq * distSq);
     double temp = 1.0 - erf(gpu_alpha * dist);
     return qi_qj * (temp / dist + constValue * expConstValue) / distSq;
   } else if (gpu_wolf){
@@ -1042,7 +1042,7 @@ __device__ double CalcCoulombVirShiftGPU(double distSq, double qi_qj,
   if (gpu_ewald) {
     // M_2_SQRTPI is 2/sqrt(PI)
     double constValue = gpu_alpha * M_2_SQRTPI;
-    double expConstValue = exp(-1.0 * gpu_alpha * gpu_alpha * distSq);
+    double expConstValue = exp(-1.0 * gpu_alphaSq * distSq);
     double temp = 1.0 - erf(gpu_alpha * dist);
     return qi_qj * (temp / dist + constValue * expConstValue) / distSq;
   } else if (gpu_wolf){
@@ -1121,7 +1121,7 @@ __device__ double CalcCoulombVirExp6GPU(double distSq, double qi_qj,
   if (gpu_ewald) {
     // M_2_SQRTPI is 2/sqrt(PI)
     double constValue = gpu_alpha * M_2_SQRTPI;
-    double expConstValue = exp(-1.0 * gpu_alpha * gpu_alpha * distSq);
+    double expConstValue = exp(-1.0 * gpu_alphaSq * distSq);
     double temp = erfc(gpu_alpha * dist);
     return qi_qj * (temp / dist + constValue * expConstValue) / distSq;
   } else if (gpu_wolf){
@@ -1206,7 +1206,7 @@ __device__ double CalcCoulombVirSwitchMartiniGPU(double distSq, double qi_qj,
   if (gpu_ewald) {
     // M_2_SQRTPI is 2/sqrt(PI)
     double constValue = gpu_alpha * M_2_SQRTPI;
-    double expConstValue = exp(-1.0 * gpu_alpha * gpu_alpha * distSq);
+    double expConstValue = exp(-1.0 * gpu_alphaSq * distSq);
     double temp = 1.0 - erf(gpu_alpha * dist);
     return qi_qj * (temp / dist + constValue * expConstValue) / distSq;
   } else if (gpu_wolf){
@@ -1307,7 +1307,7 @@ __device__ double CalcCoulombVirSwitchGPU(double distSq, double qi_qj,
   if (gpu_ewald) {
     // M_2_SQRTPI is 2/sqrt(PI)
     double constValue = gpu_alpha * M_2_SQRTPI;
-    double expConstValue = exp(-1.0 * gpu_alpha * gpu_alpha * distSq);
+    double expConstValue = exp(-1.0 * gpu_alphaSq * distSq);
     double temp = 1.0 - erf(gpu_alpha * dist);
     return qi_qj * (temp / dist + constValue * expConstValue) / distSq;
   } else if (gpu_wolf){

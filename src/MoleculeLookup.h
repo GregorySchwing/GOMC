@@ -5,8 +5,8 @@ A copy of the MIT License can be found in License.txt
 along with this program, also can be found at
 <https://opensource.org/licenses/MIT>.
 ********************************************************************************/
-#ifndef MOLECULELOOKUP_H
-#define MOLECULELOOKUP_H
+#ifndef MOLECULE_LOOKUP_H
+#define MOLECULE_LOOKUP_H
 
 #include <cereal/access.hpp>
 #include <cereal/cereal.hpp>
@@ -195,14 +195,14 @@ private:
   friend class cereal::access;
   template <class Archive>
   void serialize(Archive &ar, const unsigned int version) {
-    ar &molLookupCount;
-    ar &atomCount;
-    ar &boxAndKindStartLength;
-    ar &boxAndKindSwappableLength;
-    ar &numKinds;
-    ar &fixedMolecule;
-    ar &canSwapKind;
-    ar &canMoveKind;
+    ar & molLookupCount;
+    ar & atomCount;
+    ar & boxAndKindStartLength;
+    ar & boxAndKindSwappableLength;
+    ar & numKinds;
+    ar & fixedMolecule;
+    ar & canSwapKind;
+    ar & canMoveKind;
   }
 
   void AllocateMemory(int molLookupCount, int atomCount,
@@ -248,4 +248,4 @@ private:
   uint const *pIt;
 };
 
-#endif
+#endif /*MOLECULE_LOOKUP_H*/
