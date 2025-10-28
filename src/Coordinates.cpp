@@ -7,7 +7,9 @@ along with this program, also can be found at
 ********************************************************************************/
 #include "Coordinates.h"
 
+#include <algorithm> //For copy
 #include <cassert>
+#include <cmath>
 
 #include "TransformMatrix.h"
 

@@ -84,4 +84,4 @@ private:
 };
 } // namespace cbmc
 
-#endif /*DCHEDRONCYCLE_H*/
+#endif

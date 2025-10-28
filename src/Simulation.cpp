@@ -75,14 +75,6 @@ Simulation::~Simulation() {
 void Simulation::RunSimulation(void) {
   GOMC_EVENT_START(1, GomcProfileEvent::MC_RUN);
   double startEnergy = system->potential.totalEnergy.total;
-  if (!std::isfinite(startEnergy)) {
-    std::cout
-        << "Initial system has non-finite energy. This is usually caused"
-           " by two or more atoms in the initial configuration having "
-           "identical coordinates. Please correct your input file and rerun.\n";
-
-    exit(EXIT_FAILURE);
-  }
   if (totalSteps == 0) {
     for (int i = 0; i < (int)frameSteps.size(); i++) {
       if (i == 0) {
@@ -100,11 +92,13 @@ void Simulation::RunSimulation(void) {
 
 #ifndef NDEBUG
     Energy en0 = system->potential.boxEnergy[0];
-    std::cout << "Step " << step + 1 << ": Box 0 Energies" << std::endl;
+    std::cout << "Step " << step + 1 << std::fixed << std::setprecision(7)
+              << ": Box 0 Energies" << std::endl;
     std::cout << en0 << std::endl;
     if (BOXES_WITH_U_NB > 1) {
       Energy en1 = system->potential.boxEnergy[1];
-      std::cout << "Step " << step + 1 << ": Box 1 Energies" << std::endl;
+      std::cout << "Step " << step + 1 << std::fixed << std::setprecision(7)
+                << ": Box 1 Energies" << std::endl;
       std::cout << en1 << std::endl;
     }
 #endif
@@ -141,7 +135,7 @@ void Simulation::RunSimulation(void) {
                                system->molLookup);
       if (staticValues->forcefield.ewald) {
         for (int box = 0; box < BOX_TOTAL; box++) {
-          system->calcEwald->BoxReciprocalSums(box, system->coordinates);
+          system->calcEwald->BoxReciprocalSums(box, system->coordinates, false);
           system->potential.boxEnergy[box].recip =
               system->calcEwald->BoxReciprocal(box, false);
           system->calcEwald->UpdateRecip(box);
@@ -195,9 +189,8 @@ bool Simulation::RecalculateAndCheck(void) {
   if (!compare) {
     std::cout
         << "=================================================================\n"
-        << "Energy         INTRA B |        INTRA NB |           INTER |       "
-           "       TC |            REAL |            SELF |     CORRECTION |   "
-           "       RECIP"
+        << "Energy       INTRA B |     INTRA NB |        INTER |           TC "
+           "|         REAL |         SELF |   CORRECTION |        RECIP"
         << std::endl
         << "System: " << std::setw(12)
         << system->potential.totalEnergy.intraBond << " | " << std::setw(12)
@@ -216,7 +209,7 @@ bool Simulation::RecalculateAndCheck(void) {
         << pot.totalEnergy.self << " | " << std::setw(12)
         << pot.totalEnergy.correction << " | " << std::setw(12)
         << pot.totalEnergy.recip << std::endl
-        << "================================================================="
+        << "================================================================"
         << std::endl
         << std::endl;
   }
@@ -224,8 +217,7 @@ bool Simulation::RecalculateAndCheck(void) {
   return compare;
 }
 
-#if GOMC_GTEST || GOMC_GTEST_MPI
-
+#if GOMC_GTEST
 SystemPotential &Simulation::GetSystemEnergy(void) { return system->potential; }
 
 MoleculeLookup &Simulation::GetMolLookup() { return system->molLookup; }

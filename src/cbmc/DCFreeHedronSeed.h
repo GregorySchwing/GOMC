@@ -48,4 +48,4 @@ private:
 };
 } // namespace cbmc
 
-#endif /*DCFREEHEDRONSEED_H*/
+#endif

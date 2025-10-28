@@ -5,9 +5,11 @@ A copy of the MIT License can be found in License.txt
 along with this program, also can be found at
 <https://opensource.org/licenses/MIT>.
 ********************************************************************************/
+#define _USE_MATH_DEFINES
 #include "DCHedronCycle.h"
 
 #include <cassert>
+#include <cmath>
 #include <numeric>
 
 #include "DCData.h"
@@ -391,9 +393,7 @@ void DCHedronCycle::ConstrainedAngles(TrialMol &newMol, uint molIndex,
     // calculate weights from combined energy
     double stepWeight = 0.0;
 #ifdef _OPENMP
-#pragma omp parallel for default(none)                                         \
-    shared(energies, nonbonded_1_3, nTrials, weights)                          \
-    reduction(+ : stepWeight)
+#pragma omp parallel for default(none) shared(energies, nonbonded_1_3, nTrials, weights) reduction(+:stepWeight)
 #endif
     for (int i = 0; i < (int)nTrials; ++i) {
       weights[i] = exp(-1 * data->ff.beta * (energies[i] + nonbonded_1_3[i]));

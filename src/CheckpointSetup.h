@@ -22,17 +22,15 @@ along with this program, also can be found at
 
 class CheckpointSetup {
 public:
-#if GOMC_LIB_MPI
-  CheckpointSetup(ulong &startStep, ulong &trueStep, MoleculeLookup &molLookup,
-                  MoveSettings &moveSettings, Molecules &mol, PRNG &prng,
-                  Random123Wrapper &r123, Setup &set,
-                  const bool &parallelTemperingEnabled, PRNG &prngPT,
-                  const std::string &replicaInputDirectoryPath);
-#else
   CheckpointSetup(ulong &startStep, ulong &trueStep, MoleculeLookup &molLookup,
                   MoveSettings &moveSettings, Molecules &mol, PRNG &prng,
                   Random123Wrapper &r123, Setup &set);
+#if GOMC_LIB_MPI
 
+  CheckpointSetup(ulong &startStep, ulong &trueStep, MoleculeLookup &molLookup,
+                  MoveSettings &moveSettings, Molecules &mol, PRNG &prng,
+                  Random123Wrapper &r123, Setup &set,
+                  bool &parallelTemperingEnabled, PRNG &prngPT);
 #endif
 
   ~CheckpointSetup();
@@ -44,7 +42,7 @@ private:
   void SetCheckpointData();
 
 #if GOMC_LIB_MPI
-  void SetCheckpointData(const bool &parallelTemperingEnabled, PRNG &prngPT);
+  void SetCheckpointData(bool &parallelTemperingEnabled, PRNG &prngPT);
 #endif
 
   std::string getFileName();
@@ -66,7 +64,7 @@ private:
   void GetOriginalRangeStartStop(uint &_start, uint &stop, const uint m) const;
   void GetRestartRangeStartStop(uint &_start, uint &stop, const uint m) const;
 
-#if GOMC_GTEST || GOMC_GTEST_MPI
+#if GOMC_GTEST
 
 #endif
 
@@ -92,11 +90,11 @@ private:
 
 #if GOMC_LIB_MPI
   bool parallelTemperingWasEnabled;
-  const bool &parallelTemperingIsEnabled;
+  bool &parallelTemperingIsEnabled;
   PRNG &prngPT;
 #endif
   Checkpoint chkObj;
   friend class CheckpointOutput;
 };
 
-#endif /*CHECKPOINT_SETUP_H*/
+#endif

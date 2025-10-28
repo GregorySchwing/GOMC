@@ -5,7 +5,11 @@ A copy of the MIT License can be found in License.txt
 along with this program, also can be found at
 <https://opensource.org/licenses/MIT>.
 ********************************************************************************/
+#define _USE_MATH_DEFINES
 #include "DCRotateCOM.h"
+
+#include <cmath>
+
 #include "DCData.h"
 #include "Forcefield.h"
 #include "MolSetup.h"
@@ -178,11 +182,7 @@ void DCRotateCOM::BuildNew(TrialMol &newMol, uint molIndex) {
         RandRotateZ();
       } else {
         // convert chosen torsion to 3D positions
-        double u1, u2, u3;
-        u1 = prng();
-        u2 = prng();
-        u3 = prng();
-        spin = RotationMatrix::UniformRandom(u1, u2, u3);
+        spin = RotationMatrix::UniformRandom(prng(), prng(), prng());
       }
 
       for (uint a = 0; a < atomNumber; ++a) {
@@ -213,17 +213,11 @@ void DCRotateCOM::BuildNew(TrialMol &newMol, uint molIndex) {
 
   double stepWeight = 0.0;
   for (uint lj = 0; lj < totalTrials; ++lj) {
-    // Skip exp() calculation for small values for efficiency and to avoid
-    // subnormal values that contribute to differences between processors.
-    // Value chosen mathematically: See cppreference.com exp function notes.
-    // Note: ljWeights prefilled with 0.0, so don't need to initialize it.
-    double betaWeight = -ff.beta * (inter[lj] + real[lj]);
-    if (betaWeight >= num::MIN_EXP_NONZERO_VAL) {
-      ljWeights[lj] = std::exp(betaWeight);
-      stepWeight += ljWeights[lj];
-    }
+    ljWeights[lj] = exp(-ff.beta * (inter[lj] + real[lj]));
+    stepWeight += ljWeights[lj];
   }
   uint winner = prng.PickWeighted(ljWeights, totalTrials, stepWeight);
+
   for (uint a = 0; a < atomNumber; ++a) {
     newMol.AddAtom(a, multiPosRotions[a][winner]);
   }
@@ -293,11 +287,7 @@ void DCRotateCOM::BuildOld(TrialMol &oldMol, uint molIndex) {
         RandRotateZ();
       } else {
         // convert chosen torsion to 3D positions
-        double u1, u2, u3;
-        u1 = prng();
-        u2 = prng();
-        u3 = prng();
-        spin = RotationMatrix::UniformRandom(u1, u2, u3);
+        spin = RotationMatrix::UniformRandom(prng(), prng(), prng());
       }
 
       for (uint a = 0; a < atomNumber; ++a) {
@@ -332,13 +322,7 @@ void DCRotateCOM::BuildOld(TrialMol &oldMol, uint molIndex) {
 
   double stepWeight = 0.0;
   for (uint lj = 0; lj < totalTrials; ++lj) {
-    // Skip exp() calculation for small values for efficiency and to avoid
-    // subnormal values that contribute to differences between processors.
-    // Value chosen mathematically: See cppreference.com exp function notes.
-    double betaWeight = -ff.beta * (inter[lj] + real[lj]);
-    if (betaWeight >= num::MIN_EXP_NONZERO_VAL) {
-      stepWeight += std::exp(betaWeight);
-    }
+    stepWeight += exp(-ff.beta * (inter[lj] + real[lj]));
   }
 
   for (uint a = 0; a < atomNumber; ++a) {

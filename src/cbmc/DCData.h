@@ -131,4 +131,4 @@ inline DCData::~DCData() {
 
 } // namespace cbmc
 
-#endif /*DCDATA_H*/
+#endif

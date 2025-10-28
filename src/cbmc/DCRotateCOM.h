@@ -44,4 +44,4 @@ private:
 };
 } // namespace cbmc
 
-#endif /*DCROTATECOM_H*/
+#endif
