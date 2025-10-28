@@ -55,4 +55,4 @@ private:
   std::vector<Dihedral> dih;
 };
 } // namespace cbmc
-#endif /*DCCRANKSHAFTDIH_H*/
+#endif

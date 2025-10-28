@@ -8,13 +8,6 @@ along with this program, also can be found at
 #ifndef BASIC_TYPES_H
 #define BASIC_TYPES_H
 
-// Standard way to get pi constant on most platforms
-// Needs to be defined _before_ including cmath
-// so that the PI constants come from cmath
-#ifndef _USE_MATH_DEFINES
-#define _USE_MATH_DEFINES
-#endif
-
 #include <cmath>
 #include <cstddef>
 #include <fstream>
@@ -104,18 +97,17 @@ inline void record_debug(uint *x, uint len, std::string filename,
 
 //******************************************************************************
 
-// single XYZ coordinate for use as a temporary and return type
-class XYZ {
-public:
+typedef unsigned int uint;
+typedef unsigned long int ulong;
+
+#define UNUSED(x) (void)(x)
+
+// single XYZ for use as a temporary and return type
+struct XYZ {
+  double x, y, z;
+
   XYZ() : x(0.0), y(0.0), z(0.0) {}
   XYZ(double xVal, double yVal, double zVal) : x(xVal), y(yVal), z(zVal) {}
-
-  friend inline std::ostream &operator<<(std::ostream &stream, const XYZ &p);
-  
-  inline double getX() const { return x; }
-  inline double getY() const { return y; }
-  inline double getZ() const { return z; }
-
   void Reset() { x = y = z = 0.0; }
   XYZ &operator=(XYZ const &rhs) {
     x = rhs.x;
@@ -123,19 +115,26 @@ public:
     z = rhs.z;
     return *this;
   }
-  inline bool operator==(XYZ const &rhs) const {
-    return (x == rhs.x && y == rhs.y && z == rhs.z);
+  bool operator==(XYZ const &rhs) {
+    if (x == rhs.x && y == rhs.y && z == rhs.z)
+      return true;
+    return false;
   }
-  inline bool operator!=(XYZ const &rhs) const {
-    return (x != rhs.x || y != rhs.y || z != rhs.z);
+  bool operator!=(XYZ const &rhs) {
+    if (x != rhs.x || y != rhs.y || z != rhs.z)
+      return true;
+    return false;
   }
-  inline bool operator<(XYZ const &rhs) const {
-    return (x < rhs.x && y < rhs.y && z < rhs.z);
+  bool operator<(XYZ const &rhs) {
+    if (x < rhs.x && y < rhs.y && z < rhs.z)
+      return true;
+    return false;
   }
-  inline bool operator>(XYZ const &rhs) const {
-    return (x > rhs.x || y > rhs.y || z > rhs.z);
+  bool operator>(XYZ const &rhs) {
+    if (x > rhs.x || y > rhs.y || z > rhs.z)
+      return true;
+    return false;
   }
-
   XYZ &operator+=(XYZ const &rhs) {
     x += rhs.x;
     y += rhs.y;
@@ -168,14 +167,14 @@ public:
     return *this;
   }
 
-  XYZ operator+(XYZ const &rhs) const { return XYZ(x+rhs.x, y+rhs.y, z+rhs.z); }
-  XYZ operator-(XYZ const &rhs) const { return XYZ(x-rhs.x, y-rhs.y, z-rhs.z); }
-  XYZ operator*(XYZ const &rhs) const { return XYZ(x*rhs.x, y*rhs.y, z*rhs.z); }
-  XYZ operator/(XYZ const &rhs) const { return XYZ(x/rhs.x, y/rhs.y, z/rhs.z); }
+  XYZ operator+(XYZ const &rhs) const { return XYZ(*this) += rhs; }
+  XYZ operator-(XYZ const &rhs) const { return XYZ(*this) -= rhs; }
+  XYZ operator*(XYZ const &rhs) const { return XYZ(*this) *= rhs; }
+  XYZ operator/(XYZ const &rhs) const { return XYZ(*this) /= rhs; }
 
-  XYZ operator*(const double a) const { return XYZ(x*a, y*a, z*a); }
+  XYZ operator*(const double a) const { return XYZ(*this) *= a; }
 
-  XYZ operator-() const { return XYZ(-x, -y, -z); }
+  XYZ operator-() const { return XYZ(*this) * -1.0; }
 
   void Inverse() {
     x = 1.0 / x;
@@ -183,11 +182,11 @@ public:
     z = 1.0 / z;
   }
 
+  double Length() const { return sqrt(LengthSq()); }
   double LengthSq() const { return x * x + y * y + z * z; }
-  double Length() const { return std::sqrt(LengthSq()); }
 
   XYZ &Normalize() {
-    *this *= (1.0 / Length());
+    *this *= (1 / Length());
     return *this;
   }
 
@@ -208,9 +207,6 @@ public:
       m = z;
     return m;
   }
-
-public:
-  double x, y, z;
 };
 
 inline std::ostream &operator<<(std::ostream &stream, const XYZ &p) {

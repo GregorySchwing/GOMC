@@ -5,7 +5,10 @@ A copy of the MIT License can be found in License.txt
 along with this program, also can be found at
 <https://opensource.org/licenses/MIT>.
 ********************************************************************************/
-#include "MoveSettings.h"  //header spec
+#include "MoveSettings.h" //header spec
+
+#include <cmath>
+
 #include "BoxDimensions.h" //For axis sizes
 #include "BoxDimensionsNonOrth.h"
 #include "GeomLib.h"    //For M_PI
@@ -251,13 +254,9 @@ void MoveSettings::Adjust(const uint box, const uint move, const uint kind) {
         scale[box][move][kind] *= 0.5;
       }
     }
-    // Warning: This could lead to an acceptance rate of > 50%
+    // Warning: This will lead to have acceptance > 50%
     double maxVolExchange = boxDimRef.volume[box] - boxDimRef.minVol[box];
-    // Cap maximum volume exchanged to 1/3rd of the maximum amount so we
-    // never try to exchange so much volume in one move that the box volume
-    // would drop below 2*Rcutoff. Without this patch, this could happen if
-    // we tried a large volume transfer after accepting some smaller ones.
-    num::Bound<double>(scale[box][move][kind], 0.001, 0.34 * maxVolExchange);
+    num::Bound<double>(scale[box][move][kind], 0.001, maxVolExchange - 0.001);
   }
 #endif
   tempAccepted[box][move][kind] = 0;
@@ -313,7 +312,7 @@ uint MoveSettings::GetTrialTot(const uint box, const uint move) const {
   return sum;
 }
 
-#if GOMC_GTEST || GOMC_GTEST_MPI
+#if GOMC_GTEST
 
 bool MoveSettings::operator==(const MoveSettings &rhs) {
   bool result = true;

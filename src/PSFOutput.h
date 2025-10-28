@@ -5,8 +5,8 @@ A copy of the MIT License can be found in License.txt
 along with this program, also can be found at
 <https://opensource.org/licenses/MIT>.
 ********************************************************************************/
-#ifndef PSF_OUTPUT_H
-#define PSF_OUTPUT_H
+#ifndef PSFOUTPUT_H
+#define PSFOUTPUT_H
 
 #include <string>
 #include <vector>
@@ -105,4 +105,4 @@ private:
   std::vector<std::string> moleculeSegmentNames;
 };
 
-#endif /*PSF_OUTPUT_H*/
+#endif

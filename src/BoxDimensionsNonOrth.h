@@ -29,60 +29,59 @@ public:
     }
   }
 
-  ~BoxDimensionsNonOrth(){};
+  virtual BoxDimensionsNonOrth &operator=(BoxDimensionsNonOrth const &other);
+  virtual bool operator==(BoxDimensionsNonOrth const &other);
 
-  BoxDimensionsNonOrth &operator=(BoxDimensionsNonOrth const &other);
-  bool operator==(BoxDimensionsNonOrth const &other);
+  virtual void Init(config_setup::RestartSettings const &restart,
+                    config_setup::Volume const &confVolume,
+                    pdb_setup::Cryst1 const &cryst, Forcefield const &ff);
 
-  void Init(config_setup::RestartSettings const &restart,
-            config_setup::Volume const &confVolume,
-            pdb_setup::Cryst1 const &cryst, Forcefield const &ff) override;
+  virtual void SetVolume(const uint b, const double vol);
 
-  void SetVolume(const uint b, const double vol) override;
-
-  uint ShiftVolume(BoxDimensionsNonOrth &newDim, XYZ &scale, const uint b,
-                   const double delta) const;
+  virtual uint ShiftVolume(BoxDimensionsNonOrth &newDim, XYZ &scale,
+                           const uint b, const double delta) const;
 
   //! Calculate and execute volume exchange based on transfer
-  uint ExchangeVolume(BoxDimensionsNonOrth &newDim, XYZ *scale,
-                      const double transfer, const uint *box) const;
+  virtual uint ExchangeVolume(BoxDimensionsNonOrth &newDim, XYZ *scale,
+                              const double transfer, const uint *box) const;
 
   // Construct cell basis based on new axis dimension
   void CalcCellDimensions(const uint b);
 
   // Vector btwn two points, accounting for PBC, on an individual axis
-  XYZ MinImage(XYZ rawVecRef, const uint b) const override;
+  virtual XYZ MinImage(XYZ rawVecRef, const uint b) const;
 
   // Apply PBC, on X axis
-  XYZ MinImage_X(XYZ rawVec, const uint b) const override;
+  virtual XYZ MinImage_X(XYZ rawVec, const uint b) const;
   // Apply PBC, on Y axis
-  XYZ MinImage_Y(XYZ rawVec, const uint b) const override;
+  virtual XYZ MinImage_Y(XYZ rawVec, const uint b) const;
   // Apply PBC, on Z axis
-  XYZ MinImage_Z(XYZ rawVec, const uint b) const override;
+  virtual XYZ MinImage_Z(XYZ rawVec, const uint b) const;
 
-  // Wrap one coordinate
-  void WrapPBC(double &x, double &y, double &z, const uint b) const override;
+  // wrap one coordinate
+  virtual void WrapPBC(double &x, double &y, double &z, const uint b) const;
 
-  // Wrap one coordinate and check for PBC
-  void WrapPBC(double &x, double &y, double &z, const uint b, const bool &pbcX,
-               const bool &pbcY, const bool &pbcZ) const override;
+  // wrap one coordinate and check for PBC
+  virtual void WrapPBC(double &x, double &y, double &z, const uint b,
+                       const bool &pbcX, const bool &pbcY,
+                       const bool &pbcZ) const;
 
   // Unwrap one coordinate
-  void UnwrapPBC(double &x, double &y, double &z, const uint b,
-                 XYZ const &ref) const override;
+  virtual void UnwrapPBC(double &x, double &y, double &z, const uint b,
+                         XYZ const &ref) const;
 
   // Transform A to unslant coordinate
-  XYZ TransformUnSlant(const XYZ &A, const uint b) const override;
+  XYZ TransformUnSlant(const XYZ &A, const uint b) const;
 
   // Transform A to slant coordinate
-  XYZ TransformSlant(const XYZ &A, const uint b) const override;
+  XYZ TransformSlant(const XYZ &A, const uint b) const;
 
   // private:
   XYZArray cellBasis_Inv[BOX_TOTAL]; // inverse cell matrix for each box
   XYZArray cellLength;               // Length of a, b, c for each box
 };
 
-// Calculate inverse transform
+// Calculate transform
 inline XYZ BoxDimensionsNonOrth::TransformUnSlant(const XYZ &A,
                                                   const uint b) const {
   XYZ temp;

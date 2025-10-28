@@ -70,10 +70,8 @@ inline void Clock::CheckTime(const ulong step) {
     prevStep = step;
     lastTime = currTime;
     CompletionTime(day, hr, min);
-    printf("Steps/sec: %7.3f, Simulation ends in: %3d d: %3d h: %3d m\n", speed,
-           day, hr, min);
-    // Coerce C++ to flush the buffer so this is written immediately
-    std::cout << std::endl;
+    printf("Steps/sec: %7.3f, Simulation ends in: %3d d: %3d h: %3d m \n\n",
+           speed, day, hr, min);
 
   } else if (step == lastStep) {
 #if defined(__linux__) || defined(__APPLE__)

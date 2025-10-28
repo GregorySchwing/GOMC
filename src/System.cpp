@@ -22,9 +22,7 @@ along with this program, also can be found at
 #include "IntraTargetedSwap.h"
 #include "MoleculeExchange1.h"
 #include "MoleculeExchange2.h"
-#include "MoleculeExchange2Liq.h"
 #include "MoleculeExchange3.h"
-#include "MoleculeExchange3Liq.h"
 #include "MoleculeTransfer.h"
 #include "Molecules.h" //For indexing molecules.
 #include "MoveBase.h"  //For move bases....
@@ -58,13 +56,7 @@ System::System(StaticVals &statics, Setup &set, ulong &startStep,
       com(boxDimRef, coordinates, molLookupRef, statics.mol),
       calcEnergy(statics, *this),
       checkpointSet(startStep, trueStep, molLookupRef, moveSettings,
-                    statics.mol, prng, r123wrapper, set
-#if GOMC_LIB_MPI
-                    ,
-                    ms->parallelTemperingEnabled, *prngParallelTemp,
-                    ms->replicaInputDirectoryPath
-#endif
-                    ),
+                    statics.mol, prng, r123wrapper, set),
       vel(statics.forcefield, molLookupRef, statics.mol, prng),
       restartFromCheckpoint(set.config.in.restart.restartFromCheckpoint),
       startStepRef(startStep), trueStep(0) {
@@ -190,10 +182,6 @@ void System::InitMoves(Setup const &set) {
     moves[mv::MEMC] = new MoleculeExchange1(*this, statV);
   } else if (set.config.sys.memcVal.MEMC2) {
     moves[mv::MEMC] = new MoleculeExchange2(*this, statV);
-  } else if (set.config.sys.memcVal.MEMC2Liq) {
-    moves[mv::MEMC] = new MoleculeExchange2Liq(*this, statV);
-  } else if (set.config.sys.memcVal.MEMC3Liq) {
-    moves[mv::MEMC] = new MoleculeExchange3Liq(*this, statV);
   } else {
     moves[mv::MEMC] = new MoleculeExchange3(*this, statV);
   }

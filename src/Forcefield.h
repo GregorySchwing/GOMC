@@ -54,7 +54,7 @@ public:
   double tolerance;                // Ewald sum terms
   double rswitch;                  // Switch distance
   double dielectric;               // dielectric for martini
-  double scaling_14; //!< Scaling factor for 1-4 pairs' Ewald interactions
+  double scaling_14; //!< Scaling factor for 1-4 pairs' ewald interactions
   double sc_alpha;   // Free energy parameter
   double sc_sigma, sc_sigma_6; // Free energy parameter
 
