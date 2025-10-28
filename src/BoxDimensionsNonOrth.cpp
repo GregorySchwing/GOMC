@@ -7,6 +7,7 @@ along with this program, also can be found at
 ********************************************************************************/
 #include "BoxDimensionsNonOrth.h"
 
+#include "BoxDimensions.h"
 #include "GeomLib.h"
 #include "MoveConst.h" //For cutoff-related fail condition
 
@@ -52,13 +53,13 @@ void BoxDimensionsNonOrth::Init(config_setup::RestartSettings const &restart,
     }
 
     // Print Box dimension info
-    printf("%s %-d: %-25s %7.3f %7.3f %7.3f\n", "Info: Box ", b,
+    printf("%s %-d: %-26s %6.3f %7.3f %7.3f \n", "Info: Box ", b,
            " Periodic Cell Basis 1", cellBasis[b].Get(0).x,
            cellBasis[b].Get(0).y, cellBasis[b].Get(0).z);
-    printf("%s %-d: %-25s %7.3f %7.3f %7.3f\n", "Info: Box ", b,
+    printf("%s %-d: %-26s %6.3f %7.3f %7.3f \n", "Info: Box ", b,
            " Periodic Cell Basis 2", cellBasis[b].Get(1).x,
            cellBasis[b].Get(1).y, cellBasis[b].Get(1).z);
-    printf("%s %-d: %-25s %7.3f %7.3f %7.3f\n\n", "Info: Box ", b,
+    printf("%s %-d: %-26s %6.3f %7.3f %7.3f \n\n", "Info: Box ", b,
            " Periodic Cell Basis 3", cellBasis[b].Get(2).x,
            cellBasis[b].Get(2).y, cellBasis[b].Get(2).z);
 
@@ -177,12 +178,8 @@ uint BoxDimensionsNonOrth::ShiftVolume(BoxDimensionsNonOrth &newDim, XYZ &scale,
   // automatically reject to prevent errors.
   if ((newDim.halfAx.x[b] < rCut[b] || newDim.halfAx.y[b] < rCut[b] ||
        newDim.halfAx.z[b] < rCut[b] || newVolume < minVol[b])) {
-    std::cout << "WARNING!!! Box " << b
-              << " shrunk below 2*Rcut! Auto-rejecting!\n";
-    std::cout << "Volume was reduced from " << volume[b] << " to " << newVolume
-              << "\n";
-    std::cout << "Old Axis Dimensions: " << axis.Get(b) << "\n";
-    std::cout << "New Axis Dimensions: " << newDim.GetAxis(b) << "\n";
+    std::cout << "WARNING!!! box shrunk below 2*Rcut! Auto-rejecting!\n";
+    std::cout << "AxisDimensions: " << newDim.GetAxis(b) << std::endl;
     std::cout << "Exiting!\n";
     exit(EXIT_FAILURE);
   }
@@ -208,12 +205,8 @@ uint BoxDimensionsNonOrth::ExchangeVolume(BoxDimensionsNonOrth &newDim,
     scale[b] = newDim.axis.Get(b) / axis.Get(b);
     if ((newDim.halfAx.x[b] < rCut[b] || newDim.halfAx.y[b] < rCut[b] ||
          newDim.halfAx.z[b] < rCut[b] || newDim.volume[b] < minVol[b])) {
-      std::cout << "WARNING!!! Box " << b
-                << " shrunk below 2*Rcut! Auto-rejecting!\n";
-      std::cout << "Volume was reduced from " << volume[b] << " to "
-                << newDim.volume[b] << "\n";
-      std::cout << "Old Axis Dimensions: " << axis.Get(b) << "\n";
-      std::cout << "New Axis Dimensions: " << newDim.GetAxis(b) << "\n";
+      std::cout << "WARNING!!! box shrunk below 2*Rcut! Auto-rejecting!\n";
+      std::cout << "AxisDimensions: " << newDim.GetAxis(b) << std::endl;
       std::cout << "Exiting!\n";
       exit(EXIT_FAILURE);
     }

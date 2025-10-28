@@ -32,7 +32,6 @@ inline std::ifstream &operator>>(std::ifstream &is, bool &val) {
 
 class Reader {
 public:
-  friend inline std::ifstream &operator>>(std::ifstream &is, bool &val);
   Reader(std::string const &name, std::string const &alias,
          bool useSkipW = false, std::string const *const skipW = NULL,
          bool useSkipC = false, std::string const *const skipC = NULL,
@@ -99,7 +98,6 @@ public:
   }
 
   bool Read(std::string &firstItem);
-  std::string getFileName() const { return fileName; };
 
   // Make public to expose object.
   std::ifstream file;

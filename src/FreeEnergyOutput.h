@@ -5,8 +5,8 @@ A copy of the MIT License can be found in License.txt
 along with this program, also can be found at
 <https://opensource.org/licenses/MIT>.
 ********************************************************************************/
-#ifndef FREE_ENERGY_OUTPUT_H
-#define FREE_ENERGY_OUTPUT_H
+#ifndef FREEENERGY_OUTPUT_H
+#define FREEENERGY_OUTPUT_H
 
 #include <fstream>
 #include <string>
@@ -59,4 +59,4 @@ private:
 #endif
 };
 
-#endif /*FREE_ENERGY_OUTPUT_H*/
+#endif /*HIST_OUTPUT_H*/

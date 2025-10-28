@@ -5,8 +5,8 @@ A copy of the MIT License can be found in License.txt
 along with this program, also can be found at
 <https://opensource.org/licenses/MIT>.
 ********************************************************************************/
-#ifndef DCROTATEONATOM_H
-#define DCROTATEONATOM_H
+#ifndef DCROTATEONATOM
+#define DCROTATEONATOM
 
 #include <vector>
 
@@ -55,5 +55,4 @@ private:
   std::vector<Dihedral> dih;
 };
 } // namespace cbmc
-
-#endif /*DCROTATEONATOM_H*/
+#endif

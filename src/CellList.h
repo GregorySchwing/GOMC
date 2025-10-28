@@ -254,4 +254,4 @@ inline void CellList::Pairs::Next() {
     // skip over doubles
   } while (First() >= Second());
 }
-#endif /*CELLLIST_H*/
+#endif

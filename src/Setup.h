@@ -57,4 +57,4 @@ public:
   }
 };
 
-#endif /*SETUP_H*/
+#endif

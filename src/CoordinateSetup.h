@@ -5,8 +5,8 @@ A copy of the MIT License can be found in License.txt
 along with this program, also can be found at
 <https://opensource.org/licenses/MIT>.
 ********************************************************************************/
-#ifndef COORDINATE_SETUP_H
-#define COORDINATE_SETUP_H
+#ifndef COORDINATESETUP_H
+#define COORDINATESETUP_H
 
 #include <string>
 #include <vector>
@@ -21,4 +21,4 @@ struct CoordinateSetup {
   void SetCOM(const MolSetupData &molData);
 }
 
-#endif /*COORDINATE_SETUP_H*/
+#endif

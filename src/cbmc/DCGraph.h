@@ -83,4 +83,4 @@ private:
 };
 } // namespace cbmc
 
-#endif /*DCGRAPH_H*/
+#endif

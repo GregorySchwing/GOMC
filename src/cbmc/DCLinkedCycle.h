@@ -65,4 +65,4 @@ private:
   std::vector<bool> bExist;
 };
 } // namespace cbmc
-#endif /*DCLINKEDCYCLE_H*/
+#endif

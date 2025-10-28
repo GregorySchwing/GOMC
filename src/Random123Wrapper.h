@@ -1,16 +1,4 @@
-/*******************************************************************************
-GPU OPTIMIZED MONTE CARLO (GOMC) 2.75
-Copyright (C) 2022 GOMC Group
-A copy of the MIT License can be found in License.txt
-along with this program, also can be found at
-<https://opensource.org/licenses/MIT>.
-********************************************************************************/
-#ifndef RANDOM123_WRAPPER_H
-#define RANDOM123_WRAPPER_H
-
-#ifdef _MSC_VER
-#define R123_NO_SINCOS 1
-#endif
+#pragma once
 
 #include "BasicTypes.h"
 #include "Random123/philox.h"
@@ -47,5 +35,3 @@ private:
   RNG::key_type uk;
   RNG rng;
 };
-
-#endif /*RANDOM123_WRAPPER_H*/
